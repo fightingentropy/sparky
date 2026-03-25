@@ -116,8 +116,6 @@ h3 {
 
 .page-copy,
 .search-result-copy,
-.formula-note,
-.status-note,
 .sheet-summary,
 .sheet-list li {
   color: var(--muted);
@@ -246,6 +244,7 @@ kbd {
 .sheet-card {
   padding: 18px;
   border-top: 1px solid var(--line);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .page-header,
@@ -282,6 +281,16 @@ kbd {
 .switch-chip {
   border-color: var(--line);
   background: transparent;
+  min-height: 32px;
+  padding: 0 10px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.switch-chip.is-active {
+  border-color: rgba(245, 158, 11, 0.28);
+  color: var(--muted-strong);
 }
 
 .result-list,
@@ -363,14 +372,69 @@ kbd {
 
 .tool-grid,
 .sheet-grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px 32px;
+}
+
+.tool-grid::before,
+.sheet-grid::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 0.5px);
+  width: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
 }
 
 .tool-heading h3,
 .sheet-card-head h3 {
   font-size: 1.12rem;
+}
+
+.tool-title-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.tool-title {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  outline: none;
+  cursor: help;
+}
+
+.tool-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 5;
+  width: min(320px, calc(100vw - 48px));
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(27, 29, 32, 0.96);
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.tool-title-wrap:hover .tool-tooltip,
+.tool-title-wrap:focus-within .tool-tooltip {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .tool-form,
@@ -533,13 +597,6 @@ select:focus,
 
 .mini-metrics strong {
   font-size: 1.02rem;
-}
-
-.formula-note,
-.status-note {
-  margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.5;
 }
 
 .sheet-card {
@@ -745,8 +802,6 @@ select:focus,
 
   .page-copy,
   .search-result-copy,
-  .formula-note,
-  .status-note,
   .sheet-summary,
   .sheet-list li {
     font-size: 0.9rem;
@@ -774,6 +829,11 @@ select:focus,
   .field-row,
   .mini-metrics {
     gap: 12px;
+  }
+
+  .tool-grid::before,
+  .sheet-grid::before {
+    display: none;
   }
 
   .tool-form,
@@ -899,8 +959,6 @@ select:focus,
 
   .page-copy,
   .search-result-copy,
-  .formula-note,
-  .status-note,
   .sheet-summary,
   .sheet-list li {
     font-size: 0.86rem;
