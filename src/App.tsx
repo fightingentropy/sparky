@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type PageId = "home" | "cheatsheet";
 type OhmsTarget = "voltage" | "current" | "resistance";
-type LoadPhase = "single" | "three";
+type PhaseType = "single" | "three";
+type PowerTarget = "power" | "current" | "voltage";
+type BreakerInputMode = "current" | "power";
 
 type CheatSheetSection = {
   id: string;
@@ -28,6 +30,8 @@ type PaletteItem = {
 
 const EPSILON = 1e-9;
 const DEFAULT_PAGE: PageId = "home";
+const COPPER_RESISTIVITY = 0.0175;
+const STANDARD_BREAKERS = [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100];
 
 const cheatSheetSections: CheatSheetSection[] = [
   {
@@ -120,10 +124,28 @@ const applets: Applet[] = [
     keywords: "ohms law voltage current resistance volts amps ohms"
   },
   {
-    id: "tool-load",
-    title: "Load current",
-    subtitle: "Single and three phase",
-    keywords: "load current amps power single phase three phase kilowatt voltage pf"
+    id: "tool-power",
+    title: "kW / A / V",
+    subtitle: "Power current voltage",
+    keywords: "load current amps power single phase three phase kilowatt voltage pf converter"
+  },
+  {
+    id: "tool-vdrop",
+    title: "Voltage drop",
+    subtitle: "Quick estimate",
+    keywords: "voltage drop cable size current length single phase three phase percent"
+  },
+  {
+    id: "tool-breaker",
+    title: "Breaker sizing",
+    subtitle: "Quick selection",
+    keywords: "breaker fuse mcb rcbo size current kilowatt protective device"
+  },
+  {
+    id: "tool-conduit",
+    title: "Conduit fill",
+    subtitle: "Area check",
+    keywords: "conduit fill cable diameter count area percent containment"
   },
   {
     id: "tool-structure",
@@ -170,6 +192,31 @@ const ohmsConfig: Record<
     compute: (voltage, current) => voltage / current,
     status: (voltage, current, result) =>
       `${formatNumber(voltage)} V / ${formatNumber(current)} A = ${formatNumber(result)} ohm.`
+  }
+};
+
+const powerConfig: Record<
+  PowerTarget,
+  {
+    label: string;
+    unit: string;
+    inputLabels: [string, string];
+  }
+> = {
+  power: {
+    label: "Power",
+    unit: "kW",
+    inputLabels: ["Current (A)", "Voltage (V)"]
+  },
+  current: {
+    label: "Current",
+    unit: "A",
+    inputLabels: ["Power (kW)", "Voltage (V)"]
+  },
+  voltage: {
+    label: "Voltage",
+    unit: "V",
+    inputLabels: ["Power (kW)", "Current (A)"]
   }
 };
 
@@ -240,10 +287,29 @@ export default function App() {
   const [ohmsInputA, setOhmsInputA] = useState("2");
   const [ohmsInputB, setOhmsInputB] = useState("10");
 
-  const [loadPhase, setLoadPhase] = useState<LoadPhase>("single");
-  const [loadPower, setLoadPower] = useState("1");
-  const [loadVoltage, setLoadVoltage] = useState("230");
-  const [loadPf, setLoadPf] = useState("0.95");
+  const [powerTarget, setPowerTarget] = useState<PowerTarget>("current");
+  const [powerPhase, setPowerPhase] = useState<PhaseType>("single");
+  const [powerValueA, setPowerValueA] = useState("1");
+  const [powerValueB, setPowerValueB] = useState("230");
+  const [powerPf, setPowerPf] = useState("0.95");
+
+  const [vdropPhase, setVdropPhase] = useState<PhaseType>("single");
+  const [vdropCurrent, setVdropCurrent] = useState("20");
+  const [vdropLength, setVdropLength] = useState("20");
+  const [vdropCableSize, setVdropCableSize] = useState("2.5");
+  const [vdropVoltage, setVdropVoltage] = useState("230");
+
+  const [breakerMode, setBreakerMode] = useState<BreakerInputMode>("current");
+  const [breakerCurrent, setBreakerCurrent] = useState("18");
+  const [breakerPower, setBreakerPower] = useState("4");
+  const [breakerPhase, setBreakerPhase] = useState<PhaseType>("single");
+  const [breakerVoltage, setBreakerVoltage] = useState("230");
+  const [breakerPf, setBreakerPf] = useState("0.95");
+
+  const [conduitDiameter, setConduitDiameter] = useState("20");
+  const [conduitCableDiameter, setConduitCableDiameter] = useState("6");
+  const [conduitCableCount, setConduitCableCount] = useState("3");
+  const [conduitMaxFill, setConduitMaxFill] = useState("40");
 
   const [structureWall, setStructureWall] = useState("100");
   const [structureJoist, setStructureJoist] = useState("200");
@@ -365,42 +431,217 @@ export default function App() {
     };
   }, [ohmsInputA, ohmsInputB, ohmsTarget]);
 
-  const loadResult = useMemo(() => {
-    const powerKw = Number.parseFloat(loadPower);
-    const voltage = Number.parseFloat(loadVoltage);
-    const pf = Number.parseFloat(loadPf);
+  const powerResult = useMemo(() => {
+    const valueA = Number.parseFloat(powerValueA);
+    const valueB = Number.parseFloat(powerValueB);
+    const pf = Number.parseFloat(powerPf);
+    const phaseFactor = powerPhase === "single" ? 1 : Math.sqrt(3);
 
-    if (!Number.isFinite(powerKw) || !Number.isFinite(voltage) || powerKw <= 0 || voltage <= 0) {
+    if (!Number.isFinite(valueA) || !Number.isFinite(valueB) || valueA <= 0 || valueB <= 0) {
       return {
-        formula: "I = P / V",
-        resultValue: "-- A",
-        status: "Enter power and voltage values greater than 0."
+        label: powerTarget === "power" ? "Power" : powerTarget === "current" ? "Current" : "Voltage",
+        resultValue: powerTarget === "power" ? "-- kW" : powerTarget === "current" ? "-- A" : "-- V",
+        formula: powerPhase === "single" ? "P = V x I x PF" : "P = sqrt(3) x V x I x PF",
+        status: "Enter two values greater than 0."
       };
     }
 
-    if (loadPhase === "three" && (!Number.isFinite(pf) || pf <= 0 || pf > 1)) {
+    if (!Number.isFinite(pf) || pf <= 0 || pf > 1) {
       return {
-        formula: "I = P / (sqrt(3) x V x PF)",
-        resultValue: "-- A",
+        label: powerTarget === "power" ? "Power" : powerTarget === "current" ? "Current" : "Voltage",
+        resultValue: powerTarget === "power" ? "-- kW" : powerTarget === "current" ? "-- A" : "-- V",
+        formula: powerPhase === "single" ? "P = V x I x PF" : "P = sqrt(3) x V x I x PF",
         status: "Enter a power factor between 0 and 1."
       };
     }
 
-    const powerWatts = powerKw * 1000;
-    const current =
-      loadPhase === "single"
-        ? powerWatts / voltage
-        : powerWatts / (Math.sqrt(3) * voltage * pf);
+    if ((powerTarget === "current" || powerTarget === "voltage") && Math.abs(valueB * pf) < EPSILON) {
+      return {
+        label: powerTarget === "current" ? "Current" : "Voltage",
+        resultValue: powerTarget === "current" ? "-- A" : "-- V",
+        formula: powerPhase === "single" ? "P = V x I x PF" : "P = sqrt(3) x V x I x PF",
+        status: "Voltage/current and power factor cannot make the divisor 0."
+      };
+    }
+
+    if (powerTarget === "power") {
+      const powerKw = (phaseFactor * valueA * valueB * pf) / 1000;
+      return {
+        label: "Power",
+        resultValue: `${formatNumber(powerKw)} kW`,
+        formula: powerPhase === "single" ? "P = V x I x PF" : "P = sqrt(3) x V x I x PF",
+        status: `${formatNumber(valueA)} A at ${formatNumber(valueB)} V, PF ${formatNumber(pf)} = ${formatNumber(powerKw)} kW.`
+      };
+    }
+
+    if (powerTarget === "current") {
+      const current = (valueA * 1000) / (phaseFactor * valueB * pf);
+      return {
+        label: "Current",
+        resultValue: `${formatNumber(current)} A`,
+        formula: powerPhase === "single" ? "I = P / (V x PF)" : "I = P / (sqrt(3) x V x PF)",
+        status: `${formatNumber(valueA)} kW at ${formatNumber(valueB)} V, PF ${formatNumber(pf)} = ${formatNumber(current)} A.`
+      };
+    }
+
+    const voltage = (valueA * 1000) / (phaseFactor * valueB * pf);
+    return {
+      label: "Voltage",
+      resultValue: `${formatNumber(voltage)} V`,
+      formula: powerPhase === "single" ? "V = P / (I x PF)" : "V = P / (sqrt(3) x I x PF)",
+      status: `${formatNumber(valueA)} kW at ${formatNumber(valueB)} A, PF ${formatNumber(pf)} = ${formatNumber(voltage)} V.`
+    };
+  }, [powerPf, powerPhase, powerTarget, powerValueA, powerValueB]);
+
+  const voltageDropResult = useMemo(() => {
+    const current = Number.parseFloat(vdropCurrent);
+    const length = Number.parseFloat(vdropLength);
+    const cableSize = Number.parseFloat(vdropCableSize);
+    const voltage = Number.parseFloat(vdropVoltage);
+    const multiplier = vdropPhase === "single" ? 2 : Math.sqrt(3);
+
+    if (
+      !Number.isFinite(current) ||
+      !Number.isFinite(length) ||
+      !Number.isFinite(cableSize) ||
+      !Number.isFinite(voltage) ||
+      current <= 0 ||
+      length <= 0 ||
+      cableSize <= 0 ||
+      voltage <= 0
+    ) {
+      return {
+        dropValue: "-- V",
+        percentValue: "-- %",
+        mvPerAmpMeterValue: "--",
+        formula: vdropPhase === "single" ? "Vd = 2 x I x L x rho / A" : "Vd = sqrt(3) x I x L x rho / A",
+        status: "Enter current, length, cable size, and voltage values greater than 0."
+      };
+    }
+
+    const resistancePerMeter = COPPER_RESISTIVITY / cableSize;
+    const drop = multiplier * current * length * resistancePerMeter;
+    const percent = (drop / voltage) * 100;
+    const mvPerAmpMeter = multiplier * resistancePerMeter * 1000;
 
     return {
-      formula: loadPhase === "single" ? "I = P / V" : "I = P / (sqrt(3) x V x PF)",
-      resultValue: `${formatNumber(current)} A`,
-      status:
-        loadPhase === "single"
-          ? `${formatNumber(powerKw)} kW at ${formatNumber(voltage)} V = ${formatNumber(current)} A.`
-          : `${formatNumber(powerKw)} kW at ${formatNumber(voltage)} V, PF ${formatNumber(pf)} = ${formatNumber(current)} A.`
+      dropValue: `${formatNumber(drop)} V`,
+      percentValue: `${formatNumber(percent)} %`,
+      mvPerAmpMeterValue: formatNumber(mvPerAmpMeter),
+      formula: vdropPhase === "single" ? "Vd = 2 x I x L x rho / A" : "Vd = sqrt(3) x I x L x rho / A",
+      status: `Estimated copper drop over ${formatNumber(length)} m at ${formatNumber(current)} A. Verify against tabulated values before final design.`
     };
-  }, [loadPf, loadPhase, loadPower, loadVoltage]);
+  }, [vdropCableSize, vdropCurrent, vdropLength, vdropPhase, vdropVoltage]);
+
+  const breakerResult = useMemo(() => {
+    const pf = Number.parseFloat(breakerPf);
+    const phaseFactor = breakerPhase === "single" ? 1 : Math.sqrt(3);
+
+    let designCurrent = Number.NaN;
+
+    if (breakerMode === "current") {
+      designCurrent = Number.parseFloat(breakerCurrent);
+    } else {
+      const power = Number.parseFloat(breakerPower);
+      const voltage = Number.parseFloat(breakerVoltage);
+
+      if (
+        Number.isFinite(power) &&
+        Number.isFinite(voltage) &&
+        Number.isFinite(pf) &&
+        power > 0 &&
+        voltage > 0 &&
+        pf > 0 &&
+        pf <= 1
+      ) {
+        designCurrent = (power * 1000) / (phaseFactor * voltage * pf);
+      }
+    }
+
+    if (!Number.isFinite(designCurrent) || designCurrent <= 0) {
+      return {
+        breakerValue: "-- A",
+        currentValue: "-- A",
+        rangeValue: "--",
+        status:
+          breakerMode === "current"
+            ? "Enter a design current greater than 0."
+            : "Enter power, voltage, and power factor values greater than 0."
+      };
+    }
+
+    if (breakerMode === "power" && (!Number.isFinite(pf) || pf <= 0 || pf > 1)) {
+      return {
+        breakerValue: "-- A",
+        currentValue: "-- A",
+        rangeValue: "--",
+        status: "Enter a power factor between 0 and 1."
+      };
+    }
+
+    const nextIndex = STANDARD_BREAKERS.findIndex((size) => size >= designCurrent);
+    const breakerSize =
+      nextIndex >= 0 ? STANDARD_BREAKERS[nextIndex] : STANDARD_BREAKERS[STANDARD_BREAKERS.length - 1];
+    const lowerSize =
+      nextIndex > 0 ? STANDARD_BREAKERS[nextIndex - 1] : STANDARD_BREAKERS[0];
+    const rangeValue =
+      nextIndex === -1
+        ? `Over ${breakerSize} A`
+        : nextIndex > 0
+          ? `${lowerSize} A to ${breakerSize} A`
+          : `Up to ${breakerSize} A`;
+
+    return {
+      breakerValue: `${breakerSize} A`,
+      currentValue: `${formatNumber(designCurrent)} A`,
+      rangeValue,
+      status:
+        breakerMode === "current"
+          ? `Design current ${formatNumber(designCurrent)} A. Check cable capacity, Zs, and load characteristics before final selection.`
+          : `${formatNumber(designCurrent)} A from ${formatNumber(Number.parseFloat(breakerPower))} kW at ${formatNumber(Number.parseFloat(breakerVoltage))} V. Check cable capacity, Zs, and starting current before final selection.`
+    };
+  }, [breakerCurrent, breakerMode, breakerPf, breakerPhase, breakerPower, breakerVoltage]);
+
+  const conduitResult = useMemo(() => {
+    const conduit = Number.parseFloat(conduitDiameter);
+    const cable = Number.parseFloat(conduitCableDiameter);
+    const count = Number.parseFloat(conduitCableCount);
+    const maxFill = Number.parseFloat(conduitMaxFill);
+
+    if (
+      !Number.isFinite(conduit) ||
+      !Number.isFinite(cable) ||
+      !Number.isFinite(count) ||
+      !Number.isFinite(maxFill) ||
+      conduit <= 0 ||
+      cable <= 0 ||
+      count <= 0 ||
+      maxFill <= 0
+    ) {
+      return {
+        fillValue: "-- %",
+        usedAreaValue: "-- mm²",
+        remainingValue: "-- mm²",
+        status: "Enter conduit diameter, cable diameter, cable count, and max fill values greater than 0."
+      };
+    }
+
+    const conduitArea = Math.PI * (conduit / 2) ** 2;
+    const cableArea = Math.PI * (cable / 2) ** 2;
+    const usedArea = cableArea * count;
+    const remainingArea = Math.max(conduitArea - usedArea, 0);
+    const fillPercent = (usedArea / conduitArea) * 100;
+
+    return {
+      fillValue: `${formatNumber(fillPercent)} %`,
+      usedAreaValue: `${formatNumber(usedArea)} mm²`,
+      remainingValue: `${formatNumber(remainingArea)} mm²`,
+      status:
+        fillPercent <= maxFill
+          ? `Fill is within the ${formatNumber(maxFill)}% target.`
+          : `Fill exceeds the ${formatNumber(maxFill)}% target.`
+    };
+  }, [conduitCableCount, conduitCableDiameter, conduitDiameter, conduitMaxFill]);
 
   const structureResult = useMemo(() => {
     const wall = Number.parseFloat(structureWall);
@@ -875,57 +1116,59 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((applet) => applet.id === "tool-load") ? (
-              <article id="tool-load" className="tool-panel">
+            {filteredApplets.some((applet) => applet.id === "tool-power") ? (
+              <article id="tool-power" className="tool-panel">
                 <div className="tool-heading">
-                  <h3>Load current</h3>
-                  <span className="tool-meta">Single / three phase</span>
+                  <h3>kW / A / V</h3>
+                  <span className="tool-meta">Power current voltage</span>
                 </div>
 
                 <div className="tool-form">
-                  <label className="field">
-                    <span>Phase</span>
-                    <select
-                      value={loadPhase}
-                      onChange={(event) => {
-                        const nextPhase = event.target.value as LoadPhase;
-                        setLoadPhase(nextPhase);
-
-                        if (nextPhase === "single" && loadVoltage === "400") {
-                          setLoadVoltage("230");
-                        }
-
-                        if (nextPhase === "three" && loadVoltage === "230") {
-                          setLoadVoltage("400");
-                        }
-                      }}
-                    >
-                      <option value="single">Single-phase</option>
-                      <option value="three">Three-phase</option>
-                    </select>
-                  </label>
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Solve</span>
+                      <select
+                        value={powerTarget}
+                        onChange={(event) => setPowerTarget(event.target.value as PowerTarget)}
+                      >
+                        <option value="power">Power (kW)</option>
+                        <option value="current">Current (A)</option>
+                        <option value="voltage">Voltage (V)</option>
+                      </select>
+                    </label>
+                    <label className="field">
+                      <span>Phase</span>
+                      <select
+                        value={powerPhase}
+                        onChange={(event) => setPowerPhase(event.target.value as PhaseType)}
+                      >
+                        <option value="single">Single-phase</option>
+                        <option value="three">Three-phase</option>
+                      </select>
+                    </label>
+                  </div>
 
                   <div className="field-row">
                     <label className="field">
-                      <span>Power (kW)</span>
+                      <span>{powerConfig[powerTarget].inputLabels[0]}</span>
                       <input
                         type="number"
                         inputMode="decimal"
                         min="0"
                         step="0.01"
-                        value={loadPower}
-                        onChange={(event) => setLoadPower(event.target.value)}
+                        value={powerValueA}
+                        onChange={(event) => setPowerValueA(event.target.value)}
                       />
                     </label>
                     <label className="field">
-                      <span>Voltage (V)</span>
+                      <span>{powerConfig[powerTarget].inputLabels[1]}</span>
                       <input
                         type="number"
                         inputMode="decimal"
                         min="0"
-                        step="1"
-                        value={loadVoltage}
-                        onChange={(event) => setLoadVoltage(event.target.value)}
+                        step="0.01"
+                        value={powerValueB}
+                        onChange={(event) => setPowerValueB(event.target.value)}
                       />
                     </label>
                   </div>
@@ -938,19 +1181,295 @@ export default function App() {
                       min="0.1"
                       max="1"
                       step="0.01"
-                      value={loadPf}
-                      onChange={(event) => setLoadPf(event.target.value)}
+                      value={powerPf}
+                      onChange={(event) => setPowerPf(event.target.value)}
                     />
                   </label>
                 </div>
 
                 <div className="tool-output">
                   <div className="result-main">
-                    <p className="result-label">Current</p>
-                    <p className="result-value">{loadResult.resultValue}</p>
+                    <p className="result-label">{powerResult.label}</p>
+                    <p className="result-value">{powerResult.resultValue}</p>
                   </div>
-                  <p className="formula-note">{loadResult.formula}</p>
-                  <p className="status-note">{loadResult.status}</p>
+                  <p className="formula-note">{powerResult.formula}</p>
+                  <p className="status-note">{powerResult.status}</p>
+                </div>
+              </article>
+            ) : null}
+
+            {filteredApplets.some((applet) => applet.id === "tool-vdrop") ? (
+              <article id="tool-vdrop" className="tool-panel">
+                <div className="tool-heading">
+                  <h3>Voltage drop</h3>
+                  <span className="tool-meta">Quick estimate</span>
+                </div>
+
+                <div className="tool-form">
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Phase</span>
+                      <select
+                        value={vdropPhase}
+                        onChange={(event) => setVdropPhase(event.target.value as PhaseType)}
+                      >
+                        <option value="single">Single-phase</option>
+                        <option value="three">Three-phase</option>
+                      </select>
+                    </label>
+                    <label className="field">
+                      <span>Nominal voltage (V)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        value={vdropVoltage}
+                        onChange={(event) => setVdropVoltage(event.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Current (A)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.01"
+                        value={vdropCurrent}
+                        onChange={(event) => setVdropCurrent(event.target.value)}
+                      />
+                    </label>
+                    <label className="field">
+                      <span>Length (m)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.01"
+                        value={vdropLength}
+                        onChange={(event) => setVdropLength(event.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <label className="field">
+                    <span>Cable size (mm²)</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.1"
+                      value={vdropCableSize}
+                      onChange={(event) => setVdropCableSize(event.target.value)}
+                    />
+                  </label>
+                </div>
+
+                <div className="tool-output">
+                  <div className="result-main">
+                    <p className="result-label">Voltage drop</p>
+                    <p className="result-value">{voltageDropResult.dropValue}</p>
+                  </div>
+                  <div className="mini-metrics">
+                    <div>
+                      <span>Drop percent</span>
+                      <strong>{voltageDropResult.percentValue}</strong>
+                    </div>
+                    <div>
+                      <span>mV / A / m</span>
+                      <strong>{voltageDropResult.mvPerAmpMeterValue}</strong>
+                    </div>
+                  </div>
+                  <p className="formula-note">{voltageDropResult.formula}</p>
+                  <p className="status-note">{voltageDropResult.status}</p>
+                </div>
+              </article>
+            ) : null}
+
+            {filteredApplets.some((applet) => applet.id === "tool-breaker") ? (
+              <article id="tool-breaker" className="tool-panel">
+                <div className="tool-heading">
+                  <h3>Breaker sizing</h3>
+                  <span className="tool-meta">Quick selection</span>
+                </div>
+
+                <div className="tool-form">
+                  <label className="field">
+                    <span>Input</span>
+                    <select
+                      value={breakerMode}
+                      onChange={(event) => setBreakerMode(event.target.value as BreakerInputMode)}
+                    >
+                      <option value="current">Design current</option>
+                      <option value="power">Power load</option>
+                    </select>
+                  </label>
+
+                  {breakerMode === "current" ? (
+                    <label className="field">
+                      <span>Design current (A)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.01"
+                        value={breakerCurrent}
+                        onChange={(event) => setBreakerCurrent(event.target.value)}
+                      />
+                    </label>
+                  ) : (
+                    <>
+                      <div className="field-row">
+                        <label className="field">
+                          <span>Phase</span>
+                          <select
+                            value={breakerPhase}
+                            onChange={(event) => setBreakerPhase(event.target.value as PhaseType)}
+                          >
+                            <option value="single">Single-phase</option>
+                            <option value="three">Three-phase</option>
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span>Voltage (V)</span>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            min="0"
+                            step="1"
+                            value={breakerVoltage}
+                            onChange={(event) => setBreakerVoltage(event.target.value)}
+                          />
+                        </label>
+                      </div>
+
+                      <div className="field-row">
+                        <label className="field">
+                          <span>Power (kW)</span>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            min="0"
+                            step="0.01"
+                            value={breakerPower}
+                            onChange={(event) => setBreakerPower(event.target.value)}
+                          />
+                        </label>
+                        <label className="field">
+                          <span>Power factor</span>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            min="0.1"
+                            max="1"
+                            step="0.01"
+                            value={breakerPf}
+                            onChange={(event) => setBreakerPf(event.target.value)}
+                          />
+                        </label>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="tool-output">
+                  <div className="result-main">
+                    <p className="result-label">Suggested breaker</p>
+                    <p className="result-value">{breakerResult.breakerValue}</p>
+                  </div>
+                  <div className="mini-metrics">
+                    <div>
+                      <span>Design current</span>
+                      <strong>{breakerResult.currentValue}</strong>
+                    </div>
+                    <div>
+                      <span>Standard step</span>
+                      <strong>{breakerResult.rangeValue}</strong>
+                    </div>
+                  </div>
+                  <p className="status-note">{breakerResult.status}</p>
+                </div>
+              </article>
+            ) : null}
+
+            {filteredApplets.some((applet) => applet.id === "tool-conduit") ? (
+              <article id="tool-conduit" className="tool-panel">
+                <div className="tool-heading">
+                  <h3>Conduit fill</h3>
+                  <span className="tool-meta">Area check</span>
+                </div>
+
+                <div className="tool-form">
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Conduit ID (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.1"
+                        value={conduitDiameter}
+                        onChange={(event) => setConduitDiameter(event.target.value)}
+                      />
+                    </label>
+                    <label className="field">
+                      <span>Cable OD (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.1"
+                        value={conduitCableDiameter}
+                        onChange={(event) => setConduitCableDiameter(event.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Cable count</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min="1"
+                        step="1"
+                        value={conduitCableCount}
+                        onChange={(event) => setConduitCableCount(event.target.value)}
+                      />
+                    </label>
+                    <label className="field">
+                      <span>Max fill (%)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="1"
+                        step="1"
+                        value={conduitMaxFill}
+                        onChange={(event) => setConduitMaxFill(event.target.value)}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="tool-output">
+                  <div className="result-main">
+                    <p className="result-label">Fill</p>
+                    <p className="result-value">{conduitResult.fillValue}</p>
+                  </div>
+                  <div className="mini-metrics">
+                    <div>
+                      <span>Used area</span>
+                      <strong>{conduitResult.usedAreaValue}</strong>
+                    </div>
+                    <div>
+                      <span>Free area</span>
+                      <strong>{conduitResult.remainingValue}</strong>
+                    </div>
+                  </div>
+                  <p className="status-note">{conduitResult.status}</p>
                 </div>
               </article>
             ) : null}
@@ -1014,13 +1533,6 @@ export default function App() {
         </section>
 
         <section className={`page ${page === "cheatsheet" ? "is-active" : ""}`}>
-          <section className="page-header">
-            <div>
-              <h2>Notes</h2>
-              <p className="page-copy">Quick reminders. Search filters this page.</p>
-            </div>
-          </section>
-
           <div className="sheet-grid">
             {filteredCheatSections.map((section) => (
               <article key={section.id} id={section.id} className="sheet-card">
