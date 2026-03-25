@@ -160,38 +160,27 @@ const ohmsConfig: Record<
   {
     label: string;
     unit: string;
-    formula: string;
     inputLabels: [string, string];
     compute: (a: number, b: number) => number;
-    status: (a: number, b: number, result: number) => string;
   }
 > = {
   voltage: {
     label: "Voltage",
     unit: "V",
-    formula: "V = I x R",
     inputLabels: ["Current (A)", "Resistance (ohm)"],
-    compute: (current, resistance) => current * resistance,
-    status: (current, resistance, result) =>
-      `${formatNumber(current)} A x ${formatNumber(resistance)} ohm = ${formatNumber(result)} V.`
+    compute: (current, resistance) => current * resistance
   },
   current: {
     label: "Current",
     unit: "A",
-    formula: "I = V / R",
     inputLabels: ["Voltage (V)", "Resistance (ohm)"],
-    compute: (voltage, resistance) => voltage / resistance,
-    status: (voltage, resistance, result) =>
-      `${formatNumber(voltage)} V / ${formatNumber(resistance)} ohm = ${formatNumber(result)} A.`
+    compute: (voltage, resistance) => voltage / resistance
   },
   resistance: {
     label: "Resistance",
     unit: "ohm",
-    formula: "R = V / I",
     inputLabels: ["Voltage (V)", "Current (A)"],
-    compute: (voltage, current) => voltage / current,
-    status: (voltage, current, result) =>
-      `${formatNumber(voltage)} V / ${formatNumber(current)} A = ${formatNumber(result)} ohm.`
+    compute: (voltage, current) => voltage / current
   }
 };
 
@@ -219,6 +208,16 @@ const powerConfig: Record<
     inputLabels: ["Power (kW)", "Current (A)"]
   }
 };
+
+const toolHints = {
+  angle: "Angled length = drop / sin(theta). Advanced: total = top + angled + bottom + allowance.",
+  ohms: "V = I x R. I = V / R. R = V / I.",
+  power: "Single-phase: P = V x I x PF. Three-phase: P = sqrt(3) x V x I x PF.",
+  vdrop: "Single-phase: Vd = 2 x I x L x rho / A. Three-phase: Vd = sqrt(3) x I x L x rho / A.",
+  breaker: "Rounds design current up to the next standard breaker size.",
+  conduit: "Fill % = total cable area / conduit area x 100.",
+  structure: "Vertical chase = wall / 3. Horizontal chase = wall / 6. Joist notch = depth x 0.125."
+} as const;
 
 function normalize(text: string) {
   return text.toLowerCase();
@@ -257,6 +256,19 @@ function formatMeasure(value: number, unit: string) {
   return `${formatNumber(value)} ${unit}`;
 }
 
+function ToolTitle({ title, hint }: { title: string; hint: string }) {
+  return (
+    <div className="tool-title-wrap">
+      <h3 className="tool-title" tabIndex={0}>
+        {title}
+      </h3>
+      <div className="tool-tooltip" role="tooltip">
+        {hint}
+      </div>
+    </div>
+  );
+}
+
 function getPageFromHash(): PageId {
   const hash = window.location.hash.replace("#", "");
   if (hash === "home" || hash === "cheatsheet") {
@@ -282,6 +294,7 @@ export default function App() {
   const [angleBottomStraight, setAngleBottomStraight] = useState("0");
   const [angleAllowance, setAngleAllowance] = useState("0");
   const [angleUnit, setAngleUnit] = useState("cm");
+  const [angleAdvanced, setAngleAdvanced] = useState(false);
 
   const [ohmsTarget, setOhmsTarget] = useState<OhmsTarget>("voltage");
   const [ohmsInputA, setOhmsInputA] = useState("2");
@@ -341,9 +354,7 @@ export default function App() {
       return {
         angledLengthValue: "--",
         offsetValue: "--",
-        totalLengthValue: "--",
-        formula: "Angled length = drop / sin(theta)",
-        status: "Enter a vertical drop greater than 0."
+        totalLengthValue: "--"
       };
     }
 
@@ -351,9 +362,7 @@ export default function App() {
       return {
         angledLengthValue: "--",
         offsetValue: "--",
-        totalLengthValue: "--",
-        formula: "Angled length = drop / sin(theta)",
-        status: "Enter an angle greater than 0 and less than 90 degrees."
+        totalLengthValue: "--"
       };
     }
 
@@ -368,9 +377,7 @@ export default function App() {
       return {
         angledLengthValue: "--",
         offsetValue: "--",
-        totalLengthValue: "--",
-        formula: "Total length = top + angled + bottom + allowance",
-        status: "Straight sections and allowance must be 0 or more."
+        totalLengthValue: "--"
       };
     }
 
@@ -382,9 +389,7 @@ export default function App() {
       return {
         angledLengthValue: "--",
         offsetValue: "--",
-        totalLengthValue: "--",
-        formula: "Angled length = drop / sin(theta)",
-        status: "That angle would not create a vertical drop."
+        totalLengthValue: "--"
       };
     }
 
@@ -395,11 +400,9 @@ export default function App() {
     return {
       angledLengthValue: formatMeasure(angledLength, angleUnit),
       offsetValue: formatMeasure(offset, angleUnit),
-      totalLengthValue: formatMeasure(totalLength, angleUnit),
-      formula: "Total length = top + angled + bottom + allowance",
-      status: `Drop ${formatMeasure(drop, angleUnit)} at ${formatNumber(angle)}° gives angled length ${formatMeasure(angledLength, angleUnit)} and total developed length ${formatMeasure(totalLength, angleUnit)}.`
+      totalLengthValue: formatMeasure(totalLength, angleUnit)
     };
-  }, [angleAllowance, angleBottomStraight, angleDrop, angleTopStraight, angleUnit, angleValue]);
+  }, [angleAdvanced, angleAllowance, angleBottomStraight, angleDrop, angleTopStraight, angleUnit, angleValue]);
 
   const ohmsResult = useMemo(() => {
     const config = ohmsConfig[ohmsTarget];
@@ -409,16 +412,14 @@ export default function App() {
     if (!Number.isFinite(valueA) || !Number.isFinite(valueB) || valueA <= 0 || valueB <= 0) {
       return {
         ...config,
-        resultValue: `-- ${config.unit}`,
-        status: "Enter two values greater than 0."
+        resultValue: `-- ${config.unit}`
       };
     }
 
     if (Math.abs(valueB) < EPSILON && (ohmsTarget === "current" || ohmsTarget === "resistance")) {
       return {
         ...config,
-        resultValue: `-- ${config.unit}`,
-        status: "The divisor cannot be 0."
+        resultValue: `-- ${config.unit}`
       };
     }
 
@@ -426,8 +427,7 @@ export default function App() {
 
     return {
       ...config,
-      resultValue: `${formatNumber(result)} ${config.unit}`,
-      status: config.status(valueA, valueB, result)
+      resultValue: `${formatNumber(result)} ${config.unit}`
     };
   }, [ohmsInputA, ohmsInputB, ohmsTarget]);
 
@@ -440,27 +440,21 @@ export default function App() {
     if (!Number.isFinite(valueA) || !Number.isFinite(valueB) || valueA <= 0 || valueB <= 0) {
       return {
         label: powerTarget === "power" ? "Power" : powerTarget === "current" ? "Current" : "Voltage",
-        resultValue: powerTarget === "power" ? "-- kW" : powerTarget === "current" ? "-- A" : "-- V",
-        formula: powerPhase === "single" ? "P = V x I x PF" : "P = sqrt(3) x V x I x PF",
-        status: "Enter two values greater than 0."
+        resultValue: powerTarget === "power" ? "-- kW" : powerTarget === "current" ? "-- A" : "-- V"
       };
     }
 
     if (!Number.isFinite(pf) || pf <= 0 || pf > 1) {
       return {
         label: powerTarget === "power" ? "Power" : powerTarget === "current" ? "Current" : "Voltage",
-        resultValue: powerTarget === "power" ? "-- kW" : powerTarget === "current" ? "-- A" : "-- V",
-        formula: powerPhase === "single" ? "P = V x I x PF" : "P = sqrt(3) x V x I x PF",
-        status: "Enter a power factor between 0 and 1."
+        resultValue: powerTarget === "power" ? "-- kW" : powerTarget === "current" ? "-- A" : "-- V"
       };
     }
 
     if ((powerTarget === "current" || powerTarget === "voltage") && Math.abs(valueB * pf) < EPSILON) {
       return {
         label: powerTarget === "current" ? "Current" : "Voltage",
-        resultValue: powerTarget === "current" ? "-- A" : "-- V",
-        formula: powerPhase === "single" ? "P = V x I x PF" : "P = sqrt(3) x V x I x PF",
-        status: "Voltage/current and power factor cannot make the divisor 0."
+        resultValue: powerTarget === "current" ? "-- A" : "-- V"
       };
     }
 
@@ -468,9 +462,7 @@ export default function App() {
       const powerKw = (phaseFactor * valueA * valueB * pf) / 1000;
       return {
         label: "Power",
-        resultValue: `${formatNumber(powerKw)} kW`,
-        formula: powerPhase === "single" ? "P = V x I x PF" : "P = sqrt(3) x V x I x PF",
-        status: `${formatNumber(valueA)} A at ${formatNumber(valueB)} V, PF ${formatNumber(pf)} = ${formatNumber(powerKw)} kW.`
+        resultValue: `${formatNumber(powerKw)} kW`
       };
     }
 
@@ -478,18 +470,14 @@ export default function App() {
       const current = (valueA * 1000) / (phaseFactor * valueB * pf);
       return {
         label: "Current",
-        resultValue: `${formatNumber(current)} A`,
-        formula: powerPhase === "single" ? "I = P / (V x PF)" : "I = P / (sqrt(3) x V x PF)",
-        status: `${formatNumber(valueA)} kW at ${formatNumber(valueB)} V, PF ${formatNumber(pf)} = ${formatNumber(current)} A.`
+        resultValue: `${formatNumber(current)} A`
       };
     }
 
     const voltage = (valueA * 1000) / (phaseFactor * valueB * pf);
     return {
       label: "Voltage",
-      resultValue: `${formatNumber(voltage)} V`,
-      formula: powerPhase === "single" ? "V = P / (I x PF)" : "V = P / (sqrt(3) x I x PF)",
-      status: `${formatNumber(valueA)} kW at ${formatNumber(valueB)} A, PF ${formatNumber(pf)} = ${formatNumber(voltage)} V.`
+      resultValue: `${formatNumber(voltage)} V`
     };
   }, [powerPf, powerPhase, powerTarget, powerValueA, powerValueB]);
 
@@ -513,9 +501,7 @@ export default function App() {
       return {
         dropValue: "-- V",
         percentValue: "-- %",
-        mvPerAmpMeterValue: "--",
-        formula: vdropPhase === "single" ? "Vd = 2 x I x L x rho / A" : "Vd = sqrt(3) x I x L x rho / A",
-        status: "Enter current, length, cable size, and voltage values greater than 0."
+        mvPerAmpMeterValue: "--"
       };
     }
 
@@ -527,9 +513,7 @@ export default function App() {
     return {
       dropValue: `${formatNumber(drop)} V`,
       percentValue: `${formatNumber(percent)} %`,
-      mvPerAmpMeterValue: formatNumber(mvPerAmpMeter),
-      formula: vdropPhase === "single" ? "Vd = 2 x I x L x rho / A" : "Vd = sqrt(3) x I x L x rho / A",
-      status: `Estimated copper drop over ${formatNumber(length)} m at ${formatNumber(current)} A. Verify against tabulated values before final design.`
+      mvPerAmpMeterValue: formatNumber(mvPerAmpMeter)
     };
   }, [vdropCableSize, vdropCurrent, vdropLength, vdropPhase, vdropVoltage]);
 
@@ -562,11 +546,7 @@ export default function App() {
       return {
         breakerValue: "-- A",
         currentValue: "-- A",
-        rangeValue: "--",
-        status:
-          breakerMode === "current"
-            ? "Enter a design current greater than 0."
-            : "Enter power, voltage, and power factor values greater than 0."
+        rangeValue: "--"
       };
     }
 
@@ -574,8 +554,7 @@ export default function App() {
       return {
         breakerValue: "-- A",
         currentValue: "-- A",
-        rangeValue: "--",
-        status: "Enter a power factor between 0 and 1."
+        rangeValue: "--"
       };
     }
 
@@ -594,11 +573,7 @@ export default function App() {
     return {
       breakerValue: `${breakerSize} A`,
       currentValue: `${formatNumber(designCurrent)} A`,
-      rangeValue,
-      status:
-        breakerMode === "current"
-          ? `Design current ${formatNumber(designCurrent)} A. Check cable capacity, Zs, and load characteristics before final selection.`
-          : `${formatNumber(designCurrent)} A from ${formatNumber(Number.parseFloat(breakerPower))} kW at ${formatNumber(Number.parseFloat(breakerVoltage))} V. Check cable capacity, Zs, and starting current before final selection.`
+      rangeValue
     };
   }, [breakerCurrent, breakerMode, breakerPf, breakerPhase, breakerPower, breakerVoltage]);
 
@@ -621,8 +596,7 @@ export default function App() {
       return {
         fillValue: "-- %",
         usedAreaValue: "-- mm²",
-        remainingValue: "-- mm²",
-        status: "Enter conduit diameter, cable diameter, cable count, and max fill values greater than 0."
+        remainingValue: "-- mm²"
       };
     }
 
@@ -635,11 +609,7 @@ export default function App() {
     return {
       fillValue: `${formatNumber(fillPercent)} %`,
       usedAreaValue: `${formatNumber(usedArea)} mm²`,
-      remainingValue: `${formatNumber(remainingArea)} mm²`,
-      status:
-        fillPercent <= maxFill
-          ? `Fill is within the ${formatNumber(maxFill)}% target.`
-          : `Fill exceeds the ${formatNumber(maxFill)}% target.`
+      remainingValue: `${formatNumber(remainingArea)} mm²`
     };
   }, [conduitCableCount, conduitCableDiameter, conduitDiameter, conduitMaxFill]);
 
@@ -651,16 +621,14 @@ export default function App() {
       return {
         vertical: "-- mm",
         horizontal: "-- mm",
-        notch: "-- mm",
-        status: "Enter wall thickness and joist depth greater than 0."
+        notch: "-- mm"
       };
     }
 
     return {
       vertical: `${formatNumber(wall / 3)} mm`,
       horizontal: `${formatNumber(wall / 6)} mm`,
-      notch: `${formatNumber(joist * 0.125)} mm`,
-      status: `${formatNumber(wall)} mm wall, ${formatNumber(joist)} mm joist.`
+      notch: `${formatNumber(joist * 0.125)} mm`
     };
   }, [structureJoist, structureWall]);
 
@@ -943,8 +911,15 @@ export default function App() {
             {filteredApplets.some((applet) => applet.id === "tool-angle") ? (
               <article id="tool-angle" className="tool-panel">
                 <div className="tool-heading">
-                  <h3>Angle drop</h3>
-                  <span className="tool-meta">Drop and developed length</span>
+                  <ToolTitle title="Angle drop" hint={toolHints.angle} />
+                  <button
+                    type="button"
+                    className={`switch-chip ${angleAdvanced ? "is-active" : ""}`}
+                    onClick={() => setAngleAdvanced((current) => !current)}
+                    aria-pressed={angleAdvanced}
+                  >
+                    Advanced
+                  </button>
                 </div>
 
                 <div className="tool-form">
@@ -990,52 +965,56 @@ export default function App() {
                     </label>
                   </div>
 
-                  <div className="field-row">
-                    <label className="field">
-                      <span>Top straight</span>
-                      <div className="input-wrap">
-                        <input
-                          type="number"
-                          inputMode="decimal"
-                          min="0"
-                          step="0.01"
-                          value={angleTopStraight}
-                          onChange={(event) => setAngleTopStraight(event.target.value)}
-                        />
-                        <span className="suffix">{angleUnit}</span>
-                      </div>
-                    </label>
+                  {angleAdvanced ? (
+                    <>
+                      <div className="field-row">
+                        <label className="field">
+                          <span>Top straight</span>
+                          <div className="input-wrap">
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              min="0"
+                              step="0.01"
+                              value={angleTopStraight}
+                              onChange={(event) => setAngleTopStraight(event.target.value)}
+                            />
+                            <span className="suffix">{angleUnit}</span>
+                          </div>
+                        </label>
 
-                    <label className="field">
-                      <span>Bottom straight</span>
-                      <div className="input-wrap">
-                        <input
-                          type="number"
-                          inputMode="decimal"
-                          min="0"
-                          step="0.01"
-                          value={angleBottomStraight}
-                          onChange={(event) => setAngleBottomStraight(event.target.value)}
-                        />
-                        <span className="suffix">{angleUnit}</span>
+                        <label className="field">
+                          <span>Bottom straight</span>
+                          <div className="input-wrap">
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              min="0"
+                              step="0.01"
+                              value={angleBottomStraight}
+                              onChange={(event) => setAngleBottomStraight(event.target.value)}
+                            />
+                            <span className="suffix">{angleUnit}</span>
+                          </div>
+                        </label>
                       </div>
-                    </label>
-                  </div>
 
-                  <label className="field">
-                    <span>Extra allowance</span>
-                    <div className="input-wrap">
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        step="0.01"
-                        value={angleAllowance}
-                        onChange={(event) => setAngleAllowance(event.target.value)}
-                      />
-                      <span className="suffix">{angleUnit}</span>
-                    </div>
-                  </label>
+                      <label className="field">
+                        <span>Extra allowance</span>
+                        <div className="input-wrap">
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            min="0"
+                            step="0.01"
+                            value={angleAllowance}
+                            onChange={(event) => setAngleAllowance(event.target.value)}
+                          />
+                          <span className="suffix">{angleUnit}</span>
+                        </div>
+                      </label>
+                    </>
+                  ) : null}
                 </div>
 
                 <div className="tool-output">
@@ -1043,18 +1022,18 @@ export default function App() {
                     <p className="result-label">Angled piece</p>
                     <p className="result-value">{angleResult.angledLengthValue}</p>
                   </div>
-                  <div className="mini-metrics">
-                    <div>
-                      <span>Horizontal offset</span>
-                      <strong>{angleResult.offsetValue}</strong>
+                  {angleAdvanced ? (
+                    <div className="mini-metrics">
+                      <div>
+                        <span>Horizontal offset</span>
+                        <strong>{angleResult.offsetValue}</strong>
+                      </div>
+                      <div>
+                        <span>Total developed length</span>
+                        <strong>{angleResult.totalLengthValue}</strong>
+                      </div>
                     </div>
-                    <div>
-                      <span>Total developed length</span>
-                      <strong>{angleResult.totalLengthValue}</strong>
-                    </div>
-                  </div>
-                  <p className="formula-note">{angleResult.formula}</p>
-                  <p className="status-note">{angleResult.status}</p>
+                  ) : null}
                 </div>
               </article>
             ) : null}
@@ -1062,7 +1041,7 @@ export default function App() {
             {filteredApplets.some((applet) => applet.id === "tool-ohms") ? (
               <article id="tool-ohms" className="tool-panel">
                 <div className="tool-heading">
-                  <h3>Ohm&apos;s law</h3>
+                  <ToolTitle title="Ohm's law" hint={toolHints.ohms} />
                   <span className="tool-meta">V / I / R</span>
                 </div>
 
@@ -1110,8 +1089,6 @@ export default function App() {
                     <p className="result-label">{ohmsResult.label}</p>
                     <p className="result-value">{ohmsResult.resultValue}</p>
                   </div>
-                  <p className="formula-note">{ohmsResult.formula}</p>
-                  <p className="status-note">{ohmsResult.status}</p>
                 </div>
               </article>
             ) : null}
@@ -1119,7 +1096,7 @@ export default function App() {
             {filteredApplets.some((applet) => applet.id === "tool-power") ? (
               <article id="tool-power" className="tool-panel">
                 <div className="tool-heading">
-                  <h3>kW / A / V</h3>
+                  <ToolTitle title="kW / A / V" hint={toolHints.power} />
                   <span className="tool-meta">Power current voltage</span>
                 </div>
 
@@ -1192,8 +1169,6 @@ export default function App() {
                     <p className="result-label">{powerResult.label}</p>
                     <p className="result-value">{powerResult.resultValue}</p>
                   </div>
-                  <p className="formula-note">{powerResult.formula}</p>
-                  <p className="status-note">{powerResult.status}</p>
                 </div>
               </article>
             ) : null}
@@ -1201,7 +1176,7 @@ export default function App() {
             {filteredApplets.some((applet) => applet.id === "tool-vdrop") ? (
               <article id="tool-vdrop" className="tool-panel">
                 <div className="tool-heading">
-                  <h3>Voltage drop</h3>
+                  <ToolTitle title="Voltage drop" hint={toolHints.vdrop} />
                   <span className="tool-meta">Quick estimate</span>
                 </div>
 
@@ -1283,8 +1258,6 @@ export default function App() {
                       <strong>{voltageDropResult.mvPerAmpMeterValue}</strong>
                     </div>
                   </div>
-                  <p className="formula-note">{voltageDropResult.formula}</p>
-                  <p className="status-note">{voltageDropResult.status}</p>
                 </div>
               </article>
             ) : null}
@@ -1292,7 +1265,7 @@ export default function App() {
             {filteredApplets.some((applet) => applet.id === "tool-breaker") ? (
               <article id="tool-breaker" className="tool-panel">
                 <div className="tool-heading">
-                  <h3>Breaker sizing</h3>
+                  <ToolTitle title="Breaker sizing" hint={toolHints.breaker} />
                   <span className="tool-meta">Quick selection</span>
                 </div>
 
@@ -1390,7 +1363,6 @@ export default function App() {
                       <strong>{breakerResult.rangeValue}</strong>
                     </div>
                   </div>
-                  <p className="status-note">{breakerResult.status}</p>
                 </div>
               </article>
             ) : null}
@@ -1398,7 +1370,7 @@ export default function App() {
             {filteredApplets.some((applet) => applet.id === "tool-conduit") ? (
               <article id="tool-conduit" className="tool-panel">
                 <div className="tool-heading">
-                  <h3>Conduit fill</h3>
+                  <ToolTitle title="Conduit fill" hint={toolHints.conduit} />
                   <span className="tool-meta">Area check</span>
                 </div>
 
@@ -1469,7 +1441,6 @@ export default function App() {
                       <strong>{conduitResult.remainingValue}</strong>
                     </div>
                   </div>
-                  <p className="status-note">{conduitResult.status}</p>
                 </div>
               </article>
             ) : null}
@@ -1477,7 +1448,7 @@ export default function App() {
             {filteredApplets.some((applet) => applet.id === "tool-structure") ? (
               <article id="tool-structure" className="tool-panel">
                 <div className="tool-heading">
-                  <h3>Structural limits</h3>
+                  <ToolTitle title="Structural limits" hint={toolHints.structure} />
                   <span className="tool-meta">Wall chases / joists</span>
                 </div>
 
@@ -1523,7 +1494,6 @@ export default function App() {
                       <strong>{structureResult.notch}</strong>
                     </div>
                   </div>
-                  <p className="status-note">{structureResult.status}</p>
                 </div>
               </article>
             ) : null}
