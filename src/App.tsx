@@ -32,6 +32,12 @@ const EPSILON = 1e-9;
 const DEFAULT_PAGE: PageId = "home";
 const COPPER_RESISTIVITY = 0.0175;
 const STANDARD_BREAKERS = [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100];
+const DEFAULT_CONTAINMENT_ROD_VALUES = {
+  overallHeight: "3165",
+  topOfUnistrut: "2900",
+  buffer: "100",
+  unistrutDepth: "40"
+} as const;
 
 const cheatSheetSections: CheatSheetSection[] = [
   {
@@ -111,6 +117,12 @@ const cheatSheetSections: CheatSheetSection[] = [
 ];
 
 const applets: Applet[] = [
+  {
+    id: "tool-containment-rod",
+    title: "Containment rod",
+    subtitle: "Rod cut and Unistrut drop",
+    keywords: "containment rod threaded rod cut length unistrut strut drop buffer support channel"
+  },
   {
     id: "tool-angle",
     title: "Angle drop",
@@ -210,6 +222,8 @@ const powerConfig: Record<
 };
 
 const toolHints = {
+  containmentRod:
+    "Actual drop = overall height - top of Unistrut. Rod cut length = actual drop + buffer. Bottom of Unistrut drop = actual drop + Unistrut depth.",
   angle: "Angled length = drop / sin(theta). Advanced: total = top + angled + bottom + allowance.",
   ohms: "V = I x R. I = V / R. R = V / I.",
   power: "Single-phase: P = V x I x PF. Three-phase: P = sqrt(3) x V x I x PF.",
@@ -245,11 +259,10 @@ function formatNumber(value: number) {
     return "--";
   }
 
-  if (Math.abs(value) >= 100) {
-    return value.toFixed(1);
-  }
-
-  return value.toFixed(2);
+  const precision = Math.abs(value) >= 100 ? 1 : 2;
+  return value
+    .toFixed(precision)
+    .replace(/\.0+$|(\.\d*?[1-9])0+$/, "$1");
 }
 
 function formatMeasure(value: number, unit: string) {
@@ -287,6 +300,19 @@ export default function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [copiedSectionId, setCopiedSectionId] = useState<string | null>(null);
+
+  const [containmentRodOverallHeight, setContainmentRodOverallHeight] = useState(
+    DEFAULT_CONTAINMENT_ROD_VALUES.overallHeight
+  );
+  const [containmentRodTopOfUnistrut, setContainmentRodTopOfUnistrut] = useState(
+    DEFAULT_CONTAINMENT_ROD_VALUES.topOfUnistrut
+  );
+  const [containmentRodBuffer, setContainmentRodBuffer] = useState(
+    DEFAULT_CONTAINMENT_ROD_VALUES.buffer
+  );
+  const [containmentRodUnistrutDepth, setContainmentRodUnistrutDepth] = useState(
+    DEFAULT_CONTAINMENT_ROD_VALUES.unistrutDepth
+  );
 
   const [angleDrop, setAngleDrop] = useState("10");
   const [angleValue, setAngleValue] = useState("45");
@@ -342,6 +368,70 @@ export default function App() {
       }, 50);
     }
   }
+
+  function clearContainmentRod() {
+    setContainmentRodOverallHeight("");
+    setContainmentRodTopOfUnistrut("");
+    setContainmentRodBuffer("");
+    setContainmentRodUnistrutDepth("");
+  }
+
+  const containmentRodResult = useMemo(() => {
+    const overallHeight = Number.parseFloat(containmentRodOverallHeight);
+    const topOfUnistrut = Number.parseFloat(containmentRodTopOfUnistrut);
+    const buffer = Number.parseFloat(containmentRodBuffer);
+    const unistrutDepth =
+      containmentRodUnistrutDepth.trim() === ""
+        ? Number.parseFloat(DEFAULT_CONTAINMENT_ROD_VALUES.unistrutDepth)
+        : Number.parseFloat(containmentRodUnistrutDepth);
+
+    if (
+      Number.isFinite(overallHeight) &&
+      Number.isFinite(topOfUnistrut) &&
+      topOfUnistrut > overallHeight
+    ) {
+      return {
+        validationMessage: "Height to top of Unistrut cannot be more than overall height.",
+        actualDropValue: "-- mm",
+        rodCutLengthValue: "-- mm",
+        bottomOfUnistrutDropValue: "-- mm"
+      };
+    }
+
+    if (
+      !Number.isFinite(overallHeight) ||
+      !Number.isFinite(topOfUnistrut) ||
+      !Number.isFinite(buffer) ||
+      !Number.isFinite(unistrutDepth) ||
+      overallHeight <= 0 ||
+      topOfUnistrut < 0 ||
+      buffer < 0 ||
+      unistrutDepth < 0
+    ) {
+      return {
+        validationMessage: null,
+        actualDropValue: "-- mm",
+        rodCutLengthValue: "-- mm",
+        bottomOfUnistrutDropValue: "-- mm"
+      };
+    }
+
+    const actualDrop = overallHeight - topOfUnistrut;
+    const rodCutLength = actualDrop + buffer;
+    const bottomOfUnistrutDrop = actualDrop + unistrutDepth;
+
+    return {
+      validationMessage: null,
+      actualDropValue: formatMeasure(actualDrop, "mm"),
+      rodCutLengthValue: formatMeasure(rodCutLength, "mm"),
+      bottomOfUnistrutDropValue: formatMeasure(bottomOfUnistrutDrop, "mm")
+    };
+  }, [
+    containmentRodBuffer,
+    containmentRodOverallHeight,
+    containmentRodTopOfUnistrut,
+    containmentRodUnistrutDepth
+  ]);
 
   const angleResult = useMemo(() => {
     const drop = Number.parseFloat(angleDrop);
@@ -908,6 +998,98 @@ export default function App() {
       <main className="workspace">
         <section className={`page ${page === "home" ? "is-active" : ""}`}>
           <div className="tool-grid">
+            {filteredApplets.some((applet) => applet.id === "tool-containment-rod") ? (
+              <article id="tool-containment-rod" className="tool-panel">
+                <div className="tool-heading">
+                  <ToolTitle title="Containment rod" hint={toolHints.containmentRod} />
+                  <button type="button" className="ghost-button" onClick={clearContainmentRod}>
+                    Clear
+                  </button>
+                </div>
+
+                <div className="tool-form">
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Overall height (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        value={containmentRodOverallHeight}
+                        onChange={(event) => setContainmentRodOverallHeight(event.target.value)}
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span>Height to top of Unistrut (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        aria-invalid={containmentRodResult.validationMessage ? true : undefined}
+                        value={containmentRodTopOfUnistrut}
+                        onChange={(event) => setContainmentRodTopOfUnistrut(event.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Buffer (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        value={containmentRodBuffer}
+                        onChange={(event) => setContainmentRodBuffer(event.target.value)}
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span>Unistrut depth (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        placeholder={DEFAULT_CONTAINMENT_ROD_VALUES.unistrutDepth}
+                        value={containmentRodUnistrutDepth}
+                        onChange={(event) => setContainmentRodUnistrutDepth(event.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <p className="field-note">Leave Unistrut depth blank to use 40 mm.</p>
+
+                  {containmentRodResult.validationMessage ? (
+                    <p className="field-error" role="alert">
+                      {containmentRodResult.validationMessage}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="tool-output">
+                  <div className="result-main">
+                    <p className="result-label">Rod cut length</p>
+                    <p className="result-value">{containmentRodResult.rodCutLengthValue}</p>
+                  </div>
+                  <div className="mini-metrics">
+                    <div>
+                      <span>Actual drop</span>
+                      <strong>{containmentRodResult.actualDropValue}</strong>
+                    </div>
+                    <div>
+                      <span>Bottom of Unistrut drop</span>
+                      <strong>{containmentRodResult.bottomOfUnistrutDropValue}</strong>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ) : null}
+
             {filteredApplets.some((applet) => applet.id === "tool-angle") ? (
               <article id="tool-angle" className="tool-panel">
                 <div className="tool-heading">
