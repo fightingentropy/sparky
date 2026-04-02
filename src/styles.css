@@ -782,12 +782,46 @@ input[aria-invalid="true"] {
 @media (max-width: 720px) {
   .site-shell {
     width: min(100% - 16px, 1160px);
-    padding: 10px 0 24px;
+    min-height: 100svh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    padding: 10px 0 max(24px, env(safe-area-inset-bottom));
   }
 
   .workspace,
   .page.is-active {
     gap: 14px;
+  }
+
+  .workspace,
+  .page-home.is-active {
+    min-height: 0;
+  }
+
+  .page-home.is-active {
+    gap: 0;
+  }
+
+  .page-home.is-active .tool-grid {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-snap-type: y mandatory;
+    gap: 14px;
+    padding-bottom: 2px;
+  }
+
+  .page-home.is-active .tool-panel,
+  .page-home.is-active .empty-state {
+    min-height: 100%;
+    max-height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .page-home.is-active .tool-panel {
+    overflow-y: auto;
   }
 
   .topbar {

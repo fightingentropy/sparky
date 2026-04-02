@@ -1161,7 +1161,7 @@ export default function App() {
       </header>
 
       <main className="workspace">
-        <section className={`page ${page === "home" ? "is-active" : ""}`}>
+        <section className={`page page-home ${page === "home" ? "is-active" : ""}`}>
           <div className="tool-grid">
             {filteredApplets.some((applet) => applet.id === "tool-containment-rod") ? (
               <article id="tool-containment-rod" className="tool-panel">
