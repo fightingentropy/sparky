@@ -28,6 +28,12 @@ type PaletteItem = {
   action: () => void;
 };
 
+type UnistrutContainmentRow = {
+  id: number;
+  label: string;
+  width: string;
+};
+
 const EPSILON = 1e-9;
 const DEFAULT_PAGE: PageId = "home";
 const COPPER_RESISTIVITY = 0.0175;
@@ -37,6 +43,16 @@ const DEFAULT_CONTAINMENT_ROD_VALUES = {
   topOfUnistrut: "2900",
   buffer: "100",
   unistrutDepth: "40"
+} as const;
+const DEFAULT_UNISTRUT_LENGTH_VALUES = {
+  containments: [
+    { id: 1, label: "Tray", width: "225" },
+    { id: 2, label: "Basket", width: "125" },
+    { id: 3, label: "Trunking", width: "100" }
+  ],
+  leftAllowance: "50",
+  rightAllowance: "50",
+  gap: "50"
 } as const;
 
 const cheatSheetSections: CheatSheetSection[] = [
@@ -122,6 +138,13 @@ const applets: Applet[] = [
     title: "Containment rod",
     subtitle: "Rod cut and Unistrut drop",
     keywords: "containment rod threaded rod cut length unistrut strut drop buffer support channel"
+  },
+  {
+    id: "tool-unistrut-length",
+    title: "Unistrut length",
+    subtitle: "Multiple containment runs",
+    keywords:
+      "unistrut length calculator strut support channel tray basket trunking containment widths gap side allowance multiple runs"
   },
   {
     id: "tool-angle",
@@ -224,6 +247,8 @@ const powerConfig: Record<
 const toolHints = {
   containmentRod:
     "Actual drop = overall height - top of Unistrut. Rod cut length = actual drop + buffer. Bottom of Unistrut drop = actual drop + Unistrut depth.",
+  unistrutLength:
+    "Length = total containment widths + left allowance + right allowance + ((containments - 1) x gap). Side allowances cover the rod or square plate position at each end.",
   angle: "Angled length = drop / sin(theta). Advanced: total = top + angled + bottom + allowance.",
   ohms: "V = I x R. I = V / R. R = V / I.",
   power: "Single-phase: P = V x I x PF. Three-phase: P = sqrt(3) x V x I x PF.",
@@ -313,6 +338,16 @@ export default function App() {
   const [containmentRodUnistrutDepth, setContainmentRodUnistrutDepth] = useState(
     DEFAULT_CONTAINMENT_ROD_VALUES.unistrutDepth
   );
+  const [unistrutContainments, setUnistrutContainments] = useState<UnistrutContainmentRow[]>(() =>
+    DEFAULT_UNISTRUT_LENGTH_VALUES.containments.map((containment) => ({ ...containment }))
+  );
+  const [unistrutLeftAllowance, setUnistrutLeftAllowance] = useState(
+    DEFAULT_UNISTRUT_LENGTH_VALUES.leftAllowance
+  );
+  const [unistrutRightAllowance, setUnistrutRightAllowance] = useState(
+    DEFAULT_UNISTRUT_LENGTH_VALUES.rightAllowance
+  );
+  const [unistrutGap, setUnistrutGap] = useState(DEFAULT_UNISTRUT_LENGTH_VALUES.gap);
 
   const [angleDrop, setAngleDrop] = useState("10");
   const [angleValue, setAngleValue] = useState("45");
@@ -354,6 +389,9 @@ export default function App() {
   const [structureJoist, setStructureJoist] = useState("200");
 
   const paletteInputRef = useRef<HTMLInputElement | null>(null);
+  const nextUnistrutContainmentIdRef = useRef(
+    DEFAULT_UNISTRUT_LENGTH_VALUES.containments.length + 1
+  );
 
   function navigateTo(nextPage: PageId, targetId?: string) {
     window.location.hash = nextPage;
@@ -374,6 +412,62 @@ export default function App() {
     setContainmentRodTopOfUnistrut("");
     setContainmentRodBuffer("");
     setContainmentRodUnistrutDepth("");
+  }
+
+  function buildUnistrutContainmentRow(): UnistrutContainmentRow {
+    return {
+      id: nextUnistrutContainmentIdRef.current++,
+      label: "",
+      width: ""
+    };
+  }
+
+  function setUnistrutContainmentCount(nextCount: number) {
+    const normalizedCount = Number.isFinite(nextCount) ? Math.max(0, Math.trunc(nextCount)) : 0;
+
+    setUnistrutContainments((current) => {
+      if (normalizedCount === current.length) {
+        return current;
+      }
+
+      if (normalizedCount < current.length) {
+        return current.slice(0, normalizedCount);
+      }
+
+      const nextRows = [...current];
+      while (nextRows.length < normalizedCount) {
+        nextRows.push(buildUnistrutContainmentRow());
+      }
+
+      return nextRows;
+    });
+  }
+
+  function addUnistrutContainmentRow() {
+    setUnistrutContainments((current) => [...current, buildUnistrutContainmentRow()]);
+  }
+
+  function removeUnistrutContainmentRow(id: number) {
+    setUnistrutContainments((current) => current.filter((containment) => containment.id !== id));
+  }
+
+  function updateUnistrutContainmentRow(
+    id: number,
+    field: "label" | "width",
+    value: string
+  ) {
+    setUnistrutContainments((current) =>
+      current.map((containment) =>
+        containment.id === id ? { ...containment, [field]: value } : containment
+      )
+    );
+  }
+
+  function clearUnistrutLength() {
+    setUnistrutContainments([]);
+    setUnistrutLeftAllowance(DEFAULT_UNISTRUT_LENGTH_VALUES.leftAllowance);
+    setUnistrutRightAllowance(DEFAULT_UNISTRUT_LENGTH_VALUES.rightAllowance);
+    setUnistrutGap(DEFAULT_UNISTRUT_LENGTH_VALUES.gap);
   }
 
   const containmentRodResult = useMemo(() => {
@@ -432,6 +526,77 @@ export default function App() {
     containmentRodTopOfUnistrut,
     containmentRodUnistrutDepth
   ]);
+
+  const unistrutLengthResult = useMemo(() => {
+    if (!unistrutContainments.length) {
+      return {
+        validationMessage: "Add at least one containment.",
+        totalContainmentWidthValue: "-- mm",
+        totalSideAllowanceValue: "-- mm",
+        totalGapAllowanceValue: "-- mm",
+        finalLengthValue: "-- mm",
+        gapLabel: "0 gaps"
+      };
+    }
+
+    const leftAllowance = Number.parseFloat(unistrutLeftAllowance);
+    const rightAllowance = Number.parseFloat(unistrutRightAllowance);
+    const gap = Number.parseFloat(unistrutGap);
+    const widths = unistrutContainments.map((containment) => Number.parseFloat(containment.width));
+
+    if (
+      (Number.isFinite(leftAllowance) && leftAllowance < 0) ||
+      (Number.isFinite(rightAllowance) && rightAllowance < 0) ||
+      (Number.isFinite(gap) && gap < 0) ||
+      widths.some((width) => Number.isFinite(width) && width < 0)
+    ) {
+      return {
+        validationMessage: "Widths, allowances, and gaps cannot be negative.",
+        totalContainmentWidthValue: "-- mm",
+        totalSideAllowanceValue: "-- mm",
+        totalGapAllowanceValue: "-- mm",
+        finalLengthValue: "-- mm",
+        gapLabel: `${Math.max(unistrutContainments.length - 1, 0)} gaps`
+      };
+    }
+
+    if (!Number.isFinite(leftAllowance) || !Number.isFinite(rightAllowance) || !Number.isFinite(gap)) {
+      return {
+        validationMessage: "Enter non-negative values for the side allowances and gap.",
+        totalContainmentWidthValue: "-- mm",
+        totalSideAllowanceValue: "-- mm",
+        totalGapAllowanceValue: "-- mm",
+        finalLengthValue: "-- mm",
+        gapLabel: `${Math.max(unistrutContainments.length - 1, 0)} gaps`
+      };
+    }
+
+    if (widths.some((width) => !Number.isFinite(width))) {
+      return {
+        validationMessage: "Enter a width for each containment.",
+        totalContainmentWidthValue: "-- mm",
+        totalSideAllowanceValue: "-- mm",
+        totalGapAllowanceValue: "-- mm",
+        finalLengthValue: "-- mm",
+        gapLabel: `${Math.max(unistrutContainments.length - 1, 0)} gaps`
+      };
+    }
+
+    const totalContainmentWidth = widths.reduce((total, width) => total + width, 0);
+    const totalSideAllowance = leftAllowance + rightAllowance;
+    const gapCount = Math.max(unistrutContainments.length - 1, 0);
+    const totalGapAllowance = gapCount * gap;
+    const finalLength = totalContainmentWidth + totalSideAllowance + totalGapAllowance;
+
+    return {
+      validationMessage: null,
+      totalContainmentWidthValue: formatMeasure(totalContainmentWidth, "mm"),
+      totalSideAllowanceValue: formatMeasure(totalSideAllowance, "mm"),
+      totalGapAllowanceValue: formatMeasure(totalGapAllowance, "mm"),
+      finalLengthValue: formatMeasure(finalLength, "mm"),
+      gapLabel: `${gapCount} gap${gapCount === 1 ? "" : "s"}`
+    };
+  }, [unistrutContainments, unistrutGap, unistrutLeftAllowance, unistrutRightAllowance]);
 
   const angleResult = useMemo(() => {
     const drop = Number.parseFloat(angleDrop);
@@ -1086,6 +1251,191 @@ export default function App() {
                       <strong>{containmentRodResult.bottomOfUnistrutDropValue}</strong>
                     </div>
                   </div>
+                </div>
+              </article>
+            ) : null}
+
+            {filteredApplets.some((applet) => applet.id === "tool-unistrut-length") ? (
+              <article id="tool-unistrut-length" className="tool-panel">
+                <div className="tool-heading">
+                  <ToolTitle title="Unistrut length" hint={toolHints.unistrutLength} />
+                  <button type="button" className="ghost-button" onClick={clearUnistrutLength}>
+                    Clear
+                  </button>
+                </div>
+
+                <div className="tool-form">
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Number of containments</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min="0"
+                        step="1"
+                        aria-invalid={!unistrutContainments.length ? true : undefined}
+                        value={unistrutContainments.length}
+                        onChange={(event) =>
+                          setUnistrutContainmentCount(
+                            event.target.value === "" ? 0 : Number.parseFloat(event.target.value)
+                          )
+                        }
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span>Gap between containments (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        aria-invalid={
+                          Number.isFinite(Number.parseFloat(unistrutGap)) &&
+                          Number.parseFloat(unistrutGap) < 0
+                            ? true
+                            : undefined
+                        }
+                        value={unistrutGap}
+                        onChange={(event) => setUnistrutGap(event.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Side allowance left (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        aria-invalid={
+                          Number.isFinite(Number.parseFloat(unistrutLeftAllowance)) &&
+                          Number.parseFloat(unistrutLeftAllowance) < 0
+                            ? true
+                            : undefined
+                        }
+                        value={unistrutLeftAllowance}
+                        onChange={(event) => setUnistrutLeftAllowance(event.target.value)}
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span>Side allowance right (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="1"
+                        aria-invalid={
+                          Number.isFinite(Number.parseFloat(unistrutRightAllowance)) &&
+                          Number.parseFloat(unistrutRightAllowance) < 0
+                            ? true
+                            : undefined
+                        }
+                        value={unistrutRightAllowance}
+                        onChange={(event) => setUnistrutRightAllowance(event.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <p className="field-note">
+                    Side allowances cover the rod or square plate position at each end.
+                  </p>
+
+                  <div className="tool-actions-row">
+                    <button type="button" className="ghost-button" onClick={addUnistrutContainmentRow}>
+                      Add containment
+                    </button>
+                  </div>
+
+                  <div className="containment-rows">
+                    {unistrutContainments.map((containment, index) => (
+                      <div key={containment.id} className="containment-row">
+                        <label className="field">
+                          <span>{`Containment ${index + 1} label / name`}</span>
+                          <input
+                            type="text"
+                            placeholder="Tray"
+                            value={containment.label}
+                            onChange={(event) =>
+                              updateUnistrutContainmentRow(
+                                containment.id,
+                                "label",
+                                event.target.value
+                              )
+                            }
+                          />
+                        </label>
+
+                        <label className="field">
+                          <span>Width (mm)</span>
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            min="0"
+                            step="1"
+                            placeholder="0"
+                            aria-invalid={
+                              Number.isFinite(Number.parseFloat(containment.width)) &&
+                              Number.parseFloat(containment.width) < 0
+                                ? true
+                                : undefined
+                            }
+                            value={containment.width}
+                            onChange={(event) =>
+                              updateUnistrutContainmentRow(
+                                containment.id,
+                                "width",
+                                event.target.value
+                              )
+                            }
+                          />
+                        </label>
+
+                        <button
+                          type="button"
+                          className="ghost-button containment-remove"
+                          onClick={() => removeUnistrutContainmentRow(containment.id)}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {unistrutLengthResult.validationMessage ? (
+                    <p className="field-error" role="alert">
+                      {unistrutLengthResult.validationMessage}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="tool-output">
+                  <div className="result-main">
+                    <p className="result-label">Final Unistrut length</p>
+                    <p className="result-value">{unistrutLengthResult.finalLengthValue}</p>
+                  </div>
+
+                  <div className="mini-metrics stacked">
+                    <div>
+                      <span>Total containment width</span>
+                      <strong>{unistrutLengthResult.totalContainmentWidthValue}</strong>
+                    </div>
+                    <div>
+                      <span>Total side allowance</span>
+                      <strong>{unistrutLengthResult.totalSideAllowanceValue}</strong>
+                    </div>
+                    <div>
+                      <span>{`Total gap allowance (${unistrutLengthResult.gapLabel})`}</span>
+                      <strong>{unistrutLengthResult.totalGapAllowanceValue}</strong>
+                    </div>
+                  </div>
+
+                  <p className="formula-note">
+                    Unistrut length = Σ(widths) + left allowance + right allowance + ((n - 1) × gap)
+                  </p>
                 </div>
               </article>
             ) : null}

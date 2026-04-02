@@ -617,6 +617,37 @@ input[aria-invalid="true"] {
   line-height: 1.4;
 }
 
+.tool-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.containment-rows {
+  display: grid;
+  gap: 10px;
+}
+
+.containment-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.containment-remove {
+  min-height: 42px;
+  padding-inline: 14px;
+  white-space: nowrap;
+}
+
+.formula-note {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
 .sheet-card {
   display: grid;
   gap: 12px;
@@ -723,6 +754,10 @@ input[aria-invalid="true"] {
   .sheet-grid,
   .field-row,
   .mini-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .containment-row {
     grid-template-columns: 1fr;
   }
 
@@ -847,6 +882,11 @@ input[aria-invalid="true"] {
   .field-row,
   .mini-metrics {
     gap: 12px;
+  }
+
+  .tool-actions-row .ghost-button,
+  .containment-remove {
+    width: 100%;
   }
 
   .tool-grid::before,
