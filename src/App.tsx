@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type PageId = "home" | "cheatsheet";
-type OhmsTarget = "voltage" | "current" | "resistance";
 type PhaseType = "single" | "three";
 type PowerTarget = "power" | "current" | "voltage";
 type BreakerInputMode = "current" | "power";
@@ -153,12 +152,6 @@ const applets: Applet[] = [
     keywords: "angle drop tray bracket piece length offset trig 45 degree bend top straight bottom straight allowance developed length"
   },
   {
-    id: "tool-ohms",
-    title: "Ohm's law",
-    subtitle: "Voltage current resistance",
-    keywords: "ohms law voltage current resistance volts amps ohms"
-  },
-  {
     id: "tool-power",
     title: "kW / A / V",
     subtitle: "Power current voltage",
@@ -189,35 +182,6 @@ const applets: Applet[] = [
     keywords: "joist notch chase wall thickness building work structure"
   }
 ];
-
-const ohmsConfig: Record<
-  OhmsTarget,
-  {
-    label: string;
-    unit: string;
-    inputLabels: [string, string];
-    compute: (a: number, b: number) => number;
-  }
-> = {
-  voltage: {
-    label: "Voltage",
-    unit: "V",
-    inputLabels: ["Current (A)", "Resistance (ohm)"],
-    compute: (current, resistance) => current * resistance
-  },
-  current: {
-    label: "Current",
-    unit: "A",
-    inputLabels: ["Voltage (V)", "Resistance (ohm)"],
-    compute: (voltage, resistance) => voltage / resistance
-  },
-  resistance: {
-    label: "Resistance",
-    unit: "ohm",
-    inputLabels: ["Voltage (V)", "Current (A)"],
-    compute: (voltage, current) => voltage / current
-  }
-};
 
 const powerConfig: Record<
   PowerTarget,
@@ -250,7 +214,6 @@ const toolHints = {
   unistrutLength:
     "Length = total containment widths + left allowance + right allowance + ((containments - 1) x gap). Side allowances cover the rod or square plate position at each end.",
   angle: "Angled length = drop / sin(theta). Advanced: total = top + angled + bottom + allowance.",
-  ohms: "V = I x R. I = V / R. R = V / I.",
   power: "Single-phase: P = V x I x PF. Three-phase: P = sqrt(3) x V x I x PF.",
   vdrop: "Single-phase: Vd = 2 x I x L x rho / A. Three-phase: Vd = sqrt(3) x I x L x rho / A.",
   breaker: "Rounds design current up to the next standard breaker size.",
@@ -357,10 +320,6 @@ export default function App() {
   const [angleUnit, setAngleUnit] = useState("cm");
   const [angleAdvanced, setAngleAdvanced] = useState(false);
 
-  const [ohmsTarget, setOhmsTarget] = useState<OhmsTarget>("voltage");
-  const [ohmsInputA, setOhmsInputA] = useState("2");
-  const [ohmsInputB, setOhmsInputB] = useState("10");
-
   const [powerTarget, setPowerTarget] = useState<PowerTarget>("current");
   const [powerPhase, setPowerPhase] = useState<PhaseType>("single");
   const [powerValueA, setPowerValueA] = useState("1");
@@ -388,6 +347,9 @@ export default function App() {
   const [structureWall, setStructureWall] = useState("100");
   const [structureJoist, setStructureJoist] = useState("200");
 
+  const [activeToolIndex, setActiveToolIndex] = useState(0);
+
+  const toolGridRef = useRef<HTMLDivElement | null>(null);
   const paletteInputRef = useRef<HTMLInputElement | null>(null);
   const nextUnistrutContainmentIdRef = useRef(
     DEFAULT_UNISTRUT_LENGTH_VALUES.containments.length + 1
@@ -658,33 +620,6 @@ export default function App() {
       totalLengthValue: formatMeasure(totalLength, angleUnit)
     };
   }, [angleAdvanced, angleAllowance, angleBottomStraight, angleDrop, angleTopStraight, angleUnit, angleValue]);
-
-  const ohmsResult = useMemo(() => {
-    const config = ohmsConfig[ohmsTarget];
-    const valueA = Number.parseFloat(ohmsInputA);
-    const valueB = Number.parseFloat(ohmsInputB);
-
-    if (!Number.isFinite(valueA) || !Number.isFinite(valueB) || valueA <= 0 || valueB <= 0) {
-      return {
-        ...config,
-        resultValue: `-- ${config.unit}`
-      };
-    }
-
-    if (Math.abs(valueB) < EPSILON && (ohmsTarget === "current" || ohmsTarget === "resistance")) {
-      return {
-        ...config,
-        resultValue: `-- ${config.unit}`
-      };
-    }
-
-    const result = config.compute(valueA, valueB);
-
-    return {
-      ...config,
-      resultValue: `${formatNumber(result)} ${config.unit}`
-    };
-  }, [ohmsInputA, ohmsInputB, ohmsTarget]);
 
   const powerResult = useMemo(() => {
     const valueA = Number.parseFloat(powerValueA);
@@ -1040,6 +975,29 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const grid = toolGridRef.current;
+    if (!grid) return;
+
+    const panels = grid.querySelectorAll<HTMLElement>(".tool-panel");
+    if (!panels.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            const index = Array.from(panels).indexOf(entry.target as HTMLElement);
+            if (index >= 0) setActiveToolIndex(index);
+          }
+        }
+      },
+      { root: grid, threshold: 0.5 }
+    );
+
+    for (const panel of panels) observer.observe(panel);
+    return () => observer.disconnect();
+  }, [filteredApplets]);
+
   function handlePaletteKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (!paletteItems.length) {
       return;
@@ -1162,7 +1120,7 @@ export default function App() {
 
       <main className="workspace">
         <section className={`page page-home ${page === "home" ? "is-active" : ""}`}>
-          <div className="tool-grid">
+          <div className="tool-grid" ref={toolGridRef}>
             {filteredApplets.some((applet) => applet.id === "tool-containment-rod") ? (
               <article id="tool-containment-rod" className="tool-panel">
                 <div className="tool-heading">
@@ -1566,61 +1524,6 @@ export default function App() {
                       </div>
                     </div>
                   ) : null}
-                </div>
-              </article>
-            ) : null}
-
-            {filteredApplets.some((applet) => applet.id === "tool-ohms") ? (
-              <article id="tool-ohms" className="tool-panel">
-                <div className="tool-heading">
-                  <ToolTitle title="Ohm's law" hint={toolHints.ohms} />
-                  <span className="tool-meta">V / I / R</span>
-                </div>
-
-                <div className="tool-form">
-                  <label className="field">
-                    <span>Solve</span>
-                    <select
-                      value={ohmsTarget}
-                      onChange={(event) => setOhmsTarget(event.target.value as OhmsTarget)}
-                    >
-                      <option value="voltage">Voltage (V)</option>
-                      <option value="current">Current (A)</option>
-                      <option value="resistance">Resistance (ohm)</option>
-                    </select>
-                  </label>
-
-                  <div className="field-row">
-                    <label className="field">
-                      <span>{ohmsResult.inputLabels[0]}</span>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        step="0.01"
-                        value={ohmsInputA}
-                        onChange={(event) => setOhmsInputA(event.target.value)}
-                      />
-                    </label>
-                    <label className="field">
-                      <span>{ohmsResult.inputLabels[1]}</span>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        step="0.01"
-                        value={ohmsInputB}
-                        onChange={(event) => setOhmsInputB(event.target.value)}
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div className="tool-output">
-                  <div className="result-main">
-                    <p className="result-label">{ohmsResult.label}</p>
-                    <p className="result-value">{ohmsResult.resultValue}</p>
-                  </div>
                 </div>
               </article>
             ) : null}
@@ -2198,6 +2101,13 @@ export default function App() {
               ) : null}
             </div>
           </div>
+        </div>
+      ) : null}
+
+      {page === "home" && filteredApplets.length > 0 ? (
+        <div className="mobile-indicator">
+          <span className="mobile-indicator-title">{filteredApplets[activeToolIndex]?.title ?? ""}</span>
+          <span className="mobile-indicator-count">{Math.min(activeToolIndex + 1, filteredApplets.length)} / {filteredApplets.length}</span>
         </div>
       ) : null}
     </div>
