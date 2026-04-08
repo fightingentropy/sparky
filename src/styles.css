@@ -607,30 +607,160 @@ input[aria-invalid="true"] {
   line-height: 1.4;
 }
 
-/* ── Containment rows ───────────────────── */
+/* ── Containment cards ──────────────────── */
+
+.containment-rows {
+  display: grid;
+  gap: 8px;
+}
+
+.containment-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  transition: border-color 140ms ease;
+}
+
+.containment-card:hover {
+  border-color: var(--border-strong);
+}
+
+.containment-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.containment-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.containment-field {
+  display: grid;
+  gap: 3px;
+}
+
+.containment-field span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.containment-field select {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.containment-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 140ms ease;
+  flex-shrink: 0;
+}
+
+.containment-remove:hover {
+  background: rgba(239, 83, 80, 0.12);
+  color: var(--danger);
+}
+
+.add-containment-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--muted-strong);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.add-containment-btn:hover {
+  border-color: var(--accent-muted);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+/* ── Breakdown row ─────────────────────── */
+
+.breakdown-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.breakdown-item {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  background: var(--surface-alt);
+}
+
+.breakdown-item span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.breakdown-item strong {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.breakdown-total {
+  background: var(--surface-soft);
+}
+
+.result-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
 
 .tool-actions-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-}
-
-.containment-rows {
-  display: grid;
-  gap: 10px;
-}
-
-.containment-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr) auto;
-  gap: 10px;
-  align-items: end;
-}
-
-.containment-remove {
-  min-height: 42px;
-  padding-inline: 14px;
-  white-space: nowrap;
 }
 
 /* ── Cheatsheet ─────────────────────────── */
@@ -807,8 +937,16 @@ input[aria-invalid="true"] {
     grid-template-columns: 1fr;
   }
 
-  .containment-row {
-    grid-template-columns: 1fr;
+  .containment-card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .containment-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .breakdown-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .site-shell {
@@ -869,7 +1007,7 @@ input[aria-invalid="true"] {
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior-y: contain;
-    scroll-snap-type: y mandatory;
+    scroll-snap-type: y proximity;
     gap: 0;
     padding-bottom: 52px;
   }
@@ -877,7 +1015,7 @@ input[aria-invalid="true"] {
   .page-home.is-active .tool-panel,
   .page-home.is-active .empty-state {
     scroll-snap-align: start;
-    scroll-snap-stop: always;
+    scroll-snap-stop: normal;
   }
 
   .page-home.is-active .tool-panel {
@@ -1026,8 +1164,7 @@ input[aria-invalid="true"] {
     gap: 10px;
   }
 
-  .tool-actions-row .ghost-button,
-  .containment-remove {
+  .tool-actions-row .ghost-button {
     width: 100%;
   }
 

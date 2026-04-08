@@ -43,6 +43,11 @@ const DEFAULT_CONTAINMENT_ROD_VALUES = {
   buffer: "100",
   unistrutDepth: "40"
 } as const;
+const CONTAINMENT_OPTIONS: { label: string; widths: number[] }[] = [
+  { label: "Tray", widths: [50, 75, 100, 150, 225, 300, 450, 600, 750, 900] },
+  { label: "Basket", widths: [50, 100, 125, 150, 200, 300, 400, 500, 600] },
+  { label: "Trunking", widths: [50, 75, 100, 150, 200, 300] }
+];
 const DEFAULT_UNISTRUT_LENGTH_VALUES = {
   containments: [
     { id: 1, label: "Tray", width: "225" },
@@ -379,8 +384,8 @@ export default function App() {
   function buildUnistrutContainmentRow(): UnistrutContainmentRow {
     return {
       id: nextUnistrutContainmentIdRef.current++,
-      label: "",
-      width: ""
+      label: CONTAINMENT_OPTIONS[0].label,
+      width: String(CONTAINMENT_OPTIONS[0].widths[0])
     };
   }
 
@@ -419,9 +424,20 @@ export default function App() {
     value: string
   ) {
     setUnistrutContainments((current) =>
-      current.map((containment) =>
-        containment.id === id ? { ...containment, [field]: value } : containment
-      )
+      current.map((containment) => {
+        if (containment.id !== id) return containment;
+        if (field === "label") {
+          const option = CONTAINMENT_OPTIONS.find((o) => o.label === value);
+          const currentWidth = Number.parseFloat(containment.width);
+          const keepWidth = option && option.widths.includes(currentWidth);
+          return {
+            ...containment,
+            label: value,
+            width: keepWidth ? containment.width : option ? String(option.widths[0]) : ""
+          };
+        }
+        return { ...containment, [field]: value };
+      })
     );
   }
 
@@ -496,6 +512,7 @@ export default function App() {
         totalContainmentWidthValue: "-- mm",
         totalSideAllowanceValue: "-- mm",
         totalGapAllowanceValue: "-- mm",
+        exactLengthValue: "-- mm",
         finalLengthValue: "-- mm",
         gapLabel: "0 gaps"
       };
@@ -517,6 +534,7 @@ export default function App() {
         totalContainmentWidthValue: "-- mm",
         totalSideAllowanceValue: "-- mm",
         totalGapAllowanceValue: "-- mm",
+        exactLengthValue: "-- mm",
         finalLengthValue: "-- mm",
         gapLabel: `${Math.max(unistrutContainments.length - 1, 0)} gaps`
       };
@@ -528,6 +546,7 @@ export default function App() {
         totalContainmentWidthValue: "-- mm",
         totalSideAllowanceValue: "-- mm",
         totalGapAllowanceValue: "-- mm",
+        exactLengthValue: "-- mm",
         finalLengthValue: "-- mm",
         gapLabel: `${Math.max(unistrutContainments.length - 1, 0)} gaps`
       };
@@ -539,6 +558,7 @@ export default function App() {
         totalContainmentWidthValue: "-- mm",
         totalSideAllowanceValue: "-- mm",
         totalGapAllowanceValue: "-- mm",
+        exactLengthValue: "-- mm",
         finalLengthValue: "-- mm",
         gapLabel: `${Math.max(unistrutContainments.length - 1, 0)} gaps`
       };
@@ -548,13 +568,15 @@ export default function App() {
     const totalSideAllowance = leftAllowance + rightAllowance;
     const gapCount = Math.max(unistrutContainments.length - 1, 0);
     const totalGapAllowance = gapCount * gap;
-    const finalLength = totalContainmentWidth + totalSideAllowance + totalGapAllowance;
+    const exactLength = totalContainmentWidth + totalSideAllowance + totalGapAllowance;
+    const finalLength = Math.ceil(exactLength / 50) * 50;
 
     return {
       validationMessage: null,
       totalContainmentWidthValue: formatMeasure(totalContainmentWidth, "mm"),
       totalSideAllowanceValue: formatMeasure(totalSideAllowance, "mm"),
       totalGapAllowanceValue: formatMeasure(totalGapAllowance, "mm"),
+      exactLengthValue: formatMeasure(exactLength, "mm"),
       finalLengthValue: formatMeasure(finalLength, "mm"),
       gapLabel: `${gapCount} gap${gapCount === 1 ? "" : "s"}`
     };
@@ -1302,66 +1324,82 @@ export default function App() {
                     Side allowances cover the rod or square plate position at each end.
                   </p>
 
-                  <div className="tool-actions-row">
-                    <button type="button" className="ghost-button" onClick={addUnistrutContainmentRow}>
-                      Add containment
-                    </button>
-                  </div>
-
                   <div className="containment-rows">
-                    {unistrutContainments.map((containment, index) => (
-                      <div key={containment.id} className="containment-row">
-                        <label className="field">
-                          <span>{`Containment ${index + 1} label / name`}</span>
-                          <input
-                            type="text"
-                            placeholder="Tray"
-                            value={containment.label}
-                            onChange={(event) =>
-                              updateUnistrutContainmentRow(
-                                containment.id,
-                                "label",
-                                event.target.value
-                              )
-                            }
-                          />
-                        </label>
+                    {unistrutContainments.map((containment, index) => {
+                      const selectedOption = CONTAINMENT_OPTIONS.find(
+                        (o) => o.label === containment.label
+                      );
+                      return (
+                        <div key={containment.id} className="containment-card">
+                          <span className="containment-index">{index + 1}</span>
 
-                        <label className="field">
-                          <span>Width (mm)</span>
-                          <input
-                            type="number"
-                            inputMode="decimal"
-                            min="0"
-                            step="1"
-                            placeholder="0"
-                            aria-invalid={
-                              Number.isFinite(Number.parseFloat(containment.width)) &&
-                              Number.parseFloat(containment.width) < 0
-                                ? true
-                                : undefined
-                            }
-                            value={containment.width}
-                            onChange={(event) =>
-                              updateUnistrutContainmentRow(
-                                containment.id,
-                                "width",
-                                event.target.value
-                              )
-                            }
-                          />
-                        </label>
+                          <div className="containment-fields">
+                            <label className="containment-field">
+                              <span>Type</span>
+                              <select
+                                value={containment.label}
+                                onChange={(event) =>
+                                  updateUnistrutContainmentRow(
+                                    containment.id,
+                                    "label",
+                                    event.target.value
+                                  )
+                                }
+                              >
+                                <option value="" disabled>
+                                  Select
+                                </option>
+                                {CONTAINMENT_OPTIONS.map((option) => (
+                                  <option key={option.label} value={option.label}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
 
-                        <button
-                          type="button"
-                          className="ghost-button containment-remove"
-                          onClick={() => removeUnistrutContainmentRow(containment.id)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
+                            <label className="containment-field">
+                              <span>Width</span>
+                              <select
+                                value={containment.width}
+                                disabled={!selectedOption}
+                                onChange={(event) =>
+                                  updateUnistrutContainmentRow(
+                                    containment.id,
+                                    "width",
+                                    event.target.value
+                                  )
+                                }
+                              >
+                                {selectedOption ? (
+                                  selectedOption.widths.map((w) => (
+                                    <option key={w} value={String(w)}>
+                                      {w} mm
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option value="">--</option>
+                                )}
+                              </select>
+                            </label>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="containment-remove"
+                            aria-label={`Remove containment ${index + 1}`}
+                            onClick={() => removeUnistrutContainmentRow(containment.id)}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
+
+                  <button type="button" className="add-containment-btn" onClick={addUnistrutContainmentRow}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    Add containment
+                  </button>
 
                   {unistrutLengthResult.validationMessage ? (
                     <p className="field-error" role="alert">
@@ -1374,26 +1412,27 @@ export default function App() {
                   <div className="result-main">
                     <p className="result-label">Final Unistrut length</p>
                     <p className="result-value">{unistrutLengthResult.finalLengthValue}</p>
+                    <p className="result-sub">Rounded up to nearest 50 mm (hole spacing)</p>
                   </div>
 
-                  <div className="mini-metrics stacked">
-                    <div>
-                      <span>Total containment width</span>
+                  <div className="breakdown-row">
+                    <div className="breakdown-item">
+                      <span>Containment</span>
                       <strong>{unistrutLengthResult.totalContainmentWidthValue}</strong>
                     </div>
-                    <div>
-                      <span>Total side allowance</span>
+                    <div className="breakdown-item">
+                      <span>Side allowance</span>
                       <strong>{unistrutLengthResult.totalSideAllowanceValue}</strong>
                     </div>
-                    <div>
-                      <span>{`Total gap allowance (${unistrutLengthResult.gapLabel})`}</span>
+                    <div className="breakdown-item">
+                      <span>{`Gaps (${unistrutLengthResult.gapLabel})`}</span>
                       <strong>{unistrutLengthResult.totalGapAllowanceValue}</strong>
                     </div>
+                    <div className="breakdown-item breakdown-total">
+                      <span>Exact</span>
+                      <strong>{unistrutLengthResult.exactLengthValue}</strong>
+                    </div>
                   </div>
-
-                  <p className="formula-note">
-                    Unistrut length = Σ(widths) + left allowance + right allowance + ((n - 1) × gap)
-                  </p>
                 </div>
               </article>
             ) : null}
