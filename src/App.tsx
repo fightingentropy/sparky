@@ -5,11 +5,19 @@ type PhaseType = "single" | "three";
 type PowerTarget = "power" | "current" | "voltage";
 type BreakerInputMode = "current" | "power";
 
+type LegendItem = {
+  label: string;
+  swatch?: string;
+  swatchStyle?: "solid" | "stripe" | "ladder" | "x" | "outline" | "box";
+  swatchExtra?: string;
+};
+
 type CheatSheetSection = {
   id: string;
   title: string;
   summary: string;
   items: string[];
+  legend?: LegendItem[];
 };
 
 type Applet = {
@@ -132,6 +140,63 @@ const cheatSheetSections: CheatSheetSection[] = [
       "Horizontal offset = angled piece length x cos(angle from horizontal).",
       "Total developed length = top straight + angled piece + bottom straight + extra allowance.",
       "These relationships assume the angle is measured from the horizontal."
+    ]
+  },
+  {
+    id: "cheat-drawing-legend",
+    title: "Drawing legend",
+    summary: "Standard colour codes and symbols used on electrical services coordination drawings.",
+    items: [],
+    legend: [
+      { label: "SP&N Distribution Board", swatch: "#3366cc", swatchStyle: "x" },
+      { label: "TP&N Distribution Board", swatch: "#7733bb", swatchStyle: "x" },
+      { label: "Main Control Panel", swatch: "#5522aa", swatchStyle: "x" },
+      { label: "Telecommunications Basket", swatch: "#cc2299", swatchStyle: "solid" },
+      { label: "Data, BMS & Security Basket", swatch: "#8833aa", swatchStyle: "solid" },
+      { label: "Fire Alarm Basket", swatch: "#cc2222", swatchStyle: "solid" },
+      { label: "HV Ladder", swatch: "#663322", swatchStyle: "ladder" },
+      { label: "LV Ladder", swatch: "#888822", swatchStyle: "ladder" },
+      { label: "LV Tray", swatch: "linear-gradient(90deg, #22aa22 0%, #22aa22 30%, #cccc00 30%, #cccc00 70%, #22aa22 70%)", swatchStyle: "stripe" },
+      { label: "Lighting & Small Power Trunking", swatch: "linear-gradient(90deg, #cc2299 50%, #aa22cc 50%)", swatchStyle: "stripe" },
+      { label: "PV Tray", swatch: "repeating-linear-gradient(90deg, #88bbdd 0px, #88bbdd 6px, transparent 6px, transparent 10px)", swatchStyle: "stripe" },
+      { label: "Busbar", swatch: "linear-gradient(90deg, #aaaa22 0%, #aaaa22 40%, #88aa22 40%, #88aa22 60%, #aaaa22 60%)", swatchStyle: "stripe" },
+      { label: "Diesel Fuel Dump Pipework", swatch: "#886622", swatchStyle: "solid" },
+      { label: "Diesel Fuel Fill Pipework", swatch: "#662222", swatchStyle: "solid" },
+      { label: "Secondary Dedicated Life Safety Tray", swatch: "linear-gradient(90deg, #cc2299 0%, #cc2299 20%, #22aa22 20%, #22aa22 40%, #cccc00 40%, #cccc00 60%, #3366cc 60%, #3366cc 80%, #cc2222 80%)", swatchStyle: "stripe" },
+      { label: "ATS", swatch: "#f8e0e8", swatchStyle: "box", swatchExtra: "#cc3366" },
+      { label: "2 Hr Fire Rated Enclosure", swatch: "#cc2222", swatchStyle: "outline" }
+    ]
+  },
+  {
+    id: "cheat-drawing-abbreviations",
+    title: "Drawing abbreviations",
+    summary: "Common abbreviations found on electrical coordination drawings.",
+    items: [
+      "FA — From Above",
+      "FB — From Below",
+      "HL — High Level",
+      "TA — To Above",
+      "FL — Floor Level (used with dimensions, e.g. 9000 mm FL)"
+    ]
+  },
+  {
+    id: "cheat-sketch-colours",
+    title: "Sketch colour identification",
+    summary: "How to identify services by colour on site coordination sketches.",
+    items: [],
+    legend: [
+      { label: "Dark blue — SP&N Distribution Board routing", swatch: "#2244aa", swatchStyle: "solid" },
+      { label: "Red — Fire Alarm Basket routing", swatch: "#cc1111", swatchStyle: "solid" },
+      { label: "Purple / violet — TP&N or Data, BMS & Security", swatch: "#7733bb", swatchStyle: "solid" },
+      { label: "Magenta / pink — Telecom or Lighting & Small Power", swatch: "#cc2299", swatchStyle: "solid" },
+      { label: "Green — LV Tray (green-yellow-green pattern)", swatch: "#22aa22", swatchStyle: "solid" },
+      { label: "Yellow / olive — LV Tray or Busbar route", swatch: "#bbbb22", swatchStyle: "solid" },
+      { label: "Dark maroon / brown — Diesel Fuel Fill Pipework", swatch: "#662222", swatchStyle: "solid" },
+      { label: "Ladder pattern (brown) — HV Ladder", swatch: "#886644", swatchStyle: "ladder" },
+      { label: "Ladder pattern (olive) — LV Ladder", swatch: "#999944", swatchStyle: "ladder" },
+      { label: "Multicoloured stripe — Life Safety Tray", swatch: "linear-gradient(90deg, #cc2299 0%, #cc2299 20%, #22aa22 20%, #22aa22 40%, #cccc00 40%, #cccc00 60%, #3366cc 60%, #3366cc 80%, #cc2222 80%)", swatchStyle: "stripe" },
+      { label: "Blue square with X — SP&N Distribution Board", swatch: "#3366cc", swatchStyle: "x" },
+      { label: "Red outlined rectangle — Fire Rated Enclosure", swatch: "#cc2222", swatchStyle: "outline" }
     ]
   }
 ];
@@ -856,7 +921,8 @@ export default function App() {
     () =>
       cheatSheetSections
         .map((section) => {
-          const sectionText = `${section.title} ${section.summary} ${section.items.join(" ")}`;
+          const legendLabels = section.legend ? section.legend.map((l) => l.label) : [];
+          const allText = [section.title, section.summary, ...section.items, ...legendLabels].join(" ");
           if (!searchQuery) {
             return section;
           }
@@ -864,21 +930,26 @@ export default function App() {
           const matchingItems = section.items.filter((item) =>
             matchesQuery(`${section.title} ${item}`, searchQuery)
           );
+          const matchingLegend = section.legend?.filter((l) =>
+            matchesQuery(`${section.title} ${l.label}`, searchQuery)
+          );
 
-          if (matchesQuery(sectionText, searchQuery)) {
+          if (matchesQuery(allText, searchQuery)) {
             return {
               ...section,
-              items: matchingItems.length ? matchingItems : section.items
+              items: matchingItems.length ? matchingItems : section.items,
+              legend: matchingLegend?.length ? matchingLegend : section.legend
             };
           }
 
-          if (!matchingItems.length) {
+          if (!matchingItems.length && !matchingLegend?.length) {
             return null;
           }
 
           return {
             ...section,
-            items: matchingItems
+            items: matchingItems,
+            legend: matchingLegend?.length ? matchingLegend : undefined
           };
         })
         .filter((section): section is CheatSheetSection => section !== null),
@@ -920,7 +991,7 @@ export default function App() {
           title: section.title,
           subtitle: section.summary,
           tag: "Sheet",
-          keywords: `${section.title} ${section.summary} ${section.items.join(" ")}`,
+          keywords: `${section.title} ${section.summary} ${section.items.join(" ")} ${(section.legend || []).map((l) => l.label).join(" ")}`,
           action: () => navigateTo("cheatsheet", section.id)
         },
         ...section.items.map((item) => ({
@@ -1053,7 +1124,8 @@ export default function App() {
   }
 
   async function copyNoteSection(section: CheatSheetSection) {
-    const text = [section.title, section.summary, ...section.items].join("\n");
+    const legendLabels = section.legend ? section.legend.map((l) => l.label) : [];
+    const text = [section.title, section.summary, ...section.items, ...legendLabels].join("\n");
 
     try {
       await navigator.clipboard.writeText(text);
@@ -2021,11 +2093,48 @@ export default function App() {
                   </button>
                 </div>
                 <p className="sheet-summary">{section.summary}</p>
-                <ul className="sheet-list">
-                  {section.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+                {section.items.length > 0 ? (
+                  <ul className="sheet-list">
+                    {section.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {section.legend ? (
+                  <div className="legend-grid">
+                    {section.legend.map((entry) => (
+                      <div key={entry.label} className="legend-row">
+                        <span
+                          className={`legend-swatch legend-swatch--${entry.swatchStyle || "solid"}`}
+                          style={
+                            entry.swatchStyle === "stripe"
+                              ? { background: entry.swatch }
+                              : entry.swatchStyle === "ladder"
+                                ? {
+                                    background: `repeating-linear-gradient(90deg, ${entry.swatch} 0px, ${entry.swatch} 5px, transparent 5px, transparent 8px)`,
+                                    borderTop: `2.5px solid ${entry.swatch}`,
+                                    borderBottom: `2.5px solid ${entry.swatch}`
+                                  }
+                                : entry.swatchStyle === "x"
+                                  ? { background: entry.swatch }
+                                  : entry.swatchStyle === "outline"
+                                    ? { background: "transparent", border: `2.5px solid ${entry.swatch}` }
+                                    : entry.swatchStyle === "box"
+                                      ? { background: entry.swatch, color: entry.swatchExtra }
+                                      : { background: entry.swatch }
+                          }
+                        >
+                          {entry.swatchStyle === "x" ? (
+                            <svg viewBox="0 0 56 22" className="legend-x"><line x1="4" y1="2" x2="52" y2="20" stroke="#fff" strokeWidth="2"/><line x1="4" y1="20" x2="52" y2="2" stroke="#fff" strokeWidth="2"/></svg>
+                          ) : entry.swatchStyle === "box" ? (
+                            <span className="legend-box-text">ATS</span>
+                          ) : null}
+                        </span>
+                        <span className="legend-label">{entry.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </article>
             ))}
           </div>
