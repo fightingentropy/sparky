@@ -439,6 +439,16 @@ export default function App() {
     }
   }
 
+  function scrollToTool(index: number) {
+    const grid = toolGridRef.current;
+    if (!grid) return;
+    const panels = grid.querySelectorAll<HTMLElement>(".tool-panel");
+    const target = panels[index];
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    }
+  }
+
   function clearContainmentRod() {
     setContainmentRodOverallHeight("");
     setContainmentRodTopOfUnistrut("");
@@ -2254,8 +2264,35 @@ export default function App() {
 
       {page === "home" && filteredApplets.length > 0 ? (
         <div className="mobile-indicator">
-          <span className="mobile-indicator-title">{filteredApplets[activeToolIndex]?.title ?? ""}</span>
-          <span className="mobile-indicator-count">{Math.min(activeToolIndex + 1, filteredApplets.length)} / {filteredApplets.length}</span>
+          <button
+            type="button"
+            className="mobile-nav-btn"
+            aria-label="Previous tool"
+            disabled={activeToolIndex <= 0}
+            onClick={() => scrollToTool(activeToolIndex - 1)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div className="mobile-dots">
+            {filteredApplets.map((_, i) => (
+              <button
+                key={filteredApplets[i].id}
+                type="button"
+                className={`mobile-dot${i === activeToolIndex ? " is-active" : ""}`}
+                aria-label={filteredApplets[i].title}
+                onClick={() => scrollToTool(i)}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            className="mobile-nav-btn"
+            aria-label="Next tool"
+            disabled={activeToolIndex >= filteredApplets.length - 1}
+            onClick={() => scrollToTool(activeToolIndex + 1)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
         </div>
       ) : null}
     </div>
