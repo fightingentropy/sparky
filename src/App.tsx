@@ -374,6 +374,9 @@ export default function App() {
   const [unistrutContainments, setUnistrutContainments] = useState<UnistrutContainmentRow[]>(() =>
     DEFAULT_UNISTRUT_LENGTH_VALUES.containments.map((containment) => ({ ...containment }))
   );
+  const [unistrutCountInput, setUnistrutCountInput] = useState(
+    String(DEFAULT_UNISTRUT_LENGTH_VALUES.containments.length)
+  );
   const [unistrutLeftAllowance, setUnistrutLeftAllowance] = useState(
     DEFAULT_UNISTRUT_LENGTH_VALUES.leftAllowance
   );
@@ -486,11 +489,19 @@ export default function App() {
   }
 
   function addUnistrutContainmentRow() {
-    setUnistrutContainments((current) => [...current, buildUnistrutContainmentRow()]);
+    setUnistrutContainments((current) => {
+      const next = [...current, buildUnistrutContainmentRow()];
+      setUnistrutCountInput(String(next.length));
+      return next;
+    });
   }
 
   function removeUnistrutContainmentRow(id: number) {
-    setUnistrutContainments((current) => current.filter((containment) => containment.id !== id));
+    setUnistrutContainments((current) => {
+      const next = current.filter((containment) => containment.id !== id);
+      setUnistrutCountInput(String(next.length));
+      return next;
+    });
   }
 
   function updateUnistrutContainmentRow(
@@ -518,6 +529,7 @@ export default function App() {
 
   function clearUnistrutLength() {
     setUnistrutContainments([]);
+    setUnistrutCountInput("0");
     setUnistrutLeftAllowance(DEFAULT_UNISTRUT_LENGTH_VALUES.leftAllowance);
     setUnistrutRightAllowance(DEFAULT_UNISTRUT_LENGTH_VALUES.rightAllowance);
     setUnistrutGap(DEFAULT_UNISTRUT_LENGTH_VALUES.gap);
@@ -1336,11 +1348,16 @@ export default function App() {
                         min="0"
                         step="1"
                         aria-invalid={!unistrutContainments.length ? true : undefined}
-                        value={unistrutContainments.length}
-                        onChange={(event) =>
+                        value={unistrutCountInput}
+                        onChange={(event) => {
+                          const raw = event.target.value;
+                          setUnistrutCountInput(raw);
                           setUnistrutContainmentCount(
-                            event.target.value === "" ? 0 : Number.parseFloat(event.target.value)
-                          )
+                            raw === "" ? 0 : Number.parseFloat(raw)
+                          );
+                        }}
+                        onBlur={() =>
+                          setUnistrutCountInput(String(unistrutContainments.length))
                         }
                       />
                     </label>
