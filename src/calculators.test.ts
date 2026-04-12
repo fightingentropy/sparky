@@ -1,0 +1,263 @@
+import { describe, it, expect } from "vitest";
+import {
+  formatNumber,
+  formatMeasure,
+  calcContainmentRod,
+  calcUnistrutLength,
+  calcAngle,
+  calcPower,
+  calcVoltageDrop,
+  calcBreaker,
+  calcConduit,
+  calcStructure,
+} from "./calculators";
+
+// ── Helpers ──
+
+describe("formatNumber", () => {
+  it("returns -- for NaN", () => {
+    expect(formatNumber(NaN)).toBe("--");
+  });
+
+  it("returns -- for Infinity", () => {
+    expect(formatNumber(Infinity)).toBe("--");
+  });
+
+  it("formats small numbers with 2 decimals", () => {
+    expect(formatNumber(12.345)).toBe("12.35");
+  });
+
+  it("formats large numbers with 1 decimal", () => {
+    expect(formatNumber(365)).toBe("365");
+    expect(formatNumber(100.7)).toBe("100.7");
+  });
+
+  it("strips trailing zeros", () => {
+    expect(formatNumber(10.0)).toBe("10");
+    expect(formatNumber(10.50)).toBe("10.5");
+  });
+});
+
+describe("formatMeasure", () => {
+  it("appends unit", () => {
+    expect(formatMeasure(365, "mm")).toBe("365 mm");
+  });
+});
+
+// ── Containment rod ──
+
+describe("calcContainmentRod", () => {
+  it("calculates rod cut length correctly", () => {
+    const result = calcContainmentRod("3165", "2900", "100", "40");
+    expect(result.validationMessage).toBeNull();
+    expect(result.rodCutLengthValue).toBe("365 mm");
+    expect(result.actualDropValue).toBe("265 mm");
+    expect(result.bottomOfUnistrutDropValue).toBe("305 mm");
+  });
+
+  it("returns validation message when top > overall", () => {
+    const result = calcContainmentRod("2000", "3000", "100", "40");
+    expect(result.validationMessage).toBe(
+      "Height to top of Unistrut cannot be more than overall height."
+    );
+  });
+
+  it("returns placeholders for empty inputs", () => {
+    const result = calcContainmentRod("", "", "", "");
+    expect(result.rodCutLengthValue).toBe("-- mm");
+  });
+
+  it("uses default depth when blank", () => {
+    const result = calcContainmentRod("3165", "2900", "100", "");
+    expect(result.bottomOfUnistrutDropValue).toBe("305 mm");
+  });
+
+  it("rejects negative values", () => {
+    const result = calcContainmentRod("-100", "50", "10", "40");
+    expect(result.rodCutLengthValue).toBe("-- mm");
+  });
+});
+
+// ── Unistrut length ──
+
+describe("calcUnistrutLength", () => {
+  it("calculates correctly with default values", () => {
+    const containments = [
+      { id: 1, label: "Tray", width: "225" },
+      { id: 2, label: "Basket", width: "125" },
+      { id: 3, label: "Trunking", width: "100" },
+    ];
+    const result = calcUnistrutLength(containments, "50", "50", "50");
+    expect(result.validationMessage).toBeNull();
+    expect(result.totalContainmentWidthValue).toBe("450 mm");
+    expect(result.totalSideAllowanceValue).toBe("100 mm");
+    expect(result.totalGapAllowanceValue).toBe("100 mm");
+    expect(result.exactLengthValue).toBe("650 mm");
+    expect(result.finalLengthValue).toBe("650 mm");
+  });
+
+  it("rounds up to nearest 50", () => {
+    const containments = [{ id: 1, label: "Tray", width: "230" }];
+    const result = calcUnistrutLength(containments, "50", "50", "50");
+    expect(result.finalLengthValue).toBe("350 mm");
+    expect(result.exactLengthValue).toBe("330 mm");
+  });
+
+  it("returns validation for empty containments", () => {
+    const result = calcUnistrutLength([], "50", "50", "50");
+    expect(result.validationMessage).toBe("Add at least one containment.");
+  });
+
+  it("rejects negative gaps", () => {
+    const containments = [{ id: 1, label: "Tray", width: "225" }];
+    const result = calcUnistrutLength(containments, "50", "50", "-10");
+    expect(result.validationMessage).toBe(
+      "Widths, allowances, and gaps cannot be negative."
+    );
+  });
+});
+
+// ── Angle drop ──
+
+describe("calcAngle", () => {
+  it("calculates 45-degree angle correctly", () => {
+    const result = calcAngle("10", "45", "0", "0", "0", "cm");
+    expect(result.angledLengthValue).toBe("14.14 cm");
+    expect(result.offsetValue).toBe("10 cm");
+  });
+
+  it("calculates 30-degree angle", () => {
+    const result = calcAngle("10", "30", "0", "0", "0", "mm");
+    expect(result.angledLengthValue).toBe("20 mm");
+  });
+
+  it("includes top/bottom straight and allowance", () => {
+    const result = calcAngle("10", "45", "5", "5", "2", "cm");
+    // total = 5 + 14.14 + 5 + 2 = 26.14
+    expect(result.totalLengthValue).toBe("26.14 cm");
+  });
+
+  it("returns empty for invalid angle", () => {
+    const result = calcAngle("10", "90", "0", "0", "0", "cm");
+    expect(result.angledLengthValue).toBe("--");
+  });
+
+  it("returns empty for zero drop", () => {
+    const result = calcAngle("0", "45", "0", "0", "0", "cm");
+    expect(result.angledLengthValue).toBe("--");
+  });
+});
+
+// ── Power ──
+
+describe("calcPower", () => {
+  it("calculates current from power (single phase)", () => {
+    const result = calcPower("current", "single", "1", "230", "0.95");
+    // I = 1000 / (1 * 230 * 0.95) = 4.575...
+    expect(result.label).toBe("Current");
+    expect(result.resultValue).toBe("4.58 A");
+  });
+
+  it("calculates power (single phase)", () => {
+    const result = calcPower("power", "single", "10", "230", "1");
+    // P = 1 * 10 * 230 * 1 / 1000 = 2.3
+    expect(result.resultValue).toBe("2.3 kW");
+  });
+
+  it("calculates with three-phase", () => {
+    const result = calcPower("current", "three", "10", "400", "0.95");
+    // I = 10000 / (sqrt(3) * 400 * 0.95) = 15.19...
+    expect(result.resultValue).toBe("15.19 A");
+  });
+
+  it("returns placeholder for invalid PF", () => {
+    const result = calcPower("current", "single", "1", "230", "1.5");
+    expect(result.resultValue).toBe("-- A");
+  });
+});
+
+// ── Voltage drop ──
+
+describe("calcVoltageDrop", () => {
+  it("calculates single phase drop", () => {
+    const result = calcVoltageDrop("single", "20", "20", "2.5", "230");
+    // Vd = 2 * 20 * 20 * 0.0175/2.5 = 5.6
+    expect(result.dropValue).toBe("5.6 V");
+  });
+
+  it("calculates drop percentage", () => {
+    const result = calcVoltageDrop("single", "20", "20", "2.5", "230");
+    // % = 5.6/230 * 100 = 2.43
+    expect(result.percentValue).toBe("2.43 %");
+  });
+
+  it("handles three-phase", () => {
+    const result = calcVoltageDrop("three", "20", "20", "2.5", "400");
+    // multiplier = sqrt(3), Vd = sqrt(3)*20*20*0.007 = 4.85
+    expect(result.dropValue).toBe("4.85 V");
+  });
+
+  it("returns placeholder for zero cable size", () => {
+    const result = calcVoltageDrop("single", "20", "20", "0", "230");
+    expect(result.dropValue).toBe("-- V");
+  });
+});
+
+// ── Breaker sizing ──
+
+describe("calcBreaker", () => {
+  it("selects next standard size up", () => {
+    const result = calcBreaker("current", "18", "", "single", "230", "0.95");
+    expect(result.breakerValue).toBe("20 A");
+    expect(result.currentValue).toBe("18 A");
+  });
+
+  it("selects exact match", () => {
+    const result = calcBreaker("current", "32", "", "single", "230", "0.95");
+    expect(result.breakerValue).toBe("32 A");
+  });
+
+  it("calculates from power mode", () => {
+    const result = calcBreaker("power", "", "4", "single", "230", "0.95");
+    // I = 4000 / (1 * 230 * 0.95) = 18.31
+    expect(result.breakerValue).toBe("20 A");
+  });
+
+  it("handles over max breaker size", () => {
+    const result = calcBreaker("current", "150", "", "single", "230", "0.95");
+    expect(result.breakerValue).toBe("100 A");
+    expect(result.rangeValue).toBe("Over 100 A");
+  });
+});
+
+// ── Conduit fill ──
+
+describe("calcConduit", () => {
+  it("calculates fill percentage", () => {
+    const result = calcConduit("20", "6", "3", "40");
+    // conduit area = pi*100 = 314.16, cable area = pi*9 = 28.27, used = 84.82
+    // fill = 84.82/314.16 * 100 = 27%
+    expect(result.fillValue).toBe("27 %");
+  });
+
+  it("returns placeholder for zero diameter", () => {
+    const result = calcConduit("0", "6", "3", "40");
+    expect(result.fillValue).toBe("-- %");
+  });
+});
+
+// ── Structural limits ──
+
+describe("calcStructure", () => {
+  it("calculates wall chase limits", () => {
+    const result = calcStructure("100", "200");
+    expect(result.vertical).toBe("33.33 mm");
+    expect(result.horizontal).toBe("16.67 mm");
+    expect(result.notch).toBe("25 mm");
+  });
+
+  it("returns placeholder for zero wall", () => {
+    const result = calcStructure("0", "200");
+    expect(result.vertical).toBe("-- mm");
+  });
+});
