@@ -1,9 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CONTAINMENT_OPTIONS,
+  DEFAULT_CONTAINMENT_ROD_VALUES,
+  DEFAULT_UNISTRUT_LENGTH_VALUES,
+  calcContainmentRod,
+  calcUnistrutLength,
+  calcAngle,
+  calcPower,
+  calcVoltageDrop,
+  calcBreaker,
+  calcConduit,
+  calcStructure,
+  formulas,
+  type PhaseType,
+  type PowerTarget,
+  type BreakerInputMode,
+  type UnistrutContainmentRow
+} from "./calculators";
+import { usePersistedState } from "./usePersistedState";
+import { useHistory } from "./useHistory";
+import { useTheme } from "./useTheme";
+import { CopyableResult } from "./CopyableResult";
+import { FormulaToggle } from "./FormulaToggle";
 
 type PageId = "home" | "cheatsheet";
-type PhaseType = "single" | "three";
-type PowerTarget = "power" | "current" | "voltage";
-type BreakerInputMode = "current" | "power";
 
 type LegendItem = {
   label: string;
@@ -35,37 +55,32 @@ type PaletteItem = {
   action: () => void;
 };
 
-type UnistrutContainmentRow = {
-  id: number;
-  label: string;
-  width: string;
-};
-
-const EPSILON = 1e-9;
 const DEFAULT_PAGE: PageId = "home";
-const COPPER_RESISTIVITY = 0.0175;
-const STANDARD_BREAKERS = [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100];
-const DEFAULT_CONTAINMENT_ROD_VALUES = {
-  overallHeight: "3165",
-  topOfUnistrut: "2900",
-  buffer: "100",
-  unistrutDepth: "40"
-} as const;
-const CONTAINMENT_OPTIONS: { label: string; widths: number[] }[] = [
-  { label: "Tray", widths: [50, 75, 100, 150, 225, 300, 450, 600, 750, 900] },
-  { label: "Basket", widths: [50, 100, 125, 150, 200, 300, 400, 500, 600] },
-  { label: "Trunking", widths: [50, 75, 100, 150, 200, 300] }
-];
-const DEFAULT_UNISTRUT_LENGTH_VALUES = {
-  containments: [
-    { id: 1, label: "Tray", width: "225" },
-    { id: 2, label: "Basket", width: "125" },
-    { id: 3, label: "Trunking", width: "100" }
-  ],
-  leftAllowance: "50",
-  rightAllowance: "50",
-  gap: "50"
-} as const;
+
+const powerConfig: Record<
+  PowerTarget,
+  {
+    label: string;
+    unit: string;
+    inputLabels: [string, string];
+  }
+> = {
+  power: {
+    label: "Power",
+    unit: "kW",
+    inputLabels: ["Current (A)", "Voltage (V)"]
+  },
+  current: {
+    label: "Current",
+    unit: "A",
+    inputLabels: ["Power (kW)", "Voltage (V)"]
+  },
+  voltage: {
+    label: "Voltage",
+    unit: "V",
+    inputLabels: ["Power (kW)", "Current (A)"]
+  }
+};
 
 const cheatSheetSections: CheatSheetSection[] = [
   {
@@ -253,31 +268,6 @@ const applets: Applet[] = [
   }
 ];
 
-const powerConfig: Record<
-  PowerTarget,
-  {
-    label: string;
-    unit: string;
-    inputLabels: [string, string];
-  }
-> = {
-  power: {
-    label: "Power",
-    unit: "kW",
-    inputLabels: ["Current (A)", "Voltage (V)"]
-  },
-  current: {
-    label: "Current",
-    unit: "A",
-    inputLabels: ["Power (kW)", "Voltage (V)"]
-  },
-  voltage: {
-    label: "Voltage",
-    unit: "V",
-    inputLabels: ["Power (kW)", "Current (A)"]
-  }
-};
-
 const toolHints = {
   containmentRod:
     "Actual drop = overall height - top of Unistrut. Rod cut length = actual drop + buffer. Bottom of Unistrut drop = actual drop + Unistrut depth.",
@@ -304,27 +294,9 @@ function getTerms(query: string) {
 
 function matchesQuery(haystack: string, query: string) {
   const terms = getTerms(query);
-  if (!terms.length) {
-    return true;
-  }
-
+  if (!terms.length) return true;
   const normalizedHaystack = normalize(haystack);
   return terms.every((term) => normalizedHaystack.includes(term));
-}
-
-function formatNumber(value: number) {
-  if (!Number.isFinite(value)) {
-    return "--";
-  }
-
-  const precision = Math.abs(value) >= 100 ? 1 : 2;
-  return value
-    .toFixed(precision)
-    .replace(/\.0+$|(\.\d*?[1-9])0+$/, "$1");
-}
-
-function formatMeasure(value: number, unit: string) {
-  return `${formatNumber(value)} ${unit}`;
 }
 
 function ToolTitle({ title, hint }: { title: string; hint: string }) {
@@ -342,14 +314,15 @@ function ToolTitle({ title, hint }: { title: string; hint: string }) {
 
 function getPageFromHash(): PageId {
   const hash = window.location.hash.replace("#", "");
-  if (hash === "home" || hash === "cheatsheet") {
-    return hash;
-  }
-
+  if (hash === "home" || hash === "cheatsheet") return hash;
   return DEFAULT_PAGE;
 }
 
 export default function App() {
+  const { theme, toggleTheme } = useTheme();
+  const { entries: historyEntries, addEntry: addHistoryEntry, clearHistory } = useHistory();
+  const [historyOpen, setHistoryOpen] = useState(false);
+
   const [page, setPage] = useState<PageId>(getPageFromHash());
   const [searchQuery, setSearchQuery] = useState("");
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -359,66 +332,77 @@ export default function App() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [copiedSectionId, setCopiedSectionId] = useState<string | null>(null);
 
-  const [containmentRodOverallHeight, setContainmentRodOverallHeight] = useState(
+  // ── Persisted calculator state ──
+  const [containmentRodOverallHeight, setContainmentRodOverallHeight] = usePersistedState(
+    "cr-height",
     DEFAULT_CONTAINMENT_ROD_VALUES.overallHeight
   );
-  const [containmentRodTopOfUnistrut, setContainmentRodTopOfUnistrut] = useState(
+  const [containmentRodTopOfUnistrut, setContainmentRodTopOfUnistrut] = usePersistedState(
+    "cr-top",
     DEFAULT_CONTAINMENT_ROD_VALUES.topOfUnistrut
   );
-  const [containmentRodBuffer, setContainmentRodBuffer] = useState(
+  const [containmentRodBuffer, setContainmentRodBuffer] = usePersistedState(
+    "cr-buffer",
     DEFAULT_CONTAINMENT_ROD_VALUES.buffer
   );
-  const [containmentRodUnistrutDepth, setContainmentRodUnistrutDepth] = useState(
+  const [containmentRodUnistrutDepth, setContainmentRodUnistrutDepth] = usePersistedState(
+    "cr-depth",
     DEFAULT_CONTAINMENT_ROD_VALUES.unistrutDepth
   );
-  const [unistrutContainments, setUnistrutContainments] = useState<UnistrutContainmentRow[]>(() =>
-    DEFAULT_UNISTRUT_LENGTH_VALUES.containments.map((containment) => ({ ...containment }))
+  const [unistrutContainments, setUnistrutContainments] = usePersistedState<UnistrutContainmentRow[]>(
+    "ul-containments",
+    DEFAULT_UNISTRUT_LENGTH_VALUES.containments.map((c) => ({ ...c }))
   );
   const [unistrutCountInput, setUnistrutCountInput] = useState(
     String(DEFAULT_UNISTRUT_LENGTH_VALUES.containments.length)
   );
-  const [unistrutLeftAllowance, setUnistrutLeftAllowance] = useState(
-    DEFAULT_UNISTRUT_LENGTH_VALUES.leftAllowance
+  const [unistrutLeftAllowance, setUnistrutLeftAllowance] = usePersistedState(
+    "ul-left",
+    DEFAULT_UNISTRUT_LENGTH_VALUES.leftAllowance as string
   );
-  const [unistrutRightAllowance, setUnistrutRightAllowance] = useState(
-    DEFAULT_UNISTRUT_LENGTH_VALUES.rightAllowance
+  const [unistrutRightAllowance, setUnistrutRightAllowance] = usePersistedState(
+    "ul-right",
+    DEFAULT_UNISTRUT_LENGTH_VALUES.rightAllowance as string
   );
-  const [unistrutGap, setUnistrutGap] = useState(DEFAULT_UNISTRUT_LENGTH_VALUES.gap);
+  const [unistrutGap, setUnistrutGap] = usePersistedState(
+    "ul-gap",
+    DEFAULT_UNISTRUT_LENGTH_VALUES.gap as string
+  );
 
-  const [angleDrop, setAngleDrop] = useState("10");
-  const [angleValue, setAngleValue] = useState("45");
-  const [angleTopStraight, setAngleTopStraight] = useState("0");
-  const [angleBottomStraight, setAngleBottomStraight] = useState("0");
-  const [angleAllowance, setAngleAllowance] = useState("0");
-  const [angleUnit, setAngleUnit] = useState("cm");
+  const [angleDrop, setAngleDrop] = usePersistedState("angle-drop", "10");
+  const [angleValue, setAngleValue] = usePersistedState("angle-value", "45");
+  const [angleTopStraight, setAngleTopStraight] = usePersistedState("angle-top", "0");
+  const [angleBottomStraight, setAngleBottomStraight] = usePersistedState("angle-bottom", "0");
+  const [angleAllowance, setAngleAllowance] = usePersistedState("angle-allowance", "0");
+  const [angleUnit, setAngleUnit] = usePersistedState("angle-unit", "cm");
   const [angleAdvanced, setAngleAdvanced] = useState(false);
 
-  const [powerTarget, setPowerTarget] = useState<PowerTarget>("current");
-  const [powerPhase, setPowerPhase] = useState<PhaseType>("single");
-  const [powerValueA, setPowerValueA] = useState("1");
-  const [powerValueB, setPowerValueB] = useState("230");
-  const [powerPf, setPowerPf] = useState("0.95");
+  const [powerTarget, setPowerTarget] = usePersistedState<PowerTarget>("power-target", "current");
+  const [powerPhase, setPowerPhase] = usePersistedState<PhaseType>("power-phase", "single");
+  const [powerValueA, setPowerValueA] = usePersistedState("power-a", "1");
+  const [powerValueB, setPowerValueB] = usePersistedState("power-b", "230");
+  const [powerPf, setPowerPf] = usePersistedState("power-pf", "0.95");
 
-  const [vdropPhase, setVdropPhase] = useState<PhaseType>("single");
-  const [vdropCurrent, setVdropCurrent] = useState("20");
-  const [vdropLength, setVdropLength] = useState("20");
-  const [vdropCableSize, setVdropCableSize] = useState("2.5");
-  const [vdropVoltage, setVdropVoltage] = useState("230");
+  const [vdropPhase, setVdropPhase] = usePersistedState<PhaseType>("vdrop-phase", "single");
+  const [vdropCurrent, setVdropCurrent] = usePersistedState("vdrop-current", "20");
+  const [vdropLength, setVdropLength] = usePersistedState("vdrop-length", "20");
+  const [vdropCableSize, setVdropCableSize] = usePersistedState("vdrop-cable", "2.5");
+  const [vdropVoltage, setVdropVoltage] = usePersistedState("vdrop-voltage", "230");
 
-  const [breakerMode, setBreakerMode] = useState<BreakerInputMode>("current");
-  const [breakerCurrent, setBreakerCurrent] = useState("18");
-  const [breakerPower, setBreakerPower] = useState("4");
-  const [breakerPhase, setBreakerPhase] = useState<PhaseType>("single");
-  const [breakerVoltage, setBreakerVoltage] = useState("230");
-  const [breakerPf, setBreakerPf] = useState("0.95");
+  const [breakerMode, setBreakerMode] = usePersistedState<BreakerInputMode>("breaker-mode", "current");
+  const [breakerCurrent, setBreakerCurrent] = usePersistedState("breaker-current", "18");
+  const [breakerPower, setBreakerPower] = usePersistedState("breaker-power", "4");
+  const [breakerPhase, setBreakerPhase] = usePersistedState<PhaseType>("breaker-phase", "single");
+  const [breakerVoltage, setBreakerVoltage] = usePersistedState("breaker-voltage", "230");
+  const [breakerPf, setBreakerPf] = usePersistedState("breaker-pf", "0.95");
 
-  const [conduitDiameter, setConduitDiameter] = useState("20");
-  const [conduitCableDiameter, setConduitCableDiameter] = useState("6");
-  const [conduitCableCount, setConduitCableCount] = useState("3");
-  const [conduitMaxFill, setConduitMaxFill] = useState("40");
+  const [conduitDiameter, setConduitDiameter] = usePersistedState("conduit-dia", "20");
+  const [conduitCableDiameter, setConduitCableDiameter] = usePersistedState("conduit-cable", "6");
+  const [conduitCableCount, setConduitCableCount] = usePersistedState("conduit-count", "3");
+  const [conduitMaxFill, setConduitMaxFill] = usePersistedState("conduit-fill", "40");
 
-  const [structureWall, setStructureWall] = useState("100");
-  const [structureJoist, setStructureJoist] = useState("200");
+  const [structureWall, setStructureWall] = usePersistedState("struct-wall", "100");
+  const [structureJoist, setStructureJoist] = usePersistedState("struct-joist", "200");
 
   const [activeToolIndex, setActiveToolIndex] = useState(0);
 
@@ -427,6 +411,11 @@ export default function App() {
   const nextUnistrutContainmentIdRef = useRef(
     DEFAULT_UNISTRUT_LENGTH_VALUES.containments.length + 1
   );
+
+  // Sync count input when containments change (e.g. from localStorage load)
+  useEffect(() => {
+    setUnistrutCountInput(String(unistrutContainments.length));
+  }, [unistrutContainments.length]);
 
   function navigateTo(nextPage: PageId, targetId?: string) {
     window.location.hash = nextPage;
@@ -471,19 +460,13 @@ export default function App() {
     const normalizedCount = Number.isFinite(nextCount) ? Math.max(0, Math.trunc(nextCount)) : 0;
 
     setUnistrutContainments((current) => {
-      if (normalizedCount === current.length) {
-        return current;
-      }
-
-      if (normalizedCount < current.length) {
-        return current.slice(0, normalizedCount);
-      }
+      if (normalizedCount === current.length) return current;
+      if (normalizedCount < current.length) return current.slice(0, normalizedCount);
 
       const nextRows = [...current];
       while (nextRows.length < normalizedCount) {
         nextRows.push(buildUnistrutContainmentRow());
       }
-
       return nextRows;
     });
   }
@@ -498,7 +481,7 @@ export default function App() {
 
   function removeUnistrutContainmentRow(id: number) {
     setUnistrutContainments((current) => {
-      const next = current.filter((containment) => containment.id !== id);
+      const next = current.filter((c) => c.id !== id);
       setUnistrutCountInput(String(next.length));
       return next;
     });
@@ -535,401 +518,46 @@ export default function App() {
     setUnistrutGap(DEFAULT_UNISTRUT_LENGTH_VALUES.gap);
   }
 
-  const containmentRodResult = useMemo(() => {
-    const overallHeight = Number.parseFloat(containmentRodOverallHeight);
-    const topOfUnistrut = Number.parseFloat(containmentRodTopOfUnistrut);
-    const buffer = Number.parseFloat(containmentRodBuffer);
-    const unistrutDepth =
-      containmentRodUnistrutDepth.trim() === ""
-        ? Number.parseFloat(DEFAULT_CONTAINMENT_ROD_VALUES.unistrutDepth)
-        : Number.parseFloat(containmentRodUnistrutDepth);
+  // ── Calculator results ──
+  const containmentRodResult = useMemo(() =>
+    calcContainmentRod(containmentRodOverallHeight, containmentRodTopOfUnistrut, containmentRodBuffer, containmentRodUnistrutDepth),
+    [containmentRodBuffer, containmentRodOverallHeight, containmentRodTopOfUnistrut, containmentRodUnistrutDepth]
+  );
 
-    if (
-      Number.isFinite(overallHeight) &&
-      Number.isFinite(topOfUnistrut) &&
-      topOfUnistrut > overallHeight
-    ) {
-      return {
-        validationMessage: "Height to top of Unistrut cannot be more than overall height.",
-        actualDropValue: "-- mm",
-        rodCutLengthValue: "-- mm",
-        bottomOfUnistrutDropValue: "-- mm"
-      };
-    }
+  const unistrutLengthResult = useMemo(() =>
+    calcUnistrutLength(unistrutContainments, unistrutLeftAllowance, unistrutRightAllowance, unistrutGap),
+    [unistrutContainments, unistrutGap, unistrutLeftAllowance, unistrutRightAllowance]
+  );
 
-    if (
-      !Number.isFinite(overallHeight) ||
-      !Number.isFinite(topOfUnistrut) ||
-      !Number.isFinite(buffer) ||
-      !Number.isFinite(unistrutDepth) ||
-      overallHeight <= 0 ||
-      topOfUnistrut < 0 ||
-      buffer < 0 ||
-      unistrutDepth < 0
-    ) {
-      return {
-        validationMessage: null,
-        actualDropValue: "-- mm",
-        rodCutLengthValue: "-- mm",
-        bottomOfUnistrutDropValue: "-- mm"
-      };
-    }
+  const angleResult = useMemo(() =>
+    calcAngle(angleDrop, angleValue, angleTopStraight, angleBottomStraight, angleAllowance, angleUnit),
+    [angleAdvanced, angleAllowance, angleBottomStraight, angleDrop, angleTopStraight, angleUnit, angleValue]
+  );
 
-    const actualDrop = overallHeight - topOfUnistrut;
-    const rodCutLength = actualDrop + buffer;
-    const bottomOfUnistrutDrop = actualDrop + unistrutDepth;
+  const powerResult = useMemo(() =>
+    calcPower(powerTarget, powerPhase, powerValueA, powerValueB, powerPf),
+    [powerPf, powerPhase, powerTarget, powerValueA, powerValueB]
+  );
 
-    return {
-      validationMessage: null,
-      actualDropValue: formatMeasure(actualDrop, "mm"),
-      rodCutLengthValue: formatMeasure(rodCutLength, "mm"),
-      bottomOfUnistrutDropValue: formatMeasure(bottomOfUnistrutDrop, "mm")
-    };
-  }, [
-    containmentRodBuffer,
-    containmentRodOverallHeight,
-    containmentRodTopOfUnistrut,
-    containmentRodUnistrutDepth
-  ]);
+  const voltageDropResult = useMemo(() =>
+    calcVoltageDrop(vdropPhase, vdropCurrent, vdropLength, vdropCableSize, vdropVoltage),
+    [vdropCableSize, vdropCurrent, vdropLength, vdropPhase, vdropVoltage]
+  );
 
-  const unistrutLengthResult = useMemo(() => {
-    if (!unistrutContainments.length) {
-      return {
-        validationMessage: "Add at least one containment.",
-        totalContainmentWidthValue: "-- mm",
-        totalSideAllowanceValue: "-- mm",
-        totalGapAllowanceValue: "-- mm",
-        exactLengthValue: "-- mm",
-        finalLengthValue: "-- mm",
-        gapLabel: "0 gaps"
-      };
-    }
+  const breakerResult = useMemo(() =>
+    calcBreaker(breakerMode, breakerCurrent, breakerPower, breakerPhase, breakerVoltage, breakerPf),
+    [breakerCurrent, breakerMode, breakerPf, breakerPhase, breakerPower, breakerVoltage]
+  );
 
-    const leftAllowance = Number.parseFloat(unistrutLeftAllowance);
-    const rightAllowance = Number.parseFloat(unistrutRightAllowance);
-    const gap = Number.parseFloat(unistrutGap);
-    const widths = unistrutContainments.map((containment) => Number.parseFloat(containment.width));
+  const conduitResult = useMemo(() =>
+    calcConduit(conduitDiameter, conduitCableDiameter, conduitCableCount, conduitMaxFill),
+    [conduitCableCount, conduitCableDiameter, conduitDiameter, conduitMaxFill]
+  );
 
-    if (
-      (Number.isFinite(leftAllowance) && leftAllowance < 0) ||
-      (Number.isFinite(rightAllowance) && rightAllowance < 0) ||
-      (Number.isFinite(gap) && gap < 0) ||
-      widths.some((width) => Number.isFinite(width) && width < 0)
-    ) {
-      return {
-        validationMessage: "Widths, allowances, and gaps cannot be negative.",
-        totalContainmentWidthValue: "-- mm",
-        totalSideAllowanceValue: "-- mm",
-        totalGapAllowanceValue: "-- mm",
-        exactLengthValue: "-- mm",
-        finalLengthValue: "-- mm",
-        gapLabel: `${Math.max(unistrutContainments.length - 1, 0)} gaps`
-      };
-    }
-
-    if (!Number.isFinite(leftAllowance) || !Number.isFinite(rightAllowance) || !Number.isFinite(gap)) {
-      return {
-        validationMessage: "Enter non-negative values for the side allowances and gap.",
-        totalContainmentWidthValue: "-- mm",
-        totalSideAllowanceValue: "-- mm",
-        totalGapAllowanceValue: "-- mm",
-        exactLengthValue: "-- mm",
-        finalLengthValue: "-- mm",
-        gapLabel: `${Math.max(unistrutContainments.length - 1, 0)} gaps`
-      };
-    }
-
-    if (widths.some((width) => !Number.isFinite(width))) {
-      return {
-        validationMessage: "Enter a width for each containment.",
-        totalContainmentWidthValue: "-- mm",
-        totalSideAllowanceValue: "-- mm",
-        totalGapAllowanceValue: "-- mm",
-        exactLengthValue: "-- mm",
-        finalLengthValue: "-- mm",
-        gapLabel: `${Math.max(unistrutContainments.length - 1, 0)} gaps`
-      };
-    }
-
-    const totalContainmentWidth = widths.reduce((total, width) => total + width, 0);
-    const totalSideAllowance = leftAllowance + rightAllowance;
-    const gapCount = Math.max(unistrutContainments.length - 1, 0);
-    const totalGapAllowance = gapCount * gap;
-    const exactLength = totalContainmentWidth + totalSideAllowance + totalGapAllowance;
-    const finalLength = Math.ceil(exactLength / 50) * 50;
-
-    return {
-      validationMessage: null,
-      totalContainmentWidthValue: formatMeasure(totalContainmentWidth, "mm"),
-      totalSideAllowanceValue: formatMeasure(totalSideAllowance, "mm"),
-      totalGapAllowanceValue: formatMeasure(totalGapAllowance, "mm"),
-      exactLengthValue: formatMeasure(exactLength, "mm"),
-      finalLengthValue: formatMeasure(finalLength, "mm"),
-      gapLabel: `${gapCount} gap${gapCount === 1 ? "" : "s"}`
-    };
-  }, [unistrutContainments, unistrutGap, unistrutLeftAllowance, unistrutRightAllowance]);
-
-  const angleResult = useMemo(() => {
-    const drop = Number.parseFloat(angleDrop);
-    const angle = Number.parseFloat(angleValue);
-    const topStraight = Number.parseFloat(angleTopStraight);
-    const bottomStraight = Number.parseFloat(angleBottomStraight);
-    const allowance = Number.parseFloat(angleAllowance);
-
-    if (!Number.isFinite(drop) || drop <= 0) {
-      return {
-        angledLengthValue: "--",
-        offsetValue: "--",
-        totalLengthValue: "--"
-      };
-    }
-
-    if (!Number.isFinite(angle) || angle <= 0 || angle >= 90) {
-      return {
-        angledLengthValue: "--",
-        offsetValue: "--",
-        totalLengthValue: "--"
-      };
-    }
-
-    if (
-      !Number.isFinite(topStraight) ||
-      !Number.isFinite(bottomStraight) ||
-      !Number.isFinite(allowance) ||
-      topStraight < 0 ||
-      bottomStraight < 0 ||
-      allowance < 0
-    ) {
-      return {
-        angledLengthValue: "--",
-        offsetValue: "--",
-        totalLengthValue: "--"
-      };
-    }
-
-    const radians = (angle * Math.PI) / 180;
-    const sinValue = Math.sin(radians);
-    const cosValue = Math.cos(radians);
-
-    if (Math.abs(sinValue) < EPSILON) {
-      return {
-        angledLengthValue: "--",
-        offsetValue: "--",
-        totalLengthValue: "--"
-      };
-    }
-
-    const angledLength = drop / sinValue;
-    const offset = angledLength * cosValue;
-    const totalLength = topStraight + angledLength + bottomStraight + allowance;
-
-    return {
-      angledLengthValue: formatMeasure(angledLength, angleUnit),
-      offsetValue: formatMeasure(offset, angleUnit),
-      totalLengthValue: formatMeasure(totalLength, angleUnit)
-    };
-  }, [angleAdvanced, angleAllowance, angleBottomStraight, angleDrop, angleTopStraight, angleUnit, angleValue]);
-
-  const powerResult = useMemo(() => {
-    const valueA = Number.parseFloat(powerValueA);
-    const valueB = Number.parseFloat(powerValueB);
-    const pf = Number.parseFloat(powerPf);
-    const phaseFactor = powerPhase === "single" ? 1 : Math.sqrt(3);
-
-    if (!Number.isFinite(valueA) || !Number.isFinite(valueB) || valueA <= 0 || valueB <= 0) {
-      return {
-        label: powerTarget === "power" ? "Power" : powerTarget === "current" ? "Current" : "Voltage",
-        resultValue: powerTarget === "power" ? "-- kW" : powerTarget === "current" ? "-- A" : "-- V"
-      };
-    }
-
-    if (!Number.isFinite(pf) || pf <= 0 || pf > 1) {
-      return {
-        label: powerTarget === "power" ? "Power" : powerTarget === "current" ? "Current" : "Voltage",
-        resultValue: powerTarget === "power" ? "-- kW" : powerTarget === "current" ? "-- A" : "-- V"
-      };
-    }
-
-    if ((powerTarget === "current" || powerTarget === "voltage") && Math.abs(valueB * pf) < EPSILON) {
-      return {
-        label: powerTarget === "current" ? "Current" : "Voltage",
-        resultValue: powerTarget === "current" ? "-- A" : "-- V"
-      };
-    }
-
-    if (powerTarget === "power") {
-      const powerKw = (phaseFactor * valueA * valueB * pf) / 1000;
-      return {
-        label: "Power",
-        resultValue: `${formatNumber(powerKw)} kW`
-      };
-    }
-
-    if (powerTarget === "current") {
-      const current = (valueA * 1000) / (phaseFactor * valueB * pf);
-      return {
-        label: "Current",
-        resultValue: `${formatNumber(current)} A`
-      };
-    }
-
-    const voltage = (valueA * 1000) / (phaseFactor * valueB * pf);
-    return {
-      label: "Voltage",
-      resultValue: `${formatNumber(voltage)} V`
-    };
-  }, [powerPf, powerPhase, powerTarget, powerValueA, powerValueB]);
-
-  const voltageDropResult = useMemo(() => {
-    const current = Number.parseFloat(vdropCurrent);
-    const length = Number.parseFloat(vdropLength);
-    const cableSize = Number.parseFloat(vdropCableSize);
-    const voltage = Number.parseFloat(vdropVoltage);
-    const multiplier = vdropPhase === "single" ? 2 : Math.sqrt(3);
-
-    if (
-      !Number.isFinite(current) ||
-      !Number.isFinite(length) ||
-      !Number.isFinite(cableSize) ||
-      !Number.isFinite(voltage) ||
-      current <= 0 ||
-      length <= 0 ||
-      cableSize <= 0 ||
-      voltage <= 0
-    ) {
-      return {
-        dropValue: "-- V",
-        percentValue: "-- %",
-        mvPerAmpMeterValue: "--"
-      };
-    }
-
-    const resistancePerMeter = COPPER_RESISTIVITY / cableSize;
-    const drop = multiplier * current * length * resistancePerMeter;
-    const percent = (drop / voltage) * 100;
-    const mvPerAmpMeter = multiplier * resistancePerMeter * 1000;
-
-    return {
-      dropValue: `${formatNumber(drop)} V`,
-      percentValue: `${formatNumber(percent)} %`,
-      mvPerAmpMeterValue: formatNumber(mvPerAmpMeter)
-    };
-  }, [vdropCableSize, vdropCurrent, vdropLength, vdropPhase, vdropVoltage]);
-
-  const breakerResult = useMemo(() => {
-    const pf = Number.parseFloat(breakerPf);
-    const phaseFactor = breakerPhase === "single" ? 1 : Math.sqrt(3);
-
-    let designCurrent = Number.NaN;
-
-    if (breakerMode === "current") {
-      designCurrent = Number.parseFloat(breakerCurrent);
-    } else {
-      const power = Number.parseFloat(breakerPower);
-      const voltage = Number.parseFloat(breakerVoltage);
-
-      if (
-        Number.isFinite(power) &&
-        Number.isFinite(voltage) &&
-        Number.isFinite(pf) &&
-        power > 0 &&
-        voltage > 0 &&
-        pf > 0 &&
-        pf <= 1
-      ) {
-        designCurrent = (power * 1000) / (phaseFactor * voltage * pf);
-      }
-    }
-
-    if (!Number.isFinite(designCurrent) || designCurrent <= 0) {
-      return {
-        breakerValue: "-- A",
-        currentValue: "-- A",
-        rangeValue: "--"
-      };
-    }
-
-    if (breakerMode === "power" && (!Number.isFinite(pf) || pf <= 0 || pf > 1)) {
-      return {
-        breakerValue: "-- A",
-        currentValue: "-- A",
-        rangeValue: "--"
-      };
-    }
-
-    const nextIndex = STANDARD_BREAKERS.findIndex((size) => size >= designCurrent);
-    const breakerSize =
-      nextIndex >= 0 ? STANDARD_BREAKERS[nextIndex] : STANDARD_BREAKERS[STANDARD_BREAKERS.length - 1];
-    const lowerSize =
-      nextIndex > 0 ? STANDARD_BREAKERS[nextIndex - 1] : STANDARD_BREAKERS[0];
-    const rangeValue =
-      nextIndex === -1
-        ? `Over ${breakerSize} A`
-        : nextIndex > 0
-          ? `${lowerSize} A to ${breakerSize} A`
-          : `Up to ${breakerSize} A`;
-
-    return {
-      breakerValue: `${breakerSize} A`,
-      currentValue: `${formatNumber(designCurrent)} A`,
-      rangeValue
-    };
-  }, [breakerCurrent, breakerMode, breakerPf, breakerPhase, breakerPower, breakerVoltage]);
-
-  const conduitResult = useMemo(() => {
-    const conduit = Number.parseFloat(conduitDiameter);
-    const cable = Number.parseFloat(conduitCableDiameter);
-    const count = Number.parseFloat(conduitCableCount);
-    const maxFill = Number.parseFloat(conduitMaxFill);
-
-    if (
-      !Number.isFinite(conduit) ||
-      !Number.isFinite(cable) ||
-      !Number.isFinite(count) ||
-      !Number.isFinite(maxFill) ||
-      conduit <= 0 ||
-      cable <= 0 ||
-      count <= 0 ||
-      maxFill <= 0
-    ) {
-      return {
-        fillValue: "-- %",
-        usedAreaValue: "-- mm²",
-        remainingValue: "-- mm²"
-      };
-    }
-
-    const conduitArea = Math.PI * (conduit / 2) ** 2;
-    const cableArea = Math.PI * (cable / 2) ** 2;
-    const usedArea = cableArea * count;
-    const remainingArea = Math.max(conduitArea - usedArea, 0);
-    const fillPercent = (usedArea / conduitArea) * 100;
-
-    return {
-      fillValue: `${formatNumber(fillPercent)} %`,
-      usedAreaValue: `${formatNumber(usedArea)} mm²`,
-      remainingValue: `${formatNumber(remainingArea)} mm²`
-    };
-  }, [conduitCableCount, conduitCableDiameter, conduitDiameter, conduitMaxFill]);
-
-  const structureResult = useMemo(() => {
-    const wall = Number.parseFloat(structureWall);
-    const joist = Number.parseFloat(structureJoist);
-
-    if (!Number.isFinite(wall) || !Number.isFinite(joist) || wall <= 0 || joist <= 0) {
-      return {
-        vertical: "-- mm",
-        horizontal: "-- mm",
-        notch: "-- mm"
-      };
-    }
-
-    return {
-      vertical: `${formatNumber(wall / 3)} mm`,
-      horizontal: `${formatNumber(wall / 6)} mm`,
-      notch: `${formatNumber(joist * 0.125)} mm`
-    };
-  }, [structureJoist, structureWall]);
+  const structureResult = useMemo(() =>
+    calcStructure(structureWall, structureJoist),
+    [structureJoist, structureWall]
+  );
 
   const filteredApplets = useMemo(
     () =>
@@ -945,9 +573,7 @@ export default function App() {
         .map((section) => {
           const legendLabels = section.legend ? section.legend.map((l) => l.label) : [];
           const allText = [section.title, section.summary, ...section.items, ...legendLabels].join(" ");
-          if (!searchQuery) {
-            return section;
-          }
+          if (!searchQuery) return section;
 
           const matchingItems = section.items.filter((item) =>
             matchesQuery(`${section.title} ${item}`, searchQuery)
@@ -964,9 +590,7 @@ export default function App() {
             };
           }
 
-          if (!matchingItems.length && !matchingLegend?.length) {
-            return null;
-          }
+          if (!matchingItems.length && !matchingLegend?.length) return null;
 
           return {
             ...section,
@@ -1000,6 +624,13 @@ export default function App() {
         tag: "Action",
         keywords: "help keyboard shortcuts",
         action: () => setHelpOpen(true)
+      },
+      {
+        title: "History",
+        subtitle: "View past calculations.",
+        tag: "Action",
+        keywords: "history recent calculations log",
+        action: () => setHistoryOpen(true)
       },
       ...applets.map((applet) => ({
         title: applet.title,
@@ -1038,10 +669,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!paletteOpen) {
-      return;
-    }
-
+    if (!paletteOpen) return;
     setActivePaletteIndex(0);
     window.setTimeout(() => {
       paletteInputRef.current?.focus();
@@ -1066,6 +694,7 @@ export default function App() {
       if (event.key === "Escape") {
         setPaletteOpen(false);
         setHelpOpen(false);
+        setHistoryOpen(false);
       }
     };
 
@@ -1114,9 +743,7 @@ export default function App() {
   }, [filteredApplets]);
 
   function handlePaletteKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (!paletteItems.length) {
-      return;
-    }
+    if (!paletteItems.length) return;
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
@@ -1136,10 +763,7 @@ export default function App() {
   }
 
   async function installApp() {
-    if (!installPrompt) {
-      return;
-    }
-
+    if (!installPrompt) return;
     await installPrompt.prompt();
     await installPrompt.userChoice;
     setInstallPrompt(null);
@@ -1220,6 +844,16 @@ export default function App() {
         </nav>
 
         <div className="topbar-actions">
+          <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}>
+            {theme === "dark" ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            )}
+          </button>
+          <button type="button" className="theme-toggle" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </button>
           <label className="search-field" htmlFor="site-search">
             <input
               id="site-search"
@@ -1237,7 +871,7 @@ export default function App() {
       <main className="workspace">
         <section className={`page page-home ${page === "home" ? "is-active" : ""}`}>
           <div className="tool-grid" ref={toolGridRef}>
-            {filteredApplets.some((applet) => applet.id === "tool-containment-rod") ? (
+            {filteredApplets.some((a) => a.id === "tool-containment-rod") ? (
               <article id="tool-containment-rod" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Containment rod" hint={toolHints.containmentRod} />
@@ -1256,8 +890,9 @@ export default function App() {
                         min="0"
                         step="1"
                         value={containmentRodOverallHeight}
-                        onChange={(event) => setContainmentRodOverallHeight(event.target.value)}
+                        onChange={(e) => setContainmentRodOverallHeight(e.target.value)}
                       />
+                      {containmentRodOverallHeight === "" && <span className="field-hint">Enter the total height</span>}
                     </label>
 
                     <label className="field">
@@ -1269,8 +904,9 @@ export default function App() {
                         step="1"
                         aria-invalid={containmentRodResult.validationMessage ? true : undefined}
                         value={containmentRodTopOfUnistrut}
-                        onChange={(event) => setContainmentRodTopOfUnistrut(event.target.value)}
+                        onChange={(e) => setContainmentRodTopOfUnistrut(e.target.value)}
                       />
+                      {containmentRodTopOfUnistrut === "" && <span className="field-hint">Must be less than overall height</span>}
                     </label>
                   </div>
 
@@ -1283,7 +919,7 @@ export default function App() {
                         min="0"
                         step="1"
                         value={containmentRodBuffer}
-                        onChange={(event) => setContainmentRodBuffer(event.target.value)}
+                        onChange={(e) => setContainmentRodBuffer(e.target.value)}
                       />
                     </label>
 
@@ -1296,7 +932,7 @@ export default function App() {
                         step="1"
                         placeholder={DEFAULT_CONTAINMENT_ROD_VALUES.unistrutDepth}
                         value={containmentRodUnistrutDepth}
-                        onChange={(event) => setContainmentRodUnistrutDepth(event.target.value)}
+                        onChange={(e) => setContainmentRodUnistrutDepth(e.target.value)}
                       />
                     </label>
                   </div>
@@ -1313,23 +949,26 @@ export default function App() {
                 <div className="tool-output">
                   <div className="result-main">
                     <p className="result-label">Rod cut length</p>
-                    <p className="result-value">{containmentRodResult.rodCutLengthValue}</p>
+                    <p className="result-value">
+                      <CopyableResult value={containmentRodResult.rodCutLengthValue} onCopy={() => addHistoryEntry("Containment rod", "Rod cut length", containmentRodResult.rodCutLengthValue)} />
+                    </p>
                   </div>
                   <div className="mini-metrics">
                     <div>
                       <span>Actual drop</span>
-                      <strong>{containmentRodResult.actualDropValue}</strong>
+                      <strong><CopyableResult value={containmentRodResult.actualDropValue} onCopy={() => addHistoryEntry("Containment rod", "Actual drop", containmentRodResult.actualDropValue)} /></strong>
                     </div>
                     <div>
                       <span>Bottom of Unistrut drop</span>
-                      <strong>{containmentRodResult.bottomOfUnistrutDropValue}</strong>
+                      <strong><CopyableResult value={containmentRodResult.bottomOfUnistrutDropValue} onCopy={() => addHistoryEntry("Containment rod", "Bottom of Unistrut drop", containmentRodResult.bottomOfUnistrutDropValue)} /></strong>
                     </div>
                   </div>
                 </div>
+                <FormulaToggle formula={formulas.containmentRod} />
               </article>
             ) : null}
 
-            {filteredApplets.some((applet) => applet.id === "tool-unistrut-length") ? (
+            {filteredApplets.some((a) => a.id === "tool-unistrut-length") ? (
               <article id="tool-unistrut-length" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Unistrut length" hint={toolHints.unistrutLength} />
@@ -1349,8 +988,8 @@ export default function App() {
                         step="1"
                         aria-invalid={!unistrutContainments.length ? true : undefined}
                         value={unistrutCountInput}
-                        onChange={(event) => {
-                          const raw = event.target.value;
+                        onChange={(e) => {
+                          const raw = e.target.value;
                           setUnistrutCountInput(raw);
                           setUnistrutContainmentCount(
                             raw === "" ? 0 : Number.parseFloat(raw)
@@ -1376,8 +1015,9 @@ export default function App() {
                             : undefined
                         }
                         value={unistrutGap}
-                        onChange={(event) => setUnistrutGap(event.target.value)}
+                        onChange={(e) => setUnistrutGap(e.target.value)}
                       />
+                      {Number.isFinite(Number.parseFloat(unistrutGap)) && Number.parseFloat(unistrutGap) < 0 && <span className="field-hint">Gap cannot be negative</span>}
                     </label>
                   </div>
 
@@ -1396,7 +1036,7 @@ export default function App() {
                             : undefined
                         }
                         value={unistrutLeftAllowance}
-                        onChange={(event) => setUnistrutLeftAllowance(event.target.value)}
+                        onChange={(e) => setUnistrutLeftAllowance(e.target.value)}
                       />
                     </label>
 
@@ -1414,7 +1054,7 @@ export default function App() {
                             : undefined
                         }
                         value={unistrutRightAllowance}
-                        onChange={(event) => setUnistrutRightAllowance(event.target.value)}
+                        onChange={(e) => setUnistrutRightAllowance(e.target.value)}
                       />
                     </label>
                   </div>
@@ -1437,12 +1077,8 @@ export default function App() {
                               <span>Type</span>
                               <select
                                 value={containment.label}
-                                onChange={(event) =>
-                                  updateUnistrutContainmentRow(
-                                    containment.id,
-                                    "label",
-                                    event.target.value
-                                  )
+                                onChange={(e) =>
+                                  updateUnistrutContainmentRow(containment.id, "label", e.target.value)
                                 }
                               >
                                 <option value="" disabled>
@@ -1461,12 +1097,8 @@ export default function App() {
                               <select
                                 value={containment.width}
                                 disabled={!selectedOption}
-                                onChange={(event) =>
-                                  updateUnistrutContainmentRow(
-                                    containment.id,
-                                    "width",
-                                    event.target.value
-                                  )
+                                onChange={(e) =>
+                                  updateUnistrutContainmentRow(containment.id, "width", e.target.value)
                                 }
                               >
                                 {selectedOption ? (
@@ -1510,7 +1142,9 @@ export default function App() {
                 <div className="tool-output">
                   <div className="result-main">
                     <p className="result-label">Final Unistrut length</p>
-                    <p className="result-value">{unistrutLengthResult.finalLengthValue}</p>
+                    <p className="result-value">
+                      <CopyableResult value={unistrutLengthResult.finalLengthValue} onCopy={() => addHistoryEntry("Unistrut length", "Final length", unistrutLengthResult.finalLengthValue)} />
+                    </p>
                     <p className="result-sub">Rounded up to nearest 50 mm (hole spacing)</p>
                   </div>
 
@@ -1533,17 +1167,18 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+                <FormulaToggle formula={formulas.unistrutLength} />
               </article>
             ) : null}
 
-            {filteredApplets.some((applet) => applet.id === "tool-angle") ? (
+            {filteredApplets.some((a) => a.id === "tool-angle") ? (
               <article id="tool-angle" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Angle drop" hint={toolHints.angle} />
                   <button
                     type="button"
                     className={`switch-chip ${angleAdvanced ? "is-active" : ""}`}
-                    onClick={() => setAngleAdvanced((current) => !current)}
+                    onClick={() => setAngleAdvanced((c) => !c)}
                     aria-pressed={angleAdvanced}
                   >
                     Advanced
@@ -1561,13 +1196,13 @@ export default function App() {
                           min="0"
                           step="0.01"
                           value={angleDrop}
-                          onChange={(event) => setAngleDrop(event.target.value)}
+                          onChange={(e) => setAngleDrop(e.target.value)}
                         />
                         <select
                           className="unit-select"
                           aria-label="Unit"
                           value={angleUnit}
-                          onChange={(event) => setAngleUnit(event.target.value)}
+                          onChange={(e) => setAngleUnit(e.target.value)}
                         >
                           <option value="mm">mm</option>
                           <option value="cm">cm</option>
@@ -1586,10 +1221,11 @@ export default function App() {
                           max="90"
                           step="0.1"
                           value={angleValue}
-                          onChange={(event) => setAngleValue(event.target.value)}
+                          onChange={(e) => setAngleValue(e.target.value)}
                         />
                         <span className="suffix">deg</span>
                       </div>
+                      {Number.parseFloat(angleValue) >= 90 && <span className="field-hint">Angle must be less than 90</span>}
                     </label>
                   </div>
 
@@ -1605,7 +1241,7 @@ export default function App() {
                               min="0"
                               step="0.01"
                               value={angleTopStraight}
-                              onChange={(event) => setAngleTopStraight(event.target.value)}
+                              onChange={(e) => setAngleTopStraight(e.target.value)}
                             />
                             <span className="suffix">{angleUnit}</span>
                           </div>
@@ -1620,7 +1256,7 @@ export default function App() {
                               min="0"
                               step="0.01"
                               value={angleBottomStraight}
-                              onChange={(event) => setAngleBottomStraight(event.target.value)}
+                              onChange={(e) => setAngleBottomStraight(e.target.value)}
                             />
                             <span className="suffix">{angleUnit}</span>
                           </div>
@@ -1636,7 +1272,7 @@ export default function App() {
                             min="0"
                             step="0.01"
                             value={angleAllowance}
-                            onChange={(event) => setAngleAllowance(event.target.value)}
+                            onChange={(e) => setAngleAllowance(e.target.value)}
                           />
                           <span className="suffix">{angleUnit}</span>
                         </div>
@@ -1648,25 +1284,28 @@ export default function App() {
                 <div className="tool-output">
                   <div className="result-main">
                     <p className="result-label">Angled piece</p>
-                    <p className="result-value">{angleResult.angledLengthValue}</p>
+                    <p className="result-value">
+                      <CopyableResult value={angleResult.angledLengthValue} onCopy={() => addHistoryEntry("Angle drop", "Angled piece", angleResult.angledLengthValue)} />
+                    </p>
                   </div>
                   {angleAdvanced ? (
                     <div className="mini-metrics">
                       <div>
                         <span>Horizontal offset</span>
-                        <strong>{angleResult.offsetValue}</strong>
+                        <strong><CopyableResult value={angleResult.offsetValue} /></strong>
                       </div>
                       <div>
                         <span>Total developed length</span>
-                        <strong>{angleResult.totalLengthValue}</strong>
+                        <strong><CopyableResult value={angleResult.totalLengthValue} /></strong>
                       </div>
                     </div>
                   ) : null}
                 </div>
+                <FormulaToggle formula={formulas.angle} />
               </article>
             ) : null}
 
-            {filteredApplets.some((applet) => applet.id === "tool-power") ? (
+            {filteredApplets.some((a) => a.id === "tool-power") ? (
               <article id="tool-power" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="kW / A / V" hint={toolHints.power} />
@@ -1679,7 +1318,7 @@ export default function App() {
                       <span>Solve</span>
                       <select
                         value={powerTarget}
-                        onChange={(event) => setPowerTarget(event.target.value as PowerTarget)}
+                        onChange={(e) => setPowerTarget(e.target.value as PowerTarget)}
                       >
                         <option value="power">Power (kW)</option>
                         <option value="current">Current (A)</option>
@@ -1690,7 +1329,7 @@ export default function App() {
                       <span>Phase</span>
                       <select
                         value={powerPhase}
-                        onChange={(event) => setPowerPhase(event.target.value as PhaseType)}
+                        onChange={(e) => setPowerPhase(e.target.value as PhaseType)}
                       >
                         <option value="single">Single-phase</option>
                         <option value="three">Three-phase</option>
@@ -1707,7 +1346,7 @@ export default function App() {
                         min="0"
                         step="0.01"
                         value={powerValueA}
-                        onChange={(event) => setPowerValueA(event.target.value)}
+                        onChange={(e) => setPowerValueA(e.target.value)}
                       />
                     </label>
                     <label className="field">
@@ -1718,7 +1357,7 @@ export default function App() {
                         min="0"
                         step="0.01"
                         value={powerValueB}
-                        onChange={(event) => setPowerValueB(event.target.value)}
+                        onChange={(e) => setPowerValueB(e.target.value)}
                       />
                     </label>
                   </div>
@@ -1732,21 +1371,25 @@ export default function App() {
                       max="1"
                       step="0.01"
                       value={powerPf}
-                      onChange={(event) => setPowerPf(event.target.value)}
+                      onChange={(e) => setPowerPf(e.target.value)}
                     />
+                    {Number.parseFloat(powerPf) > 1 && <span className="field-hint">PF must be between 0 and 1</span>}
                   </label>
                 </div>
 
                 <div className="tool-output">
                   <div className="result-main">
                     <p className="result-label">{powerResult.label}</p>
-                    <p className="result-value">{powerResult.resultValue}</p>
+                    <p className="result-value">
+                      <CopyableResult value={powerResult.resultValue} onCopy={() => addHistoryEntry("kW / A / V", powerResult.label, powerResult.resultValue)} />
+                    </p>
                   </div>
                 </div>
+                <FormulaToggle formula={formulas.power} />
               </article>
             ) : null}
 
-            {filteredApplets.some((applet) => applet.id === "tool-vdrop") ? (
+            {filteredApplets.some((a) => a.id === "tool-vdrop") ? (
               <article id="tool-vdrop" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Voltage drop" hint={toolHints.vdrop} />
@@ -1759,7 +1402,7 @@ export default function App() {
                       <span>Phase</span>
                       <select
                         value={vdropPhase}
-                        onChange={(event) => setVdropPhase(event.target.value as PhaseType)}
+                        onChange={(e) => setVdropPhase(e.target.value as PhaseType)}
                       >
                         <option value="single">Single-phase</option>
                         <option value="three">Three-phase</option>
@@ -1773,7 +1416,7 @@ export default function App() {
                         min="0"
                         step="1"
                         value={vdropVoltage}
-                        onChange={(event) => setVdropVoltage(event.target.value)}
+                        onChange={(e) => setVdropVoltage(e.target.value)}
                       />
                     </label>
                   </div>
@@ -1787,7 +1430,7 @@ export default function App() {
                         min="0"
                         step="0.01"
                         value={vdropCurrent}
-                        onChange={(event) => setVdropCurrent(event.target.value)}
+                        onChange={(e) => setVdropCurrent(e.target.value)}
                       />
                     </label>
                     <label className="field">
@@ -1798,7 +1441,7 @@ export default function App() {
                         min="0"
                         step="0.01"
                         value={vdropLength}
-                        onChange={(event) => setVdropLength(event.target.value)}
+                        onChange={(e) => setVdropLength(e.target.value)}
                       />
                     </label>
                   </div>
@@ -1811,7 +1454,7 @@ export default function App() {
                       min="0"
                       step="0.1"
                       value={vdropCableSize}
-                      onChange={(event) => setVdropCableSize(event.target.value)}
+                      onChange={(e) => setVdropCableSize(e.target.value)}
                     />
                   </label>
                 </div>
@@ -1819,23 +1462,26 @@ export default function App() {
                 <div className="tool-output">
                   <div className="result-main">
                     <p className="result-label">Voltage drop</p>
-                    <p className="result-value">{voltageDropResult.dropValue}</p>
+                    <p className="result-value">
+                      <CopyableResult value={voltageDropResult.dropValue} onCopy={() => addHistoryEntry("Voltage drop", "Drop", voltageDropResult.dropValue)} />
+                    </p>
                   </div>
                   <div className="mini-metrics">
                     <div>
                       <span>Drop percent</span>
-                      <strong>{voltageDropResult.percentValue}</strong>
+                      <strong><CopyableResult value={voltageDropResult.percentValue} /></strong>
                     </div>
                     <div>
                       <span>mV / A / m</span>
-                      <strong>{voltageDropResult.mvPerAmpMeterValue}</strong>
+                      <strong><CopyableResult value={voltageDropResult.mvPerAmpMeterValue} /></strong>
                     </div>
                   </div>
                 </div>
+                <FormulaToggle formula={formulas.vdrop} />
               </article>
             ) : null}
 
-            {filteredApplets.some((applet) => applet.id === "tool-breaker") ? (
+            {filteredApplets.some((a) => a.id === "tool-breaker") ? (
               <article id="tool-breaker" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Breaker sizing" hint={toolHints.breaker} />
@@ -1847,7 +1493,7 @@ export default function App() {
                     <span>Input</span>
                     <select
                       value={breakerMode}
-                      onChange={(event) => setBreakerMode(event.target.value as BreakerInputMode)}
+                      onChange={(e) => setBreakerMode(e.target.value as BreakerInputMode)}
                     >
                       <option value="current">Design current</option>
                       <option value="power">Power load</option>
@@ -1863,7 +1509,7 @@ export default function App() {
                         min="0"
                         step="0.01"
                         value={breakerCurrent}
-                        onChange={(event) => setBreakerCurrent(event.target.value)}
+                        onChange={(e) => setBreakerCurrent(e.target.value)}
                       />
                     </label>
                   ) : (
@@ -1873,7 +1519,7 @@ export default function App() {
                           <span>Phase</span>
                           <select
                             value={breakerPhase}
-                            onChange={(event) => setBreakerPhase(event.target.value as PhaseType)}
+                            onChange={(e) => setBreakerPhase(e.target.value as PhaseType)}
                           >
                             <option value="single">Single-phase</option>
                             <option value="three">Three-phase</option>
@@ -1887,7 +1533,7 @@ export default function App() {
                             min="0"
                             step="1"
                             value={breakerVoltage}
-                            onChange={(event) => setBreakerVoltage(event.target.value)}
+                            onChange={(e) => setBreakerVoltage(e.target.value)}
                           />
                         </label>
                       </div>
@@ -1901,7 +1547,7 @@ export default function App() {
                             min="0"
                             step="0.01"
                             value={breakerPower}
-                            onChange={(event) => setBreakerPower(event.target.value)}
+                            onChange={(e) => setBreakerPower(e.target.value)}
                           />
                         </label>
                         <label className="field">
@@ -1913,7 +1559,7 @@ export default function App() {
                             max="1"
                             step="0.01"
                             value={breakerPf}
-                            onChange={(event) => setBreakerPf(event.target.value)}
+                            onChange={(e) => setBreakerPf(e.target.value)}
                           />
                         </label>
                       </div>
@@ -1924,23 +1570,26 @@ export default function App() {
                 <div className="tool-output">
                   <div className="result-main">
                     <p className="result-label">Suggested breaker</p>
-                    <p className="result-value">{breakerResult.breakerValue}</p>
+                    <p className="result-value">
+                      <CopyableResult value={breakerResult.breakerValue} onCopy={() => addHistoryEntry("Breaker sizing", "Breaker", breakerResult.breakerValue)} />
+                    </p>
                   </div>
                   <div className="mini-metrics">
                     <div>
                       <span>Design current</span>
-                      <strong>{breakerResult.currentValue}</strong>
+                      <strong><CopyableResult value={breakerResult.currentValue} /></strong>
                     </div>
                     <div>
                       <span>Standard step</span>
-                      <strong>{breakerResult.rangeValue}</strong>
+                      <strong><CopyableResult value={breakerResult.rangeValue} /></strong>
                     </div>
                   </div>
                 </div>
+                <FormulaToggle formula={formulas.breaker} />
               </article>
             ) : null}
 
-            {filteredApplets.some((applet) => applet.id === "tool-conduit") ? (
+            {filteredApplets.some((a) => a.id === "tool-conduit") ? (
               <article id="tool-conduit" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Conduit fill" hint={toolHints.conduit} />
@@ -1957,7 +1606,7 @@ export default function App() {
                         min="0"
                         step="0.1"
                         value={conduitDiameter}
-                        onChange={(event) => setConduitDiameter(event.target.value)}
+                        onChange={(e) => setConduitDiameter(e.target.value)}
                       />
                     </label>
                     <label className="field">
@@ -1968,7 +1617,7 @@ export default function App() {
                         min="0"
                         step="0.1"
                         value={conduitCableDiameter}
-                        onChange={(event) => setConduitCableDiameter(event.target.value)}
+                        onChange={(e) => setConduitCableDiameter(e.target.value)}
                       />
                     </label>
                   </div>
@@ -1982,7 +1631,7 @@ export default function App() {
                         min="1"
                         step="1"
                         value={conduitCableCount}
-                        onChange={(event) => setConduitCableCount(event.target.value)}
+                        onChange={(e) => setConduitCableCount(e.target.value)}
                       />
                     </label>
                     <label className="field">
@@ -1993,7 +1642,7 @@ export default function App() {
                         min="1"
                         step="1"
                         value={conduitMaxFill}
-                        onChange={(event) => setConduitMaxFill(event.target.value)}
+                        onChange={(e) => setConduitMaxFill(e.target.value)}
                       />
                     </label>
                   </div>
@@ -2002,23 +1651,26 @@ export default function App() {
                 <div className="tool-output">
                   <div className="result-main">
                     <p className="result-label">Fill</p>
-                    <p className="result-value">{conduitResult.fillValue}</p>
+                    <p className="result-value">
+                      <CopyableResult value={conduitResult.fillValue} onCopy={() => addHistoryEntry("Conduit fill", "Fill", conduitResult.fillValue)} />
+                    </p>
                   </div>
                   <div className="mini-metrics">
                     <div>
                       <span>Used area</span>
-                      <strong>{conduitResult.usedAreaValue}</strong>
+                      <strong><CopyableResult value={conduitResult.usedAreaValue} /></strong>
                     </div>
                     <div>
                       <span>Free area</span>
-                      <strong>{conduitResult.remainingValue}</strong>
+                      <strong><CopyableResult value={conduitResult.remainingValue} /></strong>
                     </div>
                   </div>
                 </div>
+                <FormulaToggle formula={formulas.conduit} />
               </article>
             ) : null}
 
-            {filteredApplets.some((applet) => applet.id === "tool-structure") ? (
+            {filteredApplets.some((a) => a.id === "tool-structure") ? (
               <article id="tool-structure" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Structural limits" hint={toolHints.structure} />
@@ -2035,7 +1687,7 @@ export default function App() {
                         min="0"
                         step="1"
                         value={structureWall}
-                        onChange={(event) => setStructureWall(event.target.value)}
+                        onChange={(e) => setStructureWall(e.target.value)}
                       />
                     </label>
                     <label className="field">
@@ -2046,7 +1698,7 @@ export default function App() {
                         min="0"
                         step="1"
                         value={structureJoist}
-                        onChange={(event) => setStructureJoist(event.target.value)}
+                        onChange={(e) => setStructureJoist(e.target.value)}
                       />
                     </label>
                   </div>
@@ -2056,18 +1708,19 @@ export default function App() {
                   <div className="mini-metrics stacked">
                     <div>
                       <span>Vertical chase</span>
-                      <strong>{structureResult.vertical}</strong>
+                      <strong><CopyableResult value={structureResult.vertical} onCopy={() => addHistoryEntry("Structural limits", "Vertical chase", structureResult.vertical)} /></strong>
                     </div>
                     <div>
                       <span>Horizontal chase</span>
-                      <strong>{structureResult.horizontal}</strong>
+                      <strong><CopyableResult value={structureResult.horizontal} /></strong>
                     </div>
                     <div>
                       <span>Joist notch</span>
-                      <strong>{structureResult.notch}</strong>
+                      <strong><CopyableResult value={structureResult.notch} /></strong>
                     </div>
                   </div>
                 </div>
+                <FormulaToggle formula={formulas.structure} />
               </article>
             ) : null}
           </div>
@@ -2174,7 +1827,7 @@ export default function App() {
 
       {paletteOpen ? (
         <div className="modal-backdrop" onClick={() => setPaletteOpen(false)}>
-          <div className="modal-shell" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+          <div className="modal-shell" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
                 <h2>Command palette</h2>
@@ -2194,7 +1847,7 @@ export default function App() {
                 placeholder="Go to tools, notes, help"
                 autoComplete="off"
                 value={paletteQuery}
-                onChange={(event) => setPaletteQuery(event.target.value)}
+                onChange={(e) => setPaletteQuery(e.target.value)}
                 onKeyDown={handlePaletteKeyDown}
               />
             </label>
@@ -2233,7 +1886,7 @@ export default function App() {
             className="modal-shell help-shell"
             role="dialog"
             aria-modal="true"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
               <div>
@@ -2274,6 +1927,51 @@ export default function App() {
                   </button>
                 </div>
               ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {historyOpen ? (
+        <div className="modal-backdrop" onClick={() => setHistoryOpen(false)}>
+          <div
+            className="modal-shell history-shell"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div>
+                <h2>History</h2>
+                <p className="page-copy">Recent calculations</p>
+              </div>
+              <div className="modal-header-actions">
+                {historyEntries.length > 0 && (
+                  <button className="ghost-button" type="button" onClick={clearHistory}>
+                    Clear all
+                  </button>
+                )}
+                <button className="ghost-button" type="button" onClick={() => setHistoryOpen(false)}>
+                  Close
+                </button>
+              </div>
+            </div>
+
+            <div className="history-list">
+              {historyEntries.length ? (
+                historyEntries.map((entry) => (
+                  <div key={entry.id} className="history-entry">
+                    <span className="history-tool">{entry.tool}</span>
+                    <span className="history-label">{entry.label}</span>
+                    <strong className="history-value">{entry.value}</strong>
+                    <span className="history-time">
+                      {new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="empty-state">No history yet. Copy a result to start tracking.</div>
+              )}
             </div>
           </div>
         </div>
