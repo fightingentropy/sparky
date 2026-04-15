@@ -82,6 +82,7 @@ export type ConduitResult = {
   fillValue: string;
   usedAreaValue: string;
   remainingValue: string;
+  overFill: boolean;
 };
 
 export type StructureResult = {
@@ -339,10 +340,6 @@ export function calcPower(
     return { label: emptyLabel, resultValue: `-- ${emptyUnit}` };
   }
 
-  if ((target === "current" || target === "voltage") && Math.abs(valueB * pf) < EPSILON) {
-    return { label: emptyLabel, resultValue: `-- ${emptyUnit}` };
-  }
-
   if (target === "power") {
     const powerKw = (phaseFactor * valueA * valueB * pf) / 1000;
     return { label: "Power", resultValue: `${formatNumber(powerKw)} kW` };
@@ -475,7 +472,7 @@ export function calcConduit(
     count <= 0 ||
     maxFill <= 0
   ) {
-    return { fillValue: "-- %", usedAreaValue: "-- mm²", remainingValue: "-- mm²" };
+    return { fillValue: "-- %", usedAreaValue: "-- mm²", remainingValue: "-- mm²", overFill: false };
   }
 
   const conduitArea = Math.PI * (conduit / 2) ** 2;
@@ -487,7 +484,8 @@ export function calcConduit(
   return {
     fillValue: `${formatNumber(fillPercent)} %`,
     usedAreaValue: `${formatNumber(usedArea)} mm²`,
-    remainingValue: `${formatNumber(remainingArea)} mm²`
+    remainingValue: `${formatNumber(remainingArea)} mm²`,
+    overFill: fillPercent > maxFill
   };
 }
 

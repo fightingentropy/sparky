@@ -238,11 +238,18 @@ describe("calcConduit", () => {
     // conduit area = pi*100 = 314.16, cable area = pi*9 = 28.27, used = 84.82
     // fill = 84.82/314.16 * 100 = 27%
     expect(result.fillValue).toBe("27 %");
+    expect(result.overFill).toBe(false);
+  });
+
+  it("flags overfill when fill exceeds max", () => {
+    const result = calcConduit("20", "6", "6", "40");
+    expect(result.overFill).toBe(true);
   });
 
   it("returns placeholder for zero diameter", () => {
     const result = calcConduit("0", "6", "3", "40");
     expect(result.fillValue).toBe("-- %");
+    expect(result.overFill).toBe(false);
   });
 });
 

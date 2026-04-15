@@ -409,7 +409,7 @@ export default function App() {
   const toolGridRef = useRef<HTMLDivElement | null>(null);
   const paletteInputRef = useRef<HTMLInputElement | null>(null);
   const nextUnistrutContainmentIdRef = useRef(
-    DEFAULT_UNISTRUT_LENGTH_VALUES.containments.length + 1
+    Math.max(...unistrutContainments.map((c) => c.id), 0) + 1
   );
 
   // Sync count input when containments change (e.g. from localStorage load)
@@ -531,7 +531,7 @@ export default function App() {
 
   const angleResult = useMemo(() =>
     calcAngle(angleDrop, angleValue, angleTopStraight, angleBottomStraight, angleAllowance, angleUnit),
-    [angleAdvanced, angleAllowance, angleBottomStraight, angleDrop, angleTopStraight, angleUnit, angleValue]
+    [angleAllowance, angleBottomStraight, angleDrop, angleTopStraight, angleUnit, angleValue]
   );
 
   const powerResult = useMemo(() =>
@@ -1654,6 +1654,11 @@ export default function App() {
                     <p className="result-value">
                       <CopyableResult value={conduitResult.fillValue} onCopy={() => addHistoryEntry("Conduit fill", "Fill", conduitResult.fillValue)} />
                     </p>
+                    {conduitResult.overFill && (
+                      <p className="field-error" role="alert">
+                        Fill exceeds the {conduitMaxFill}% limit.
+                      </p>
+                    )}
                   </div>
                   <div className="mini-metrics">
                     <div>

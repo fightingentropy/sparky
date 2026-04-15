@@ -45,6 +45,13 @@ self.addEventListener("fetch", (event) => {
           return cached;
         }
 
+        if (event.request.mode === "navigate") {
+          const fallback = await caches.match("/");
+          if (fallback) {
+            return fallback;
+          }
+        }
+
         throw new TypeError("Network request failed and no cache entry was available.");
       })
   );
