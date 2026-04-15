@@ -11,12 +11,16 @@ export type HistoryEntry = {
 const MAX_ENTRIES = 30;
 const STORAGE_KEY = "sparky-history";
 
-let nextId = Date.now();
+let nextId = 1;
 
 function loadHistory(): HistoryEntry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as HistoryEntry[]) : [];
+    const entries = raw ? (JSON.parse(raw) as HistoryEntry[]) : [];
+    for (const e of entries) {
+      if (e.id >= nextId) nextId = e.id + 1;
+    }
+    return entries;
   } catch {
     return [];
   }
