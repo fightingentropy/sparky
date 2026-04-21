@@ -22,8 +22,9 @@ import { useHistory } from "./useHistory";
 import { useTheme } from "./useTheme";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
+import { ExamPage } from "./ExamPage";
 
-type PageId = "home" | "cheatsheet";
+type PageId = "home" | "cheatsheet" | "exams";
 
 type LegendItem = {
   label: string;
@@ -314,7 +315,7 @@ function ToolTitle({ title, hint }: { title: string; hint: string }) {
 
 function getPageFromHash(): PageId {
   const hash = window.location.hash.replace("#", "");
-  if (hash === "home" || hash === "cheatsheet") return hash;
+  if (hash === "home" || hash === "cheatsheet" || hash === "exams") return hash;
   return DEFAULT_PAGE;
 }
 
@@ -619,6 +620,13 @@ export default function App() {
         action: () => navigateTo("cheatsheet")
       },
       {
+        title: "Exams",
+        subtitle: "Interactive mock exams.",
+        tag: "Page",
+        keywords: "exam mock quiz questions nvq level 3 city guilds",
+        action: () => navigateTo("exams")
+      },
+      {
         title: "Help",
         subtitle: "Show shortcuts.",
         tag: "Action",
@@ -830,7 +838,8 @@ export default function App() {
           {(
             [
               { id: "home", label: "Home" },
-              { id: "cheatsheet", label: "Notes" }
+              { id: "cheatsheet", label: "Notes" },
+              { id: "exams", label: "Exams" }
             ] as const
           ).map((item) => (
             <a
@@ -1828,6 +1837,8 @@ export default function App() {
             <p className="empty-state">No cheat sheet entries match that search.</p>
           ) : null}
         </section>
+
+        <ExamPage isActive={page === "exams"} />
       </main>
 
       {paletteOpen ? (
