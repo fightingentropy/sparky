@@ -90,10 +90,11 @@ export function ExamPage({ isActive }: Props) {
       <div className="exam-shell">
         <header className="exam-hero">
           <div className="exam-hero-text">
-            {EXAMS.length > 1 ? (
-              <label className="exam-select-label">
-                <span>Mock exam</span>
+            <div className="exam-title-wrap">
+              {EXAMS.length > 1 ? (
                 <select
+                  className="exam-title-select"
+                  aria-label="Mock exam"
                   value={exam.id}
                   onChange={(event) => {
                     setSelectedExamId(event.target.value);
@@ -105,12 +106,23 @@ export function ExamPage({ isActive }: Props) {
                     </option>
                   ))}
                 </select>
-              </label>
-            ) : null}
-            <h2>{exam.title}</h2>
-            <p className="exam-subtitle">{exam.subtitle}</p>
-            <p className="exam-description">{exam.description}</p>
-            <p className="exam-format">{exam.format}</p>
+              ) : (
+                <h2>{exam.title}</h2>
+              )}
+              <span
+                className="exam-title-info"
+                tabIndex={0}
+                role="button"
+                aria-label="About this exam"
+              >
+                i
+              </span>
+              <div className="exam-tooltip" role="tooltip">
+                <span className="exam-tooltip-subtitle">{exam.subtitle}</span>
+                <p className="exam-tooltip-description">{exam.description}</p>
+                <p className="exam-tooltip-format">{exam.format}</p>
+              </div>
+            </div>
           </div>
           <div className="exam-hero-stats">
             <div className="exam-stat">
