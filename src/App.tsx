@@ -435,11 +435,7 @@ export default function App() {
   function scrollToTool(index: number) {
     const grid = toolGridRef.current;
     if (!grid) return;
-    const panels = grid.querySelectorAll<HTMLElement>(".tool-panel");
-    const target = panels[index];
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
-    }
+    grid.scrollTo({ left: grid.clientWidth * index, behavior: "smooth" });
   }
 
   function clearContainmentRod() {
@@ -731,23 +727,16 @@ export default function App() {
     const grid = toolGridRef.current;
     if (!grid) return;
 
-    const panels = grid.querySelectorAll<HTMLElement>(".tool-panel");
-    if (!panels.length) return;
+    function handleScroll() {
+      const width = grid!.clientWidth;
+      if (width === 0) return;
+      const index = Math.round(grid!.scrollLeft / width);
+      setActiveToolIndex((current) => (current === index ? current : index));
+    }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            const index = Array.from(panels).indexOf(entry.target as HTMLElement);
-            if (index >= 0) setActiveToolIndex(index);
-          }
-        }
-      },
-      { root: grid, threshold: 0.5 }
-    );
-
-    for (const panel of panels) observer.observe(panel);
-    return () => observer.disconnect();
+    grid.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => grid.removeEventListener("scroll", handleScroll);
   }, [filteredApplets]);
 
   function handlePaletteKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
