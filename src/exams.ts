@@ -506,6 +506,486 @@ export const EXAMS: Exam[] = [
       "Diversity calculations — On-Site Guide Appendix A, worked examples.",
       "Amendment 4:2026 updates — if sitting after October 2026, revise the new Section on stationary secondary batteries, Section 710 (medical locations) revisions, and functional earthing/bonding for ICT equipment."
     ]
+  },
+  {
+    id: "l3-inspection-testing",
+    title: "Level 3 — Inspection & Testing",
+    subtitle: "Dedicated BS 7671 / GN3 mock",
+    description:
+      "A 30-question mock dedicated to the inspection and testing content of the Level 3 NVQ (e.g. C&G 2357 Unit 309, 5357, or the equivalent EAL unit — also useful preparation for C&G 2391-52). Covers purpose and scope of verification, certification and EICR codes, test instruments and GS38, the full dead and live test sequence, acceptance criteria, and interpretation of results. Built against BS 7671 (18th Edition, A2:2022 + A3:2024) and Guidance Note 3.",
+    format: "30 multiple-choice questions. Aim for 70%+ in about 60 minutes as a realistic pass standard.",
+    passMark: 21,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Purpose, Scope & Documents",
+        questions: [
+          {
+            number: 1,
+            prompt:
+              "The primary purpose of initial verification of a new electrical installation is to:",
+            options: {
+              A: "Confirm the installation matches the contract specification",
+              B: "Verify the installation meets the requirements of BS 7671 and is safe to be put into service",
+              C: "Prove that every circuit operates as intended",
+              D: "Provide paperwork for the customer's insurer"
+            },
+            answer: "B",
+            explanation:
+              "BS 7671 Part 6. Initial verification confirms the installation complies with BS 7671 and is safe to energise and put into service. Contract conformity (A) is a separate commercial check; functional proving (C) is one element of verification but not its overall purpose."
+          },
+          {
+            number: 2,
+            prompt:
+              "A contractor has installed a new final circuit in an existing domestic installation. The appropriate certification is:",
+            options: {
+              A: "A Minor Electrical Installation Works Certificate (MEIWC)",
+              B: "An Electrical Installation Certificate (EIC) with the Schedule of Inspections and Schedule of Test Results",
+              C: "An Electrical Installation Condition Report (EICR)",
+              D: "A functional testing record only"
+            },
+            answer: "B",
+            explanation:
+              "Any new circuit — or new installation — requires an EIC accompanied by the inspection and test schedules. MEIWC is only permitted for additions or alterations to an existing circuit that do not extend to a new circuit. EICRs are issued following periodic inspection of an existing installation."
+          },
+          {
+            number: 3,
+            prompt:
+              "A Minor Electrical Installation Works Certificate (MEIWC) may correctly be issued for:",
+            options: {
+              A: "Installation of a new consumer unit",
+              B: "An additional socket outlet added as a spur from an existing ring final circuit, with no new circuit created",
+              C: "A new dedicated circuit that has not yet been energised",
+              D: "Recording C2 defects identified during a periodic inspection"
+            },
+            answer: "B",
+            explanation:
+              "MEIWC covers additions or alterations to an existing circuit where no new circuit is created — e.g. a spur, replacing a damaged accessory, relocating a switch. Anything involving a new circuit or a new installation requires an EIC."
+          },
+          {
+            number: 4,
+            prompt:
+              "An Electrical Installation Condition Report (EICR) is:",
+            options: {
+              A: "A certificate issued at the completion of new installation work",
+              B: "A record of the results of a periodic inspection and test on an existing installation, with coded observations (C1, C2, C3, FI)",
+              C: "A document only issued when the installation is found to be defective",
+              D: "A design certificate produced before installation starts"
+            },
+            answer: "B",
+            explanation:
+              "The EICR documents the condition of an existing installation at the time of the periodic inspection. Observations are coded C1 (danger present), C2 (potentially dangerous), C3 (improvement recommended) or FI (further investigation). The presence of any C1, C2 or FI makes the overall outcome Unsatisfactory."
+          },
+          {
+            number: 5,
+            prompt:
+              "A pre-test visual inspection (Reg 642.3) should confirm, among other items, that:",
+            options: {
+              A: "Only that no cables show external damage",
+              B: "Equipment is correctly selected and erected, conductors are correctly identified and connected, protective devices are correctly rated and set, barriers/enclosures are in place, and required labels and notices are fitted",
+              C: "Only that earthing is present somewhere in the installation",
+              D: "Only that the installation appears to function"
+            },
+            answer: "B",
+            explanation:
+              "The visual inspection is structured and wide-ranging: correct selection of equipment for the environment, correct rating and setting of protective devices, correct connection and identification of conductors, presence of fire barriers, warning notices, labelling, etc. A visual inspection is not simply \"does it look OK\" — a significant proportion of defects are caught before any test instrument is used."
+          }
+        ]
+      },
+      {
+        id: "section-2",
+        title: "Section 2 — Test Instruments & GS38",
+        questions: [
+          {
+            number: 6,
+            prompt:
+              "HSE Guidance Note GS38 requires that test probes and leads have:",
+            options: {
+              A: "Finger barriers, exposed metal tip no more than 4 mm (preferably 2 mm or shrouded/spring-loaded), adequately insulated leads, and fused leads where appropriate",
+              B: "Crocodile clips only, never probes",
+              C: "Probes at least 100 mm long to improve reach",
+              D: "No fuses in the leads, so that high test currents can flow"
+            },
+            answer: "A",
+            explanation:
+              "GS38 is the practical standard for test probes used on live equipment. Finger barriers, a short exposed tip (≤ 4 mm, preferably ≤ 2 mm or retractable/shrouded), correctly rated insulation, and fused leads together limit the risk of shock and of creating a fault during a live test. Unsuitable probes are one of the commonest contributors to shock incidents in testing."
+          },
+          {
+            number: 7,
+            prompt:
+              "A proving unit (or other known live source) is required:",
+            options: {
+              A: "Only when testing RCDs",
+              B: "Before and after each use of a voltage indicator during safe isolation, to confirm the indicator is functioning",
+              C: "To measure earth fault loop impedance",
+              D: "As a substitute for an insulation resistance tester"
+            },
+            answer: "B",
+            explanation:
+              "Safe isolation: prove the tester on a known source → test at the point of work for dead → re-prove the tester. If the re-prove fails, the preceding \"dead\" confirmation is worthless. A proving unit gives a reliably safe source for this and is itself battery-limited to avoid shock risk."
+          },
+          {
+            number: 8,
+            prompt:
+              "The standard insulation resistance test voltage for a 230/400 V LV installation is:",
+            options: {
+              A: "100 V AC",
+              B: "250 V DC",
+              C: "500 V DC",
+              D: "1000 V DC"
+            },
+            answer: "C",
+            explanation:
+              "Table 64 of BS 7671. LV installations in the range above 50 V up to 500 V are tested at 500 V DC, with a minimum acceptable value of 1.0 MΩ. SELV/PELV circuits are tested at 250 V DC (min 0.5 MΩ); systems above 500 V use 1000 V DC."
+          },
+          {
+            number: 9,
+            prompt:
+              "A low-resistance ohmmeter used for continuity testing must be capable of delivering:",
+            options: {
+              A: "At least 1 A at 50 V",
+              B: "A short-circuit current of between 200 mA and 10 A, at an open-circuit voltage of 4 V to 24 V AC or DC",
+              C: "Exactly 500 mA at 12 V AC",
+              D: "A test current of 30 mA only"
+            },
+            answer: "B",
+            explanation:
+              "Set out in GN3: 200 mA to 10 A, 4–24 V AC or DC. The current must be high enough to break through oxide and surface contamination at joints so poor connections are revealed rather than masked. It is NOT the same instrument used for insulation resistance testing."
+          }
+        ]
+      },
+      {
+        id: "section-3",
+        title: "Section 3 — Dead Tests",
+        questions: [
+          {
+            number: 10,
+            prompt:
+              "The correct sequence of DEAD tests on a new installation, per GN3, is:",
+            options: {
+              A: "Insulation resistance → continuity → polarity",
+              B: "Continuity of protective conductors → continuity of ring final conductors → insulation resistance → polarity (dead) → earth electrode resistance (where applicable)",
+              C: "Polarity → earth fault loop impedance → insulation resistance",
+              D: "Functional testing → insulation resistance → continuity"
+            },
+            answer: "B",
+            explanation:
+              "GN3 sequence. cpc continuity is first so the circuit is proven safe to energise for subsequent steps; IR is then carried out (a 500 V DC test on unproven cpc is hazardous); polarity dead and earth electrode resistance follow. Live tests (polarity live, Ze, Zs, PFC, RCD, functional) are carried out only after all dead tests pass and the installation is energised."
+          },
+          {
+            number: 11,
+            prompt:
+              "The R1 + R2 test method for continuity of the circuit protective conductor is carried out by:",
+            options: {
+              A: "Linking line and cpc at the origin, nulling the leads, then measuring between line and cpc at each accessory along the circuit",
+              B: "Measuring directly between any two earthed metal parts",
+              C: "Applying 500 V DC between line and cpc at the origin",
+              D: "Taking a live earth fault loop impedance reading at each accessory"
+            },
+            answer: "A",
+            explanation:
+              "Link the line conductor to the cpc at the distribution board (with the circuit isolated), null the test leads, and measure between line and cpc at each point. The reading is R1 + R2, the end-to-end resistance of the line + cpc. Used to confirm cpc continuity and to calculate Zs without energising: Zs = Ze + (R1+R2), with a temperature correction where appropriate."
+          },
+          {
+            number: 12,
+            prompt:
+              "The R2 wander-lead method is preferred to R1+R2 when:",
+            options: {
+              A: "The circuit is energised",
+              B: "Testing the continuity of main protective or supplementary bonding conductors to extraneous-conductive-parts, or where no paired line conductor is available",
+              C: "Carrying out an earth electrode test on a TT system",
+              D: "Checking the balance of a ring final circuit"
+            },
+            answer: "B",
+            explanation:
+              "The wander-lead R2 test uses a long lead from the MET (nulled first) to the bonded part under test. It is the usual method for main protective bonding, supplementary bonding, and any cpc where you cannot easily link to a line conductor at the origin. It gives the resistance of the protective conductor alone."
+          },
+          {
+            number: 13,
+            prompt:
+              "The \"figure-of-eight\" (cross-connection) ring final circuit test is used to:",
+            options: {
+              A: "Prove that the ring has no breaks, interconnections or spurs-on-a-spur, by cross-connecting line and cpc at the DB so that R1+R2 measured at any socket on the ring is substantially equal to (r1 + r2) / 4",
+              B: "Detect insulation breakdown between line and neutral",
+              C: "Measure the RCD operating time at 1×IΔn",
+              D: "Record the prospective fault current"
+            },
+            answer: "A",
+            explanation:
+              "After end-to-end measurement of r1, rn and r2, the line end of one leg is cross-connected to the cpc end of the other (and vice versa) at the DB. At every socket on the ring, R1+R2 should then equal (r1 + r2) / 4 with only small variations. A significant variation indicates a break, an interconnection, or a spur fed from a spur."
+          },
+          {
+            number: 14,
+            prompt:
+              "The minimum acceptable insulation resistance for a 230 V LV final circuit tested at 500 V DC is:",
+            options: {
+              A: "0.5 MΩ",
+              B: "1 MΩ",
+              C: "2 MΩ",
+              D: "10 MΩ"
+            },
+            answer: "B",
+            explanation:
+              "Table 64, BS 7671: minimum 1.0 MΩ for LV installations up to 500 V, tested at 500 V DC. A reading between 1 and 2 MΩ is a pass, but it indicates deteriorating insulation and should be recorded and investigated. SELV/PELV circuits are tested at 250 V DC with a minimum of 0.5 MΩ."
+          },
+          {
+            number: 15,
+            prompt:
+              "When carrying out an insulation resistance test between live conductors and earth on a final circuit, the accepted practice is to:",
+            options: {
+              A: "Leave all lamps, dimmers and electronic equipment connected for a realistic reading",
+              B: "Disconnect or short out voltage-sensitive equipment (electronic dimmers, SPDs, RCBO electronics), remove lamps, and link line and neutral together so a single test measures both live conductors to earth",
+              C: "Increase the test voltage to 1000 V DC regardless of the installation",
+              D: "Leave RCDs in circuit to protect the tester from fault current"
+            },
+            answer: "B",
+            explanation:
+              "Linking L and N and testing to earth gives one figure covering both live conductors, and ensures items downstream of single-pole switches are included. 500 V DC will damage SPDs and many electronic devices; lamps and dimmers also typically read low and mask the cable IR. Disconnecting and retesting section by section is also how many IR faults are localised."
+          },
+          {
+            number: 16,
+            prompt:
+              "A dead polarity check on a final circuit confirms that:",
+            options: {
+              A: "Every single-pole switch, fuse or circuit breaker is connected in the line conductor (not the neutral), and that socket outlets and accessories have line, neutral and cpc on the correct terminals",
+              B: "The RCD operates correctly at 1×IΔn",
+              C: "The earth electrode resistance is low",
+              D: "The ring final has balanced legs"
+            },
+            answer: "A",
+            explanation:
+              "Polarity has two strands: (i) single-pole devices must only interrupt the line conductor, and (ii) accessories must be wired with L, N and cpc on the correct terminals. Polarity is confirmed both dead (as a continuity-style test) and live (with a voltage indicator) — both are required."
+          }
+        ]
+      },
+      {
+        id: "section-4",
+        title: "Section 4 — Live Tests",
+        questions: [
+          {
+            number: 17,
+            prompt:
+              "Earth fault loop impedance at the origin (Ze) is correctly measured by:",
+            options: {
+              A: "Leaving all main protective bonding and the main switch as normal during the test",
+              B: "Energising the supply, opening the main switch to isolate the installation, disconnecting the main protective bonding conductors at the MET, then testing between the incoming line conductor and the separated earth; reconnecting bonding immediately afterwards",
+              C: "Reading the value from the DNO label without measurement",
+              D: "Carrying out a 500 V DC test between line and earth"
+            },
+            answer: "B",
+            explanation:
+              "Ze is the loop impedance external to the installation — supply + cable + earth return. Main bonding is disconnected at the MET so parallel paths via gas/water services don't give a falsely low reading. Opening the main switch isolates the installation from the tester. The test must be kept brief and bonding reconnected immediately — the installation is temporarily less safe while the bonding is lifted."
+          },
+          {
+            number: 18,
+            prompt:
+              "Zs for a circuit can be established by:",
+            options: {
+              A: "Direct measurement at the furthest point of the circuit using an earth fault loop impedance tester (ideally the no-trip / low-current function on RCD-protected circuits), OR by calculation as Zs = Ze + (R1+R2), applying a temperature correction where appropriate",
+              B: "Insulation resistance measurement only",
+              C: "Polarity test only",
+              D: "Only direct measurement — calculation is never permitted"
+            },
+            answer: "A",
+            explanation:
+              "Both methods are accepted and often cross-checked. Direct measurement on RCD-protected circuits uses the no-trip function so the RCD doesn't operate during the test. Calculation using Zs = Ze + (R1+R2) is useful as a verification and when direct measurement isn't practical; R1+R2 measured cold must be corrected for the conductor's operating temperature before comparison with Table 41.3 maxima."
+          },
+          {
+            number: 19,
+            prompt:
+              "The Prospective Fault Current (PFC) recorded on the certificate should be:",
+            options: {
+              A: "PSCC at the origin only",
+              B: "PEFC at the origin only",
+              C: "The higher of PSCC (prospective short-circuit current, between live conductors) and PEFC (prospective earth fault current, line to earth), measured at the origin",
+              D: "Half of PSCC"
+            },
+            answer: "C",
+            explanation:
+              "Record the higher of the two values so every protective device is demonstrated to have a breaking capacity at least equal to the worst-case fault level. On a typical TN-C-S domestic supply in the UK this is commonly in the 1–16 kA range, depending on proximity to the substation."
+          },
+          {
+            number: 20,
+            prompt:
+              "The maximum permitted disconnection time for a general-purpose 30 mA RCD (to BS EN 61008 or 61009) tested at 1 × IΔn is:",
+            options: {
+              A: "40 ms",
+              B: "100 ms",
+              C: "200 ms",
+              D: "300 ms"
+            },
+            answer: "D",
+            explanation:
+              "300 ms at 1×IΔn for a general (non-S) type RCD. The other two test points are 0.5×IΔn (must NOT trip within 2 s) and 5×IΔn (must trip within 40 ms). S-type (time-delayed) RCDs are allowed 130–500 ms at 1×IΔn and are used where selectivity with a downstream RCD is required."
+          },
+          {
+            number: 21,
+            prompt:
+              "When the same 30 mA RCD is tested at 5 × IΔn (150 mA), the maximum permitted disconnection time is:",
+            options: {
+              A: "40 ms",
+              B: "150 ms",
+              C: "300 ms",
+              D: "500 ms"
+            },
+            answer: "A",
+            explanation:
+              "40 ms at 5 × IΔn is the high-current test that underpins the use of 30 mA RCDs as additional protection against direct contact — the fault must be cleared before ventricular fibrillation risk becomes dangerous. A common trap in exams is to swap the 40 ms and 300 ms figures between the 5× and 1× tests."
+          },
+          {
+            number: 22,
+            prompt:
+              "An Arc Fault Detection Device (AFDD) is functionally tested in service by:",
+            options: {
+              A: "Creating a genuine arcing fault with test leads",
+              B: "Using the integrated test button provided on the device, in accordance with the manufacturer's instructions, and verifying the device trips and can be re-set",
+              C: "A 500 V DC insulation resistance test",
+              D: "An earth fault loop impedance test"
+            },
+            answer: "B",
+            explanation:
+              "There is no standard on-site injection test that reproduces an arc signature — functional verification relies on the manufacturer's test button, which simulates the arc detection electronics and proves the trip mechanism works. The device also carries out continuous self-monitoring. Record the functional test outcome on the schedule."
+          }
+        ]
+      },
+      {
+        id: "section-5",
+        title: "Section 5 — Certification & EICR Codes",
+        questions: [
+          {
+            number: 23,
+            prompt:
+              "An Electrical Installation Certificate (EIC) for new work requires signatures confirming responsibility for:",
+            options: {
+              A: "The customer only",
+              B: "Design, construction, and inspection & testing (which may be discharged by the same competent person on smaller jobs, but each role is signed for separately)",
+              C: "The Distribution Network Operator",
+              D: "The local authority building control officer"
+            },
+            answer: "B",
+            explanation:
+              "The EIC separates the three responsibilities explicitly, even when one individual discharges all three. This makes each competent person accountable for the part of the work they have signed for, and supports traceability if a fault is later investigated."
+          },
+          {
+            number: 24,
+            prompt:
+              "An EICR observation coded C1 means:",
+            options: {
+              A: "Improvement recommended",
+              B: "Danger present — risk of injury; immediate remedial action required",
+              C: "Potentially dangerous — urgent remedial action required",
+              D: "Further investigation required"
+            },
+            answer: "B",
+            explanation:
+              "C1 is the most serious code — danger is present now (e.g. exposed live parts, damaged insulation with accessible copper). The inspector should make safe before leaving the site (often by isolation) and inform the duty holder immediately. Any C1 automatically renders the overall EICR result Unsatisfactory."
+          },
+          {
+            number: 25,
+            prompt:
+              "An EICR observation coded C2 means:",
+            options: {
+              A: "Danger is present",
+              B: "Potentially dangerous — urgent remedial action required",
+              C: "Improvement recommended but not urgent",
+              D: "No action required"
+            },
+            answer: "B",
+            explanation:
+              "C2 indicates a fault that could become dangerous if circumstances change — e.g. missing supplementary bonding in a bathroom where the omission conditions are not fully met, or a damaged accessory likely to expose live parts in use. C2 renders the report Unsatisfactory and must be remedied promptly, but does not necessarily require same-visit make-safe action."
+          },
+          {
+            number: 26,
+            prompt:
+              "Under the Electrical Safety Standards in the Private Rented Sector (England) Regulations 2020, the maximum interval between EICRs on a privately rented domestic property is:",
+            options: {
+              A: "1 year",
+              B: "3 years",
+              C: "5 years, or at change of tenancy if sooner",
+              D: "10 years"
+            },
+            answer: "C",
+            explanation:
+              "The 2020 Regulations require a maximum 5-year EICR interval for privately rented dwellings in England, with a fresh EICR at change of tenancy if that falls sooner. Owner-occupied domestic is IET-recommended at up to 10 years; HMOs and commercial are typically 5 years; industrial often 3 years."
+          },
+          {
+            number: 27,
+            prompt:
+              "The Schedule of Test Results accompanying an EIC or EICR is used to:",
+            options: {
+              A: "Replace the EIC",
+              B: "Record the numerical results obtained during testing — continuity, insulation resistance, Zs, PFC, RCD times, polarity — circuit by circuit, for traceability and audit",
+              C: "Record only RCD test results",
+              D: "Document a verbal handover to the customer"
+            },
+            answer: "B",
+            explanation:
+              "The Schedule of Test Results is the factual numerical record per circuit. It is paired with the Schedule of Inspections (a tick-box record of inspection items) to form the technical evidence behind the signed EIC or EICR. Without complete schedules the certificate itself is not valid."
+          }
+        ]
+      },
+      {
+        id: "section-6",
+        title: "Section 6 — Interpretation & Practical",
+        questions: [
+          {
+            number: 28,
+            prompt:
+              "An insulation resistance test on a 230 V final circuit, live conductors linked to earth, reads 0.5 MΩ. The correct response is:",
+            options: {
+              A: "Record as a fail — below the 1.0 MΩ minimum of Table 64; isolate, investigate by disconnecting accessories one at a time and retesting, then rectify the fault",
+              B: "Record as a comfortable pass",
+              C: "Record as a healthy reading typical of a new installation",
+              D: "Issue an EIC unchanged"
+            },
+            answer: "A",
+            explanation:
+              "0.5 MΩ is below the 1.0 MΩ minimum — a fail. Likely causes: pinched or nicked cable at a back box, moisture ingress, or a failing accessory/load left in circuit (dimmer, SPD, lamp). Localise by splitting the circuit progressively and retesting each section."
+          },
+          {
+            number: 29,
+            prompt:
+              "A measured Zs on a 32 A Type B final circuit is 1.55 Ω. The maximum Zs from Table 41.3 (230 V, 0.4 s disconnection) is 1.37 Ω. The correct action is:",
+            options: {
+              A: "Record as a pass — 1.55 Ω is close enough to 1.37 Ω",
+              B: "Record as non-compliant — the circuit will not achieve automatic disconnection within 0.4 s by overcurrent alone; investigate cable length and csa, cpc size, and termination integrity, or provide ADS by a 30 mA RCD and re-assess",
+              C: "Upsize the protective device to a 40 A Type B to make Zs fit",
+              D: "Fit a time-delayed RCD to slow disconnection"
+            },
+            answer: "B",
+            explanation:
+              "Measured Zs exceeds the tabulated maximum — the overcurrent device alone will not clear a line-to-earth fault within the required 0.4 s. Root causes include an overly long cable run, undersized cpc, high Ze, or a loose connection. Compliant fixes: shorten the run, increase cpc csa, re-terminate, or provide ADS by 30 mA RCD (which is why most final circuits are now RCD-protected). Upsizing the OCPD (C) defeats overload protection and is wrong."
+          },
+          {
+            number: 30,
+            prompt:
+              "During functional testing, a 30 mA RCD trips at 1 × IΔn in 340 ms. The correct action is:",
+            options: {
+              A: "Record as a pass within tolerance",
+              B: "Record as a fail — 300 ms is the maximum permitted at 1 × IΔn for a general-purpose 30 mA RCD; replace the device and repeat the full RCD test",
+              C: "Uprate the RCD to 100 mA IΔn and retest",
+              D: "Disable the integral test button"
+            },
+            answer: "B",
+            explanation:
+              "340 ms exceeds the 300 ms limit at 1 × IΔn — the device has failed and no longer provides the additional protection claimed. Replace and retest at 0.5×, 1× and 5×IΔn, and record all three results on the schedule. Never uprate the IΔn or disable a test facility as a way to \"pass\" a failing RCD."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { range: "27–30", label: "Strong — exam-ready" },
+      { range: "24–26", label: "Comfortable pass, review weak areas" },
+      { range: "21–23", label: "Borderline — identify topic gaps and revisit" },
+      { range: "< 21", label: "More revision needed before sitting" }
+    ],
+    priorities: [
+      "GN3 sequence — dead tests then live tests, in the order given; many exam questions are lifted almost verbatim from this.",
+      "RCD acceptance criteria cold — 0.5×IΔn (no trip), 1×IΔn (≤ 300 ms general type), 5×IΔn (≤ 40 ms). Know S-type figures too.",
+      "EICR codes C1 / C2 / C3 / FI — be able to classify real-world observations, not just recite the definitions.",
+      "Certificates — when to issue an EIC vs a MEIWC vs an EICR, and who signs the three responsibility boxes on the EIC.",
+      "Table 64 insulation resistance — test voltages and minimums for SELV/PELV, LV, and > 500 V circuits."
+    ]
   }
 ];
 

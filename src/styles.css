@@ -1739,43 +1739,118 @@ input[aria-invalid="true"] {
   font-size: 1.35rem;
 }
 
-.exam-subtitle {
+.exam-title-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: 100%;
+}
+
+.exam-title-wrap h2 {
   margin: 0;
+}
+
+.exam-title-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: help;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.exam-title-info:hover,
+.exam-title-info:focus-visible {
+  color: var(--accent-strong);
+  border-color: var(--accent-strong);
+  outline: none;
+}
+
+.exam-tooltip {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: min(440px, calc(100vw - 48px));
+  padding: 12px 14px;
+  display: grid;
+  gap: 6px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.exam-title-info:hover ~ .exam-tooltip,
+.exam-title-info:focus-visible ~ .exam-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.exam-tooltip-subtitle {
   color: var(--accent-strong);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   letter-spacing: 0.02em;
 }
 
-.exam-description,
-.exam-format {
+.exam-tooltip-description,
+.exam-tooltip-format {
   margin: 0;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   line-height: 1.55;
 }
 
-.exam-format {
+.exam-tooltip-format {
   color: var(--muted-strong);
   font-weight: 500;
 }
 
-.exam-select-label {
-  display: grid;
-  gap: 4px;
-  margin-bottom: 4px;
+.exam-title-select {
+  width: auto;
+  max-width: 100%;
+  min-height: 0;
+  padding: 2px 28px 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.25;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='none' stroke='%2397a0ab' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 L6 6.5 L11 1.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  transition: color 0.15s;
 }
 
-.exam-select-label span {
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.exam-select-label select {
-  max-width: 340px;
+.exam-title-select:hover,
+.exam-title-select:focus {
+  color: var(--accent-strong);
+  border: 0;
+  box-shadow: none;
+  outline: none;
 }
 
 .exam-hero-stats {
@@ -2376,7 +2451,8 @@ input[aria-invalid="true"] {
     padding: 16px 18px;
   }
 
-  .exam-hero-text h2 {
+  .exam-hero-text h2,
+  .exam-title-select {
     font-size: 1.15rem;
   }
 
