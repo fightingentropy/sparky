@@ -1252,20 +1252,13 @@ input:disabled {
 
   .site-shell {
     width: 100%;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
+    min-height: 0;
     height: 100svh;
     height: 100dvh;
     height: var(--app-viewport-height, 100dvh);
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     padding: 0;
-  }
-
-  html.is-standalone-pwa .site-shell {
-    min-height: 100lvh;
-    height: 100lvh;
-    height: var(--app-viewport-height, 100lvh);
   }
 
   .workspace,
