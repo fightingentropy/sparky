@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   value: string;
@@ -7,8 +7,17 @@ type Props = {
 
 export function CopyableResult({ value, onCopy }: Props) {
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<number | null>(null);
 
   const isPlaceholder = value.startsWith("--");
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   async function handleClick() {
     if (isPlaceholder) return;
@@ -16,7 +25,13 @@ export function CopyableResult({ value, onCopy }: Props) {
       await navigator.clipboard.writeText(value);
       setCopied(true);
       onCopy?.();
-      setTimeout(() => setCopied(false), 1200);
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = window.setTimeout(() => {
+        setCopied(false);
+        timeoutRef.current = null;
+      }, 1200);
     } catch {}
   }
 
