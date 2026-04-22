@@ -1245,13 +1245,20 @@ input:disabled {
   }
 
   body {
-    position: fixed;
-    inset: 0;
     width: 100%;
   }
 
-  .site-shell {
+  #root {
     position: fixed;
+    inset: 0;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .site-shell {
+    position: absolute;
     inset: 0;
     width: auto;
     min-height: 0;
