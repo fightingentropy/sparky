@@ -417,6 +417,7 @@ export default function App() {
   const nextUnistrutContainmentIdRef = useRef(
     Math.max(...unistrutContainments.map((c) => c.id), 0) + 1
   );
+  const copiedSectionTimeoutRef = useRef<number | null>(null);
 
   // Sync count input when containments change (e.g. from localStorage load)
   useEffect(() => {
@@ -733,6 +734,14 @@ export default function App() {
   }, [searchQuery]);
 
   useEffect(() => {
+    return () => {
+      if (copiedSectionTimeoutRef.current !== null) {
+        window.clearTimeout(copiedSectionTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const onBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
@@ -763,6 +772,15 @@ export default function App() {
     grid.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => grid.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const grid = toolGridRef.current;
+    if (!grid) return;
+    const width = grid.clientWidth;
+    if (width === 0) return;
+    const index = Math.round(grid.scrollLeft / width);
+    setActiveToolIndex((current) => (current === index ? current : index));
   }, [filteredApplets]);
 
   function handlePaletteKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -799,8 +817,12 @@ export default function App() {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedSectionId(section.id);
-      window.setTimeout(() => {
+      if (copiedSectionTimeoutRef.current !== null) {
+        window.clearTimeout(copiedSectionTimeoutRef.current);
+      }
+      copiedSectionTimeoutRef.current = window.setTimeout(() => {
         setCopiedSectionId((current) => (current === section.id ? null : current));
+        copiedSectionTimeoutRef.current = null;
       }, 1400);
     } catch {
       setCopiedSectionId(null);

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 export function usePersistedState<T>(key: string, defaultValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
   const prevKeyRef = useRef(key);
+  const didMountRef = useRef(false);
 
   const [value, setValue] = useState<T>(() => {
     try {
@@ -15,12 +16,17 @@ export function usePersistedState<T>(key: string, defaultValue: T): [T, React.Di
   useEffect(() => {
     if (prevKeyRef.current !== key) {
       prevKeyRef.current = key;
+      didMountRef.current = false;
       try {
         const stored = localStorage.getItem(key);
         setValue(stored ? (JSON.parse(stored) as T) : defaultValue);
       } catch {
         setValue(defaultValue);
       }
+      return;
+    }
+    if (!didMountRef.current) {
+      didMountRef.current = true;
       return;
     }
     try {
