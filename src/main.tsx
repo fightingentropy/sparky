@@ -6,9 +6,18 @@ import "./styles.css";
 
 const viewportSyncDelays = [0, 80, 250, 700];
 
+function hasEditableFocus() {
+  return (
+    document.activeElement instanceof HTMLInputElement ||
+    document.activeElement instanceof HTMLSelectElement ||
+    document.activeElement instanceof HTMLTextAreaElement
+  );
+}
+
 function syncViewportHeight() {
-  const measuredHeight =
-    window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight;
+  const measuredHeight = hasEditableFocus()
+    ? window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight
+    : window.innerHeight || window.visualViewport?.height || document.documentElement.clientHeight;
 
   if (Number.isFinite(measuredHeight) && measuredHeight > 0) {
     const height = Math.floor(measuredHeight);
