@@ -146,6 +146,28 @@ describe("calcAngle", () => {
     const result = calcAngle("0", "45", "0", "0", "0", "cm");
     expect(result.angledLengthValue).toBe("--");
   });
+
+  it("subtracts one prefab bend height from drop", () => {
+    // 45°, drop 20, one 5cm bend → effective drop 15 → 15/sin(45) = 21.21
+    const result = calcAngle("20", "45", "0", "0", "0", "cm", true, false, "5");
+    expect(result.angledLengthValue).toBe("21.21 cm");
+  });
+
+  it("subtracts both prefab bend heights from drop", () => {
+    // 45°, drop 20, two 5cm bends → effective drop 10 → 10/sin(45) = 14.14
+    const result = calcAngle("20", "45", "0", "0", "0", "cm", true, true, "5");
+    expect(result.angledLengthValue).toBe("14.14 cm");
+  });
+
+  it("ignores bend height when neither end is selected", () => {
+    const result = calcAngle("10", "45", "0", "0", "0", "cm", false, false, "5");
+    expect(result.angledLengthValue).toBe("14.14 cm");
+  });
+
+  it("returns empty when bends exceed drop", () => {
+    const result = calcAngle("8", "45", "0", "0", "0", "cm", true, true, "5");
+    expect(result.angledLengthValue).toBe("--");
+  });
 });
 
 // ── Power ──

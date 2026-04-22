@@ -492,7 +492,7 @@ kbd {
   grid-template-columns: 1fr;
 }
 
-input,
+input:not([type="checkbox"]):not([type="radio"]),
 select {
   width: 100%;
   min-height: 42px;
@@ -585,6 +585,41 @@ input[aria-invalid="true"] {
 .segment {
   min-height: 42px;
   border-color: var(--border);
+}
+
+.check-row {
+  display: flex;
+  gap: 16px;
+  min-height: 42px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.check-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--muted-strong);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.check-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.check-option:has(input:checked) {
+  color: var(--text);
+}
+
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .segment.active {
@@ -1252,7 +1287,7 @@ input[aria-invalid="true"] {
   /* Mobile indicator — bottom-bar styling */
   .mobile-indicator {
     gap: 6px;
-    padding: 8px 10px max(8px, env(safe-area-inset-bottom));
+    padding: 8px 10px;
     background: rgba(20, 23, 27, 0.85);
     backdrop-filter: blur(16px) saturate(1.3);
     -webkit-backdrop-filter: blur(16px) saturate(1.3);

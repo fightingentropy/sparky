@@ -3,11 +3,34 @@ export const EPSILON = 1e-9;
 export const COPPER_RESISTIVITY = 0.0175;
 export const STANDARD_BREAKERS = [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100];
 
-export const CONTAINMENT_OPTIONS: { label: string; widths: number[] }[] = [
+export type ContainmentWidth = number | { nominal: number; actual: number };
+
+export const CONTAINMENT_OPTIONS: { label: string; widths: ContainmentWidth[] }[] = [
   { label: "Tray", widths: [50, 75, 100, 150, 225, 300, 450, 600, 750, 900] },
   { label: "Basket", widths: [50, 100, 125, 150, 200, 300, 400, 500, 600] },
-  { label: "Trunking", widths: [50, 75, 100, 150, 200, 300] }
+  { label: "Trunking", widths: [50, 75, 100, 150, 200, 300] },
+  {
+    label: "Ladder",
+    widths: [
+      { nominal: 150, actual: 200 },
+      { nominal: 300, actual: 350 },
+      { nominal: 400, actual: 450 },
+      { nominal: 500, actual: 550 },
+      { nominal: 600, actual: 650 },
+      { nominal: 750, actual: 800 },
+      { nominal: 900, actual: 950 }
+    ]
+  }
 ];
+
+export function widthValue(w: ContainmentWidth): number {
+  return typeof w === "number" ? w : w.actual;
+}
+
+export function widthLabel(w: ContainmentWidth): string {
+  if (typeof w === "number") return `${w} mm`;
+  return `${w.nominal} mm (outer ${w.actual})`;
+}
 
 export const DEFAULT_CONTAINMENT_ROD_VALUES = {
   overallHeight: "3165",
@@ -275,13 +298,17 @@ export function calcAngle(
   topStraightStr: string,
   bottomStraightStr: string,
   allowanceStr: string,
-  unit: string
+  unit: string,
+  topBend = false,
+  bottomBend = false,
+  bendHeightStr = "0"
 ): AngleResult {
   const drop = Number.parseFloat(dropStr);
   const angle = Number.parseFloat(angleStr);
   const topStraight = Number.parseFloat(topStraightStr);
   const bottomStraight = Number.parseFloat(bottomStraightStr);
   const allowance = Number.parseFloat(allowanceStr);
+  const bendHeight = Number.parseFloat(bendHeightStr);
 
   const empty: AngleResult = {
     angledLengthValue: "--",
@@ -300,13 +327,22 @@ export function calcAngle(
     allowance < 0
   ) return empty;
 
+  const bendCount = (topBend ? 1 : 0) + (bottomBend ? 1 : 0);
+  const bendDeduction =
+    bendCount > 0 && Number.isFinite(bendHeight) && bendHeight > 0
+      ? bendCount * bendHeight
+      : 0;
+  const effectiveDrop = drop - bendDeduction;
+
+  if (effectiveDrop < 0) return empty;
+
   const radians = (angle * Math.PI) / 180;
   const sinValue = Math.sin(radians);
   const cosValue = Math.cos(radians);
 
   if (Math.abs(sinValue) < EPSILON) return empty;
 
-  const angledLength = drop / sinValue;
+  const angledLength = effectiveDrop / sinValue;
   const offset = angledLength * cosValue;
   const totalLength = topStraight + angledLength + bottomStraight + allowance;
 

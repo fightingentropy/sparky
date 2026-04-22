@@ -12,6 +12,8 @@ import {
   calcConduit,
   calcStructure,
   formulas,
+  widthLabel,
+  widthValue,
   type PhaseType,
   type PowerTarget,
   type BreakerInputMode,
@@ -376,6 +378,9 @@ export default function App() {
   const [angleBottomStraight, setAngleBottomStraight] = usePersistedState("angle-bottom", "0");
   const [angleAllowance, setAngleAllowance] = usePersistedState("angle-allowance", "0");
   const [angleUnit, setAngleUnit] = usePersistedState("angle-unit", "cm");
+  const [angleTopBend, setAngleTopBend] = usePersistedState("angle-top-bend", false);
+  const [angleBottomBend, setAngleBottomBend] = usePersistedState("angle-bottom-bend", false);
+  const [angleBendHeight, setAngleBendHeight] = usePersistedState("angle-bend-height", "5");
   const [angleAdvanced, setAngleAdvanced] = useState(false);
 
   const [powerTarget, setPowerTarget] = usePersistedState<PowerTarget>("power-target", "current");
@@ -446,10 +451,11 @@ export default function App() {
   }
 
   function buildUnistrutContainmentRow(): UnistrutContainmentRow {
+    const firstOption = CONTAINMENT_OPTIONS[0];
     return {
       id: nextUnistrutContainmentIdRef.current++,
-      label: CONTAINMENT_OPTIONS[0].label,
-      width: String(CONTAINMENT_OPTIONS[0].widths[0])
+      label: firstOption.label,
+      width: String(widthValue(firstOption.widths[0]))
     };
   }
 
@@ -495,11 +501,11 @@ export default function App() {
         if (field === "label") {
           const option = CONTAINMENT_OPTIONS.find((o) => o.label === value);
           const currentWidth = Number.parseFloat(containment.width);
-          const keepWidth = option && option.widths.includes(currentWidth);
+          const keepWidth = option && option.widths.some((w) => widthValue(w) === currentWidth);
           return {
             ...containment,
             label: value,
-            width: keepWidth ? containment.width : option ? String(option.widths[0]) : ""
+            width: keepWidth ? containment.width : option ? String(widthValue(option.widths[0])) : ""
           };
         }
         return { ...containment, [field]: value };
@@ -527,8 +533,28 @@ export default function App() {
   );
 
   const angleResult = useMemo(() =>
-    calcAngle(angleDrop, angleValue, angleTopStraight, angleBottomStraight, angleAllowance, angleUnit),
-    [angleAllowance, angleBottomStraight, angleDrop, angleTopStraight, angleUnit, angleValue]
+    calcAngle(
+      angleDrop,
+      angleValue,
+      angleTopStraight,
+      angleBottomStraight,
+      angleAllowance,
+      angleUnit,
+      angleTopBend,
+      angleBottomBend,
+      angleBendHeight
+    ),
+    [
+      angleAllowance,
+      angleBendHeight,
+      angleBottomBend,
+      angleBottomStraight,
+      angleDrop,
+      angleTopBend,
+      angleTopStraight,
+      angleUnit,
+      angleValue
+    ]
   );
 
   const powerResult = useMemo(() =>
@@ -1100,11 +1126,14 @@ export default function App() {
                                 }
                               >
                                 {selectedOption ? (
-                                  selectedOption.widths.map((w) => (
-                                    <option key={w} value={String(w)}>
-                                      {w} mm
-                                    </option>
-                                  ))
+                                  selectedOption.widths.map((w) => {
+                                    const value = widthValue(w);
+                                    return (
+                                      <option key={value} value={String(value)}>
+                                        {widthLabel(w)}
+                                      </option>
+                                    );
+                                  })
                                 ) : (
                                   <option value="">--</option>
                                 )}
@@ -1224,6 +1253,46 @@ export default function App() {
                         <span className="suffix">deg</span>
                       </div>
                       {Number.parseFloat(angleValue) >= 90 && <span className="field-hint">Angle must be less than 90</span>}
+                    </label>
+                  </div>
+
+                  <div className="field-row">
+                    <div className="field">
+                      <span>Prefab bends</span>
+                      <div className="check-row">
+                        <label className="check-option">
+                          <input
+                            type="checkbox"
+                            checked={angleTopBend}
+                            onChange={(e) => setAngleTopBend(e.target.checked)}
+                          />
+                          <span>Top</span>
+                        </label>
+                        <label className="check-option">
+                          <input
+                            type="checkbox"
+                            checked={angleBottomBend}
+                            onChange={(e) => setAngleBottomBend(e.target.checked)}
+                          />
+                          <span>Bottom</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <label className="field">
+                      <span>Bend height</span>
+                      <div className="input-wrap">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          step="0.1"
+                          value={angleBendHeight}
+                          onChange={(e) => setAngleBendHeight(e.target.value)}
+                          disabled={!angleTopBend && !angleBottomBend}
+                        />
+                        <span className="suffix">{angleUnit}</span>
+                      </div>
                     </label>
                   </div>
 
