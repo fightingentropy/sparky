@@ -194,14 +194,14 @@ export function ExamPage({ isActive }: Props) {
             <>
               <div className="exam-footer-status">
                 {answeredCount === total ? (
-                  <span className="exam-status-ok">All questions answered — ready to submit.</span>
+                  <span className="exam-status-ok">Ready to submit.</span>
                 ) : (
                   <button
                     type="button"
                     className="ghost-button exam-jump-btn"
                     onClick={scrollToFirstUnanswered}
                   >
-                    Jump to next unanswered ({total - answeredCount} left)
+                    Next unanswered ({total - answeredCount})
                   </button>
                 )}
               </div>
