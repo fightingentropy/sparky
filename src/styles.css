@@ -1301,7 +1301,7 @@ input:disabled {
     border-radius: 0;
     background: var(--bg);
     width: 100%;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 84px);
+    padding-bottom: calc(max(env(safe-area-inset-bottom) - 22px, 6px) + 56px);
   }
 
   .page-home.is-active .tool-panel .tool-output {
@@ -1317,9 +1317,9 @@ input:disabled {
     left: 0;
     gap: 6px;
     padding:
-      8px
+      6px
       calc(env(safe-area-inset-right) + 10px)
-      calc(env(safe-area-inset-bottom) + 6px)
+      max(env(safe-area-inset-bottom) - 22px, 6px)
       calc(env(safe-area-inset-left) + 10px);
     background: var(--surface);
     backdrop-filter: blur(16px) saturate(1.3);
