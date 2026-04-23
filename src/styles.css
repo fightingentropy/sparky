@@ -1332,17 +1332,17 @@ input:disabled {
     flex: 1;
   }
 
-  /* Mobile topbar — compact single row */
+  /* Mobile topbar */
   .topbar {
     position: static;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    gap: 8px;
+    gap: 7px 8px;
     padding:
-      calc(env(safe-area-inset-top) + 10px)
+      calc(env(safe-area-inset-top) + 8px)
       calc(env(safe-area-inset-right) + 14px)
-      10px
+      8px
       calc(env(safe-area-inset-left) + 14px);
     margin-bottom: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -1354,6 +1354,7 @@ input:disabled {
   .brand {
     gap: 8px;
     flex: 0 0 auto;
+    min-width: 0;
   }
 
   .brand-mark {
@@ -1362,18 +1363,22 @@ input:disabled {
   }
 
   .brand strong {
-    font-size: 0.9rem;
+    display: none;
   }
 
   .primary-nav {
     display: inline-flex;
+    width: 100%;
+    min-width: 0;
     gap: 2px;
     padding: 2px;
-    margin-left: auto;
+    margin-left: 0;
     border-radius: 6px;
   }
 
   .primary-nav a {
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 28px;
     padding: 0 10px;
     font-size: 0.78rem;
@@ -1381,20 +1386,24 @@ input:disabled {
   }
 
   .topbar-actions {
+    grid-column: 1 / -1;
     width: 100%;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 8px;
+    min-width: 0;
   }
 
   .search-field {
-    min-height: 34px;
+    min-width: 0;
+    min-height: 30px;
     border-radius: var(--radius-sm);
-    font-size: 0.86rem;
+    font-size: 0.82rem;
   }
 
   .search-hint {
-    min-width: 32px;
+    min-width: 28px;
     min-height: 18px;
-    font-size: 0.66rem;
+    font-size: 0.62rem;
   }
 
   /* Mobile tool panels */
@@ -2532,9 +2541,9 @@ input:disabled {
     overflow-x: hidden;
     overflow-y: auto;
     padding:
-      12px
-      12px
-      calc(max(env(safe-area-inset-bottom) - 22px, 6px) + 64px);
+      8px
+      10px
+      calc(max(env(safe-area-inset-bottom) - 30px, 2px) + 48px);
   }
 
   .exam-shell,
@@ -2549,13 +2558,14 @@ input:disabled {
   }
 
   .exam-shell {
-    gap: 14px;
+    gap: 10px;
     overflow-x: clip;
   }
 
   .exam-hero {
-    gap: 14px;
-    padding: 16px 18px;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
   }
 
   .exam-title-wrap {
@@ -2565,7 +2575,7 @@ input:disabled {
 
   .exam-hero-text h2,
   .exam-title-select {
-    font-size: 1.15rem;
+    font-size: 0.98rem;
   }
 
   .exam-title-select {
@@ -2590,21 +2600,27 @@ input:disabled {
     grid-auto-flow: row;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-columns: initial;
-    gap: 8px;
+    gap: 6px;
   }
 
   .exam-stat {
-    padding: 10px 8px;
+    gap: 2px;
+    padding: 6px 6px;
+    border-radius: var(--radius-sm);
   }
 
   .exam-stat span {
-    font-size: 0.62rem;
-    letter-spacing: 0.04em;
+    font-size: 0.56rem;
+    letter-spacing: 0.03em;
     overflow-wrap: anywhere;
   }
 
   .exam-stat strong {
-    font-size: 1.15rem;
+    font-size: 1rem;
+  }
+
+  .exam-progress {
+    height: 4px;
   }
 
   .exam-sections,
@@ -2614,8 +2630,22 @@ input:disabled {
     max-width: 100%;
   }
 
+  .exam-sections {
+    gap: 16px;
+  }
+
+  .exam-section {
+    gap: 10px;
+  }
+
+  .exam-section-title {
+    padding-bottom: 6px;
+    font-size: 0.9rem;
+  }
+
   .exam-question {
-    padding: 14px 16px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
   }
 
   .exam-question-head {
@@ -2656,9 +2686,9 @@ input:disabled {
     gap: 8px;
     flex-wrap: nowrap;
     padding:
-      6px
+      4px
       calc(env(safe-area-inset-right) + 10px)
-      max(env(safe-area-inset-bottom) - 22px, 6px)
+      max(env(safe-area-inset-bottom) - 30px, 2px)
       calc(env(safe-area-inset-left) + 10px);
     border-right: 0;
     border-bottom: 0;
@@ -2678,14 +2708,15 @@ input:disabled {
 
   .exam-submit-btn {
     flex: 0 0 auto;
-    min-width: 116px;
-    min-height: 38px;
-    padding: 0 14px;
+    min-width: 100px;
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 0.86rem;
   }
 
   .exam-jump-btn {
     width: 100%;
-    min-height: 38px;
+    min-height: 32px;
     min-width: 0;
     padding: 0 10px;
     overflow: hidden;
