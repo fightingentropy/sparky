@@ -1466,6 +1466,1443 @@ export const EXAMS: Exam[] = [
       "Fault-finding discipline — the AM2 fault-find sub-test is heavily weighted. Practise interpreting Zs, IR and ring-final anomalies and working from symptom to root cause by splitting the circuit.",
       "Commissioning & handover — selective energisation, three-phase rotation, multi-way lighting functional tests, and a complete documentation pack (EIC + both schedules + Part P + O&M)."
     ]
+  },
+  {
+    id: "basic-electrics",
+    title: "Basic Electrics — Topic Mock",
+    subtitle: "Webinar 1 — fundamentals",
+    description:
+      "A focused topic mock built around Webinar 1 — Introduction to Basic Electrics. Covers voltage, current, resistance, power, Ohm's law, the power law, AC vs DC, single- and three-phase basics, and the conductor behaviour you'll rely on throughout the rest of the course.",
+    format: "12 multiple-choice questions. Aim for 9+/12 (75%) before moving on to regulations material.",
+    passMark: 9,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Units & Ohm's Law",
+        questions: [
+          {
+            number: 1,
+            prompt: "The SI unit of electrical resistance is the:",
+            options: {
+              A: "Ampere (A)",
+              B: "Volt (V)",
+              C: "Ohm (Ω)",
+              D: "Watt (W)"
+            },
+            answer: "C",
+            explanation:
+              "Resistance is measured in ohms (Ω). The volt is the unit of potential difference, the ampere is the unit of current, and the watt is the unit of power. Knowing your units cold matters because BS 7671 tables, calculations and test-instrument readings all assume you can read them at a glance."
+          },
+          {
+            number: 2,
+            prompt:
+              "A circuit has a supply of 230 V and a resistance of 23 Ω. The current flowing is:",
+            options: {
+              A: "0.1 A",
+              B: "10 A",
+              C: "23 A",
+              D: "5290 A"
+            },
+            answer: "B",
+            explanation:
+              "By Ohm's law I = V / R = 230 / 23 = 10 A. Be ready to rearrange V = I × R in any direction without writing it down — you'll use it in voltage drop, EFLI and circuit-design work constantly."
+          },
+          {
+            number: 3,
+            prompt:
+              "A 2.3 kW resistive heating element is connected to a 230 V supply. The current it draws is:",
+            options: {
+              A: "0.1 A",
+              B: "5 A",
+              C: "10 A",
+              D: "100 A"
+            },
+            answer: "C",
+            explanation:
+              "P = V × I, so I = P / V = 2300 / 230 = 10 A. For a purely resistive load (kettle, immersion, fan heater) the power factor is 1, so the calculated current is the actual current the protective device sees."
+          },
+          {
+            number: 4,
+            prompt:
+              "A 13 A current passes through a conductor of resistance 0.5 Ω. The power dissipated as heat in the conductor is:",
+            options: {
+              A: "6.5 W",
+              B: "26 W",
+              C: "84.5 W",
+              D: "169 W"
+            },
+            answer: "C",
+            explanation:
+              "P = I² × R = 13² × 0.5 = 169 × 0.5 = 84.5 W. This is the I²R loss that drives cable heating — and why a loose termination on an otherwise-correct circuit can still get hot enough to char an accessory."
+          }
+        ]
+      },
+      {
+        id: "section-2",
+        title: "Section 2 — AC Supply Systems",
+        questions: [
+          {
+            number: 5,
+            prompt: "The nominal UK single-phase mains voltage and frequency are:",
+            options: {
+              A: "240 V at 60 Hz",
+              B: "230 V at 50 Hz",
+              C: "110 V at 50 Hz",
+              D: "400 V at 50 Hz"
+            },
+            answer: "B",
+            explanation:
+              "230 V at 50 Hz nominal (harmonised across Europe in 1995, with a tolerance of +10 % / −6 %). 240 V is the legacy figure, 110 V centre-tapped is the UK construction-site standard, and 400 V is the line-to-line voltage on a three-phase supply."
+          },
+          {
+            number: 6,
+            prompt:
+              "On a UK 230 / 400 V three-phase supply, the voltage measured between any two line conductors is approximately:",
+            options: {
+              A: "110 V",
+              B: "230 V",
+              C: "400 V",
+              D: "650 V"
+            },
+            answer: "C",
+            explanation:
+              "400 V (line-to-line). The relationship is VL = √3 × VP, so 230 × 1.732 ≈ 400 V. Line-to-neutral is 230 V; line-to-line is 400 V. Confusing the two is the most common slip in three-phase calculations."
+          },
+          {
+            number: 7,
+            prompt: "For a 230 V RMS sinusoidal supply, the approximate peak voltage is:",
+            options: {
+              A: "163 V",
+              B: "230 V",
+              C: "325 V",
+              D: "460 V"
+            },
+            answer: "C",
+            explanation:
+              "Vpeak = Vrms × √2 = 230 × 1.414 ≈ 325 V. RMS is the equivalent DC value that produces the same heating effect; peak matters when you're sizing insulation, selecting SPDs, or interpreting an oscilloscope trace."
+          },
+          {
+            number: 8,
+            prompt:
+              "On a three-phase supply, the phase angle between any two line voltages is:",
+            options: {
+              A: "60°",
+              B: "90°",
+              C: "120°",
+              D: "180°"
+            },
+            answer: "C",
+            explanation:
+              "120°. Three phases are equally spaced around the cycle: L1 at 0°, L2 at 120°, L3 at 240°. This is what allows balanced loads to draw zero net neutral current and lets three-phase motors start without an auxiliary winding."
+          }
+        ]
+      },
+      {
+        id: "section-3",
+        title: "Section 3 — Conductors & Circuit Behaviour",
+        questions: [
+          {
+            number: 9,
+            prompt:
+              "Doubling the length of a copper cable while keeping its cross-sectional area the same will:",
+            options: {
+              A: "Halve its resistance",
+              B: "Leave its resistance unchanged",
+              C: "Double its resistance",
+              D: "Quadruple its resistance"
+            },
+            answer: "C",
+            explanation:
+              "R = ρL / A, so doubling L doubles R. This is why long runs need a bigger CSA — both to keep volt drop within Appendix 4 limits and to keep R1+R2 low enough to satisfy the Zs requirements of Table 41.3."
+          },
+          {
+            number: 10,
+            prompt:
+              "As the temperature of a copper conductor rises, its electrical resistance:",
+            options: {
+              A: "Decreases",
+              B: "Stays the same",
+              C: "Increases",
+              D: "Falls to zero at the boiling point of water"
+            },
+            answer: "C",
+            explanation:
+              "Copper has a positive temperature coefficient — resistance rises with temperature. This is why the IR test is taken cold and why measured R1+R2 must be corrected up to operating temperature before being used in a Zs calculation (the Cmin / temperature factor)."
+          },
+          {
+            number: 11,
+            prompt: "Three 6 Ω resistors connected in parallel give a total resistance of:",
+            options: {
+              A: "0.5 Ω",
+              B: "2 Ω",
+              C: "6 Ω",
+              D: "18 Ω"
+            },
+            answer: "B",
+            explanation:
+              "For n equal resistors in parallel, RT = R / n = 6 / 3 = 2 Ω. In series the same three would total 18 Ω. The parallel-paths idea is exactly what halves the loop resistance of a ring final circuit compared with a radial of the same CSA."
+          },
+          {
+            number: 12,
+            prompt: "A purely resistive load (e.g. a heating element) has a power factor of:",
+            options: {
+              A: "0",
+              B: "0.85",
+              C: "1.0",
+              D: "1.732"
+            },
+            answer: "C",
+            explanation:
+              "Unity (1.0). Power factor = cos φ between V and I; for a pure resistor V and I are in phase (φ = 0°), so PF = 1. Inductive loads (motors, ballasts) lag and capacitive loads lead, which is why PFC capacitor banks exist on industrial supplies."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { range: "11–12", label: "Strong — fundamentals secure" },
+      { range: "9–10", label: "Comfortable pass" },
+      { range: "7–8", label: "Some gaps — revisit Ohm's and the power law" },
+      { range: "< 7", label: "Re-watch the basic electrics webinar before moving on" }
+    ],
+    priorities: [
+      "Ohm's law and the power law triangles — be able to rearrange V = IR and P = VI on demand without writing them down.",
+      "230 V single-phase and 400 V three-phase line-to-line — these are the UK distribution voltages every later module assumes.",
+      "Conductor resistance: proportional to length, inversely proportional to CSA, rising with temperature. Underpins both voltage drop and Zs work later in the course."
+    ]
+  },
+  {
+    id: "building-regulations",
+    title: "Building Regulations & Part P — Topic Mock",
+    subtitle: "Webinar 2 — building regs for electricians",
+    description:
+      "A focused topic mock built around Webinar 2 — Basic Electrics & Building Regulations, with the emphasis on the Building Regulations side. Covers Part P scope, notifiable work, the relevant Approved Documents, the routes to compliance for an electrician, and how BS 7671 sits inside the regulatory framework in England.",
+    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
+    passMark: 9,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Part P & Notifiable Work",
+        questions: [
+          {
+            number: 1,
+            prompt: "Approved Document P (Part P) of the Building Regulations applies to:",
+            options: {
+              A: "All electrical work in any building in England",
+              B: "Electrical work in dwellings (and associated outbuildings, gardens and shared parts of multi-dwelling buildings)",
+              C: "Only commercial premises",
+              D: "Only new-build properties"
+            },
+            answer: "B",
+            explanation:
+              "Part P applies to fixed electrical installations in dwellings, including outbuildings (sheds, garages), garden lighting, and the shared/common parts of buildings that contain dwellings. Commercial-only work falls under EAWR and BS 7671 but not Part P."
+          },
+          {
+            number: 2,
+            prompt:
+              "Since the April 2013 changes, notifiable work under Part P in England is limited to:",
+            options: {
+              A: "Any electrical work in a kitchen",
+              B: "Replacing a single accessory",
+              C: "Installing a new circuit, replacing a consumer unit, or any addition / alteration in a special location (e.g. a room containing a bath or shower)",
+              D: "Only the installation of EV charging equipment"
+            },
+            answer: "C",
+            explanation:
+              "Three categories remain notifiable in England: a new circuit, a consumer unit replacement (or main switch replacement), and any addition/alteration in a special location. Kitchens and outdoor work were removed from the notifiable list in 2013, though the work still has to comply."
+          },
+          {
+            number: 3,
+            prompt:
+              "For Part P purposes, a \"special location\" in a dwelling is most commonly a:",
+            options: {
+              A: "Bedroom",
+              B: "Living room",
+              C: "Room containing a bath or shower (zones 0, 1 or 2)",
+              D: "Hallway"
+            },
+            answer: "C",
+            explanation:
+              "The Part P definition of a special location post-2013 is essentially \"a room containing a bath or shower\" within zones 0, 1 or 2 as defined by BS 7671 Section 701. Swimming pools and saunas are also special locations under BS 7671 but are far less common in domestic work."
+          },
+          {
+            number: 4,
+            prompt:
+              "Carrying out notifiable Part P work without using one of the approved compliance routes is:",
+            options: {
+              A: "A civil matter only — the customer can sue but no offence is committed",
+              B: "A criminal offence under the Building Act, with the local authority empowered to require correction or removal",
+              C: "Permitted provided BS 7671 is followed",
+              D: "Permitted provided the customer is told"
+            },
+            answer: "B",
+            explanation:
+              "Failing to notify is an offence under the Building Act 1984, prosecutable for up to 2 years after completion. The local authority can serve an enforcement notice requiring the work to be altered or removed; in practice the bigger problem for most owners is that they cannot prove compliance when they sell."
+          }
+        ]
+      },
+      {
+        id: "section-2",
+        title: "Section 2 — Other Approved Documents",
+        questions: [
+          {
+            number: 5,
+            prompt: "Approved Document B of the Building Regulations covers:",
+            options: {
+              A: "Structure",
+              B: "Fire safety",
+              C: "Resistance to moisture",
+              D: "Conservation of fuel and power"
+            },
+            answer: "B",
+            explanation:
+              "AD B is fire safety — relevant whenever you penetrate a fire-rated wall or floor, or install cables in escape routes (where Reg 521.11.201 of BS 7671 also requires non-combustible cable supports)."
+          },
+          {
+            number: 6,
+            prompt: "Approved Document L of the Building Regulations covers:",
+            options: {
+              A: "Drainage and waste disposal",
+              B: "Conservation of fuel and power (energy efficiency)",
+              C: "Sound insulation",
+              D: "Access to and use of buildings"
+            },
+            answer: "B",
+            explanation:
+              "AD L drives the energy-efficiency requirements you meet through low-energy lighting, heating-control wiring, EV-charge-ready provision in new dwellings, and similar. AD M is access; AD E is sound; AD H is drainage."
+          },
+          {
+            number: 7,
+            prompt: "Approved Document A of the Building Regulations covers:",
+            options: {
+              A: "Structure",
+              B: "Ventilation",
+              C: "Site preparation and resistance to contaminants",
+              D: "Electrical safety"
+            },
+            answer: "A",
+            explanation:
+              "AD A is structure — relevant to electricians when you notch or drill joists (the safe-zone rules in AD A are echoed in BS 7671's safe-zone wiring rules in Reg 522.6.202)."
+          },
+          {
+            number: 8,
+            prompt: "Approved Document F of the Building Regulations covers:",
+            options: {
+              A: "Fire safety",
+              B: "Ventilation",
+              C: "Glazing safety",
+              D: "Means of escape"
+            },
+            answer: "B",
+            explanation:
+              "AD F is ventilation — relevant when you wire extract fans (kitchen, bathroom, MVHR) and need to know minimum extract rates and whether intermittent or continuous-running fans are required."
+          }
+        ]
+      },
+      {
+        id: "section-3",
+        title: "Section 3 — Compliance Routes & BS 7671",
+        questions: [
+          {
+            number: 9,
+            prompt:
+              "The three routes to compliance for notifiable Part P work in England are:",
+            options: {
+              A: "Self-certification by a registered Competent Person Scheme member; submission of a Building Notice / Full Plans to LABC; or third-party certification by a registered third-party verifier",
+              B: "BS 7671 alone, with no further notification",
+              C: "An EICR completed before commencement",
+              D: "A written agreement with the customer"
+            },
+            answer: "A",
+            explanation:
+              "The three legitimate routes are: (1) being a CPS member and self-certifying via your scheme, (2) notifying the local authority before starting work and having it inspected, or (3) using a registered third-party certifier to inspect after completion. Only the CPS route is realistic for most production work."
+          },
+          {
+            number: 10,
+            prompt:
+              "Examples of recognised Competent Person Schemes for electrical work in England include:",
+            options: {
+              A: "HSE and DNO",
+              B: "NICEIC, NAPIT, Stroma, ELECSA and Certsure",
+              C: "BSI and IET",
+              D: "JIB and ECA"
+            },
+            answer: "B",
+            explanation:
+              "CPSs are private bodies authorised by DLUHC (now MHCLG) to self-certify Part P work — the principal ones are NICEIC, NAPIT, Stroma and ELECSA. The IET writes the Wiring Regulations but is not itself a CPS; the JIB / ECA are trade bodies, not certifiers."
+          },
+          {
+            number: 11,
+            prompt:
+              "The legal status of BS 7671 (the IET Wiring Regulations) in England is:",
+            options: {
+              A: "A statutory instrument with direct legal force",
+              B: "A non-statutory British Standard cited as the practical means of compliance with Part P (a 'deemed-to-satisfy' route)",
+              C: "Mandatory only for new-build dwellings",
+              D: "Replaced by Part P"
+            },
+            answer: "B",
+            explanation:
+              "BS 7671 itself is not law, but compliance with it is one of the recognised ways of demonstrating that the safety objectives of Part P (and the design and construction provisions of EAWR 1989) have been met. A court can accept other approaches, but in practice every prosecution is measured against BS 7671."
+          },
+          {
+            number: 12,
+            prompt:
+              "After completing notifiable Part P work as a CPS member, the contractor must:",
+            options: {
+              A: "Do nothing further",
+              B: "Notify the customer only, verbally",
+              C: "Issue a Building Regulations compliance certificate to the client and notify the relevant CPS within 30 days, which then notifies the local authority",
+              D: "Notify the DNO"
+            },
+            answer: "C",
+            explanation:
+              "The CPS member self-certifies via their scheme within 30 days; the scheme issues a compliance certificate to the client (typically by post) and informs the local authority on the contractor's behalf. Failing to notify within the time limit can result in fines from the scheme and undermines the homeowner's ability to prove compliance."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { range: "11–12", label: "Strong — building-regs literacy is solid" },
+      { range: "9–10", label: "Comfortable pass" },
+      { range: "7–8", label: "Re-read AD P and the notifiable-work list" },
+      { range: "< 7", label: "Re-watch the building regulations webinar" }
+    ],
+    priorities: [
+      "The three notifiable categories under Part P — new circuit, consumer unit, special location — these are the only ones that trigger notification.",
+      "The three routes to compliance — CPS self-cert, Building Notice, third-party certifier — and which is realistic for your day-to-day work.",
+      "Approved Document letters: A (structure), B (fire), F (ventilation), L (energy), P (electrical) — be able to identify each from a one-line description."
+    ]
+  },
+  {
+    id: "18th-edition",
+    title: "18th Edition (BS 7671) — Topic Mock",
+    subtitle: "Webinar 3 — wiring regulations structure & key provisions",
+    description:
+      "A focused topic mock built around Webinar 3 — 18th Edition of the Wiring Regulations. Drills the structure of BS 7671:2018 + A2:2022 + A3:2024, the key part numbers, the major tables electricians look up daily, and the headline provisions introduced or revised by the recent amendments (AFDDs, SPDs, EV charging).",
+    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
+    passMark: 9,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Structure of BS 7671",
+        questions: [
+          {
+            number: 1,
+            prompt: "BS 7671 is divided into:",
+            options: {
+              A: "3 parts plus appendices",
+              B: "5 parts plus appendices",
+              C: "7 parts plus appendices",
+              D: "10 parts plus appendices"
+            },
+            answer: "C",
+            explanation:
+              "Seven numbered parts: 1 Scope/Object/Fundamental principles, 2 Definitions, 3 Assessment of general characteristics, 4 Protection for safety, 5 Selection and erection, 6 Inspection and testing, 7 Special installations or locations — plus the appendices and the index."
+          },
+          {
+            number: 2,
+            prompt: "Definitions used throughout BS 7671 are found in:",
+            options: {
+              A: "Part 1",
+              B: "Part 2",
+              C: "Part 4",
+              D: "Appendix 5"
+            },
+            answer: "B",
+            explanation:
+              "Part 2 is the definitions register. Whenever a term is in italics in the text (e.g. \"competent person\", \"basic protection\"), Part 2 is the place to look — and a question about a defined term in BS 7671 is a Part 2 lookup, not a guess."
+          },
+          {
+            number: 3,
+            prompt: "Initial verification, periodic inspection and certification are addressed in:",
+            options: {
+              A: "Part 3",
+              B: "Part 4",
+              C: "Part 6",
+              D: "Part 7"
+            },
+            answer: "C",
+            explanation:
+              "Part 6 covers inspection and testing — Chapter 64 initial verification, Chapter 65 periodic inspection, Chapter 66 certification and reporting. Detailed test methodology lives in IET Guidance Note 3."
+          },
+          {
+            number: 4,
+            prompt:
+              "Special installations and locations (e.g. bathrooms, swimming pools, EV charging) are addressed in:",
+            options: {
+              A: "Part 4",
+              B: "Part 5",
+              C: "Part 6",
+              D: "Part 7"
+            },
+            answer: "D",
+            explanation:
+              "Part 7 contains the special-location sections (701 bath/shower, 702 swimming pools, 711 exhibitions, 712 PV, 715 ELV lighting, 722 EV charging, etc.). Each one modifies — or supplements — the general requirements for that specific environment."
+          }
+        ]
+      },
+      {
+        id: "section-2",
+        title: "Section 2 — Special Provisions & Key Tables",
+        questions: [
+          {
+            number: 5,
+            prompt: "Section 701 of BS 7671 covers:",
+            options: {
+              A: "EV charging installations",
+              B: "Locations containing a bath or shower",
+              C: "Solar PV installations",
+              D: "Construction sites"
+            },
+            answer: "B",
+            explanation:
+              "701 is the bath/shower section, with the well-known zones 0, 1 and 2 and the supplementary equipotential bonding rules in Reg 701.415.2 (waivable only when the four conditions of Reg 701.415.2 are all met). 722 is EV; 712 is PV; 704 is construction sites."
+          },
+          {
+            number: 6,
+            prompt:
+              "Maximum permitted earth fault loop impedance (Zs) values for Type B / C / D circuit-breakers on 230 V circuits are tabulated in:",
+            options: {
+              A: "Table 41.1",
+              B: "Table 41.3",
+              C: "Table 54.8",
+              D: "Appendix 14"
+            },
+            answer: "B",
+            explanation:
+              "Table 41.3 gives the maximum Zs for the disconnection times of Reg 411.3.2.2/3 with circuit-breakers and RCBOs. Table 41.2 covers fuses; Table 54.8 covers main protective bonding sizing; Appendix 14 explains how the Cmin temperature correction is applied."
+          },
+          {
+            number: 7,
+            prompt:
+              "Main protective bonding conductor cross-sectional areas (related to the line conductor at the origin) are given in:",
+            options: {
+              A: "Table 41.3",
+              B: "Table 51",
+              C: "Table 54.8",
+              D: "Table 7.1A in the OSG"
+            },
+            answer: "C",
+            explanation:
+              "Table 54.8 gives the minimum CSA of the main protective bonding conductor for TN and TT systems based on the line conductor size. Table 41.3 is Zs; Table 51 is conductor identification; OSG 7.1A covers different territory (small-installation diversity)."
+          },
+          {
+            number: 8,
+            prompt:
+              "Recommended limits for voltage drop (3 % for lighting, 5 % for other uses) on a public LV supply appear in:",
+            options: {
+              A: "Section 525 / Appendix 4",
+              B: "Section 411",
+              C: "Appendix 1",
+              D: "Section 132"
+            },
+            answer: "A",
+            explanation:
+              "Section 525 sets the principle and Appendix 4 provides the worked detail (mV/A/m tables, correction factors, the 3 % / 5 % default limits and the 6 % / 8 % limits for installations supplied by a private LV source)."
+          }
+        ]
+      },
+      {
+        id: "section-3",
+        title: "Section 3 — Recent Amendments (A2:2022 / A3:2024)",
+        questions: [
+          {
+            number: 9,
+            prompt:
+              "Since A2:2022, Arc Fault Detection Devices (AFDDs) to BS EN 62606 are required (\"shall be provided\") for single-phase AC final circuits supplying socket-outlets ≤ 32 A in:",
+            options: {
+              A: "All dwellings without exception",
+              B: "Higher Risk Residential Buildings, HMOs, purpose-built student accommodation and care homes",
+              C: "Only industrial premises",
+              D: "Only EV charging circuits"
+            },
+            answer: "B",
+            explanation:
+              "Reg 421.1.7 makes AFDDs mandatory in those four categories of higher-risk premises and recommends them everywhere else. The justification is the residual fire risk from series and parallel arcing faults that an MCB or RCD won't detect."
+          },
+          {
+            number: 10,
+            prompt:
+              "Surge Protective Devices (SPDs) are addressed in BS 7671 by:",
+            options: {
+              A: "Section 411",
+              B: "Section 443 (and Section 534 for selection and erection)",
+              C: "Section 522",
+              D: "Section 712"
+            },
+            answer: "B",
+            explanation:
+              "Section 443 is the protection-against-overvoltages section that triggers the need for an SPD; Section 534 covers selection and erection. Since A2:2022, the assumption is that SPDs are required unless a documented risk-assessment route justifies omitting them."
+          },
+          {
+            number: 11,
+            prompt:
+              "Electric Vehicle charging installations are dealt with in BS 7671 by:",
+            options: {
+              A: "Section 701",
+              B: "Section 712",
+              C: "Section 722",
+              D: "Section 753"
+            },
+            answer: "C",
+            explanation:
+              "Section 722 covers EV charging — RCD requirements (Type B or RDC-DD), PEN-fault detection on TN-C-S (open-PEN protection), socket-outlet selection, etc. 712 is PV; 753 is heating cables; 701 is bathrooms."
+          },
+          {
+            number: 12,
+            prompt:
+              "Solar photovoltaic power supply systems are dealt with in BS 7671 by:",
+            options: {
+              A: "Section 712",
+              B: "Section 722",
+              C: "Section 740",
+              D: "Section 706"
+            },
+            answer: "A",
+            explanation:
+              "Section 712 covers PV installations (DC-side cabling, isolation, earthing of the array frame, AC-side connection, labelling). It works alongside the inverter manufacturer's instructions and the DNO's G98/G99 connection requirements."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { range: "11–12", label: "Strong — fluent in the structure of BS 7671" },
+      { range: "9–10", label: "Comfortable pass" },
+      { range: "7–8", label: "Practise lookups in the contents pages" },
+      { range: "< 7", label: "Re-watch the 18th Edition webinar and walk through the BS 7671 contents" }
+    ],
+    priorities: [
+      "The Part numbers — 1 to 7 — and what each covers. Half the exam questions in this area test whether you can find the regulation, not whether you've memorised its number.",
+      "The major lookup tables — Table 41.3 (Zs), Table 54.8 (bonding), Appendix 4 (voltage drop) — practise navigating to each in under 30 seconds.",
+      "The amendment headlines — AFDDs in higher-risk premises, SPDs by default, the EV-charging open-PEN protection — these come up in viva-style assessor questions."
+    ]
+  },
+  {
+    id: "pat-testing",
+    title: "PAT Testing — Topic Mock",
+    subtitle: "Webinar 4 — in-service inspection & testing",
+    description:
+      "A focused topic mock built around the PAT-testing portion of Webinar 4. Covers the IET Code of Practice for In-service Inspection and Testing of Electrical Equipment (5th edition), equipment classes, the formal visual / combined inspection-and-test, pass values, intervals, and the legal driver behind the work.",
+    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
+    passMark: 9,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Equipment Classification",
+        questions: [
+          {
+            number: 1,
+            prompt:
+              "The recognised UK reference document for in-service inspection and testing of portable and movable electrical equipment is:",
+            options: {
+              A: "BS 7671 Wiring Regulations",
+              B: "The IET Code of Practice for In-service Inspection and Testing of Electrical Equipment (5th edition)",
+              C: "IET Guidance Note 3",
+              D: "PUWER 1998 ACOP"
+            },
+            answer: "B",
+            explanation:
+              "The IET COP is the practical industry guidance — it defines the equipment classes, the inspection categories, the test sequences, the pass criteria and the recommended intervals. BS 7671 only covers the fixed installation up to the socket-outlet."
+          },
+          {
+            number: 2,
+            prompt:
+              "A Class I appliance relies on which two layers of shock protection?",
+            options: {
+              A: "Double insulation only",
+              B: "Basic insulation plus a connection of accessible conductive parts to the protective conductor (earth)",
+              C: "SELV only",
+              D: "Functional insulation only"
+            },
+            answer: "B",
+            explanation:
+              "Class I = basic insulation as the primary barrier, plus an earthed metal enclosure as the fault path. If either fails on its own, the user is still protected; both have to fail before a shock becomes possible. This is why earth continuity is the headline test for Class I."
+          },
+          {
+            number: 3,
+            prompt:
+              "A Class II appliance is identified by what symbol and relies on what protection?",
+            options: {
+              A: "A single square — relies on basic insulation only",
+              B: "A double square (one inside the other) — relies on double or reinforced insulation, with no earthed metalwork",
+              C: "An IP rating — relies on the enclosure",
+              D: "A flash symbol — relies on a fuse"
+            },
+            answer: "B",
+            explanation:
+              "The double-square symbol denotes Class II / double-insulated. Earth continuity does not apply; the appropriate electrical test is insulation resistance. Many newer power tools and small appliances are Class II to avoid the cost and weight of an earthed enclosure."
+          },
+          {
+            number: 4,
+            prompt:
+              "Class III equipment is supplied at:",
+            options: {
+              A: "230 V single-phase",
+              B: "400 V three-phase",
+              C: "SELV — not exceeding 50 V AC or 120 V ripple-free DC",
+              D: "Any voltage provided it is double-insulated"
+            },
+            answer: "C",
+            explanation:
+              "Class III relies on supply at SELV — derived from a safety-isolating transformer and never connected to earth. Phone-charger output, low-voltage garden lighting transformers and bench-tool transformers are typical sources of a Class III supply."
+          }
+        ]
+      },
+      {
+        id: "section-2",
+        title: "Section 2 — Inspections & Tests",
+        questions: [
+          {
+            number: 5,
+            prompt:
+              "A combined inspection and test must always be preceded by:",
+            options: {
+              A: "Insulation resistance only",
+              B: "A formal visual inspection — tests do not replace the visual",
+              C: "An EICR",
+              D: "Disposal of the appliance if more than 5 years old"
+            },
+            answer: "B",
+            explanation:
+              "The IET COP sequence is user check → formal visual inspection → combined inspection and test. The visual catches damaged flexes, cracked plugs, overheated mouldings and incorrect fuse ratings — many of which the electrical tests cannot detect."
+          },
+          {
+            number: 6,
+            prompt:
+              "The earth-continuity test on a Class I appliance is typically applied at:",
+            options: {
+              A: "500 V DC",
+              B: "1000 V DC",
+              C: "A low voltage with a test current ≥ 1.5 × the appliance's fuse rating (typically a 200 mA \"soft\" or 10 A / 25 A \"hard\" test)",
+              D: "Mains voltage"
+            },
+            answer: "C",
+            explanation:
+              "Earth continuity is a low-voltage, controlled-current test — most modern PAT instruments offer a 200 mA option (kinder to delicate earthed components like surge filters) and a higher-current option (10 A or 25 A) for robust kit. Pass criterion is typically ≤ 0.1 Ω + R, where R is the lead's calculated resistance."
+          },
+          {
+            number: 7,
+            prompt:
+              "The insulation resistance test on a Class I appliance is typically applied at what test voltage and what minimum acceptance value?",
+            options: {
+              A: "250 V DC, ≥ 0.5 MΩ",
+              B: "500 V DC, ≥ 1.0 MΩ for most appliances (≥ 0.3 MΩ for heating elements)",
+              C: "1000 V DC, ≥ 0.5 MΩ",
+              D: "230 V AC, ≥ 1.0 MΩ"
+            },
+            answer: "B",
+            explanation:
+              "500 V DC is the standard PAT IR test voltage, with a 1.0 MΩ minimum for most appliances. Heating-element loads can legitimately read lower (≥ 0.3 MΩ) when warm; IT equipment with surge filtration is tested at 250 V DC to avoid damaging the filter components."
+          },
+          {
+            number: 8,
+            prompt:
+              "Which of the following tests should NOT be applied to a Class II appliance?",
+            options: {
+              A: "Formal visual inspection",
+              B: "Earth continuity (there is no earth to test to)",
+              C: "Insulation resistance",
+              D: "Functional check"
+            },
+            answer: "B",
+            explanation:
+              "Class II equipment has no earthed conductive parts, so an earth-continuity test is meaningless. The relevant electrical test is insulation resistance (typically applied between the live conductors joined together and any accessible metalwork, often via a probe)."
+          }
+        ]
+      },
+      {
+        id: "section-3",
+        title: "Section 3 — Records, Intervals & Legal Driver",
+        questions: [
+          {
+            number: 9,
+            prompt:
+              "The legal driver requiring an employer to maintain electrical equipment in a safe condition (and which underpins in-service inspection and testing) is principally:",
+            options: {
+              A: "BS 7671",
+              B: "PUWER 1998 only",
+              C: "The Electricity at Work Regulations 1989 (especially Reg 4(2)) supported by HSWA 1974",
+              D: "RIDDOR 2013"
+            },
+            answer: "C",
+            explanation:
+              "Reg 4(2) of EAWR 1989 requires that systems be maintained so as to prevent danger so far as is reasonably practicable. PUWER and HSWA reinforce this in the broader work-equipment context. There is no statute that mandates \"PAT testing\" by name — what is mandated is the outcome (safe equipment), and PAT is the recognised means of evidencing it."
+          },
+          {
+            number: 10,
+            prompt:
+              "Who decides the inspection and test intervals for in-service equipment?",
+            options: {
+              A: "The HSE specifies fixed intervals by law",
+              B: "The duty holder (typically the employer), based on equipment type, environment, frequency of use and previous test history",
+              C: "The IET, on a 12-month cycle",
+              D: "The local authority"
+            },
+            answer: "B",
+            explanation:
+              "Intervals are risk-based, not legally fixed. The IET COP gives recommended starting intervals (e.g. 6 months for Class I handheld in industrial use; 4 years for stationary IT in a low-risk office) which the duty holder may shorten or lengthen based on the actual incidence of failure and environment."
+          },
+          {
+            number: 11,
+            prompt:
+              "A pass label on a tested item should as a minimum show:",
+            options: {
+              A: "Just the word \"PASS\"",
+              B: "The tester's name",
+              C: "A unique appliance ID, the test date, the next test due date (where the duty holder has chosen to display it), the tester's identity, and the pass result",
+              D: "Only the appliance type"
+            },
+            answer: "C",
+            explanation:
+              "The label is the visible part of the record. It must let a user immediately verify that the item has been tested and identify which record in the register it corresponds to. Some duty holders omit the \"next due\" date so users don't keep using kit past its next scheduled test."
+          },
+          {
+            number: 12,
+            prompt:
+              "A user-check (the first tier of the IET COP three-tier regime) is best described as:",
+            options: {
+              A: "A full formal test by a competent person",
+              B: "A brief look by the user before each use — checking the flex, plug, casing and surroundings — with no test instrument involved",
+              C: "An insulation resistance test only",
+              D: "A test only required if the item has previously failed"
+            },
+            answer: "B",
+            explanation:
+              "User checks happen with every use and require no instruments — just looking for damaged flex, cracked plug, scorch marks, missing screws, loose grommet, or use in an unsuitable environment (wet, hot, in tension). They are the most frequent and most cost-effective layer of in-service safety."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { range: "11–12", label: "Strong — PAT-ready" },
+      { range: "9–10", label: "Comfortable pass" },
+      { range: "7–8", label: "Re-read the IET COP equipment-class chapter" },
+      { range: "< 7", label: "Re-watch the PAT testing webinar" }
+    ],
+    priorities: [
+      "Equipment classes — Class I (earthed), Class II (double-insulated), Class III (SELV) — and which test applies to each.",
+      "The three-tier regime — user check, formal visual, combined inspection and test — and the order they sit in.",
+      "Pass criteria cold — earth continuity ≤ 0.1 Ω + R, IR ≥ 1.0 MΩ at 500 V DC for most appliances, ≥ 0.3 MΩ for heating elements."
+    ]
+  },
+  {
+    id: "initial-verification",
+    title: "Initial Verification — Topic Mock",
+    subtitle: "Webinar 5 — testing a new installation before energising",
+    description:
+      "A focused topic mock built around Webinar 5 — Initial Verification. Covers Part 6 of BS 7671, the inspection schedule, the dead-test sequence (continuity, ring final, IR, polarity), the live-test sequence (Ze, PFC, Zs, RCD), acceptance criteria, and the documentation issued for new work.",
+    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
+    passMark: 9,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Inspection & Documents",
+        questions: [
+          {
+            number: 1,
+            prompt:
+              "Initial verification of a new installation, addition or alteration is required by which Part of BS 7671?",
+            options: {
+              A: "Part 4",
+              B: "Part 5",
+              C: "Part 6",
+              D: "Part 7"
+            },
+            answer: "C",
+            explanation:
+              "Part 6 deals with inspection and testing. Chapter 64 covers initial verification specifically; Chapter 65 covers periodic; Chapter 66 covers certification. Part 4 is protection, Part 5 is selection and erection."
+          },
+          {
+            number: 2,
+            prompt:
+              "The visual inspection element of initial verification should be carried out:",
+            options: {
+              A: "Only after energising",
+              B: "Before energising — to verify workmanship, conductor identification, IP ratings, accessory selection, fire stopping, etc.",
+              C: "At the same time as live testing",
+              D: "Only if the customer requests it"
+            },
+            answer: "B",
+            explanation:
+              "Inspection is a pre-energisation activity — once the supply is on, you can no longer easily check the back of accessories, the routing in voids, or the identification of conductors at terminations. The Schedule of Inspections is the tick-box record of what was looked at."
+          },
+          {
+            number: 3,
+            prompt:
+              "The principal IET guidance document for initial and periodic verification is:",
+            options: {
+              A: "Guidance Note 1",
+              B: "Guidance Note 3",
+              C: "On-Site Guide",
+              D: "Code of Practice for In-service Inspection and Testing"
+            },
+            answer: "B",
+            explanation:
+              "GN3 is the inspection-and-testing companion to BS 7671. It expands on test methodology, gives worked examples, and is the reference book that 2391 and many NVQ I&T questions are built around."
+          },
+          {
+            number: 4,
+            prompt:
+              "On completion of new work the certificate(s) issued to the client are:",
+            options: {
+              A: "Just an EICR",
+              B: "An Electrical Installation Certificate (EIC) accompanied by a Schedule of Inspections and a Schedule of Test Results",
+              C: "A Building Regulations certificate alone",
+              D: "A verbal handover"
+            },
+            answer: "B",
+            explanation:
+              "An EIC alone is incomplete — without the Schedule of Inspections and the Schedule of Test Results behind it, there is no evidence base for the signed declarations. A Minor Works Certificate (MEIWC) is the equivalent for small additions/alterations not introducing a new circuit."
+          }
+        ]
+      },
+      {
+        id: "section-2",
+        title: "Section 2 — Dead Tests",
+        questions: [
+          {
+            number: 5,
+            prompt:
+              "The recommended sequence of dead tests during initial verification is:",
+            options: {
+              A: "Insulation resistance, polarity, continuity",
+              B: "Continuity of protective conductors, continuity of ring final circuit conductors, insulation resistance, polarity, EFLI by calculation",
+              C: "Polarity, insulation resistance, continuity",
+              D: "Insulation resistance only"
+            },
+            answer: "B",
+            explanation:
+              "GN3's recommended order: continuity of CPCs (R1+R2), continuity of ring finals (r1, rn, r2 then cross-connected readings), insulation resistance, polarity, and earth-electrode resistance where relevant. EFLI (Zs) is then derived as Ze + (R1 + R2). The order matters because each test confirms a property the next test depends on."
+          },
+          {
+            number: 6,
+            prompt:
+              "An R1 + R2 measurement is taken to:",
+            options: {
+              A: "Measure the supply voltage",
+              B: "Measure the resistance of the line conductor and circuit protective conductor in series, end-to-end of a circuit, so that Zs can be derived as Ze + (R1+R2)",
+              C: "Verify polarity at the consumer unit",
+              D: "Measure prospective fault current"
+            },
+            answer: "B",
+            explanation:
+              "R1+R2 is the loop measurement of the line conductor and the cpc taken at every accessory; the worst-case reading combined with Ze gives the calculated Zs at that point. This is the safest way to verify earth fault loop impedance because it doesn't rely on the supply being live and won't trip an RCD."
+          },
+          {
+            number: 7,
+            prompt:
+              "For a 230 V LV circuit, the insulation resistance test is applied at what test voltage and what minimum acceptance value?",
+            options: {
+              A: "250 V DC, ≥ 0.5 MΩ",
+              B: "500 V DC, ≥ 1.0 MΩ",
+              C: "1000 V DC, ≥ 1.0 MΩ",
+              D: "230 V AC, ≥ 0.25 MΩ"
+            },
+            answer: "B",
+            explanation:
+              "BS 7671 Table 64 (now displayed as Table 6.4 in some printings of A2:2022) requires 500 V DC test with a 1.0 MΩ minimum for circuits up to 500 V. SELV/PELV use 250 V DC with 0.5 MΩ; circuits over 500 V use 1000 V DC with 1.0 MΩ."
+          },
+          {
+            number: 8,
+            prompt:
+              "Polarity of fixed wiring should be confirmed before energising using:",
+            options: {
+              A: "A multimeter at mains voltage",
+              B: "An approved voltage indicator at every accessory",
+              C: "A continuity / low-resistance ohmmeter, by confirming the line-side connection at every accessory point",
+              D: "A 500 V DC insulation tester"
+            },
+            answer: "C",
+            explanation:
+              "Polarity is a dead test — it verifies that the line conductor reaches the correct terminal at every accessory and that single-pole protective devices and switches are in the line conductor. A live polarity check using an AVI is also required at the origin during the live-test phase, but the dead check is what catches wiring errors before energising."
+          }
+        ]
+      },
+      {
+        id: "section-3",
+        title: "Section 3 — Live Tests & Acceptance",
+        questions: [
+          {
+            number: 9,
+            prompt:
+              "External earth fault loop impedance Ze is measured at the origin of the installation by:",
+            options: {
+              A: "Calculating it from cable resistance",
+              B: "Disconnecting the means of earthing, then measuring between the line conductor and the disconnected MET earthing point with the supply energised",
+              C: "Reading the value from the DNO's certificate",
+              D: "Measuring between line and neutral"
+            },
+            answer: "B",
+            explanation:
+              "Ze is the earth fault loop impedance external to the installation — i.e. the loop through the source and back via the earthing arrangement. It must be measured with the means of earthing disconnected so that parallel paths (such as gas and water bonding) don't artificially lower the reading."
+          },
+          {
+            number: 10,
+            prompt:
+              "Earth fault loop impedance Zs at the far end of a final circuit can be obtained by:",
+            options: {
+              A: "Direct measurement only",
+              B: "Calculation Zs = Ze + (R1 + R2), or by direct measurement (using the no-trip / RCD-bypass mode of the loop tester on RCD-protected circuits)",
+              C: "Estimation from the cable length",
+              D: "The DNO's quoted PFC value"
+            },
+            answer: "B",
+            explanation:
+              "Both routes are accepted in BS 7671. Calculation is the safer first method because it doesn't trip RCDs and uses the dead-test data you've already gathered. Direct measurement is then used to confirm the calculated value, with the no-trip mode used on RCD-protected circuits."
+          },
+          {
+            number: 11,
+            prompt:
+              "For a 30 mA general-type RCD, the test current and required maximum operating times are:",
+            options: {
+              A: "0.5 × IΔn (no trip in 2 s); 1 × IΔn (≤ 300 ms); 5 × IΔn (≤ 40 ms)",
+              B: "1 × IΔn (≤ 1 s); 5 × IΔn (≤ 200 ms)",
+              C: "0.5 × IΔn (≤ 100 ms); 1 × IΔn (≤ 50 ms)",
+              D: "Only the 30 mA push-button test"
+            },
+            answer: "A",
+            explanation:
+              "Memorise these acceptance criteria cold: at half rated current the device must not trip within 2 seconds; at rated current it must trip within 300 ms (general-type) and within 40 ms at five times rated. S-type (selective) RCDs allow longer times to support discrimination with downstream devices."
+          },
+          {
+            number: 12,
+            prompt:
+              "The Schedule of Test Results that accompanies an EIC records:",
+            options: {
+              A: "Verbal handover notes",
+              B: "Customer satisfaction comments",
+              C: "The numerical results of every test taken — circuit-by-circuit continuity, IR, Zs, RCD times, polarity confirmation — providing the audit-evidence behind the signed certificate",
+              D: "Only the RCD test results"
+            },
+            answer: "C",
+            explanation:
+              "The Schedule of Test Results is the factual numerical record of the verification. Without complete schedules the EIC declarations have nothing behind them; if a fault later develops, the numerical record is the evidence the duty holder uses to demonstrate that due diligence was carried out."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { range: "11–12", label: "Strong — initial-verification ready" },
+      { range: "9–10", label: "Comfortable pass" },
+      { range: "7–8", label: "Re-read GN3 chapters on dead and live test sequence" },
+      { range: "< 7", label: "Re-watch the initial verification webinar" }
+    ],
+    priorities: [
+      "The dead-test sequence — continuity, ring final, IR, polarity — in the GN3 order, knowing why each one comes before the next.",
+      "Acceptance criteria — IR ≥ 1.0 MΩ at 500 V DC, RCD trip times (0.5×, 1×, 5× IΔn).",
+      "Zs by calculation — Zs = Ze + (R1+R2) — and when to use the no-trip loop mode for direct measurement on RCD-protected circuits."
+    ]
+  },
+  {
+    id: "periodic-inspection",
+    title: "Periodic Inspection & Testing — Topic Mock",
+    subtitle: "Webinar 6 — testing an existing installation",
+    description:
+      "A focused topic mock built around Webinar 6 — Periodic Inspection and Testing. Covers the purpose of PIT, recommended intervals, sampling, limitations, the dead/live test approach for an in-service installation, and the legal drivers behind periodic verification.",
+    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
+    passMark: 9,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Purpose & Intervals",
+        questions: [
+          {
+            number: 1,
+            prompt:
+              "The IET-recommended maximum interval between periodic inspections of an owner-occupied domestic installation is:",
+            options: {
+              A: "1 year",
+              B: "3 years",
+              C: "5 years",
+              D: "10 years (or at change of occupancy if sooner)"
+            },
+            answer: "D",
+            explanation:
+              "10 years is the IET-recommended maximum for owner-occupied domestic, with a fresh inspection at change of occupancy. The figure is in Table 3.2 of GN3. Privately rented dwellings in England are mandated to 5 years by separate legislation (the ESS PRS Regulations 2020)."
+          },
+          {
+            number: 2,
+            prompt:
+              "Under the Electrical Safety Standards in the Private Rented Sector (England) Regulations 2020, the maximum interval between EICRs on a privately rented domestic property is:",
+            options: {
+              A: "1 year",
+              B: "3 years",
+              C: "5 years, or at change of tenancy if sooner",
+              D: "10 years"
+            },
+            answer: "C",
+            explanation:
+              "The 2020 Regulations set a 5-year maximum, with a fresh EICR at change of tenancy if that falls sooner. The landlord must supply the report to the tenant within 28 days of inspection and to a new tenant before they move in."
+          },
+          {
+            number: 3,
+            prompt:
+              "Typical IET-recommended maximum interval for a commercial premises:",
+            options: {
+              A: "1 year",
+              B: "3 years",
+              C: "5 years (or at change of occupancy)",
+              D: "10 years"
+            },
+            answer: "C",
+            explanation:
+              "GN3 typically gives 5 years for commercial premises (offices, shops, restaurants). Industrial premises are typically 3 years. Specific high-risk environments (petrol stations, cinemas, swimming pools, leisure complexes) are 1 year."
+          },
+          {
+            number: 4,
+            prompt:
+              "Typical IET-recommended maximum interval for a swimming pool installation:",
+            options: {
+              A: "1 year",
+              B: "3 years",
+              C: "5 years",
+              D: "10 years"
+            },
+            answer: "A",
+            explanation:
+              "1 year — water and a continuous public footfall combine to create one of the highest-risk LV environments. Petrol filling stations, fish farms, marinas, leisure complexes and theatres also fall into the 1-year band."
+          }
+        ]
+      },
+      {
+        id: "section-2",
+        title: "Section 2 — Sampling & Limitations",
+        questions: [
+          {
+            number: 5,
+            prompt:
+              "Sampling during a periodic inspection (i.e. testing only a proportion of similar circuits) is:",
+            options: {
+              A: "Not permitted — every circuit must be fully tested",
+              B: "Permitted, but the extent and any agreed sample size must be recorded on the EICR and agreed in writing with the client beforehand",
+              C: "Permitted only on commercial installations",
+              D: "Permitted only on TT systems"
+            },
+            answer: "B",
+            explanation:
+              "Sampling is the practical reality on large installations — but it is conditional. The extent (what is included) and limitations (what is excluded, and why) are recorded on the EICR, and the duty holder accepts that anything outside the sample has not been verified."
+          },
+          {
+            number: 6,
+            prompt:
+              "If sampling reveals a defect on one of the sampled circuits, the inspector should:",
+            options: {
+              A: "Record the defect and stop",
+              B: "Increase the sample size and, where similar defects are found across multiple sampled circuits, extend testing towards 100 % of similar circuits",
+              C: "Issue a Satisfactory result anyway",
+              D: "Refer the matter to the DNO"
+            },
+            answer: "B",
+            explanation:
+              "A defect in the sample raises the probability that similar defects exist in the unsampled population, so the sample size must increase. Once the failure rate is significant, testing becomes 100 %. This is fundamental to GN3's sampling logic — sampling is risk-based, not a fixed percentage."
+          },
+          {
+            number: 7,
+            prompt:
+              "The \"limitations\" box on an EICR records:",
+            options: {
+              A: "The inspector's opinion of the installer's competence",
+              B: "Areas, items or operational restrictions that meant parts of the installation could not be inspected and tested — e.g. tenanted bedrooms, locked plant rooms, no permission to interrupt supply",
+              C: "Future improvement suggestions",
+              D: "Only the date of the inspection"
+            },
+            answer: "B",
+            explanation:
+              "The limitations box is a risk-management entry — it tells the duty holder which parts of the installation are outside the scope of the report and therefore not covered by the conclusions. Limitations are agreed in writing before work starts and recorded explicitly so liability is clear."
+          },
+          {
+            number: 8,
+            prompt:
+              "Live testing during a periodic inspection is justified only when:",
+            options: {
+              A: "The duty holder asks for it",
+              B: "The inspector wants to save time",
+              C: "Dead testing is impracticable (e.g. continuous-process plant, life-safety circuits, business-critical IT) and the duty holder accepts the residual risk",
+              D: "The installation is over 10 years old"
+            },
+            answer: "C",
+            explanation:
+              "GN3's principle is dead-test by default; live test only where dead testing isn't reasonably practicable. Live testing introduces shock risk to the inspector and arc-flash risk to the equipment, so the case for it must be specific and documented — not a workflow convenience."
+          }
+        ]
+      },
+      {
+        id: "section-3",
+        title: "Section 3 — Process & Outputs",
+        questions: [
+          {
+            number: 9,
+            prompt:
+              "The principal legal driver behind periodic inspection and testing in the workplace is:",
+            options: {
+              A: "BS 7671 alone — it is statutory",
+              B: "RIDDOR 2013",
+              C: "The Electricity at Work Regulations 1989 (Reg 4(2)) and the Health and Safety at Work etc. Act 1974",
+              D: "Building Regulations Part P"
+            },
+            answer: "C",
+            explanation:
+              "EAWR Reg 4(2) requires that systems be maintained so as to prevent danger; HSWA places the general duty on the employer. Periodic inspection and testing is the recognised means of demonstrating that the duty has been discharged. Part P only applies to dwellings, and only to notifiable work."
+          },
+          {
+            number: 10,
+            prompt:
+              "The principal legal driver behind periodic inspection and testing in privately rented dwellings in England is:",
+            options: {
+              A: "EAWR 1989 only",
+              B: "The Electrical Safety Standards in the Private Rented Sector (England) Regulations 2020",
+              C: "Building Regulations Part P",
+              D: "RIDDOR"
+            },
+            answer: "B",
+            explanation:
+              "The 2020 Regulations made periodic inspection a specific statutory duty on landlords in England (5-yearly max, EICR copy to tenant within 28 days, action on C1/C2/FI within 28 days or sooner if specified). Comparable but separate regimes exist in Scotland and Wales."
+          },
+          {
+            number: 11,
+            prompt:
+              "Periodic inspection and testing is best described as:",
+            options: {
+              A: "A guarantee that no fault will occur before the next inspection",
+              B: "A proactive replacement of every component approaching end-of-life",
+              C: "A snapshot in time — it gives a defensible view of the installation's condition on the day of inspection but does not guarantee future performance",
+              D: "A purely paperwork exercise"
+            },
+            answer: "C",
+            explanation:
+              "PIT is a condition assessment at a moment in time. The interval is risk-based precisely because faults can develop between inspections — and the duty holder remains responsible for in-service safety throughout, not only at inspection time."
+          },
+          {
+            number: 12,
+            prompt:
+              "The output document of a periodic inspection of an existing installation is:",
+            options: {
+              A: "An EIC",
+              B: "A MEIWC (Minor Works Certificate)",
+              C: "An EICR (Electrical Installation Condition Report) with a Schedule of Inspections and a Schedule of Test Results",
+              D: "A Domestic Visual Condition Report"
+            },
+            answer: "C",
+            explanation:
+              "The EICR is the report on existing work; the EIC and MEIWC are certificates issued for new work and minor additions/alterations respectively. The EICR is supported by the Schedule of Inspections (what was looked at) and the Schedule of Test Results (what was measured)."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { range: "11–12", label: "Strong — periodic-inspection ready" },
+      { range: "9–10", label: "Comfortable pass" },
+      { range: "7–8", label: "Re-read GN3 chapter on intervals and sampling" },
+      { range: "< 7", label: "Re-watch the periodic inspection webinar" }
+    ],
+    priorities: [
+      "Recommended maximum intervals — domestic owner-occupied 10 years, PRS 5 years, commercial 5 years, industrial 3 years, high-risk (pools, petrol, theatres) 1 year.",
+      "Sampling logic — agreed in writing, recorded as extent/limitations, sample size grows when defects are found.",
+      "The legal drivers — EAWR 1989 + HSWA in workplaces, ESS PRS Regulations 2020 in English rented homes — and the difference between guidance intervals and statutory intervals."
+    ]
+  },
+  {
+    id: "condition-reporting",
+    title: "Condition Reporting (EICR) — Topic Mock",
+    subtitle: "Webinar 7 — classifying and recording condition",
+    description:
+      "A focused topic mock built around Webinar 7 — Condition Reporting. Covers the EICR document set, the C1 / C2 / C3 / FI classification codes, what makes a report Satisfactory or Unsatisfactory, the inspector's on-site obligations when danger is found, and the landlord/duty-holder duties under the ESS PRS Regulations 2020.",
+    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
+    passMark: 9,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Forms & Documents",
+        questions: [
+          {
+            number: 1,
+            prompt: "EICR stands for:",
+            options: {
+              A: "Electrical Installation Compliance Record",
+              B: "Electrical Installation Condition Report",
+              C: "Electrical Inspection & Calibration Report",
+              D: "Electricians' Industry Conformance Record"
+            },
+            answer: "B",
+            explanation:
+              "Electrical Installation Condition Report — the standard BS 7671 model form for reporting on the condition of an existing installation. \"Condition\" rather than \"compliance\" because installations are assessed against the edition of BS 7671 in force when they were built, not retrospectively against the current edition."
+          },
+          {
+            number: 2,
+            prompt:
+              "A complete EICR submission to the client comprises:",
+            options: {
+              A: "The EICR alone",
+              B: "The EICR plus a Schedule of Inspections and a Schedule of Test Results",
+              C: "Just the test results",
+              D: "An EIC and a Minor Works Certificate"
+            },
+            answer: "B",
+            explanation:
+              "The EICR is the headline document; the Schedule of Inspections records what was visually checked, and the Schedule of Test Results records the numerical readings. All three together form the report — without the schedules the EICR is incomplete."
+          },
+          {
+            number: 3,
+            prompt:
+              "An Electrical Installation Certificate (EIC) is issued for:",
+            options: {
+              A: "Existing installations being condition-assessed",
+              B: "New installations, additions and alterations that introduce a new circuit",
+              C: "Periodic inspections only",
+              D: "PAT testing"
+            },
+            answer: "B",
+            explanation:
+              "EIC = new work. EICR = condition of existing work. The Minor Electrical Installation Works Certificate (MEIWC) is the equivalent of an EIC for additions/alterations not introducing a new circuit (e.g. an extra socket on a ring final)."
+          },
+          {
+            number: 4,
+            prompt:
+              "Before commencing an EICR, the inspector must agree what with the client?",
+            options: {
+              A: "The colour of the report's cover",
+              B: "The extent of the installation to be inspected and any limitations on access or testing — preferably in writing",
+              C: "The names of any future tenants",
+              D: "Nothing — the inspector decides"
+            },
+            answer: "B",
+            explanation:
+              "Extent and limitations must be agreed up-front and recorded on the report. Without this, both inspector and client are exposed: the inspector could be held responsible for areas they were never given access to, and the client may have a false sense of coverage."
+          }
+        ]
+      },
+      {
+        id: "section-2",
+        title: "Section 2 — EICR Codes",
+        questions: [
+          {
+            number: 5,
+            prompt: "Code C1 on an EICR observation means:",
+            options: {
+              A: "Improvement recommended",
+              B: "Danger present — risk of injury; immediate remedial action required",
+              C: "Potentially dangerous — urgent remedial action required",
+              D: "Further investigation required"
+            },
+            answer: "B",
+            explanation:
+              "C1 is the most serious — danger is present now (e.g. exposed live conductors at an accessible accessory). The inspector should make safe before leaving site (often by isolation), inform the duty holder immediately, and any C1 automatically renders the EICR Unsatisfactory."
+          },
+          {
+            number: 6,
+            prompt: "Code C2 on an EICR observation means:",
+            options: {
+              A: "Danger is present right now",
+              B: "Potentially dangerous — urgent remedial action required",
+              C: "Improvement recommended",
+              D: "No action required"
+            },
+            answer: "B",
+            explanation:
+              "C2 is a fault that is not dangerous as it sits but is likely to become dangerous if circumstances change — for example, supplementary bonding missing in a bathroom where the four conditions of Reg 701.415.2 cannot be met. C2 makes the EICR Unsatisfactory and must be remedied promptly."
+          },
+          {
+            number: 7,
+            prompt: "Code C3 on an EICR observation means:",
+            options: {
+              A: "Improvement recommended — it does not by itself render the report Unsatisfactory",
+              B: "Danger present",
+              C: "Further investigation required",
+              D: "Code 3 of safe isolation"
+            },
+            answer: "A",
+            explanation:
+              "C3 is the \"would be better if\" code — non-compliance with the current edition that does not present an actual danger. A C3 alone does not make the report Unsatisfactory, but a recurring pattern of C3s tells the duty holder where to focus future investment."
+          },
+          {
+            number: 8,
+            prompt: "FI (Further Investigation) on an EICR observation means:",
+            options: {
+              A: "Future improvement suggested for the next inspection",
+              B: "Further investigation required without delay because the inspector found something they could not fully diagnose during the inspection (e.g. an unexplained low IR reading)",
+              C: "Final inspection completed",
+              D: "Fitting incorrect"
+            },
+            answer: "B",
+            explanation:
+              "FI is used when the scope of the inspection didn't permit a definitive call but the symptom suggests a possible defect requiring deeper investigation. Like C1 and C2, the presence of an FI renders the overall report Unsatisfactory — because the installation's condition is genuinely unknown at that point."
+          }
+        ]
+      },
+      {
+        id: "section-3",
+        title: "Section 3 — Outcomes & Responsibilities",
+        questions: [
+          {
+            number: 9,
+            prompt:
+              "The overall classification of an EICR is rendered Unsatisfactory by:",
+            options: {
+              A: "Any C3",
+              B: "Any C1, C2 or FI observation",
+              C: "Only a C1",
+              D: "More than ten C3s"
+            },
+            answer: "B",
+            explanation:
+              "Any single C1, C2 or FI is enough to make the overall report Unsatisfactory. C3s on their own do not — though they should still drive remedial planning. The Unsatisfactory result is what triggers the landlord/duty-holder's obligation to act."
+          },
+          {
+            number: 10,
+            prompt:
+              "If a C1 is identified on site during an EICR, the inspector should:",
+            options: {
+              A: "Note it on the report and leave site",
+              B: "Make safe before leaving site (typically by isolation), notify the duty holder verbally and in writing, and record the action on the report",
+              C: "Wait for the duty holder to call an electrician",
+              D: "Switch off the entire installation regardless of impact"
+            },
+            answer: "B",
+            explanation:
+              "C1 = danger present now. Walking away leaves the inspector personally exposed and the public at risk. The standard response is to isolate the affected circuit, label it, notify the duty holder immediately and record exactly what was found and what action was taken."
+          },
+          {
+            number: 11,
+            prompt:
+              "Under the ESS PRS Regulations 2020 (England), the landlord must provide the EICR to the existing tenant:",
+            options: {
+              A: "Within 7 days of the inspection",
+              B: "Within 28 days of the inspection",
+              C: "On request only",
+              D: "Within 6 months"
+            },
+            answer: "B",
+            explanation:
+              "Within 28 days to existing tenants. To a new tenant, the EICR must be supplied before they move in. Where the report is Unsatisfactory, the landlord must complete the required remedial work — and obtain written confirmation from a qualified person — within 28 days of the inspection (or sooner if the report specifies)."
+          },
+          {
+            number: 12,
+            prompt:
+              "An accessory (e.g. a socket-outlet) is found with the front plate broken away, exposing a live terminal accessible to a finger. The most appropriate code is:",
+            options: {
+              A: "C3 — improvement recommended",
+              B: "C2 — potentially dangerous",
+              C: "C1 — danger present",
+              D: "FI — further investigation"
+            },
+            answer: "C",
+            explanation:
+              "Exposed accessible live parts are the textbook C1 — basic protection has failed and a finger or metal object can reach a live conductor. Make safe by isolating the circuit, label it, and the report is Unsatisfactory. C2 would apply if the live part were not directly accessible but a single foreseeable event could expose it."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { range: "11–12", label: "Strong — confident with EICR coding" },
+      { range: "9–10", label: "Comfortable pass" },
+      { range: "7–8", label: "Re-read the C1/C2/C3/FI definitions and Best-Practice Guide 4 from Electrical Safety First" },
+      { range: "< 7", label: "Re-watch the condition reporting webinar" }
+    ],
+    priorities: [
+      "C1 / C2 / C3 / FI — be able to recite each definition exactly, and to apply them to real-world observations.",
+      "Unsatisfactory triggers — any C1, C2 or FI; C3 alone is not Unsatisfactory.",
+      "On-site response to a C1 — make safe, notify duty holder, record. Walking away from a known C1 is a personal-liability risk for the inspector."
+    ]
   }
 ];
 
