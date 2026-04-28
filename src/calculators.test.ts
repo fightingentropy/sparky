@@ -168,6 +168,11 @@ describe("calcAngle", () => {
     const result = calcAngle("8", "45", "0", "0", "0", "cm", true, true, "5");
     expect(result.angledLengthValue).toBe("--");
   });
+
+  it("returns empty when bends exactly consume the drop", () => {
+    const result = calcAngle("10", "45", "0", "0", "0", "cm", true, true, "5");
+    expect(result.angledLengthValue).toBe("--");
+  });
 });
 
 // ── Power ──
@@ -272,6 +277,16 @@ describe("calcConduit", () => {
     const result = calcConduit("0", "6", "3", "40");
     expect(result.fillValue).toBe("-- %");
     expect(result.overFill).toBe(false);
+  });
+
+  it("rejects fractional cable counts", () => {
+    const result = calcConduit("20", "6", "2.5", "40");
+    expect(result.fillValue).toBe("-- %");
+  });
+
+  it("rejects impossible max fill limits", () => {
+    const result = calcConduit("20", "6", "3", "120");
+    expect(result.fillValue).toBe("-- %");
   });
 });
 

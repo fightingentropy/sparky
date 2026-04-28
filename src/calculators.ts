@@ -334,7 +334,7 @@ export function calcAngle(
       : 0;
   const effectiveDrop = drop - bendDeduction;
 
-  if (effectiveDrop < 0) return empty;
+  if (effectiveDrop <= 0) return empty;
 
   const radians = (angle * Math.PI) / 180;
   const sinValue = Math.sin(radians);
@@ -506,7 +506,9 @@ export function calcConduit(
     conduit <= 0 ||
     cable <= 0 ||
     count <= 0 ||
-    maxFill <= 0
+    !Number.isInteger(count) ||
+    maxFill <= 0 ||
+    maxFill > 100
   ) {
     return { fillValue: "-- %", usedAreaValue: "-- mm²", remainingValue: "-- mm²", overFill: false };
   }
