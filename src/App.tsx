@@ -25,8 +25,10 @@ import { useTheme } from "./useTheme";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
 import { ExamPage } from "./ExamPage";
+import { TutorialsPage } from "./TutorialsPage";
+import { TUTORIALS } from "./tutorials";
 
-type PageId = "home" | "cheatsheet" | "exams";
+type PageId = "home" | "cheatsheet" | "exams" | "tutorials";
 
 type LegendItem = {
   label: string;
@@ -361,10 +363,19 @@ function ToolTitle({ title, hint }: { title: string; hint: string }) {
   );
 }
 
-function getPageFromHash(): PageId {
+function getPageFromLocation(): PageId {
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (path === "/tutorials") return "tutorials";
+
   const hash = window.location.hash.replace("#", "");
-  if (hash === "home" || hash === "cheatsheet" || hash === "exams") return hash;
+  if (hash === "home" || hash === "cheatsheet" || hash === "exams" || hash === "tutorials") {
+    return hash;
+  }
   return DEFAULT_PAGE;
+}
+
+function getPageHref(page: PageId) {
+  return page === "tutorials" ? "/tutorials" : `/#${page}`;
 }
 
 export default function App() {
@@ -372,7 +383,7 @@ export default function App() {
   const { entries: historyEntries, addEntry: addHistoryEntry, clearHistory } = useHistory();
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const [page, setPage] = useState<PageId>(getPageFromHash());
+  const [page, setPage] = useState<PageId>(getPageFromLocation());
   const [searchQuery, setSearchQuery] = useState("");
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteQuery, setPaletteQuery] = useState("");
@@ -472,7 +483,7 @@ export default function App() {
   }, [unistrutContainments.length]);
 
   function navigateTo(nextPage: PageId, targetId?: string) {
-    window.location.hash = nextPage;
+    window.history.pushState(null, "", getPageHref(nextPage));
     setPage(nextPage);
 
     if (targetId) {
@@ -697,6 +708,13 @@ export default function App() {
         action: () => navigateTo("exams")
       },
       {
+        title: "Tutorials",
+        subtitle: "Workplace videos and demonstrations.",
+        tag: "Page",
+        keywords: "tutorials videos demonstrations workplace trunking conduit tray unistrut supports",
+        action: () => navigateTo("tutorials")
+      },
+      {
         title: "Help",
         subtitle: "Show shortcuts.",
         tag: "Action",
@@ -732,7 +750,14 @@ export default function App() {
           keywords: `${section.title} ${item}`,
           action: () => navigateTo("cheatsheet", section.id)
         }))
-      ])
+      ]),
+      ...TUTORIALS.map((tutorial) => ({
+        title: tutorial.title,
+        subtitle: tutorial.workplaceUse,
+        tag: "Video",
+        keywords: `${tutorial.title} ${tutorial.channel} ${tutorial.category} ${tutorial.workplaceUse} ${tutorial.practiceFocus.join(" ")}`,
+        action: () => navigateTo("tutorials", tutorial.id)
+      }))
     ];
 
     return baseItems
@@ -741,9 +766,13 @@ export default function App() {
   }, [paletteQuery]);
 
   useEffect(() => {
-    const onHashChange = () => setPage(getPageFromHash());
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
+    const updatePage = () => setPage(getPageFromLocation());
+    window.addEventListener("hashchange", updatePage);
+    window.addEventListener("popstate", updatePage);
+    return () => {
+      window.removeEventListener("hashchange", updatePage);
+      window.removeEventListener("popstate", updatePage);
+    };
   }, []);
 
   useEffect(() => {
@@ -880,7 +909,15 @@ export default function App() {
   return (
     <div className="site-shell">
       <header className="topbar">
-        <a className="brand" href="#home" aria-label="Go to overview">
+        <a
+          className="brand"
+          href={getPageHref("home")}
+          aria-label="Go to overview"
+          onClick={(event) => {
+            event.preventDefault();
+            navigateTo("home");
+          }}
+        >
           <svg
             className="brand-mark"
             viewBox="0 0 40 40"
@@ -924,13 +961,18 @@ export default function App() {
             [
               { id: "home", label: "Home" },
               { id: "cheatsheet", label: "Notes" },
-              { id: "exams", label: "Exams" }
+              { id: "exams", label: "Exams" },
+              { id: "tutorials", label: "Tutorials" }
             ] as const
           ).map((item) => (
             <a
               key={item.id}
-              href={`#${item.id}`}
+              href={getPageHref(item.id)}
               className={page === item.id ? "is-active" : undefined}
+              onClick={(event) => {
+                event.preventDefault();
+                navigateTo(item.id);
+              }}
             >
               {item.label}
             </a>
@@ -1967,6 +2009,7 @@ export default function App() {
         </section>
 
         <ExamPage isActive={page === "exams"} />
+        <TutorialsPage isActive={page === "tutorials"} />
       </main>
 
       {paletteOpen ? (
