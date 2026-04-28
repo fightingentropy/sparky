@@ -224,6 +224,481 @@ const cheatSheetSections: CheatSheetSection[] = [
       { label: "Blue square with X — SP&N Distribution Board", swatch: "#3366cc", swatchStyle: "x" },
       { label: "Red outlined rectangle — Fire Rated Enclosure", swatch: "#cc2222", swatchStyle: "outline" }
     ]
+  },
+  {
+    id: "cheat-course-earthing-systems",
+    title: "Earthing systems (TN-S/TN-C-S/TT/IT)",
+    summary: "Three UK supply earthing arrangements plus the rare IT system, and where each is used.",
+    items: [
+      "TN-S: DNO supplies a separate earth, usually via the metallic sheath of the service cable; older properties.",
+      "TN-C-S (PME): DNO neutral and earth combined as PEN to cut-out, split at consumer end; commonest UK arrangement.",
+      "TT: DNO provides no earth; consumer's own earth electrode (rod) used. Common on rural/overhead supplies.",
+      "IT: high-impedance earth, used where a first-fault must not trip (e.g. operating theatres). Requires insulation monitoring (BS 7671 Section 411.6).",
+      "Max Ze: TN-S 0.8 ohm, TN-C-S 0.35 ohm, TT max 200 ohm (typical TT requires RCD for fault protection).",
+      "TN-C-S supplies should now have a supplementary earth electrode to mitigate PEN faults (esp. EV chargers).",
+      "On a PEN/open-PEN fault, neutral and all bonded metalwork rise to line potential - 'looks dead but is live'."
+    ]
+  },
+  {
+    id: "cheat-course-earthing-bonding-sizing",
+    title: "Earthing & bonding sizing",
+    summary: "Standard CSAs for earthing conductor and main protective bonding (BS 7671 Chapter 54).",
+    items: [
+      "Standard meter tails: 25 mm^2 line + 25 mm^2 N + 16 mm^2 earthing conductor.",
+      "Main protective bonding sized from Table 54.8 (typically 10 mm^2 with 25 mm^2 tails; 6 mm^2 was the older standard).",
+      "CPC sizing by Table 54.7: line up to 16 mm^2 -> CPC same size; 16-35 mm^2 -> CPC min 16 mm^2; >35 mm^2 -> CPC min half line.",
+      "Or calculate CPC adiabatically (Reg 543.1.3): S = sqrt(I^2 * t / k); k from Table 54.3 (Cu/PVC = 115).",
+      "Bonding to gas/water: connect within 600 mm of where the service enters, after the meter; loop conductor through clamps - do not cut.",
+      "Every BS 951 clamp must carry the 'Safety Electrical Connection - Do Not Remove' label.",
+      "Plastic incoming services (e.g. blue MDPE) are NOT extraneous-conductive-parts - no main bonding required."
+    ]
+  },
+  {
+    id: "cheat-course-supplementary-bonding",
+    title: "Supplementary bonding (Reg 701.415.2)",
+    summary: "When supp. bonding can be omitted in a room containing a bath or shower.",
+    items: [
+      "Reg 701.415.2 - supplementary bonding may be omitted in a bathroom if ALL THREE conditions are met.",
+      "1) All final circuits comply with disconnection times of Reg 411.3.2.",
+      "2) All final circuits have 30 mA RCD additional protection (Reg 415.1.1).",
+      "3) All extraneous-conductive-parts are connected to main protective bonding (Reg 411.3.1.2).",
+      "Sup. bonding conductor commonly 4 mm^2 G/Y where mechanically unprotected; sized via Table 54.8.",
+      "Sup. bonding doesn't need a dedicated path back to the MET - linking exposed and extraneous parts together is enough."
+    ]
+  },
+  {
+    id: "cheat-course-disconnection-times",
+    title: "Max disconnection times (Table 41.1)",
+    summary: "BS 7671 Table 41.1 disconnection-time limits for AC final and distribution circuits.",
+    items: [
+      "Final circuit <=32 A fixed equipment OR <=63 A socket on TN, 230 V AC: 0.4 s (Reg 411.3.2.2).",
+      "Distribution circuits, or final circuits exceeding the above limits, on TN: 5 s (Reg 411.3.2.3).",
+      "Final circuit <=32 A fixed / <=63 A socket on TT: 0.2 s.",
+      "Distribution / larger final circuits on TT: 1 s.",
+      "'Instantaneous' for OCPDs in BS 7671 = 0.1 s.",
+      "Type B MCB Ia = 5xIn (e.g. 16 A B = 80 A); Type C = 10xIn; Type D = 20xIn.",
+      "Use Table 41.4 (0.4 s) when 411.3.2.2 applies (small final circuit/sockets); Table 41.2 (5 s) for distribution / larger circuits.",
+      "Table 41.3 covers MCBs/RCBOs (Type B/C/D); Table 41.5 covers RCDs on TT."
+    ]
+  },
+  {
+    id: "cheat-course-zs-tables",
+    title: "Max Zs values & 80% rule",
+    summary: "Tabulated vs measured Zs and key values from Table 41.3 / GN3 Appendix A.",
+    items: [
+      "Tabulated Zs (BS 7671 Table 41.3) is at operating temperature; for initial verification use 80% (max measured).",
+      "Max measured Zs = max tabulated Zs x 0.8 (cables cold on first energisation).",
+      "B6: tab 7.28 / measured 5.82 ohm. B16: tab 2.73 / meas 2.19. B20: tab 2.19 / meas 1.75. B32: tab 1.09 / meas 0.87.",
+      "C6: tab 3.64 / meas 2.91. C32: tab 0.68 / meas 0.55.",
+      "Read question for the word 'measured' - if present multiply tabulated by 0.8.",
+      "On EICR (cables hot, in service) the tabulated Table 41.x values may be used; on initial verification use the 80% values.",
+      "Table 41.5 (TT): max Zs 30 mA = 1667, 100 mA = 500, 300 mA = 167, 500 mA = 100 ohm. Use I_dn in amps in RA x I_dn <= 50 V."
+    ]
+  },
+  {
+    id: "cheat-course-rcd-types",
+    title: "RCD types (AC/A/F/B)",
+    summary: "RCD type describes the residual waveform it can detect - distinct from MCB types B/C/D.",
+    items: [
+      "Type AC - sinusoidal AC residual currents only. Now restricted; can be 'blinded' by DC fault current.",
+      "Type A - AC plus pulsating DC; modern default for general circuits (LED drivers, SMPS, etc.).",
+      "Type F - as Type A plus higher-frequency / mixed-frequency residuals (some VSD / inverter loads).",
+      "Type B - all of the above plus smooth DC; required for EV chargers and similar DC-fault-prone loads.",
+      "RCD 'job' is set by mA rating, not type: 30 mA = additional protection; 100/300/500 mA also used for fault/fire.",
+      "Fire protection (areas of increased risk): RCD rating must NOT exceed 300 mA.",
+      "BS EN 60898 = MCB; BS EN 61008 = RCCB (no overcurrent); BS EN 61009 = RCBO (combined).",
+      "30% rule: connected leakage on a 30 mA circuit should not exceed 9 mA to avoid nuisance tripping."
+    ]
+  },
+  {
+    id: "cheat-course-where-rcd-required",
+    title: "Where 30 mA RCD required",
+    summary: "BS 7671 regulations that mandate 30 mA additional protection.",
+    items: [
+      "Reg 411.3.3 - all socket outlets <=32 A used by ordinary persons (BA1). Exception only with risk assessment for BA4/BA5.",
+      "Reg 411.3.3 also applies to mobile equipment <=32 A used outdoors.",
+      "Reg 411.3.4 - all final circuits supplying luminaires within domestic dwellings.",
+      "Reg 522.6.202 - cables in masonry walls at depth <50 mm not protected by an earthed metallic covering.",
+      "Reg 522.6.203 - cables in metal-stud partition walls (regardless of depth).",
+      "Reg 522.6.204 alternatives: SWA, earthed metallic conduit/trunking, mechanical strike plate, or part of SELV/PELV.",
+      "Part 7 special locations: bathrooms (701), pools (702), saunas, EV (722) etc. as required by the section.",
+      "RCD socket outlet or RCD-FCU acceptable retrofit when CU change is impractical (regs say 'outlets', not 'circuits')."
+    ]
+  },
+  {
+    id: "cheat-course-consumer-unit",
+    title: "Consumer unit requirements",
+    summary: "Reg 421.1.201, AFDDs, SPDs and main switch rules.",
+    items: [
+      "Reg 421.1.201 - domestic CU must be non-combustible (metal) or in a non-combustible cabinet (since 17th Ed Amd 3, 2015).",
+      "Applies to NEW CUs only; existing plastic CUs without thermal damage may remain - note on cert.",
+      "Main switch is normally a double-pole switch to BS EN 60947-3, breaks both line and neutral.",
+      "Enclosure IP: top minimum IP4X, sides/front/bottom minimum IP2X (Reg 416 / page 80).",
+      "Unused ways must be filled with blanking plates to maintain enclosure rating.",
+      "AFDDs (Reg 421.1.7) required on socket circuits <=32 A in HRRBs (>18 m or >6 storeys), HMOs, purpose-built student accommodation, care homes.",
+      "SPDs (Type 2) required at origin per Reg 443; check green/red indicator window - replace cartridge when red.",
+      "Different makes of MCB in one CU is C3 unless thermal damage / modification / loose -> C2."
+    ]
+  },
+  {
+    id: "cheat-course-cable-design-sequence",
+    title: "Cable design sequence",
+    summary: "BS 7671 / OSG Appendix F design steps using Ib, In, Iz, It and correction factors.",
+    items: [
+      "Required relationship: Ib <= In <= Iz <= It (memory: 'Ibanezit').",
+      "Step 1: Ib = P/V (apply diversity for cookers etc., per OSG Appendix A Table A1).",
+      "Step 2: In = next standard rating up (BS EN 60898 sizes: 6/10/16/20/25/32/40/50/63 A; no 5/15/30 A).",
+      "Step 3: Identify reference method (B = in conduit; C = clipped direct; 100-103 = T&E in/under insulation).",
+      "Step 4: It >= In / (Ca x Cg x Ci x Cs x Cf). Cf = 0.725 only for BS 3036 rewireable fuses.",
+      "Step 5: Read It from BS 7671 Table 4D5 / OSG Table F6 (T&E with CPC).",
+      "Step 6: Volt drop check (mV/A/m x Ib x L /1000); 3% for lighting, 5% other (6.9 V / 11.5 V at 230 V).",
+      "If corrected Iz drops below In always size cable to In - the device can pass In through the cable continuously."
+    ]
+  },
+  {
+    id: "cheat-course-correction-factors",
+    title: "Correction factors Ca/Cg/Ci",
+    summary: "Common derating factors from OSG Appendix F / BS 7671 Appendix 4.",
+    items: [
+      "Ca - ambient temp (Table 4B1/F1). 70 deg C cable: 25C=1.03, 30C=1.00, 35C=0.94, 40C=0.87.",
+      "Cg - grouping (Table 4C1/F3). E.g. 4 circuits enclosed = 0.65 (always include your own circuit in the count).",
+      "Ci - thermal insulation (Table F2/Appendix 4 p.423). Full surrounding = method 103 = approx half rating.",
+      "Cs/Cd - soil thermal resistivity / depth of burial (for buried cables).",
+      "Cable rating method 100 (T&E above plasterboard, insulation <=100 mm); 102 (touching insulation one side); 103 (fully surrounded).",
+      "Method C clipped-direct gives the highest rating; method 103 the lowest.",
+      "CCC factor applied for cables with >4 loaded cores."
+    ]
+  },
+  {
+    id: "cheat-course-volt-drop",
+    title: "Volt drop calc & limits",
+    summary: "Voltage drop formulas and BS 7671 Appendix 4 / Reg 525 limits.",
+    items: [
+      "Design formula: Vd = (mV/A/m x Ib x L) / 1000.",
+      "Verification formula (GN3 p.103): Vd = (R1 + Rn) x Ib x 1.2 (1.2 = operating-temp factor for 70 deg C PVC).",
+      "Limits per Appendix 12 / Reg 525: 3% lighting, 5% other circuits (LV public supply).",
+      "230 V single-phase: 3% = 6.9 V; 5% = 11.5 V. 400 V three-phase: 3% = 12 V; 5% = 20 V.",
+      "Limit applies from origin of installation - sum drops across distribution + final circuit.",
+      "Typical mV/A/m (T&E): 1.0 mm^2 = 44; 2.5 mm^2 = 18; 6 mm^2 = 7.3; 10 mm^2 = 4.4; 16 mm^2 = 2.8.",
+      "Volt drop fix is a LARGER cable, never smaller."
+    ]
+  },
+  {
+    id: "cheat-course-final-circuit-specs",
+    title: "Standard final circuits (App H)",
+    summary: "OSG App H Table 4.2.1 / BS 7671 Appendix 15 standard final circuit specs.",
+    items: [
+      "Ring final: 30/32 A, min 2.5 mm^2 T&E (1.5 mm^2 CPC), max 100 m^2 floor area, sockets only.",
+      "Radial socket 20 A: min 2.5 mm^2 T&E, max 50 m^2.",
+      "Radial socket 32 A: min 4 mm^2 T&E, max 75 m^2.",
+      "Lighting circuit: typically 6 A or 10 A on 1.0 or 1.5 mm^2 T&E; max 13 lamps at 100 W on a 6 A.",
+      "Spurs: only ONE unfused spur per ring socket; FCU (BS 1363) <=13 A allows multiple sockets downstream.",
+      "Cooker diversity (Table A1): first 10 A + 30% remainder + 5 A if socket in control unit.",
+      "Immersion 3 kW: 16 A MCB, 20 A DP local switch, heat-resistant flex to element."
+    ]
+  },
+  {
+    id: "cheat-course-iv-test-sequence",
+    title: "Initial verification - test sequence",
+    summary: "BS 7671 / GN3 sequence for new installations (dead then live).",
+    items: [
+      "DEAD: 1) Continuity of CPCs / main + supplementary bonding. 2) Continuity of ring final. 3) Insulation resistance. 4) Polarity (continuity method).",
+      "LIVE: 5) Supply polarity. 6) Earth electrode resistance (if TT). 7) Ze. 8) Zs / PFC. 9) RCD test. 10) Phase sequence (3-ph). 11) Functional test. 12) Volt-drop verification.",
+      "Always null/zero test leads before any continuity test.",
+      "Disconnect both ends of bonding from MET when testing, to remove parallel paths.",
+      "Insulation values: <=500 V circuits test at 500 V DC, min 1 MOhm (investigate if <20 MOhm new).",
+      "SELV/PELV test at 250 V DC, min 0.5 MOhm. Above 500 V circuits: 1000 V DC, min 1 MOhm.",
+      "Continuity record HIGHEST value; insulation record LOWEST value.",
+      "Earth electrode E1 (3-spike) - record AVERAGE of 3 readings within 5%."
+    ]
+  },
+  {
+    id: "cheat-course-test-methods",
+    title: "Specific test methods",
+    summary: "Method 1, Method 2, ring final 3-step, Ze, Zs measured/calculated.",
+    items: [
+      "Method 1 (R1+R2): temp link L-CPC at DB, probe each accessory, record highest. Preferred - feeds Zs calc.",
+      "Method 2 (R2 only): probe CPC at MET to far end, often with wandering lead. Used for bonding.",
+      "Ring step 1: end-to-end r1, rn, r2. r1 ~= rn; r2 = r1 x (CSA_line/CSA_cpc). 2.5/1.5 ratio = 1.67.",
+      "Ring step 2 (L-N cross): each socket reads (r1+rn)/4 - catches L-E or N-E reverse polarity.",
+      "Ring step 3 (L-CPC cross): each socket reads (r1+r2)/4 - catches L-N reverse; this is the recorded R1+R2.",
+      "Wrong cross-connection (L-L instead of L-N) = readings rise then fall around the ring.",
+      "Ze: isolate, lock off, disconnect earthing conductor and bonding from MET, test L to disconnected earth lead.",
+      "Zs measured live or calculated as Ze + R1+R2 (origin) or ZDB + R1+R2 (sub-board).",
+      "PSCC measured L-N (probes piggy-backed); PEFC measured L-E. Single-phase: record HIGHER. 3-ph rule of thumb: highest L-N PSCC x 2."
+    ]
+  },
+  {
+    id: "cheat-course-ir-detail",
+    title: "Insulation resistance detail",
+    summary: "Test voltages, what to disconnect, L+N-link trick, parallel maths.",
+    items: [
+      "Disconnect/bypass: loads, lamps, dimmers, RCDs, electronic switches; close all MCBs and ordinary switches.",
+      "Single-phase: 3 tests - L-N, L-E, N-E. Three-phase: 10 tests (or condensed via Tables 2.10/2.11).",
+      "On a periodic, do NOT test L-N (sensitive equipment may be in service); record L-N as 'NV'.",
+      "If something might still be connected: link L+N together, test to E - load is at same potential, not damaged.",
+      "Whole-installation IR test only valid when no RCDs/RCBOs in circuit.",
+      "Combined IR (parallel): 1/R_total = 1/R1 + 1/R2 + ... ; total is always lower than the lowest reading.",
+      "Cable resistance doubles with length; insulation resistance HALVES when length doubles.",
+      "Verify leads at 250 V first (sanity-check) before pressing 500 V test."
+    ]
+  },
+  {
+    id: "cheat-course-pat-testing",
+    title: "PAT - classes & pass criteria",
+    summary: "In-service inspection of equipment per IET CoP 5th Ed.",
+    items: [
+      "Three levels: User check; formal visual inspection; combined inspection and test.",
+      "Class I: needs PCC + IR + functional test. Class II: IR + functional only (no CPC).",
+      "PCC pass: R measured <= 0.1 ohm + R (older equipment 0.5 ohm + R). R from Appendix 5 mOhm/m x length.",
+      "IR test at 500 V DC: Class I >= 1 MOhm, Class II >= 2 MOhm (L+N joined, tested to E).",
+      "For voltage-sensitive equipment use protective conductor / touch current test instead of 500 V IR.",
+      "BS 1362 plug fuse size set by FLEX size (CoP page 80 table), NOT appliance wattage.",
+      "Test instruments to BS EN 61010 (safety) + BS EN 61557 (accuracy); leads to GS38 (probe tip 2-4 mm).",
+      "V-forms: V1 asset register, V2 inspection record, V3 labels, V4 repair, V5 faulty register, V6 instrument accuracy.",
+      "Inspection intervals set by risk assessment - labels do NOT show next-inspection date (equipment may move)."
+    ]
+  },
+  {
+    id: "cheat-course-eicr-codes",
+    title: "EICR codes (C1/C2/C3/FI)",
+    summary: "GN3 Table 3.5 / BPG4 - codes and example faults for periodic reports.",
+    items: [
+      "C1 - Danger present (live parts touchable). Notify duty holder in writing without delay; make safe on discovery if possible.",
+      "C2 - Potentially dangerous. Urgent remedial action required. Renders EICR unsatisfactory.",
+      "C3 - Improvement recommended. Installation can still be classed satisfactory.",
+      "FI - Further Investigation required without delay (e.g. unidentified live circuit).",
+      "C1 examples: missing CU cover, smashed socket exposing live, damaged insulation accessible, incorrect supply polarity.",
+      "C2 examples: water pipe used as TT earth; bonding < required CSA; Zs > max with no RCD; broken ring; borrowed neutral; IR < 1 MOhm; no 30 mA RCD on ground-floor sockets; mixed MCB makes with thermal damage.",
+      "C3 examples: missing BS 951 'do not remove' label; no 30 mA RCD on first-floor sockets; old red/black colours; junction box with sheath stripped too far above ceiling.",
+      "BS 3036 rewireable fuse alone is NOT a fault if Zs is within max permitted. Missing busbar shroud (with CU cover in place) is NOT a C1/C2.",
+      "If unsure between two codes, give the WORSE one. Any C1 or C2 = unsatisfactory."
+    ]
+  },
+  {
+    id: "cheat-course-eicr-procedure",
+    title: "Periodic / EICR procedure",
+    summary: "Sampling, limitations and how a periodic differs from initial verification.",
+    items: [
+      "EICR purpose (GN3 p.109): to determine whether the existing installation is safe for continued use.",
+      "Customer defines extent (what to inspect) and limitations (no-go areas).",
+      "Sampling table (GN3 Table 3.3): main switchgear external 100%; internal not less than 20%; DBs not less than 25%; final accessories 10-100%; earthing/bonding 100%.",
+      "Increase the sample size when a fault is found. Do not re-sample the same set.",
+      "Mnemonic SAD COWS: Safety, Age, Damage, Corrosion, Overloading, Wear & tear, change of uSe.",
+      "Use all 4 senses on a periodic (live, in service): sight, hearing, smell, touch.",
+      "EICR mandated by Housing Act for rented dwellings - every 5 years or change of occupancy.",
+      "EICR result: Satisfactory or Unsatisfactory (never 'condemned')."
+    ]
+  },
+  {
+    id: "cheat-course-bathroom-zones",
+    title: "Bathroom & pool zones",
+    summary: "BS 7671 Section 701 / 702 zone definitions and IP requirements.",
+    items: [
+      "Bathroom Zone 0: inside the tub/shower tray (<=0.1 m for permanent shower cubicle floor). Min IPX7.",
+      "Zone 1: above bath/shower up to 2.25 m above finished floor. Min IPX4.",
+      "Zone 2: 0.6 m horizontally from edge of zone 1, up to 2.25 m. Min IPX4. No zone 3.",
+      "Sockets prohibited within 2.5 m horizontally of edge of zone 1 (was 3 m pre-Amd 2). Must have 30 mA RCD.",
+      "Shaver sockets (BS EN 61558-2-5) permitted in zone 2 - electrically separated.",
+      "Pool Zone 0 (Section 702): inside the pool. Zone 1: above to 2.5 m. Zone 2: 2 m horizontal from zone 1.",
+      "EV charging (Section 722): IP44 = IPX4 + IP4X (EV equipment must meet both).",
+      "Marina / seashore (Section 709): waves require IPX6 (external influence AD6)."
+    ]
+  },
+  {
+    id: "cheat-course-iv-inspection-checklist",
+    title: "Inspection checklist (Appendix 6)",
+    summary: "BS 7671 Appendix 6 / GN3 Section 2.5 - what each heading covers.",
+    items: [
+      "Item 1: Condition of consumer's intake equipment (visual only - DNO own).",
+      "Item 2: Parallel/switched alternative supplies (PV, generators).",
+      "Item 3: Earthing & bonding (electrode, conductor, MET, main bonding, BS 951 labels).",
+      "Item 4: Basic protection (insulation, barriers/enclosures: top IP4X, sides/front/bottom IP2X).",
+      "Item 5: Other shock protection methods (SELV/PELV, double insulation, electrical separation).",
+      "Item 6: Additional protection (30 mA RCD, supplementary bonding only - ONLY two recognised forms).",
+      "Item 7: Distribution boards (cover, identification, labels).",
+      "Item 8: Final circuits (cable size/type/route, accessories, polarity, RCD requirement).",
+      "Item 9: Switching & isolation. Item 10: Current-using equipment. Item 11: Notices/labels/circuit charts. Item 12: Special locations (Part 7)."
+    ]
+  },
+  {
+    id: "cheat-course-safe-isolation",
+    title: "Safe isolation procedure",
+    summary: "Per Electrician's Guide Ch.7.5 / Best Practice Guide 2 - not in GN3.",
+    items: [
+      "1) Identify circuit / installation to isolate; 2) seek permission from duty holder.",
+      "3) Locate ALL sources (mains, PV, UPS, CHP, generators, battery storage).",
+      "4) Discharge any capacitors. 5) Use AVI to BS EN 61243 (probe tip <=4 mm exposed, GS38 leads).",
+      "6) Prove AVI on known live source or proving unit BEFORE isolation.",
+      "7) Switch off and lock off (correct lock-off device, retain key personally).",
+      "8) Apply warning notice with name/contact/work being done.",
+      "9) Prove dead at point of isolation: single-phase = 3 tests (E-L, E-N, L-N); three-phase = 10 tests.",
+      "10) Re-prove AVI on known source AFTER. Replace CU cover before leaving area.",
+      "Always prove dead at the actual point of work, not just at the DB."
+    ]
+  },
+  {
+    id: "cheat-course-instruments-gs38",
+    title: "Test instruments & GS38",
+    summary: "Standards, calibration practice and lead/probe rules.",
+    items: [
+      "BS EN 61010 - safety of test equipment. BS EN 61557 - accuracy/measurement performance.",
+      "GS38 - HSE guidance on test leads and probes (free PDF, 9 pages). Probe tip exposure 2-4 mm.",
+      "CAT II/III/IV ratings - select instrument appropriate to the install (GN3 Table 1.1).",
+      "Calibration not legally required, but accuracy must be demonstrable - regular accuracy checks against a calibration card; log on Form V6.",
+      "MFT functions: continuity (low-resistance ohmmeter), insulation resistance, EFLI, RCD test, voltage.",
+      "EFLI 'no-trip' two-wire test injects DC-modulated pulses so an upstream RCD does not trip.",
+      "Always null/zero leads before continuity test. Disconnect bonding ends from MET to remove parallel paths."
+    ]
+  },
+  {
+    id: "cheat-course-rcd-trip-times",
+    title: "RCD trip-time test",
+    summary: "GN3 Table 2.17 trip-time limits and procedure.",
+    items: [
+      "Test current = device's rated I_dn (30/100/300/500 mA). Same for all device sizes.",
+      "At 1/2 x I_dn: device must NOT trip.",
+      "At 1 x I_dn: must trip <=300 ms (general purpose). Test at 0 deg and 180 deg, record higher.",
+      "At 5 x I_dn: must trip <=40 ms (used in fault-finding only).",
+      "Then operate the integral test button - mechanical check only. Press AFTER electrical tests.",
+      "TT formula: RA x I_dn (in amps) <= 50 V. Convert mA to A (30 mA = 0.03 A).",
+      "Earth electrode resistance >200 ohm regarded as unstable regardless of formula compliance.",
+      "RCD warning notice (Reg 514.12) - test 6-monthly via test button (no longer mandatory in dwellings under latest amendment)."
+    ]
+  },
+  {
+    id: "cheat-course-supply-intake",
+    title: "Mains position / intake",
+    summary: "Order of supply equipment and ownership boundaries.",
+    items: [
+      "Order from street: DNO supply cable -> service head (cut-out) -> main fuse -> meter tails -> meter -> (optional isolator) -> consumer unit.",
+      "Main fuse typically BS 88-3 (formerly BS 1361), 60/80/100 A. SEALED - do NOT pull.",
+      "DNO owns up to and including the meter (and DNO-side tails). Consumer owns CU and consumer-side tails.",
+      "Tail length from meter to CU normally <=3 m without DNO sub-main protection (e.g. switch-fuse).",
+      "Henley block used to tap existing meter tails when adding a second CU.",
+      "ESQCR (Electricity Safety, Quality & Continuity Regs) governs DNO equipment - not the electrician's responsibility.",
+      "If installation is fed via a Henley + sub-main, fit a switch-fuse <=80 A so house fault blows that, not the DNO 100 A fuse.",
+      "Document supply: U_0, type/no. of conductors, frequency, PSCC, Ze, OCPD type/rating - obtain from DNO if not measured."
+    ]
+  },
+  {
+    id: "cheat-course-adiabatic-pfc",
+    title: "Adiabatic & PFC calcs",
+    summary: "Cable survival check and prospective fault current formulas.",
+    items: [
+      "Adiabatic equation (Reg 543.1.3, page 98/99): t = k^2 * S^2 / I^2, or S = sqrt(I^2 * t / k^2).",
+      "k from Table 54.3 for CPC checks. Cu/PVC = 115; Cu/90 deg C = 143.",
+      "If cable t > OCPD clearance time, the cable survives the fault (e.g. cable t = 2.3 s vs OCPD 0.1 s -> safe).",
+      "PEFC = (U_0 x C_min) / Zs, with C_min = 0.95 (Reg 411.4.4).",
+      "Recorded PFC (single-phase) = HIGHER of PEFC and PSCC. Three-phase rule of thumb: highest L-N PSCC x 2.",
+      "Voltage limits (CENELEC): 230 V +10%/-6% = 216.2 V to 253 V. C_max = 1.10.",
+      "Device breaking capacity: PFC at any DB must not exceed device I_cn (typical 6 kA, 10 kA, etc.)."
+    ]
+  },
+  {
+    id: "cheat-course-three-phase-basics",
+    title: "Three-phase basics",
+    summary: "Voltages, colours and supply structure.",
+    items: [
+      "L1 = brown (was red), L2 = black (was yellow), L3 = grey (was blue), N = blue (was black).",
+      "Line to neutral nominal = 230 V. Line to line = 400 V (= 230 x sqrt(3)).",
+      "RMS to peak: peak = RMS / 0.707 = 230 / 0.707 = 325 V.",
+      "Domestic supply normally 100 A single-phase max; >100 A demand suggests three-phase.",
+      "Phase sequence must be L1-L2-L3 throughout - check at every rotating-equipment point, not just intake.",
+      "To correct wrong phase rotation, swap any TWO conductors (not all three).",
+      "Three-phase polarity = 10 voltage tests during safe isolation (incl. all L-L pairs at 400 V).",
+      "On National Grid HV transmission only L1/L2/L3 - neutral created at distribution star point."
+    ]
+  },
+  {
+    id: "cheat-course-special-cables-fp200",
+    title: "Fire alarm & special cables",
+    summary: "FP200 use and conductor identification.",
+    items: [
+      "FP200 (round, soft, fire-rated) - CPC same CSA as live conductors; foil screen contacts CPC.",
+      "Feed TO panel = LV: foil + CPC sleeved green/yellow as the protective conductor.",
+      "Loops FROM panel = ELV (~24 V): screen is FUNCTIONAL earth only - sleeve pink, NOT connected to earth at devices.",
+      "MICC (pyro / mineral-insulated) accepted but rare; FP200 fulfils evidence requirement on the NVQ.",
+      "SWA armour can be used as CPC (with proper gland + banjo); plastic enclosure must use earth tag.",
+      "Resin joints kit includes braided continuity strap so SWA armour stays continuous.",
+      "Don't use BS 951 saddle clamp on SWA armour - damages the cable; use a gland.",
+      "Heat-resistant flex (90 deg C thermosetting / silicone) at immersion heater terminations."
+    ]
+  },
+  {
+    id: "cheat-course-buried-cables-outbuildings",
+    title: "Buried cables & outbuildings",
+    summary: "OSG Section 5.7.3 / Section 528 guidance.",
+    items: [
+      "BS 7671 specifies 'suitable depth' - rule of thumb roughly two spades deep.",
+      "Use SWA on a bed of sifted sand; lay marker tape/tile ~150 mm above cable; backfill.",
+      "Best practice: pull SWA through twin-line ducting with draw rope - future-proofs replacement.",
+      "Outbuilding with extraneous-conductive-parts: main bond back to house MET.",
+      "Decide whether to export TN-C-S earth or fit local TT electrode at the outbuilding.",
+      "External cable: galvanised steel conduit/trunking outside (plastic degrades and lets water in).",
+      "Solar PV: AC isolator (red/yellow rotary) at inverter output; DC isolator (grey) between panels and inverter."
+    ]
+  },
+  {
+    id: "cheat-course-conduit-sizing",
+    title: "Conduit fill & install",
+    summary: "OSG Appendix E rules and conduit selection.",
+    items: [
+      "OSG Appendix E: cables must not occupy more than 45% of the cross-sectional area of the conduit.",
+      "Conduit installation per BS 7671 Chapter 52.",
+      "Metal conduit/trunking is an exposed-conductive-part - must be earthed, can serve as the CPC if continuous.",
+      "Plastic conduit not exposed-conductive-part; uses glue at joints, not threads. May warp with temperature.",
+      "Smooth inside of cut conduit with file to prevent cable damage.",
+      "Cables grouping factor Cg applied based on number of circuits in same conduit/trunking.",
+      "Capping (in chases) is NOT mechanical protection - capping does NOT replace 30 mA RCD requirement.",
+      "Trunking >=710 mm^2 cross-section requires a fire barrier through fire-rated walls (Appendix 13)."
+    ]
+  },
+  {
+    id: "cheat-course-diversity",
+    title: "Diversity & max demand",
+    summary: "OSG Appendix A practical diversity rules.",
+    items: [
+      "Cooker (household): first 10 A + 30% of remainder + 5 A if socket in control unit.",
+      "Lighting (modern method): 66% of total connected load (LED-friendly). Old: 100 W per lampholder.",
+      "Immersion / instant water heater: 100% of full load.",
+      "Sockets/general purpose: 100% of largest, 40% of remainder (varies by Table A1/A2).",
+      "Manufacturer's instructions take precedence: if appliance states 16 A supply, supply 16 A regardless of diversity.",
+      "Diversity is NOT applied to showers (full load when on).",
+      "Always re-check max demand against intake capacity (typically 100 A single-phase) when adding circuits."
+    ]
+  },
+  {
+    id: "cheat-course-eic-paperwork",
+    title: "EIC / MEIWC paperwork",
+    summary: "Certification rules and what each form is for.",
+    items: [
+      "EIC issued for: new circuit, full/partial rewire, CU change, any wholly new work.",
+      "MEIWC issued for: alteration/addition to ONE existing circuit (no new circuit).",
+      "EIC valid only with two schedules: schedule of inspections + schedule of test results (one per DB).",
+      "Three signatories: Designer, Constructor (installer), Inspector. Client does NOT sign.",
+      "ONE intake = ONE EIC, with as many schedules as there are DBs.",
+      "Designer recommends next inspection on EIC; Inspector decides on EICR.",
+      "Suggested intervals (GN3 Ch.3): owner-occupied dwelling 10 yr; rented dwelling 5 yr; commercial 5 yr.",
+      "Don't write 'Safe for continued use' on an EIC - that wording belongs on EICRs.",
+      "'Limitation' belongs on EICR, not EIC. Never leave 'Departures' or 'Comments on existing installation' blank."
+    ]
+  },
+  {
+    id: "cheat-course-protective-measures",
+    title: "Shock protection methods (Ch 41)",
+    summary: "BS 7671 Chapter 41 shock-protection methods to identify.",
+    items: [
+      "ADS (411) - the standard method: earthing + bonding + OCPD/RCD that disconnects in time.",
+      "Double / reinforced insulation (412) - Class II equipment, square-in-square symbol.",
+      "Electrical separation (413) - isolating transformer, no earth on secondary (e.g. shaver socket).",
+      "SELV (414) - extra-low voltage, no CPC continuity to secondary, max 50 V AC.",
+      "PELV (414) - extra-low voltage, CPC DOES continue to secondary.",
+      "Additional protection (415): only TWO recognised - 30 mA RCD and supplementary bonding.",
+      "Basic protection (416): insulation of live parts (only removable by destruction) + barriers/enclosures.",
+      "Obstacles / placing out of reach (417) - skilled persons only; live above 2.5 m, horizontal 1.25 m, behind barrier 0.75 m.",
+      "Non-conducting locations (418) - bonding without an earth reference (data centres, labs)."
+    ]
   }
 ];
 
