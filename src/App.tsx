@@ -58,7 +58,13 @@ type PaletteItem = {
   action: () => void;
 };
 
+type AngleUnit = "mm" | "cm" | "m";
+
 const DEFAULT_PAGE: PageId = "home";
+const ANGLE_UNITS: readonly AngleUnit[] = ["mm", "cm", "m"];
+const POWER_TARGETS: readonly PowerTarget[] = ["power", "current", "voltage"];
+const PHASE_TYPES: readonly PhaseType[] = ["single", "three"];
+const BREAKER_INPUT_MODES: readonly BreakerInputMode[] = ["current", "power"];
 
 const powerConfig: Record<
   PowerTarget,
@@ -302,6 +308,46 @@ function matchesQuery(haystack: string, query: string) {
   return terms.every((term) => normalizedHaystack.includes(term));
 }
 
+function isOneOf<T extends string>(options: readonly T[], value: unknown): value is T {
+  return typeof value === "string" && options.includes(value as T);
+}
+
+function isBoolean(value: unknown): value is boolean {
+  return typeof value === "boolean";
+}
+
+function isAngleUnit(value: unknown): value is AngleUnit {
+  return isOneOf(ANGLE_UNITS, value);
+}
+
+function isPowerTarget(value: unknown): value is PowerTarget {
+  return isOneOf(POWER_TARGETS, value);
+}
+
+function isPhaseType(value: unknown): value is PhaseType {
+  return isOneOf(PHASE_TYPES, value);
+}
+
+function isBreakerInputMode(value: unknown): value is BreakerInputMode {
+  return isOneOf(BREAKER_INPUT_MODES, value);
+}
+
+function isUnistrutContainmentRow(value: unknown): value is UnistrutContainmentRow {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+
+  const row = value as Partial<UnistrutContainmentRow>;
+  if (!Number.isInteger(row.id) || typeof row.label !== "string" || typeof row.width !== "string") {
+    return false;
+  }
+
+  const option = CONTAINMENT_OPTIONS.find((o) => o.label === row.label);
+  return Boolean(option?.widths.some((width) => String(widthValue(width)) === row.width));
+}
+
+function isUnistrutContainments(value: unknown): value is UnistrutContainmentRow[] {
+  return Array.isArray(value) && value.every(isUnistrutContainmentRow);
+}
+
 function ToolTitle({ title, hint }: { title: string; hint: string }) {
   return (
     <div className="tool-title-wrap">
@@ -336,40 +382,41 @@ export default function App() {
   const [copiedSectionId, setCopiedSectionId] = useState<string | null>(null);
 
   // ── Persisted calculator state ──
-  const [containmentRodOverallHeight, setContainmentRodOverallHeight] = usePersistedState(
+  const [containmentRodOverallHeight, setContainmentRodOverallHeight] = usePersistedState<string>(
     "cr-height",
     DEFAULT_CONTAINMENT_ROD_VALUES.overallHeight
   );
-  const [containmentRodTopOfUnistrut, setContainmentRodTopOfUnistrut] = usePersistedState(
+  const [containmentRodTopOfUnistrut, setContainmentRodTopOfUnistrut] = usePersistedState<string>(
     "cr-top",
     DEFAULT_CONTAINMENT_ROD_VALUES.topOfUnistrut
   );
-  const [containmentRodBuffer, setContainmentRodBuffer] = usePersistedState(
+  const [containmentRodBuffer, setContainmentRodBuffer] = usePersistedState<string>(
     "cr-buffer",
     DEFAULT_CONTAINMENT_ROD_VALUES.buffer
   );
-  const [containmentRodUnistrutDepth, setContainmentRodUnistrutDepth] = usePersistedState(
+  const [containmentRodUnistrutDepth, setContainmentRodUnistrutDepth] = usePersistedState<string>(
     "cr-depth",
     DEFAULT_CONTAINMENT_ROD_VALUES.unistrutDepth
   );
   const [unistrutContainments, setUnistrutContainments] = usePersistedState<UnistrutContainmentRow[]>(
     "ul-containments",
-    DEFAULT_UNISTRUT_LENGTH_VALUES.containments.map((c) => ({ ...c }))
+    DEFAULT_UNISTRUT_LENGTH_VALUES.containments.map((c) => ({ ...c })),
+    isUnistrutContainments
   );
   const [unistrutCountInput, setUnistrutCountInput] = useState(
     String(DEFAULT_UNISTRUT_LENGTH_VALUES.containments.length)
   );
-  const [unistrutLeftAllowance, setUnistrutLeftAllowance] = usePersistedState(
+  const [unistrutLeftAllowance, setUnistrutLeftAllowance] = usePersistedState<string>(
     "ul-left",
-    DEFAULT_UNISTRUT_LENGTH_VALUES.leftAllowance as string
+    DEFAULT_UNISTRUT_LENGTH_VALUES.leftAllowance
   );
-  const [unistrutRightAllowance, setUnistrutRightAllowance] = usePersistedState(
+  const [unistrutRightAllowance, setUnistrutRightAllowance] = usePersistedState<string>(
     "ul-right",
-    DEFAULT_UNISTRUT_LENGTH_VALUES.rightAllowance as string
+    DEFAULT_UNISTRUT_LENGTH_VALUES.rightAllowance
   );
-  const [unistrutGap, setUnistrutGap] = usePersistedState(
+  const [unistrutGap, setUnistrutGap] = usePersistedState<string>(
     "ul-gap",
-    DEFAULT_UNISTRUT_LENGTH_VALUES.gap as string
+    DEFAULT_UNISTRUT_LENGTH_VALUES.gap
   );
 
   const [angleDrop, setAngleDrop] = usePersistedState("angle-drop", "10");
@@ -377,28 +424,28 @@ export default function App() {
   const [angleTopStraight, setAngleTopStraight] = usePersistedState("angle-top", "0");
   const [angleBottomStraight, setAngleBottomStraight] = usePersistedState("angle-bottom", "0");
   const [angleAllowance, setAngleAllowance] = usePersistedState("angle-allowance", "0");
-  const [angleUnit, setAngleUnit] = usePersistedState("angle-unit", "cm");
-  const [angleTopBend, setAngleTopBend] = usePersistedState("angle-top-bend", false);
-  const [angleBottomBend, setAngleBottomBend] = usePersistedState("angle-bottom-bend", false);
+  const [angleUnit, setAngleUnit] = usePersistedState<AngleUnit>("angle-unit", "cm", isAngleUnit);
+  const [angleTopBend, setAngleTopBend] = usePersistedState("angle-top-bend", false, isBoolean);
+  const [angleBottomBend, setAngleBottomBend] = usePersistedState("angle-bottom-bend", false, isBoolean);
   const [angleBendHeight, setAngleBendHeight] = usePersistedState("angle-bend-height", "5");
   const [angleAdvanced, setAngleAdvanced] = useState(false);
 
-  const [powerTarget, setPowerTarget] = usePersistedState<PowerTarget>("power-target", "current");
-  const [powerPhase, setPowerPhase] = usePersistedState<PhaseType>("power-phase", "single");
+  const [powerTarget, setPowerTarget] = usePersistedState<PowerTarget>("power-target", "current", isPowerTarget);
+  const [powerPhase, setPowerPhase] = usePersistedState<PhaseType>("power-phase", "single", isPhaseType);
   const [powerValueA, setPowerValueA] = usePersistedState("power-a", "1");
   const [powerValueB, setPowerValueB] = usePersistedState("power-b", "230");
   const [powerPf, setPowerPf] = usePersistedState("power-pf", "0.95");
 
-  const [vdropPhase, setVdropPhase] = usePersistedState<PhaseType>("vdrop-phase", "single");
+  const [vdropPhase, setVdropPhase] = usePersistedState<PhaseType>("vdrop-phase", "single", isPhaseType);
   const [vdropCurrent, setVdropCurrent] = usePersistedState("vdrop-current", "20");
   const [vdropLength, setVdropLength] = usePersistedState("vdrop-length", "20");
   const [vdropCableSize, setVdropCableSize] = usePersistedState("vdrop-cable", "2.5");
   const [vdropVoltage, setVdropVoltage] = usePersistedState("vdrop-voltage", "230");
 
-  const [breakerMode, setBreakerMode] = usePersistedState<BreakerInputMode>("breaker-mode", "current");
+  const [breakerMode, setBreakerMode] = usePersistedState<BreakerInputMode>("breaker-mode", "current", isBreakerInputMode);
   const [breakerCurrent, setBreakerCurrent] = usePersistedState("breaker-current", "18");
   const [breakerPower, setBreakerPower] = usePersistedState("breaker-power", "4");
-  const [breakerPhase, setBreakerPhase] = usePersistedState<PhaseType>("breaker-phase", "single");
+  const [breakerPhase, setBreakerPhase] = usePersistedState<PhaseType>("breaker-phase", "single", isPhaseType);
   const [breakerVoltage, setBreakerVoltage] = usePersistedState("breaker-voltage", "230");
   const [breakerPf, setBreakerPf] = usePersistedState("breaker-pf", "0.95");
 
@@ -779,7 +826,8 @@ export default function App() {
     if (!grid) return;
     const width = grid.clientWidth;
     if (width === 0) return;
-    const index = Math.round(grid.scrollLeft / width);
+    const maxIndex = Math.max(filteredApplets.length - 1, 0);
+    const index = Math.min(Math.round(grid.scrollLeft / width), maxIndex);
     setActiveToolIndex((current) => (current === index ? current : index));
   }, [filteredApplets]);
 
@@ -1251,7 +1299,7 @@ export default function App() {
                           className="unit-select"
                           aria-label="Unit"
                           value={angleUnit}
-                          onChange={(e) => setAngleUnit(e.target.value)}
+                          onChange={(e) => setAngleUnit(e.target.value as AngleUnit)}
                         >
                           <option value="mm">mm</option>
                           <option value="cm">cm</option>

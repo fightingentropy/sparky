@@ -1,10 +1,30 @@
 import { useMemo, useRef } from "react";
-import { EXAMS, countQuestions, type Exam, type ExamChoice, type ExamQuestion } from "./exams";
+import { EXAMS, getScoringBand, type Exam, type ExamChoice, type ExamQuestion } from "./exams";
 import { usePersistedState } from "./usePersistedState";
 
 type Answers = Record<number, ExamChoice>;
 
 const LETTERS: ExamChoice[] = ["A", "B", "C", "D"];
+
+function isExamChoice(value: unknown): value is ExamChoice {
+  return typeof value === "string" && (LETTERS as string[]).includes(value);
+}
+
+function isAnswers(value: unknown): value is Answers {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+
+  return Object.entries(value).every(
+    ([questionNumber, answer]) => Number.isInteger(Number(questionNumber)) && isExamChoice(answer)
+  );
+}
+
+function isExamId(value: unknown): value is string {
+  return typeof value === "string" && EXAMS.some((exam) => exam.id === value);
+}
+
+function isBoolean(value: unknown): value is boolean {
+  return typeof value === "boolean";
+}
 
 type Props = {
   isActive: boolean;
@@ -13,7 +33,8 @@ type Props = {
 export function ExamPage({ isActive }: Props) {
   const [selectedExamId, setSelectedExamId] = usePersistedState<string>(
     "exam-selected",
-    EXAMS[0].id
+    EXAMS[0].id,
+    isExamId
   );
   const exam = useMemo(
     () => EXAMS.find((e) => e.id === selectedExamId) ?? EXAMS[0],
@@ -22,37 +43,41 @@ export function ExamPage({ isActive }: Props) {
 
   const [answers, setAnswers] = usePersistedState<Answers>(
     `exam-answers-${exam.id}`,
-    {}
+    {},
+    isAnswers
   );
   const [submitted, setSubmitted] = usePersistedState<boolean>(
     `exam-submitted-${exam.id}`,
-    false
+    false,
+    isBoolean
   );
 
   const reviewRef = useRef<HTMLDivElement | null>(null);
 
-  const total = countQuestions(exam);
-  const answeredCount = Object.keys(answers).length;
+  const questions = useMemo(
+    () => exam.sections.flatMap((section) => section.questions),
+    [exam]
+  );
+  const total = questions.length;
+  const answeredCount = useMemo(
+    () => questions.reduce((count, question) => count + (answers[question.number] ? 1 : 0), 0),
+    [answers, questions]
+  );
 
   const correctCount = useMemo(() => {
-    let c = 0;
-    for (const section of exam.sections) {
-      for (const q of section.questions) {
-        if (answers[q.number] === q.answer) c += 1;
-      }
-    }
-    return c;
-  }, [exam, answers]);
+    return questions.reduce(
+      (count, question) => count + (answers[question.number] === question.answer ? 1 : 0),
+      0
+    );
+  }, [answers, questions]);
 
   const percent = total ? Math.round((correctCount / total) * 100) : 0;
   const passed = correctCount >= exam.passMark;
 
-  const scoringBand = useMemo(() => {
-    if (correctCount >= 27) return exam.scoring[0];
-    if (correctCount >= 24) return exam.scoring[1];
-    if (correctCount >= 21) return exam.scoring[2];
-    return exam.scoring[3];
-  }, [correctCount, exam.scoring]);
+  const scoringBand = useMemo(
+    () => getScoringBand(exam, correctCount),
+    [correctCount, exam]
+  );
 
   function setAnswer(questionNumber: number, choice: ExamChoice) {
     if (submitted) return;
@@ -319,7 +344,7 @@ type ResultsProps = {
   total: number;
   percent: number;
   passed: boolean;
-  scoringBand: { range: string; label: string };
+  scoringBand: Exam["scoring"][number];
   reviewRef: React.RefObject<HTMLDivElement | null>;
 };
 

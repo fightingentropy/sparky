@@ -22,7 +22,7 @@ export type Exam = {
   format: string;
   passMark: number;
   sections: ExamSection[];
-  scoring: Array<{ range: string; label: string }>;
+  scoring: Array<{ minScore: number; range: string; label: string }>;
   priorities: string[];
 };
 
@@ -495,10 +495,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "27–30", label: "Strong — exam-ready" },
-      { range: "24–26", label: "Comfortable pass, review weak areas" },
-      { range: "21–23", label: "Borderline — identify topic gaps and revisit" },
-      { range: "< 21", label: "More revision needed before sitting" }
+      { minScore: 27, range: "27–30", label: "Strong — exam-ready" },
+      { minScore: 24, range: "24–26", label: "Comfortable pass, review weak areas" },
+      { minScore: 21, range: "21–23", label: "Borderline — identify topic gaps and revisit" },
+      { minScore: 0, range: "< 21", label: "More revision needed before sitting" }
     ],
     priorities: [
       "Regulation lookups — practise finding Zs values in Table 41.3, bonding sizes in Table 54.8, and voltage drop in Appendix 4.",
@@ -974,10 +974,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "27–30", label: "Strong — exam-ready" },
-      { range: "24–26", label: "Comfortable pass, review weak areas" },
-      { range: "21–23", label: "Borderline — identify topic gaps and revisit" },
-      { range: "< 21", label: "More revision needed before sitting" }
+      { minScore: 27, range: "27–30", label: "Strong — exam-ready" },
+      { minScore: 24, range: "24–26", label: "Comfortable pass, review weak areas" },
+      { minScore: 21, range: "21–23", label: "Borderline — identify topic gaps and revisit" },
+      { minScore: 0, range: "< 21", label: "More revision needed before sitting" }
     ],
     priorities: [
       "GN3 sequence — dead tests then live tests, in the order given; many exam questions are lifted almost verbatim from this.",
@@ -1454,10 +1454,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "27–30", label: "Strong — AM2-ready on knowledge" },
-      { range: "24–26", label: "Comfortable pass, polish weak topics" },
-      { range: "21–23", label: "Borderline — review gaps before the EPA" },
-      { range: "< 21", label: "More revision needed before sitting AM2" }
+      { minScore: 27, range: "27–30", label: "Strong — AM2-ready on knowledge" },
+      { minScore: 24, range: "24–26", label: "Comfortable pass, polish weak topics" },
+      { minScore: 21, range: "21–23", label: "Borderline — review gaps before the EPA" },
+      { minScore: 0, range: "< 21", label: "More revision needed before sitting AM2" }
     ],
     priorities: [
       "Safe isolation — rehearse the full sequence until it is automatic. The assessor will watch for permission, lock-off, prove/re-prove of the indicator, and GS38-compliant probes.",
@@ -1659,10 +1659,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "11–12", label: "Strong — fundamentals secure" },
-      { range: "9–10", label: "Comfortable pass" },
-      { range: "7–8", label: "Some gaps — revisit Ohm's and the power law" },
-      { range: "< 7", label: "Re-watch the basic electrics webinar before moving on" }
+      { minScore: 11, range: "11–12", label: "Strong — fundamentals secure" },
+      { minScore: 9, range: "9–10", label: "Comfortable pass" },
+      { minScore: 7, range: "7–8", label: "Some gaps — revisit Ohm's and the power law" },
+      { minScore: 0, range: "< 7", label: "Re-watch the basic electrics webinar before moving on" }
     ],
     priorities: [
       "Ohm's law and the power law triangles — be able to rearrange V = IR and P = VI on demand without writing them down.",
@@ -1862,10 +1862,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "11–12", label: "Strong — building-regs literacy is solid" },
-      { range: "9–10", label: "Comfortable pass" },
-      { range: "7–8", label: "Re-read AD P and the notifiable-work list" },
-      { range: "< 7", label: "Re-watch the building regulations webinar" }
+      { minScore: 11, range: "11–12", label: "Strong — building-regs literacy is solid" },
+      { minScore: 9, range: "9–10", label: "Comfortable pass" },
+      { minScore: 7, range: "7–8", label: "Re-read AD P and the notifiable-work list" },
+      { minScore: 0, range: "< 7", label: "Re-watch the building regulations webinar" }
     ],
     priorities: [
       "The three notifiable categories under Part P — new circuit, consumer unit, special location — these are the only ones that trigger notification.",
@@ -2066,10 +2066,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "11–12", label: "Strong — fluent in the structure of BS 7671" },
-      { range: "9–10", label: "Comfortable pass" },
-      { range: "7–8", label: "Practise lookups in the contents pages" },
-      { range: "< 7", label: "Re-watch the 18th Edition webinar and walk through the BS 7671 contents" }
+      { minScore: 11, range: "11–12", label: "Strong — fluent in the structure of BS 7671" },
+      { minScore: 9, range: "9–10", label: "Comfortable pass" },
+      { minScore: 7, range: "7–8", label: "Practise lookups in the contents pages" },
+      { minScore: 0, range: "< 7", label: "Re-watch the 18th Edition webinar and walk through the BS 7671 contents" }
     ],
     priorities: [
       "The Part numbers — 1 to 7 — and what each covers. Half the exam questions in this area test whether you can find the regulation, not whether you've memorised its number.",
@@ -2274,10 +2274,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "11–12", label: "Strong — PAT-ready" },
-      { range: "9–10", label: "Comfortable pass" },
-      { range: "7–8", label: "Re-read the IET COP equipment-class chapter" },
-      { range: "< 7", label: "Re-watch the PAT testing webinar" }
+      { minScore: 11, range: "11–12", label: "Strong — PAT-ready" },
+      { minScore: 9, range: "9–10", label: "Comfortable pass" },
+      { minScore: 7, range: "7–8", label: "Re-read the IET COP equipment-class chapter" },
+      { minScore: 0, range: "< 7", label: "Re-watch the PAT testing webinar" }
     ],
     priorities: [
       "Equipment classes — Class I (earthed), Class II (double-insulated), Class III (SELV) — and which test applies to each.",
@@ -2482,10 +2482,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "11–12", label: "Strong — initial-verification ready" },
-      { range: "9–10", label: "Comfortable pass" },
-      { range: "7–8", label: "Re-read GN3 chapters on dead and live test sequence" },
-      { range: "< 7", label: "Re-watch the initial verification webinar" }
+      { minScore: 11, range: "11–12", label: "Strong — initial-verification ready" },
+      { minScore: 9, range: "9–10", label: "Comfortable pass" },
+      { minScore: 7, range: "7–8", label: "Re-read GN3 chapters on dead and live test sequence" },
+      { minScore: 0, range: "< 7", label: "Re-watch the initial verification webinar" }
     ],
     priorities: [
       "The dead-test sequence — continuity, ring final, IR, polarity — in the GN3 order, knowing why each one comes before the next.",
@@ -2690,10 +2690,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "11–12", label: "Strong — periodic-inspection ready" },
-      { range: "9–10", label: "Comfortable pass" },
-      { range: "7–8", label: "Re-read GN3 chapter on intervals and sampling" },
-      { range: "< 7", label: "Re-watch the periodic inspection webinar" }
+      { minScore: 11, range: "11–12", label: "Strong — periodic-inspection ready" },
+      { minScore: 9, range: "9–10", label: "Comfortable pass" },
+      { minScore: 7, range: "7–8", label: "Re-read GN3 chapter on intervals and sampling" },
+      { minScore: 0, range: "< 7", label: "Re-watch the periodic inspection webinar" }
     ],
     priorities: [
       "Recommended maximum intervals — domestic owner-occupied 10 years, PRS 5 years, commercial 5 years, industrial 3 years, high-risk (pools, petrol, theatres) 1 year.",
@@ -2893,10 +2893,10 @@ export const EXAMS: Exam[] = [
       }
     ],
     scoring: [
-      { range: "11–12", label: "Strong — confident with EICR coding" },
-      { range: "9–10", label: "Comfortable pass" },
-      { range: "7–8", label: "Re-read the C1/C2/C3/FI definitions and Best-Practice Guide 4 from Electrical Safety First" },
-      { range: "< 7", label: "Re-watch the condition reporting webinar" }
+      { minScore: 11, range: "11–12", label: "Strong — confident with EICR coding" },
+      { minScore: 9, range: "9–10", label: "Comfortable pass" },
+      { minScore: 7, range: "7–8", label: "Re-read the C1/C2/C3/FI definitions and Best-Practice Guide 4 from Electrical Safety First" },
+      { minScore: 0, range: "< 7", label: "Re-watch the condition reporting webinar" }
     ],
     priorities: [
       "C1 / C2 / C3 / FI — be able to recite each definition exactly, and to apply them to real-world observations.",
@@ -2908,4 +2908,8 @@ export const EXAMS: Exam[] = [
 
 export function countQuestions(exam: Exam): number {
   return exam.sections.reduce((sum, section) => sum + section.questions.length, 0);
+}
+
+export function getScoringBand(exam: Exam, correctCount: number) {
+  return exam.scoring.find((band) => correctCount >= band.minScore) ?? exam.scoring[exam.scoring.length - 1];
 }

@@ -1,40 +1,56 @@
 import { useState, useEffect, useRef } from "react";
 
-export function usePersistedState<T>(key: string, defaultValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const prevKeyRef = useRef(key);
-  const didMountRef = useRef(false);
+type Validator<T> = (value: unknown) => value is T;
 
-  const [value, setValue] = useState<T>(() => {
-    try {
-      const stored = localStorage.getItem(key);
-      return stored ? (JSON.parse(stored) as T) : defaultValue;
-    } catch {
-      return defaultValue;
-    }
-  });
+function removeStoredValue(key: string) {
+  try {
+    localStorage.removeItem(key);
+  } catch {}
+}
+
+function readStoredValue<T>(
+  key: string,
+  defaultValue: T,
+  validate?: Validator<T>
+): T {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored === null) return defaultValue;
+
+    const parsed = JSON.parse(stored) as unknown;
+    if (!validate) return parsed as T;
+    if (validate(parsed)) return parsed;
+
+    removeStoredValue(key);
+    return defaultValue;
+  } catch {
+    removeStoredValue(key);
+    return defaultValue;
+  }
+}
+
+export function usePersistedState<T>(
+  key: string,
+  defaultValue: T,
+  validate?: Validator<T>
+): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const prevKeyRef = useRef(key);
+
+  const [value, setValue] = useState<T>(() => readStoredValue(key, defaultValue, validate));
 
   useEffect(() => {
     if (prevKeyRef.current !== key) {
       prevKeyRef.current = key;
-      didMountRef.current = false;
-      try {
-        const stored = localStorage.getItem(key);
-        setValue(stored ? (JSON.parse(stored) as T) : defaultValue);
-      } catch {
-        setValue(defaultValue);
-      }
+      setValue(readStoredValue(key, defaultValue, validate));
       return;
     }
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
+
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
       // quota exceeded — ignore
     }
-  }, [key, value]);
+  }, [key, value, validate]);
 
   return [value, setValue];
 }
