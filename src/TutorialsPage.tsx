@@ -5,8 +5,6 @@ type Props = {
 };
 
 export function TutorialsPage({ isActive }: Props) {
-  const featured = TUTORIALS[0];
-
   return (
     <section className={`page page-tutorials ${isActive ? "is-active" : ""}`}>
       <header className="page-header tutorials-header">
@@ -19,27 +17,8 @@ export function TutorialsPage({ isActive }: Props) {
         <span className="tutorial-count">{TUTORIALS.length} videos</span>
       </header>
 
-      <article className="tutorial-feature" id={featured.id}>
-        <div className="tutorial-feature-video">
-          <TutorialEmbed videoId={featured.videoId} title={featured.title} />
-        </div>
-        <div className="tutorial-feature-copy">
-          <span className="tutorial-category">{featured.category}</span>
-          <h3>{featured.title}</h3>
-          <p>{featured.workplaceUse}</p>
-          <ul>
-            {featured.practiceFocus.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-          <a className="ghost-button tutorial-source-link" href={featured.sourceUrl} target="_blank" rel="noreferrer">
-            Open on YouTube
-          </a>
-        </div>
-      </article>
-
       <div className="tutorial-grid">
-        {TUTORIALS.slice(1).map((tutorial) => (
+        {TUTORIALS.map((tutorial) => (
           <article key={tutorial.id} id={tutorial.id} className="tutorial-card">
             <TutorialEmbed videoId={tutorial.videoId} title={tutorial.title} />
             <div className="tutorial-card-body">

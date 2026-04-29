@@ -26,9 +26,10 @@ import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
 import { ExamPage } from "./ExamPage";
 import { TutorialsPage } from "./TutorialsPage";
+import { InteractivePage } from "./InteractivePage";
 import { TUTORIALS } from "./tutorials";
 
-type PageId = "home" | "cheatsheet" | "exams" | "tutorials";
+type PageId = "home" | "cheatsheet" | "exams" | "tutorials" | "interactive";
 
 type LegendItem = {
   label: string;
@@ -840,17 +841,26 @@ function ToolTitle({ title, hint }: { title: string; hint: string }) {
 
 function getPageFromLocation(): PageId {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (path === "/notes" || path === "/cheatsheet") return "cheatsheet";
+  if (path === "/exams") return "exams";
   if (path === "/tutorials") return "tutorials";
-
-  const hash = window.location.hash.replace("#", "");
-  if (hash === "home" || hash === "cheatsheet" || hash === "exams" || hash === "tutorials") {
-    return hash;
-  }
+  if (path === "/interactive") return "interactive";
   return DEFAULT_PAGE;
 }
 
-function getPageHref(page: PageId) {
-  return page === "tutorials" ? "/tutorials" : `/#${page}`;
+function getPageHref(page: PageId): string {
+  switch (page) {
+    case "home":
+      return "/";
+    case "cheatsheet":
+      return "/notes";
+    case "exams":
+      return "/exams";
+    case "tutorials":
+      return "/tutorials";
+    case "interactive":
+      return "/interactive";
+  }
 }
 
 export default function App() {
@@ -1190,6 +1200,13 @@ export default function App() {
         action: () => navigateTo("tutorials")
       },
       {
+        title: "Interactive",
+        subtitle: "Build and energize circuits with floating tips.",
+        tag: "Page",
+        keywords: "interactive circuit builder simulator playground series parallel breaker switch",
+        action: () => navigateTo("interactive")
+      },
+      {
         title: "Help",
         subtitle: "Show shortcuts.",
         tag: "Action",
@@ -1242,13 +1259,13 @@ export default function App() {
 
   useEffect(() => {
     const updatePage = () => setPage(getPageFromLocation());
-    window.addEventListener("hashchange", updatePage);
     window.addEventListener("popstate", updatePage);
-    return () => {
-      window.removeEventListener("hashchange", updatePage);
-      window.removeEventListener("popstate", updatePage);
-    };
+    return () => window.removeEventListener("popstate", updatePage);
   }, []);
+
+  useEffect(() => {
+    document.body.setAttribute("data-page", page);
+  }, [page]);
 
   useEffect(() => {
     if (!paletteOpen) return;
@@ -1428,7 +1445,7 @@ export default function App() {
               strokeLinecap="round"
             />
           </svg>
-          <strong>Sparky Toolkit</strong>
+          <strong>Sparky</strong>
         </a>
 
         <nav className="primary-nav" aria-label="Primary">
@@ -1437,7 +1454,8 @@ export default function App() {
               { id: "home", label: "Home" },
               { id: "cheatsheet", label: "Notes" },
               { id: "exams", label: "Exams" },
-              { id: "tutorials", label: "Tutorials" }
+              { id: "tutorials", label: "Tutorials" },
+              { id: "interactive", label: "Interactive" }
             ] as const
           ).map((item) => (
             <a
@@ -2485,6 +2503,7 @@ export default function App() {
 
         <ExamPage isActive={page === "exams"} />
         <TutorialsPage isActive={page === "tutorials"} />
+        <InteractivePage isActive={page === "interactive"} />
       </main>
 
       {paletteOpen ? (
