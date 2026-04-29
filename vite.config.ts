@@ -15,7 +15,7 @@ export default defineConfig({
         "icons/maskable-512.png"
       ],
       manifest: {
-        name: "Sparky Toolkit",
+        name: "Sparky",
         short_name: "Sparky",
         description: "Offline electrician toolkit with quick calculators and cheat sheets.",
         start_url: "/",
