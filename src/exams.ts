@@ -30,7 +30,7 @@ export const EXAMS: Exam[] = [
   {
     id: "l3-nvq-electrical",
     title: "Level 3 NVQ Electrical Installation",
-    subtitle: "Mock Knowledge Exam",
+    subtitle: "Knowledge Exam",
     description:
       "Representative of knowledge questions sat during Level 3 NVQ Diploma in Installing Electrotechnical Systems & Equipment (e.g. City & Guilds 2357 / 5357, EAL 600/6724/X). Covers health & safety, BS 7671 (18th Edition, A2:2022 & A3:2024), electrical science, earthing & bonding, inspection & testing, circuit design, and fault-finding.",
     format: "30 multiple-choice questions. Aim for 70%+ in about 60 minutes as a realistic pass standard.",
@@ -510,9 +510,9 @@ export const EXAMS: Exam[] = [
   {
     id: "l3-inspection-testing",
     title: "Level 3 — Inspection & Testing",
-    subtitle: "Dedicated BS 7671 / GN3 mock",
+    subtitle: "Dedicated BS 7671 / GN3 exam",
     description:
-      "A 30-question mock dedicated to the inspection and testing content of the Level 3 NVQ (e.g. C&G 2357 Unit 309, 5357, or the equivalent EAL unit — also useful preparation for C&G 2391-52). Covers purpose and scope of verification, certification and EICR codes, test instruments and GS38, the full dead and live test sequence, acceptance criteria, and interpretation of results. Built against BS 7671 (18th Edition, A2:2022 + A3:2024) and Guidance Note 3.",
+      "A 30-question exam dedicated to the inspection and testing content of the Level 3 NVQ (e.g. C&G 2357 Unit 309, 5357, or the equivalent EAL unit — also useful preparation for C&G 2391-52). Covers purpose and scope of verification, certification and EICR codes, test instruments and GS38, the full dead and live test sequence, acceptance criteria, and interpretation of results. Built against BS 7671 (18th Edition, A2:2022 + A3:2024) and Guidance Note 3.",
     format: "30 multiple-choice questions. Aim for 70%+ in about 60 minutes as a realistic pass standard.",
     passMark: 21,
     sections: [
@@ -990,9 +990,9 @@ export const EXAMS: Exam[] = [
   {
     id: "am2-installation-assessment",
     title: "AM2 / AM2E — Installation Electrician EPA",
-    subtitle: "Mock knowledge / written element",
+    subtitle: "Knowledge / written element",
     description:
-      "Representative of the knowledge and written-response element of the AM2 / AM2E end-point assessment for the Installation & Maintenance Electrician apprenticeship standard, delivered by NET. The practical assessment is hands-on installation, inspection, testing, fault-finding and commissioning — this mock drills the underpinning knowledge those practical tasks rely on. Built against BS 7671 (18th Edition, A2:2022 + A3:2024), HSG85, GS38 and Guidance Note 3.",
+      "Representative of the knowledge and written-response element of the AM2 / AM2E end-point assessment for the Installation & Maintenance Electrician apprenticeship standard, delivered by NET. The practical assessment is hands-on installation, inspection, testing, fault-finding and commissioning — this exam drills the underpinning knowledge those practical tasks rely on. Built against BS 7671 (18th Edition, A2:2022 + A3:2024), HSG85, GS38 and Guidance Note 3.",
     format: "30 multiple-choice questions. Aim for 70%+ in about 60 minutes — the AM2 practical is a separate test of skill, but consistent knowledge of these topics underpins every task.",
     passMark: 21,
     sections: [
@@ -1469,10 +1469,10 @@ export const EXAMS: Exam[] = [
   },
   {
     id: "basic-electrics",
-    title: "Basic Electrics — Topic Mock",
+    title: "Basic Electrics",
     subtitle: "Webinar 1 — fundamentals",
     description:
-      "A focused topic mock built around Webinar 1 — Introduction to Basic Electrics. Covers voltage, current, resistance, power, Ohm's law, the power law, AC vs DC, single- and three-phase basics, and the conductor behaviour you'll rely on throughout the rest of the course.",
+      "A focused exam built around Webinar 1 — Introduction to Basic Electrics. Covers voltage, current, resistance, power, Ohm's law, the power law, AC vs DC, single- and three-phase basics, and the conductor behaviour you'll rely on throughout the rest of the course.",
     format: "12 multiple-choice questions. Aim for 9+/12 (75%) before moving on to regulations material.",
     passMark: 9,
     sections: [
@@ -1672,12 +1672,12 @@ export const EXAMS: Exam[] = [
   },
   {
     id: "building-regulations",
-    title: "Building Regulations & Part P — Topic Mock",
-    subtitle: "Webinar 2 — building regs for electricians",
+    title: "Building Regulations & Part P",
+    subtitle: "Combined topic drill + Access Training homework practice bank",
     description:
-      "A focused topic mock built around Webinar 2 — Basic Electrics & Building Regulations, with the emphasis on the Building Regulations side. Covers Part P scope, notifiable work, the relevant Approved Documents, the routes to compliance for an electrician, and how BS 7671 sits inside the regulatory framework in England.",
-    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
-    passMark: 9,
+      "A focused exam built around Webinar 2 — Basic Electrics & Building Regulations, with the emphasis on the Building Regulations side. Covers Part P scope, notifiable work, the relevant Approved Documents, the routes to compliance for an electrician, and how BS 7671 sits inside the regulatory framework in England. Now combined with 20 questions from the Access Training Building Regulations homework — covering Approved Documents A, B, C, E, F, L, M and P, plus the practical install detail (notch & chase depths, gas/electricity spacing, EV charge-point provisions).",
+    format: "32 multiple-choice questions. Aim for 22+/32 (70%+) to pass; 29+/32 (90%+) for a strong result.",
+    passMark: 22,
     sections: [
       {
         id: "section-1",
@@ -1859,28 +1859,303 @@ export const EXAMS: Exam[] = [
               "The CPS member self-certifies via their scheme within 30 days; the scheme issues a compliance certificate to the client (typically by post) and informs the local authority on the contractor's behalf. Failing to notify within the time limit can result in fines from the scheme and undermines the homeowner's ability to prove compliance."
           }
         ]
+      },
+      {
+        id: "section-1",
+        title: "Section 1 — Building Regulations Practice Bank",
+        questions: [
+          {
+            number: 13,
+            prompt: "Heat detectors should be mounted",
+            options: {
+              A: "Directly above air conditioning outlets",
+              B: "Between 25mm to 600mm below the ceiling",
+              C: "Between 25mm to 150mm below the ceiling",
+              D: "500mm from any walls"
+            },
+            answer: "C",
+            explanation:
+              "BS 5839-6: ceiling-mounted heat detectors must have the sensing element 25–150 mm below the ceiling so it sits in the rising layer of hot gases. Placing it directly under an AC outlet would cool the sensor; 500 mm below would put it below the heat layer."
+          },
+          {
+            number: 14,
+            prompt: "Approved Document Part E (Resistance to the passage of sound) requires",
+            options: {
+              A: "That chases must be used in separating walls",
+              B: "Deep boxes to be used in separating walls",
+              C: "Sockets to be staggered on opposite sides of a separating wall",
+              D: "Sockets to be fitted back to back on a separating wall between a room and a corridor"
+            },
+            answer: "C",
+            explanation:
+              "Part E targets airborne sound transmission. Back-to-back accessory boxes punch a near-direct sound path through a separating wall, so Part E requires sockets to be staggered horizontally on opposite faces. Deep boxes and chases would worsen the problem, not help it."
+          },
+          {
+            number: 15,
+            prompt: "It is necessary to notify the relevant building control body before the work begins if the work is",
+            options: {
+              A: "Certified by a registered third party certifier",
+              B: "Carried out and certified by a registered competent enterprise",
+              C: "Carried out by an enterprise not registered with a CPS",
+              D: "Non-notifiable"
+            },
+            answer: "C",
+            explanation:
+              "CPS members self-certify after the work, so prior notice is not needed. A non-CPS enterprise carrying out notifiable work must give the local authority Building Control prior notice (Building Notice or Full Plans) before starting. Non-notifiable work needs no notification at all."
+          },
+          {
+            number: 16,
+            prompt:
+              "An EV charging point can be connected to a PME supply, as long as one of the four provisions of Regulation: 722.411.4.1 are met, or, what else?",
+            options: {
+              A: "25mm squared bonding conductor is connected to all extraneous conductive parts",
+              B: "A Type F RCD is installed",
+              C: "An isolation transformer is used",
+              D: "A tethered lead EV chargepoint is installed"
+            },
+            answer: "C",
+            explanation:
+              "Reg 722.411.4.1 lists the open-PEN protection options for EV charge-points on PME. The alternative route is to provide isolation from the PME earthing arrangement — typically with a separating/isolating transformer or a dedicated TT earth electrode, so any open-PEN fault cannot be exported to the vehicle."
+          },
+          {
+            number: 17,
+            prompt: "Approved documents L1A and L1B do not give guidance on the installation of",
+            options: {
+              A: "Domestic combined heat and power (microCHP)",
+              B: "Solar photovoltaic panels",
+              C: "Warm air systems",
+              D: "Underfloor heating"
+            },
+            answer: "B",
+            explanation:
+              "Part L1A/L1B (Conservation of Fuel and Power) covers fixed building services like heating, hot water, ventilation and lighting. Solar PV electrical installation is covered by BS 7671 Section 712 and the MCS standards rather than Part L itself — Part L only counts PV as a contribution to the dwelling's energy efficiency calculation."
+          },
+          {
+            number: 18,
+            prompt:
+              "The statement is a requirement of which Approved Document? The building shall be designed and constructed so that there are appropriate provisions for the early warning of fire?",
+            options: {
+              A: "Approved Document Part M",
+              B: "Approved Document Part A",
+              C: "Approved Document Part B",
+              D: "Approved Document Part F"
+            },
+            answer: "C",
+            explanation:
+              "Part B is fire safety. B1 specifically requires means of warning and escape — the statutory requirement underpinning smoke-alarm provision in dwellings (Volume 1) and fire alarm systems in non-dwellings (Volume 2). Part A is structure, M is access, F is ventilation."
+          },
+          {
+            number: 19,
+            prompt: "Which of these is not a requirement of Regulation 7 of the Building Regulations?",
+            options: {
+              A: "Building work shall be carried out in a workmanlike manner",
+              B: "Building work shall be carried out by registered competent persons only",
+              C: "Building work shall be carried out with adequate and proper materials",
+              D: "Materials used in building work are applied, used or fixed so as to adequately perform the functions for which they are designed."
+            },
+            answer: "B",
+            explanation:
+              "Reg 7 covers materials and workmanship: workmanlike manner, adequate and proper materials, materials applied properly. Competent Person Schemes are about Part P notification, not Reg 7 — there is no requirement that all building work be done by registered persons."
+          },
+          {
+            number: 20,
+            prompt: "What is the minimum intermittent extract fan ventilation rate in a kitchen adjacent to a hob?",
+            options: {
+              A: "6 litres/ second",
+              B: "30 litres/ second",
+              C: "60 litres/ second",
+              D: "15 litres/ second"
+            },
+            answer: "C",
+            explanation:
+              "Part F Table 5.1a — intermittent extract: 30 L/s if the fan is over the hob (cooker hood), 60 L/s elsewhere in the kitchen. A fan adjacent to (not over) the hob falls in the 60 L/s category."
+          },
+          {
+            number: 21,
+            prompt: "Which approved document requires sufficient means for giving early warning of fire?",
+            options: {
+              A: "F",
+              B: "B",
+              C: "E",
+              D: "L"
+            },
+            answer: "B",
+            explanation:
+              "Part B — Fire safety. B1 is the means of warning and escape requirement. F is ventilation, E is sound, L is energy efficiency."
+          },
+          {
+            number: 22,
+            prompt: "Which of these is non-notifiable work under Part P?",
+            options: {
+              A: "New central heating system circuit",
+              B: "Installing a new outdoor lighting circuit in a garden",
+              C: "Work to connect an electric gate to an existing isolator",
+              D: "Installing an extractor fan 300mm from the edge of a bath at a height of 2m."
+            },
+            answer: "C",
+            explanation:
+              "Since 2013 only two categories are notifiable: a new circuit, or a consumer unit replacement. Connecting an electric gate to an existing isolator is an addition to an existing circuit, so it is non-notifiable. Both the new central heating circuit and the new outdoor lighting circuit are new circuits and therefore notifiable."
+          },
+          {
+            number: 23,
+            prompt: "Part P does not apply to electrical installations",
+            options: {
+              A: "In outbuildings such as a detached garage",
+              B: "Outside a dwelling such as a pond pump in a garden",
+              C: "In the common access areas of blocks of flats such as corridors",
+              D: "In business premises in the same building as a dwelling with separate metering"
+            },
+            answer: "C",
+            explanation:
+              "Part P applies to dwellings and to outbuildings/gardens that are part of a dwelling — so a detached garage and a pond pump are in scope. Common access areas of blocks of flats and separately-metered business premises are explicitly excluded; common parts come under other Approved Documents (B, M etc.)."
+          },
+          {
+            number: 24,
+            prompt:
+              "In order to comply with the requirements of Approved Document Part C, persons carrying out electrical work in new buildings should",
+            options: {
+              A: "Provide fixed building services which are energy efficient",
+              B: "Fit background ventilators with intermittent extract fans",
+              C: "Seal cable entries to prevent the ingress of gas or water",
+              D: "Install switches at a height of between 450mm and 1200mm from the finished floor level"
+            },
+            answer: "C",
+            explanation:
+              "Part C is site preparation and resistance to contaminants and moisture. The electrical implication is that any cable penetration through the external envelope (or a ground-floor slab) must be sealed against gas (radon, methane) and water ingress. Energy efficiency is L, ventilation is F, switch heights are M."
+          },
+          {
+            number: 25,
+            prompt: "Which of these is notifiable under Part P?",
+            options: {
+              A: "The installation of a kitchen lighting system using a CE marked prefabricated, modular system linked by plug and socket connectors",
+              B: "New outdoor lighting circuit that involves crossing the garden",
+              C: "Electrical maintenance on equipment 700mm from Zone 1 in a bathroom",
+              D: "Electrical installation work in a shed that does not involve new outdoor wiring"
+            },
+            answer: "B",
+            explanation:
+              "A new outdoor lighting circuit is a new circuit — notifiable. CE-marked prefabricated systems with plug-and-socket connectors are treated as accessories rather than a new circuit. Maintenance is non-notifiable. Work confined to an existing shed circuit is non-notifiable."
+          },
+          {
+            number: 26,
+            prompt: "The maximum depth of a notch in a wooden joist should be",
+            options: {
+              A: "0.25 x joist depth",
+              B: "Between 0.25 and 0.4 x span",
+              C: "Between 0.07 and 0.25 x span",
+              D: "A maximum of 0.125 x joint depth"
+            },
+            answer: "D",
+            explanation:
+              "Approved Document A: notches in joists must not exceed 0.125 × the joist depth, and only in the top edge between 0.07 and 0.25 of the span from the support. Drilled holes have separate limits (max 0.25 × depth on the neutral axis)."
+          },
+          {
+            number: 27,
+            prompt:
+              "Electrical testing should be carried out in the correct sequence. Which of the following is classed as the first live test?",
+            options: {
+              A: "Continuity of protective conductors",
+              B: "Supply polarity",
+              C: "Insulation resistance",
+              D: "Continuity of ring final circuit conductors"
+            },
+            answer: "B",
+            explanation:
+              "Continuity, IR and ring continuity are all dead tests. The live test sequence per BS 7671 / GN3 starts with confirming polarity at the origin, then earth electrode resistance (TT), then earth fault loop impedance Ze/Zs, PFC, phase rotation, RCDs, functional."
+          },
+          {
+            number: 28,
+            prompt: "Vertical chases must",
+            options: {
+              A: "Be at least 50mm deep",
+              B: "Not be deeper than one sixth of the wall thickness",
+              C: "Not be deeper than one third of the wall thickness",
+              D: "Be at least 50mm from the top or bottom of a joist"
+            },
+            answer: "C",
+            explanation:
+              "Approved Document A and BS EN 1996-2: vertical chases must not exceed 1/3 of the wall thickness; horizontal chases must not exceed 1/6. Deeper chases compromise the structural strength of the masonry."
+          },
+          {
+            number: 29,
+            prompt: "What is the minimum spacing for gas installation pipework from an electricity meter?",
+            options: {
+              A: "300mm",
+              B: "25mm",
+              C: "500mm",
+              D: "150mm"
+            },
+            answer: "D",
+            explanation:
+              "BS 6891 / IGE/G/1: minimum 150 mm horizontal separation between gas pipework and electricity meters, consumer units or other electrical equipment. Where they cross, 25 mm separation with insulation is acceptable but 150 mm is the headline figure most often examined."
+          },
+          {
+            number: 30,
+            prompt:
+              "A way of satisfying the requirements of approved document M is to install switches at a height",
+            options: {
+              A: "Between 1350mm and 1450mm above floor level",
+              B: "Between 25mm and 600mm below the ceiling",
+              C: "Below 450mm?",
+              D: "Between 450mm and 1200mm from the finished floor level"
+            },
+            answer: "D",
+            explanation:
+              "Part M Volume 1 (dwellings): switches, sockets and other accessories that need regular operation must be 450 mm to 1200 mm from the finished floor level so they are reachable from a wheelchair. This is for new dwellings; existing dwellings have no retrospective duty."
+          },
+          {
+            number: 31,
+            prompt:
+              "Which of these cable installation methods has the highest maximum current carrying capacity (Iz)?",
+            options: {
+              A: "100",
+              B: "A",
+              C: "103",
+              D: "C"
+            },
+            answer: "D",
+            explanation:
+              "BS 7671 Reference Method C — clipped direct on a wall or ceiling — gives the highest Iz of the listed methods because the cable can dissipate heat freely. Methods A (in conduit in an insulated wall) and 100/103 (in masonry / fully in insulation) all derate the cable."
+          },
+          {
+            number: 32,
+            prompt:
+              "What is the minimum conductor cross sectional area for a radial circuit in a household protected by a 32A overcurrent device?",
+            options: {
+              A: "1.5mm Squared",
+              B: "0.75mm Squared",
+              C: "4.0mm Squared",
+              D: "2.5mm Squared"
+            },
+            answer: "C",
+            explanation:
+              "OSG Table 7.1 — a 32 A radial socket-outlet circuit needs 4 mm² live conductors (typically with 1.5 mm² CPC in T+E) on the standard reference methods. 2.5 mm² T+E only carries up to 27 A in many install methods, so it cannot be protected by a 32 A device."
+          }
+        ]
       }
     ],
     scoring: [
-      { minScore: 11, range: "11–12", label: "Strong — building-regs literacy is solid" },
-      { minScore: 9, range: "9–10", label: "Comfortable pass" },
-      { minScore: 7, range: "7–8", label: "Re-read AD P and the notifiable-work list" },
-      { minScore: 0, range: "< 7", label: "Re-watch the building regulations webinar" }
+      { minScore: 29, range: "29–32", label: "Strong — homework standard" },
+      { minScore: 22, range: "22–28", label: "Comfortable pass" },
+      { minScore: 16, range: "16–21", label: "Re-read the relevant theory before re-attempting" },
+      { minScore: 0, range: "< 16", label: "Re-watch the topic webinar before re-attempting" }
     ],
     priorities: [
       "The three notifiable categories under Part P — new circuit, consumer unit, special location — these are the only ones that trigger notification.",
       "The three routes to compliance — CPS self-cert, Building Notice, third-party certifier — and which is realistic for your day-to-day work.",
-      "Approved Document letters: A (structure), B (fire), F (ventilation), L (energy), P (electrical) — be able to identify each from a one-line description."
+      "Approved Document letters: A (structure), B (fire), F (ventilation), L (energy), P (electrical) — be able to identify each from a one-line description.",
+      "Notch and chase limits: notch ≤ 0.125 × joist depth; vertical chase ≤ 1/3 wall thickness, horizontal ≤ 1/6.",
+      "150 mm gas/electricity spacing — both BS 6891 (gas) and IET guidance call this out."
     ]
   },
   {
     id: "18th-edition",
-    title: "18th Edition (BS 7671) — Topic Mock",
-    subtitle: "Webinar 3 — wiring regulations structure & key provisions",
+    title: "18th Edition (BS 7671)",
+    subtitle: "Combined topic drill + Access Training homework practice bank",
     description:
-      "A focused topic mock built around Webinar 3 — 18th Edition of the Wiring Regulations. Drills the structure of BS 7671:2018 + A2:2022 + A3:2024, the key part numbers, the major tables electricians look up daily, and the headline provisions introduced or revised by the recent amendments (AFDDs, SPDs, EV charging).",
-    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
-    passMark: 9,
+      "A focused exam built around Webinar 3 — 18th Edition of the Wiring Regulations. Drills the structure of BS 7671:2018 + A2:2022 + A3:2024, the key part numbers, the major tables electricians look up daily, and the headline provisions introduced or revised by the recent amendments (AFDDs, SPDs, EV charging). Now combined with 56 questions from the Access Training 18th Edition Amendment 2 homework: AFDDs, SPDs, EV charging on PME, prosumer installations, special locations, RCD types, disconnection times and the recent amendment provisions.",
+    format: "68 multiple-choice questions. Aim for 48+/68 (70%+) to pass; 61+/68 (90%+) for a strong result.",
+    passMark: 48,
     sections: [
       {
         id: "section-1",
@@ -2063,28 +2338,577 @@ export const EXAMS: Exam[] = [
               "Section 712 covers PV installations (DC-side cabling, isolation, earthing of the array frame, AC-side connection, labelling). It works alongside the inverter manufacturer's instructions and the DNO's G98/G99 connection requirements."
           }
         ]
+      },
+      {
+        id: "section-1",
+        title: "Section 1 — 18th Edition Practice Bank",
+        questions: [
+          {
+            number: 13,
+            prompt: "Which of the following is not part of the schedule of inspections for an initial verification?",
+            options: { A: "Additional protection", B: "RCD type", C: "Distribution equipment", D: "Basic protection" },
+            answer: "B",
+            explanation: "The Schedule of Inspections checks the methods of protection (basic, fault, additional) and that distribution equipment, identification, and bonding are correct. The specific RCD TYPE (AC/A/F/B) is recorded on the Schedule of Test Results, not on the Schedule of Inspections."
+          },
+          {
+            number: 14,
+            prompt: "When provided, where must an AFDD be installed?",
+            options: {
+              A: "At equipment which is likely to cause operation of an AFDD",
+              B: "At the origin of an installation",
+              C: "At the origin of the final circuit being protected",
+              D: "Between the meter and consumer unit main switch"
+            },
+            answer: "C",
+            explanation: "BS 7671 532.6 / 421.1.7 — AFDDs are installed at the origin of the final circuit so they protect the entire downstream cabling and accessories. Installing at the origin of the installation gives no per-circuit selectivity."
+          },
+          {
+            number: 15,
+            prompt: "Storage batteries are used as an alternative electrical source for what?",
+            options: { A: "High frequency oscillations", B: "Safety services", C: "Maintainability", D: "Undervoltage" },
+            answer: "B",
+            explanation: "Section 560 — safety services (emergency lighting, fire alarm panels, smoke control) need an independent source so they keep working when the mains fails. Battery banks (or generators) are the standard alternative source."
+          },
+          {
+            number: 16,
+            prompt: "Low voltage generating sets are considered to be what?",
+            options: {
+              A: "Within the scope of BS 7671",
+              B: "Outside the scope of BS 7671",
+              C: "Not included in BS 7671",
+              D: "Excluded from the scope of BS 7671"
+            },
+            answer: "A",
+            explanation: "Section 551 specifically covers LV generating sets — they are within the scope of BS 7671. The Regulations cover both the connection back to the installation and the protective measures for parallel operation with the public supply."
+          },
+          {
+            number: 17,
+            prompt: "When island mode is in use, what must be used to prevent incorrect operation of an RCD, and not overlap with switching to the DNO neutral?",
+            options: {
+              A: "Single pole RCD",
+              B: "Neutral switch device",
+              C: "Double pole 60947-3 isolator",
+              D: "Functional switching of the DNO neutral"
+            },
+            answer: "B",
+            explanation: "Section 551 / 826 (Prosumer installations under A2:2022) — when an inverter feeds the installation in island mode it must disconnect the DNO neutral with a neutral switching device to prevent the local generator paralleling onto the DNO supply via the neutral."
+          },
+          {
+            number: 18,
+            prompt: "In order for an enclosure to be adequate for basic protection, the minimum IP rating of an insulating enclosure shall be at least?",
+            options: { A: "IP2X", B: "IPXXD", C: "IP4X", D: "IPX2" },
+            answer: "A",
+            explanation: "Reg 416.2.2: vertical surfaces require IP2X or IPXXB minimum (jointed test finger). Horizontal upper surfaces require IP4X or IPXXD (1 mm wire). The basic figure cited in the question is the IP2X minimum."
+          },
+          {
+            number: 19,
+            prompt: "What is the max measured Zs for a 32A BS88-3 system C fuse protecting a distribution circuit?",
+            options: { A: "0.728 ohms", B: "1.6 ohms", C: "0.91 ohms", D: "1.28 ohms" },
+            answer: "D",
+            explanation: "Distribution circuits use 5 s disconnection time. From BS 7671 Table 41.4 for BS 88-3 32 A at 5 s: tabulated Zs = 1.6 Ω. GN3 max measured = 0.8 × 1.6 = 1.28 Ω (the 80% rule for warm conductors)."
+          },
+          {
+            number: 20,
+            prompt: "Which of the following SPD type can be installed at the origin of an installation?",
+            options: { A: "Type 5", B: "Type 4", C: "Type 1", D: "Type 3" },
+            answer: "C",
+            explanation: "Type 1 SPDs handle the 10/350 µs lightning current waveform — installed at the origin where there is risk of direct or partial direct lightning strike. Type 2 handles induced surges; Type 3 sits at the equipment end. Types 4 and 5 don't exist."
+          },
+          {
+            number: 21,
+            prompt: "Sufficient space for the initial installation and later replacement of individual items of electrical equipment is considered as?",
+            options: {
+              A: "Prevention of mutual detrimental influence",
+              B: "Prevention of harmful effects",
+              C: "Accessibility of electrical equipment",
+              D: "Additions and alterations to an installation"
+            },
+            answer: "C",
+            explanation: "Section 132 / 513 — the requirement to provide enough access space for installation, inspection, testing, maintenance and replacement is the 'accessibility' requirement. Cramming a CU into a 200 mm cupboard fails this rule."
+          },
+          {
+            number: 22,
+            prompt: "Which of the following shall be considered when determining the frequency of periodic inspection and testing?",
+            options: {
+              A: "The frequency of any maintenance carried out",
+              B: "Age of the building fabric",
+              C: "How many occupants within the installation",
+              D: "The size of the installation"
+            },
+            answer: "A",
+            explanation: "Reg 651 — the frequency of periodic I&T considers the type of installation, its use & operation, frequency and quality of maintenance, and external influences. Building fabric age and occupant count aren't drivers in their own right."
+          },
+          {
+            number: 23,
+            prompt: "If the protective conductor is of the same material as the 35mm² line conductor of a circuit, what minimum CSA must it be?",
+            options: { A: "6mm²", B: "16mm²", C: "35mm²", D: "10mm²" },
+            answer: "B",
+            explanation: "BS 7671 Table 54.7: for line conductors > 35 mm² the PE may be S/2 (= 17.5, rounded down to 16 mm²) of same material. The other rule (S ≤ 16 → CPC = S) doesn't apply at 35 mm²."
+          },
+          {
+            number: 24,
+            prompt: "An EV installation connected to a TNCS earthing arrangement cannot have the PME used as a means of earthing unless?",
+            options: {
+              A: "The MET is connected to an earth electrode by a protective conductor",
+              B: "Under no circumstances can the PME be exported",
+              C: "It's part of a 3 phase installation",
+              D: "It's protected by a Type A RCD"
+            },
+            answer: "A",
+            explanation: "Reg 722.411.4.1 — to use PME for an EV charge-point you must either fit an open-PEN device, or provide a local earth electrode at the installation, or use a separating transformer. The electrode option breaks the dependence on the DNO neutral."
+          },
+          {
+            number: 25,
+            prompt: "Preventing a current resulting from a fault passing through the body of any person or any livestock, is a form of what?",
+            options: {
+              A: "Protection against voltage disturbances",
+              B: "Protection against thermal effects",
+              C: "Fault protection",
+              D: "Protection against overcurrent"
+            },
+            answer: "C",
+            explanation: "Fault protection (formerly 'protection against indirect contact') is the duty to prevent dangerous touch voltages on exposed parts caused by an insulation fault — typically achieved by ADS, Class II, or electrical separation."
+          },
+          {
+            number: 26,
+            prompt: "In order to avoid the use of an RCD for additional protection for a cable buried 35mm in a wall in safe zones, what can be used?",
+            options: {
+              A: "Additional protection must be installed",
+              B: "Thermosetting insulated and sheathed cable",
+              C: "Earthed conduit containing the cable",
+              D: "Supplementary bonding"
+            },
+            answer: "C",
+            explanation: "Reg 522.6.202 — the alternatives to a 30 mA RCD for cables < 50 mm in walls in safe zones are: earthed metallic conduit/ducting, mechanical protection, or use of cables with an earthed metal sheath. Just 'thermosetting' cable doesn't change the requirement."
+          },
+          {
+            number: 27,
+            prompt: "When shall overcurrent detection be provided for a neutral conductor?",
+            options: {
+              A: "If the circuit is protected by a BS3036 fuse",
+              B: "In an IT system",
+              C: "Never",
+              D: "In the presence of harmonic currents"
+            },
+            answer: "D",
+            explanation: "Reg 431.2.3 — neutral overcurrent detection is required where harmonic currents (especially 3rd harmonic in 3-phase 4-wire) can drive significant circulating current in the neutral, even when the lines look balanced."
+          },
+          {
+            number: 28,
+            prompt: "What is the suggested font size for a general use periodic inspection due date label?",
+            options: { A: "18pt", B: "16pt", C: "10pt", D: "14pt" },
+            answer: "D",
+            explanation: "BS 7671 (with A3) suggests a 14pt minimum for the periodic inspection due-date notice on consumer units so it remains legible without access to the cupboard. Earlier editions did not specify a font size."
+          },
+          {
+            number: 29,
+            prompt: "A switch which does not necessarily isolate all live conductors is called what?",
+            options: {
+              A: "Switching for mechanical maintenance",
+              B: "Emergency switching",
+              C: "Functional switching",
+              D: "Isolation"
+            },
+            answer: "C",
+            explanation: "Section 537 — functional switching only controls a circuit in normal operation; it does not have to disconnect every live conductor (a single-pole light switch is the classic example). Isolation requires all live conductors disconnected."
+          },
+          {
+            number: 30,
+            prompt: "Electrical equipment in a marina in a seashore location shall be no less than",
+            options: { A: "IPX3", B: "IPX4", C: "IPX6", D: "IPX5" },
+            answer: "C",
+            explanation: "Section 709 (Marinas) requires IPX6 (powerful jets / heavy seas) for equipment in seashore locations to withstand wave action and storm spray. Inland marinas use lower IP."
+          },
+          {
+            number: 31,
+            prompt: "A 20A 400V 3-phase motor circuit, connected to a TN system has a maximum disconnection time of?  ",
+            options: { A: "0.2s", B: "5s", C: "0.4s", D: "0.1s" },
+            answer: "A",
+            explanation: "Table 41.1 — TN system, final circuit at U₀ > 230 V: max disconnection time 0.2 s. (At 230 V the limit is 0.4 s; distribution circuits get 5 s.)"
+          },
+          {
+            number: 32,
+            prompt: "Which conductor joins an exposed conductive part to the MET?",
+            options: {
+              A: "Circuit protective conductor",
+              B: "Main protective bonding conductor",
+              C: "Earthing conductor",
+              D: "Supplementary bonding conductor"
+            },
+            answer: "A",
+            explanation: "CPC: from the exposed conductive part of accessories/equipment back to the MET via the distribution board. Main bonding goes from MET to extraneous parts. Earthing conductor is MET to the means of earthing."
+          },
+          {
+            number: 33,
+            prompt: "Which RCD will trip on alternating sinusoidal residual current and on residual pulsating direct current, suddenly applied or smoothly increasing only?",
+            options: { A: "Type A", B: "Type A.C", C: "Type F", D: "Type B" },
+            answer: "A",
+            explanation: "Type A: AC sinusoidal + pulsating DC. Type AC: AC sinusoidal only. Type F: Type A + composite multi-frequency. Type B: all of the above + smooth DC. Type A is now the minimum default for general use."
+          },
+          {
+            number: 34,
+            prompt: "When can overload protection not be omitted?",
+            options: {
+              A: "The exciter circuit of a rotating machine",
+              B: "For the supply of a lifting magnet",
+              C: "For the supply of a circuit supplying a fire extinguishing device",
+              D: "Polyphase motor circuit"
+            },
+            answer: "D",
+            explanation: "Reg 433.3 lists where overload protection MAY be omitted (exciter circuits, lifting magnets, safety circuits like fire suppression). Polyphase motor circuits are not on that list and must always have overload protection."
+          },
+          {
+            number: 35,
+            prompt: "The term PEI is defined as?",
+            options: {
+              A: "Prosumers Electrical Installation",
+              B: "Protective Earthing Installation",
+              C: "Prosumers Earthing Installation",
+              D: "Protective Electrical Installation"
+            },
+            answer: "A",
+            explanation: "PEI = Prosumer Electrical Installation — introduced in Section 826 by A2:2022 to cover dwellings that both consume and produce electricity (PV + battery + EV charger combinations)."
+          },
+          {
+            number: 36,
+            prompt: "A standard socket outlet can be installed within a room containing a bath or shower as long as?",
+            options: {
+              A: "It's no less than 2.5m from the boundary of zone 1",
+              B: "It's within the boundary of zone 2",
+              C: "Under no circumstance can one be installed",
+              D: "It's no less than 3m from the boundary of zone 1"
+            },
+            answer: "D",
+            explanation: "Section 701 — a standard socket outlet may be installed in a bath/shower room provided it is no closer than 3 m horizontally from the boundary of Zone 1. Within 3 m, only SELV or shaver-supply sockets are permitted."
+          },
+          {
+            number: 37,
+            prompt: "Electric shock protection is not achieved by which of the following?",
+            options: {
+              A: "Class 2 equipment",
+              B: "Coordination between conductor and overload protective devices",
+              C: "SELV",
+              D: "Automatic disconnection of supply"
+            },
+            answer: "B",
+            explanation: "Conductor / overload protective device coordination (Reg 433) is overload protection — it prevents the cable overheating, not shock. The other three are recognised protective measures against electric shock in Section 410/411/414."
+          },
+          {
+            number: 38,
+            prompt: "A method of protection against electric shock using basic protection, ascertained during initial verification is which of the following?",
+            options: {
+              A: "Protection by obstacles",
+              B: "Correct type of protective device",
+              C: "Suitable installation method",
+              D: "Suitable sized conductors"
+            },
+            answer: "A",
+            explanation: "Basic protection methods listed in Section 416/417: insulation of live parts, barriers/enclosures, obstacles, placing out of reach. Obstacles is one of the named basic-protection measures (used in restricted areas, by skilled persons)."
+          },
+          {
+            number: 39,
+            prompt: "Lightning strikes shall not be protected against where which of the following is present?",
+            options: {
+              A: "Significant financial or data loss",
+              B: "Disruption to household installations",
+              C: "Failure of a safety service",
+              D: "Serious injury to, or loss of human life"
+            },
+            answer: "B",
+            explanation: "Reg 443.4 — protection against transient overvoltages of atmospheric origin must be provided where consequence includes serious injury, loss of human life, failure of safety service, or significant financial loss. Mere disruption to household equipment doesn't trigger the requirement."
+          },
+          {
+            number: 40,
+            prompt: "During the refurbishment of a house, the site, whilst under construction has a socket outlet with a rated current of 16A (commando socket), what must be the manufacturing standard of this outlet?",
+            options: { A: "BS EN 60309-2", B: "BS EN 61439-4", C: "BS EN 60309-1", D: "BS EN 50525-2-21" },
+            answer: "A",
+            explanation: "BS EN 60309-2 covers the dimensional / interchangeability requirements of industrial round-pin commando sockets. 60309-1 is the general standard; 61439-4 covers assemblies for construction sites; 50525 is cable construction."
+          },
+          {
+            number: 41,
+            prompt: "In single phase, two wire circuits, the neutral conductor must?",
+            options: {
+              A: "Be either one size more or one size less than the line conductor",
+              B: "Not be less than the CSA of the line conductor",
+              C: "Be the same CSA as the line conductor",
+              D: "Not be less than half the CSA of the line conductor"
+            },
+            answer: "C",
+            explanation: "Reg 524 — for single-phase two-wire circuits, the neutral must be the same CSA as the line. The 'half-size neutral' rule applies only to balanced 3-phase circuits with line CSA > 16 mm² Cu / 25 mm² Al, and only with no significant harmonics."
+          },
+          {
+            number: 42,
+            prompt: "The preservation of continuity of a protective conductor shall be suitably protected against which of the following?",
+            options: { A: "Earth faults", B: "Overload", C: "Overcurrent", D: "Chemical deterioration" },
+            answer: "D",
+            explanation: "Reg 543.3 — protective conductors must be protected against mechanical damage, chemical or electrochemical deterioration, electrodynamic and thermodynamic forces. Chemical deterioration matters because corroded joints become high-resistance and break the fault path."
+          },
+          {
+            number: 43,
+            prompt: "Which statutory regulation depicts that a PME earthing facility cannot be connected to any metalwork in a caravan?",
+            options: {
+              A: "Electricity Safety, Quality and Continuity Regulations",
+              B: "Electricity at Work Regulations",
+              C: "Electrical Safety Regulations",
+              D: "Provision and Use of Work Equipment Regulations"
+            },
+            answer: "A",
+            explanation: "ESQCR 2002 Reg 9 prohibits a DNO PME earth being used to earth a caravan, boat or similar mobile installation — these must be TT'd. EAWR is the work duty; PUWER covers work equipment generally."
+          },
+          {
+            number: 44,
+            prompt: "Which of the following installations does not require the installation of an AFDD?",
+            options: {
+              A: "Socket outlets in a care home",
+              B: "Lighting circuit in a HMO",
+              C: "Socket outlets in a HRRB",
+              D: "Socket outlets in student accommodation"
+            },
+            answer: "B",
+            explanation: "BS 7671 421.1.7 (A2:2022) — AFDDs are required for AC final circuits supplying SOCKET OUTLETS rated up to 32 A in higher-risk premises (HRRBs, HMOs, care homes, student accommodation, purpose-built student accommodation). Lighting circuits are not in scope."
+          },
+          {
+            number: 45,
+            prompt: "Which of the following voltages is not covered by BS 7671",
+            options: { A: "230V A.C.", B: "1000V A.C.", C: "1500V D.C.", D: "1500V A.C." },
+            answer: "D",
+            explanation: "BS 7671 covers up to 1000 V a.c. or 1500 V d.c. between conductors. 1500 V a.c. exceeds the LV upper limit and is outside scope (governed by HV regulations and specific equipment standards)."
+          },
+          {
+            number: 46,
+            prompt: "In a swimming pool, the space located 2.6m directly above a springboard over the pool is classed as?",
+            options: { A: "Zone 0", B: "Outside of zones", C: "Zone 2", D: "Zone 1" },
+            answer: "B",
+            explanation: "Section 702 — pool zones extend 2.5 m above the highest point that can be occupied (e.g. springboard surface). 2.6 m above the springboard is therefore above the 2.5 m zone limit, so outside any zone."
+          },
+          {
+            number: 47,
+            prompt: "Which is not considered during an assessment of compatibility for an installation?",
+            options: { A: "DC Feedback", B: "Harmonic currents", C: "Transient overvoltages", D: "Use of monitoring devices" },
+            answer: "D",
+            explanation: "Reg 331.1 lists the compatibility considerations: transients, undervoltages, harmonics, DC feedback, leakage currents, etc. The use of monitoring devices is a design choice (Reg 538), not an item assessed against compatibility."
+          },
+          {
+            number: 48,
+            prompt: "The removal of an unexpected danger is classed as?",
+            options: {
+              A: "Isolation",
+              B: "Switching for mechanical maintenance",
+              C: "Functional switching",
+              D: "Emergency switching"
+            },
+            answer: "D",
+            explanation: "Section 537 — emergency switching is the rapid disconnection of supply to remove an unexpected danger. The button must be readily accessible and clearly marked. Isolation is for safe working; mechanical maintenance is for non-electrical work."
+          },
+          {
+            number: 49,
+            prompt: "Through wiring of a luminaire is not allowed?",
+            options: {
+              A: "Unless the wiring system is in conduit",
+              B: "Under any circumstance",
+              C: "Unless single core conductors are used",
+              D: "Unless the luminaire is designed for it"
+            },
+            answer: "D",
+            explanation: "Section 559 — through-wiring is only permitted where the luminaire is specifically designed for it (terminals rated for the conductor type and operating temperature). Otherwise the cable insulation may degrade against the hot luminaire body."
+          },
+          {
+            number: 50,
+            prompt: "An extra low voltage lighting installation suspended from a ceiling shall be capable of carrying not less than?",
+            options: { A: "3kg", B: "5kg", C: "4kg", D: "6kg" },
+            answer: "B",
+            explanation: "Section 715 — suspension/track support systems for ELV lighting must be capable of carrying not less than 5 kg per metre of installation, providing a margin over the lightweight ELV fittings and conductor mass."
+          },
+          {
+            number: 51,
+            prompt: "A functional earthing conductor is identified by which colour?",
+            options: { A: "Cream", B: "Green", C: "Pink", D: "Green and Yellow" },
+            answer: "A",
+            explanation: "Reg 514.4.5 — functional earthing conductors (clean earths for IT/instrumentation) are identified with cream insulation to distinguish them from green/yellow protective earthing. Mixing the two defeats the segregation."
+          },
+          {
+            number: 52,
+            prompt: "A distribution circuit supplying a garage, connected to a 230V A.C. TN system has a maximum disconnection time off?",
+            options: { A: "0.2s", B: "0.4s", C: "5s", D: "1s" },
+            answer: "C",
+            explanation: "Table 41.1 — distribution circuits (and final circuits > 32 A) on TN system: maximum 5 s. Final circuits ≤ 32 A on 230 V TN: 0.4 s. The garage is fed via a sub-main/distribution circuit, not a final circuit."
+          },
+          {
+            number: 53,
+            prompt: "To prevent indirect energising of a circuit, what must be done?",
+            options: {
+              A: "Reduce starting currents",
+              B: "Consider power factor",
+              C: "Divide the installation",
+              D: "Provide safety services"
+            },
+            answer: "C",
+            explanation: "Reg 314 — divide the installation into circuits so that each can be isolated independently and a fault in one can't energise another via shared neutrals or links. This is the fundamental design step that prevents indirect energising."
+          },
+          {
+            number: 54,
+            prompt: "In order to provide automatic disconnection of supply, fault protection is required alongside what else?",
+            options: {
+              A: "Basic protection",
+              B: "Overload protection",
+              C: "Fire protection",
+              D: "Bonding of extraneous conductive parts"
+            },
+            answer: "D",
+            explanation: "ADS depends on protective equipotential bonding to reduce touch voltages between exposed parts and extraneous parts during a fault. The protective device disconnects, but bonding limits the touch voltage during the disconnection time."
+          },
+          {
+            number: 55,
+            prompt: "If alternative sources of supply are present, what must be applied and where?",
+            options: {
+              A: "A warning notice at all points of isolation",
+              B: "A barrier at all points of isolation",
+              C: "A warning notice on documentation provided",
+              D: "No requirement needed"
+            },
+            answer: "A",
+            explanation: "Reg 514.15 — where a generator, PV inverter or battery may energise the installation independently of the main supply, a warning notice must be at every point of isolation telling anyone working downstream that the supply may still be live."
+          },
+          {
+            number: 56,
+            prompt: "In a room containing a bath or shower, what sized RCD must be provided for all circuits serving or passing through zones 1 and or 2.",
+            options: { A: "30mA", B: "300mA", C: "500mA", D: "100mA" },
+            answer: "A",
+            explanation: "Section 701 — all LV circuits in a bath/shower room (and any circuit passing through zones 1 or 2) require additional protection by 30 mA RCD. 100 / 300 / 500 mA RCDs are for fire and earth fault protection on distribution circuits."
+          },
+          {
+            number: 57,
+            prompt: "Diversity is sometimes applied when determining which of the following?",
+            options: {
+              A: "Exposure to external influences",
+              B: "Compatibility of equipment",
+              C: "Installation maintainability",
+              D: "Maximum demand"
+            },
+            answer: "D",
+            explanation: "Diversity is the engineering judgement that not every load runs at full power simultaneously — applied when calculating maximum demand for cable / device sizing. OSG Appendix A gives standard diversity factors for domestic loads."
+          },
+          {
+            number: 58,
+            prompt: "If an installation is reliant on all exposed conductive parts connected to an independent earth electrode, which type of installation is it?",
+            options: { A: "TNC", B: "TNS", C: "TNCS", D: "TT" },
+            answer: "D",
+            explanation: "TT — installation has its own earth electrode independent of the supply source. TN systems all use the source earth (delivered separately in TN-S, combined-then-split in TN-C-S, or combined throughout in TN-C)."
+          },
+          {
+            number: 59,
+            prompt: "Separate neutral and protective conductors throughout an installation indicate what?",
+            options: { A: "TNCS", B: "TNC", C: "TT", D: "TNS" },
+            answer: "D",
+            explanation: "TN-S = separate neutral and PE all the way back to the source. TN-C-S has them combined as PEN to the cut-out then split (PME). TN-C has them combined throughout (rare in dwellings). TT has no source PE."
+          },
+          {
+            number: 60,
+            prompt: "A conductor intended to be energised is called?",
+            options: { A: "Live part", B: "Bonding conductor", C: "Insulation", D: "Main earthing terminal" },
+            answer: "A",
+            explanation: "BS 7671 Part 2 definition — a 'live part' is a conductor or conductive part intended to be energised in normal use, including a neutral conductor (but not a PEN conductor)."
+          },
+          {
+            number: 61,
+            prompt: "The disconnection time allowed for a 40A final circuit connected to a TN system is:",
+            options: { A: "5s", B: "0.4s", C: "1s", D: "0.2s" },
+            answer: "B",
+            explanation: "Table 41.1 — TN system final circuits not exceeding 63 A with one or more socket outlets, or 32 A supplying only fixed connected current-using equipment, at 230 V: 0.4 s. A 40 A circuit falls in this category."
+          },
+          {
+            number: 62,
+            prompt: "What must not be used as a circuit protective conductor?",
+            options: {
+              A: "Metallic cable management system",
+              B: "Exposed structural steel",
+              C: "A conductor in a cable",
+              D: "A single core conductor"
+            },
+            answer: "B",
+            explanation: "Reg 543.2.6 — extraneous-conductive-parts may be used as a CPC under strict conditions (continuity, removability, identification). General exposed structural steel doesn't satisfy these conditions in normal practice; it must be bonded but not relied on as the CPC."
+          },
+          {
+            number: 63,
+            prompt: "Which person type can, with a risk assessment, have socket outlets installed where additional protection is omitted?",
+            options: { A: "BA2", B: "BA3", C: "BA5", D: "BA1" },
+            answer: "C",
+            explanation: "BS 7671 Appendix 5 — BA codes: BA1 ordinary, BA2 children, BA3 disabled, BA4 instructed, BA5 skilled. Reg 411.3.3 lets the 30 mA RCD on socket outlets be omitted on a documented risk assessment for sockets used by BA5 skilled persons only."
+          },
+          {
+            number: 64,
+            prompt: "Semiconductor devices can be used as an isolating device unless?",
+            options: {
+              A: "It has adequate mechanical protection",
+              B: "It forms part of an installation",
+              C: "Under no circumstances can a semiconductor be used for this purpose",
+              D: "It has adequate insulation"
+            },
+            answer: "C",
+            explanation: "Reg 537.2.2 — isolation must achieve a contact gap or equivalent insulation between separated parts. Semiconductor devices (thyristors, IGBTs) cannot provide that physical separation; they're suitable for switching only."
+          },
+          {
+            number: 65,
+            prompt: "Which of the following cannot be used as a wiring system for a safety service?",
+            options: {
+              A: "PVC conduit",
+              B: "Wiring system maintaining the necessary fire and mechanical protection",
+              C: "Fire resistant cables",
+              D: "Mineral insulated cable"
+            },
+            answer: "A",
+            explanation: "Section 560 / Reg 560.8 — safety service wiring must maintain its function during a fire. PVC conduit melts and the cable inside loses support and insulation, so it can't be used. Mineral insulated and fire-resistant cables retain integrity."
+          },
+          {
+            number: 66,
+            prompt: "Who issues and who receives the documentation following an initial verification of rented accommodation?",
+            options: {
+              A: "The installer and the person who ordered the work",
+              B: "The designer and the tenant",
+              C: "Either the designer, installer or inspector and the person who ordered the work",
+              D: "The landlord and the tenant"
+            },
+            answer: "C",
+            explanation: "BS 7671 Chapter 64 — the EIC is signed by designer, constructor and inspector (one person can sign multiple boxes) and issued to the person who ordered the work. The original goes to the duty holder; the contractor keeps a copy."
+          },
+          {
+            number: 67,
+            prompt: "Where a wiring system such as conduit, cable ducting, cable trunking, busbar or busbar trunking passes through a building element that has specific fire resisting properties, what is the minimum internal cross-sectional area of space before internal sealing is required?",
+            options: { A: "45mm²", B: "90mm²", C: "500mm²", D: "710mm²" },
+            answer: "B",
+            explanation: "Reg 527.2.4 — internal sealing of the wiring system is required where the internal cross-sectional area of the system exceeds 90 mm². Below that, the system itself is regarded as adequately self-sealing and only external fire stopping is needed."
+          },
+          {
+            number: 68,
+            prompt: "A building constructed mainly of combustible materials is classed as what?",
+            options: { A: "CB2", B: "CA2", C: "CB1", D: "CA1" },
+            answer: "B",
+            explanation: "BS 7671 Appendix 5 — CA codes for construction material: CA1 = non-combustible; CA2 = combustible. CB codes are for building design (BD codes are evacuation difficulty). A timber-frame house is CA2."
+          }
+        ]
       }
     ],
     scoring: [
-      { minScore: 11, range: "11–12", label: "Strong — fluent in the structure of BS 7671" },
-      { minScore: 9, range: "9–10", label: "Comfortable pass" },
-      { minScore: 7, range: "7–8", label: "Practise lookups in the contents pages" },
-      { minScore: 0, range: "< 7", label: "Re-watch the 18th Edition webinar and walk through the BS 7671 contents" }
+      { minScore: 61, range: "61–68", label: "Strong — homework standard" },
+      { minScore: 48, range: "48–60", label: "Comfortable pass" },
+      { minScore: 34, range: "34–47", label: "Re-read the relevant theory before re-attempting" },
+      { minScore: 0, range: "< 34", label: "Re-watch the topic webinar before re-attempting" }
     ],
     priorities: [
-      "The Part numbers — 1 to 7 — and what each covers. Half the exam questions in this area test whether you can find the regulation, not whether you've memorised its number.",
-      "The major lookup tables — Table 41.3 (Zs), Table 54.8 (bonding), Appendix 4 (voltage drop) — practise navigating to each in under 30 seconds.",
-      "The amendment headlines — AFDDs in higher-risk premises, SPDs by default, the EV-charging open-PEN protection — these come up in viva-style assessor questions."
+      "BS 7671:2018 + A2:2022 + A3:2024 — recognise which amendment introduced what (AFDDs in HRRBs/HMOs, prosumer Section 826, font sizes for labels).",
+      "AFDDs (A2:2022) — required on socket outlet final circuits ≤ 32 A in HRRBs, HMOs, care homes and student accommodation; installed at the origin of the final circuit.",
+      "Type A is the new minimum default RCD for general use; Type AC is no longer permitted for new installations except very specific cases.",
+      "EV on PME (722.411.4.1): use an open-PEN protective device, a separating transformer, or a local earth electrode at the installation."
     ]
   },
   {
     id: "pat-testing",
-    title: "PAT Testing — Topic Mock",
-    subtitle: "Webinar 4 — in-service inspection & testing",
+    title: "PAT Testing (5th Edition COP)",
+    subtitle: "Combined topic drill + Access Training homework practice bank",
     description:
-      "A focused topic mock built around the PAT-testing portion of Webinar 4. Covers the IET Code of Practice for In-service Inspection and Testing of Electrical Equipment (5th edition), equipment classes, the formal visual / combined inspection-and-test, pass values, intervals, and the legal driver behind the work.",
-    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
-    passMark: 9,
+      "A focused exam built around the PAT-testing portion of Webinar 4. Covers the IET Code of Practice for In-service Inspection and Testing of Electrical Equipment (5th edition), equipment classes, the formal visual / combined inspection-and-test, pass values, intervals, and the legal driver behind the work. Now combined with 35 questions from the Access Training PAT homework: equipment classification, test sequence and tolerances, instruments, leakage and load testing, legal framework and recordkeeping.",
+    format: "47 multiple-choice questions. Aim for 33+/47 (70%+) to pass; 42+/47 (90%+) for a strong result.",
+    passMark: 33,
     sections: [
       {
         id: "section-1",
@@ -2271,28 +3095,350 @@ export const EXAMS: Exam[] = [
               "User checks happen with every use and require no instruments — just looking for damaged flex, cracked plug, scorch marks, missing screws, loose grommet, or use in an unsuitable environment (wet, hot, in tension). They are the most frequent and most cost-effective layer of in-service safety."
           }
         ]
+      },
+      {
+        id: "section-1",
+        title: "Section 1 — PAT Testing Practice Bank",
+        questions: [
+          {
+            number: 13,
+            prompt: "10 mA converted to amperes is",
+            options: { A: ".0001 A", B: "0.01 A", C: "0.001 A", D: "0.1 A" },
+            answer: "B",
+            explanation: "10 mA = 10 × 10⁻³ A = 0.01 A. Drop the decimal three places."
+          },
+          {
+            number: 14,
+            prompt: "What is the expected protection conductor resistance of an appliance cable if it has a CSA of 0.75mm squared and is 1.5m long?",
+            options: { A: "339 Ohms", B: "0.39 Ohms", C: "39 Ohms", D: "0.039 Ohms" },
+            answer: "D",
+            explanation: "Tabulated copper resistance for 0.75 mm² flex ≈ 26 mΩ/m at 20 °C. R = 26 × 1.5 ÷ 1000 ≈ 0.039 Ω. The other answers are out by factors of 10–10000."
+          },
+          {
+            number: 15,
+            prompt: "Which would not be carried out on Class II equipment?",
+            options: { A: "Functional tests", B: "Protective conductor continuity test", C: "Insulation resistance test", D: "Polarity test" },
+            answer: "B",
+            explanation: "Class II equipment has no protective conductor (it relies on double or reinforced insulation), so there is nothing to test for PE continuity. IR, polarity and functional tests still apply."
+          },
+          {
+            number: 16,
+            prompt: "Which class of equipment is NOT acceptable in the UK?",
+            options: { A: "Class 0", B: "Class III", C: "Class II", D: "Class I" },
+            answer: "A",
+            explanation: "Class 0 has only basic insulation and no earth — a single insulation failure puts the user in contact with live parts. The UK has prohibited Class 0 since the introduction of the Plugs & Sockets Regulations and the Electrical Equipment (Safety) Regs."
+          },
+          {
+            number: 17,
+            prompt: "What is not considered to be a factor when considering a risk based assessment when determining the initial frequency of inspection and testing?",
+            options: { A: "Frequency of use", B: "The environment", C: "The fixed wiring RCD trip time", D: "Previous records" },
+            answer: "C",
+            explanation: "The trip time of the supply RCD has no bearing on how often a portable appliance needs visual checks or tests. Use, environment and history are the three drivers in COP Table 7.1."
+          },
+          {
+            number: 18,
+            prompt: "Which of these does not describe a category of inspection and testing, referred to in the Code of Practice?",
+            options: {
+              A: "Equipment is inspected and tested and records kept of all results",
+              B: "Before every use, a user should check the equipment and record any faults found",
+              C: "Before every use, a user should check equipment and record all findings",
+              D: "Inspections without tests, when equipments is checked and records kept of all results"
+            },
+            answer: "C",
+            explanation: "User checks are visual-only and only faults are reported — recording every check would defeat the point. The three COP categories are user check (faults reported), formal visual inspection, and combined inspection and test."
+          },
+          {
+            number: 19,
+            prompt: "The dimensions of the conductors in an extension lead affect the resistance of the lead. Which of these correctly describes two conditions when resistance would reduce?",
+            options: {
+              A: "Increase in length and reduction in diameter",
+              B: "Increase in diameter and reduction in length",
+              C: "Increase in length and increase in diameter",
+              D: "Reduction in length and reduction in diameter"
+            },
+            answer: "B",
+            explanation: "R = ρL/A — resistance falls when length goes down and CSA (diameter) goes up. The other combinations either offset or increase R."
+          },
+          {
+            number: 20,
+            prompt: "Why must business equipment be powered down prior to disconnecting from the supply when undertaking formal inspection?",
+            options: {
+              A: "Fibre optic data cables will be safe to disconnect",
+              B: "There is a risk of data loss",
+              C: "Monitors will discharge quicker",
+              D: "To avoid static electricity"
+            },
+            answer: "B",
+            explanation: "Pulling the plug on a running PC, server or POS terminal corrupts open files and may damage the OS. Always shut down through the operating system first; the safety of the test is unaffected either way."
+          },
+          {
+            number: 21,
+            prompt: "A 2m length of flex with a csa of 0.75mm squared which has a rewireable plug top has a maximum fuse rating of",
+            options: { A: "13A", B: "6A", C: "3A", D: "10A" },
+            answer: "B",
+            explanation: "BS 1363 plug fuse selection — 0.75 mm² flex protects up to 6 A. 1.0 mm² is good for 10 A; 1.25/1.5 mm² for 13 A. 3 A is the lower fuse for low-current appliances on 0.5 mm²."
+          },
+          {
+            number: 22,
+            prompt: "What tolerance is given in excess of the resistance of the protective conductor when measuring the earth continuity of an appliance with a supply cable?",
+            options: { A: "0.02 Ohms", B: "0.2 Ohms", C: "0.01 Ohms", D: "0.1 Ohms" },
+            answer: "D",
+            explanation: "The COP allows 0.1 Ω above the calculated cable resistance for end-fitting and connection variability. Anything beyond suggests a poor termination, not just cable impedance."
+          },
+          {
+            number: 23,
+            prompt: "Which legal document requires that electrical equipment supplied under contract is of satisfactory quality?",
+            options: {
+              A: "The health and safety at work act",
+              B: "The electrical Equipment (Safety) Regulations 2016",
+              C: "The supply of goods and services act 1982",
+              D: "The supply of Machinery (Safety) Regulations 2008"
+            },
+            answer: "C",
+            explanation: "Supply of Goods and Services Act 1982 (B2B) and Consumer Rights Act 2015 (B2C) impose the satisfactory quality duty on goods supplied. The Equipment Safety Regs cover product compliance, not the contract terms."
+          },
+          {
+            number: 24,
+            prompt: "Equipment, in which protection against electric shock relies upon basic insulation only, is the definition of construction classification",
+            options: { A: "Class II", B: "Class III", C: "Class I", D: "Class 0" },
+            answer: "D",
+            explanation: "Class 0 = basic insulation only, no earth. Class I = basic insulation + protective earth. Class II = double or reinforced insulation. Class III = SELV supply."
+          },
+          {
+            number: 25,
+            prompt: "A toaster is generally classified as",
+            options: { A: "Mobile", B: "Portable", C: "Transportable", D: "Hand-held" },
+            answer: "B",
+            explanation: "COP equipment categories: portable = moved while connected or about while in use (kettle, toaster, lamp). Mobile = wheeled, moved while in use (vacuum). Hand-held = held during use (drill). Toasters sit and run, so portable."
+          },
+          {
+            number: 26,
+            prompt: "What causes high protective conductor currents in equipment such as variable speed drive which incorporates an EMC filter?",
+            options: {
+              A: "The length of the CPC cable",
+              B: "The choke that is wired in series with the line conductor",
+              C: "The capacitors and discharge resistors within the filter",
+              D: "The choke that is wired in series with the neutral conductor"
+            },
+            answer: "C",
+            explanation: "EMC filters use Y-capacitors from each line to earth to shunt high-frequency noise. These capacitors leak current to earth at mains frequency, which is the source of the elevated PE current that PAT operators see on VSDs and IT equipment."
+          },
+          {
+            number: 27,
+            prompt: "According to the Code of Practice which basic requirement demonstrates that a maintenance regime for electrical appliances exists within an organisation?",
+            options: {
+              A: "A kitemark logo on the company letterhead",
+              B: "The invoices from the inspection and testing contractor",
+              C: "The records of inspections and tests",
+              D: "PAT strikers on all appliances"
+            },
+            answer: "C",
+            explanation: "The records demonstrate the duty holder is meeting EAWR Reg 4(2) — maintaining the equipment in safe condition. Stickers and invoices alone don't show what was inspected, when, or what failed."
+          },
+          {
+            number: 28,
+            prompt: "When performance testing an RCD, the test should be done using",
+            options: { A: "30mA", B: "100mA", C: "300mA", D: "150mA" },
+            answer: "A",
+            explanation: "A portable 30 mA RCD must be tested at its rated tripping current (30 mA) to confirm it operates within the time limit. Higher-current tests (5× IΔn) check the fast-trip path; the 1× IΔn test confirms the basic threshold."
+          },
+          {
+            number: 29,
+            prompt: "What is the frequency of testing for a mobile class 1 item of equipment used in commercial kitchens",
+            options: { A: "12 months", B: "1 month", C: "3 months", D: "There are no specified timescales" },
+            answer: "A",
+            explanation: "COP Table 7.1 — commercial kitchen mobile Class I: combined inspection & test every 12 months, formal visual inspection every 6 months. The kitchen environment (heat, water, grease) drives a tighter regime than office equipment."
+          },
+          {
+            number: 30,
+            prompt: "A severe electric shock occur under fault free conditions if the body is placed between",
+            options: {
+              A: "A live conductor and earth",
+              B: "The earth pin of a power socket and the metallic case of a class 1 item",
+              C: "Two earthed exposed conductive parts",
+              D: "Two conductors at the same potential"
+            },
+            answer: "A",
+            explanation: "Direct contact with a live conductor while standing on or touching earth provides the full mains potential across the body — the classic shock path. The other options either share the same potential (no current) or require a fault for current to flow."
+          },
+          {
+            number: 31,
+            prompt: "The sample test instrument record sheet provided in the Code of Practice requires certain details to be kept about the instruments used. These details include",
+            options: {
+              A: "Instrument type; Model; Serial Number and Date of next calibration",
+              B: "Instrument Manufacturer; Model; Serial Number and Date of next calibration",
+              C: "Instrument Manufacturer; Model; Serial Number and Date of last calibration",
+              D: "Instrument type; Model; Serial Number and Date of last calibration"
+            },
+            answer: "D",
+            explanation: "COP sample form: type, model, serial and date of last calibration — that lets you trace the test back to a known calibration baseline. Date-of-next-calibration is helpful for scheduling but isn't the audit trail."
+          },
+          {
+            number: 32,
+            prompt: "Some aspects of a fixed installation, when noticed, should be recorded or discussed with the owner of the property. Which of these should not lead to a tester's recommendation that the installation itself should be inspected or reviewed?",
+            options: {
+              A: "Red and black cores in the fixed wiring",
+              B: "No adequate means of earthing",
+              C: "Condition of socket outlets",
+              D: "Limited or no RCD protection"
+            },
+            answer: "A",
+            explanation: "Old red/black cable colours are not a defect on their own — installations on the older harmonised colours are perfectly safe if maintained. The other three are genuine safety concerns that warrant a fixed-wiring EICR."
+          },
+          {
+            number: 33,
+            prompt: "Which regulations place a legal requirement on a landlord, who provides electrical equipment as part of a tenancy, to ensure that it is safe when first supplied?",
+            options: {
+              A: "WEEE regulations",
+              B: "BS 7671",
+              C: "The electrical equipment (safety) regulations",
+              D: "The housing act (England and Wales)"
+            },
+            answer: "C",
+            explanation: "Electrical Equipment (Safety) Regulations 2016 require electrical equipment supplied to comply with safety standards. BS 7671 is the wiring rules, WEEE is end-of-life recycling, and the Housing Act covers wider tenant duties."
+          },
+          {
+            number: 34,
+            prompt: "A method of reducing the risk of electric shock under fault conditions is to use SELV equipment, this method",
+            options: {
+              A: "Operates at 110 V a.c.",
+              B: "Uses a centre tapped transformed with the centre connected to earth",
+              C: "Needs to have an earth connection on the load side",
+              D: "Has no connection to earth on the load side"
+            },
+            answer: "D",
+            explanation: "SELV (Separated Extra-Low Voltage) is electrically isolated from earth on the load side and operates at ≤ 50 V a.c. / 120 V d.c. The centre-tapped earth setup at 110 V is the construction-site reduced low-voltage system, not SELV."
+          },
+          {
+            number: 35,
+            prompt: "A person who is not skilled in electrical work, but is classed as competent to carry out inspection and testing of electrical equipment, is known as being competent to which level?",
+            options: { A: "Level 2", B: "Level 1", C: "Level 3", D: "Level 4" },
+            answer: "A",
+            explanation: "COP Appendix VII competency framework: Level 1 = user check; Level 2 = formal visual inspection AND combined inspection & test by a non-electrical person who has had appropriate training; Level 3 = electrically skilled."
+          },
+          {
+            number: 36,
+            prompt: "When tested separately, a 2 core lead set is tested as a",
+            options: { A: "Class I appliance", B: "Class III appliance", C: "Class II appliance", D: "Class 0 appliance" },
+            answer: "C",
+            explanation: "A 2-core lead has no protective earth conductor — it's classified and tested as Class II. The classification follows the construction, not the appliance it ends up plugged into."
+          },
+          {
+            number: 37,
+            prompt: "A load test is particularly useful for",
+            options: { A: "IT equipment", B: "Central heating systems", C: "Domestic lighting", D: "Heating equipment" },
+            answer: "D",
+            explanation: "Load testing measures the current drawn under normal use to confirm the heating element draws roughly the rated current. For IT equipment with switch-mode supplies the current isn't a useful diagnostic; for heaters it tells you the element is intact."
+          },
+          {
+            number: 38,
+            prompt: "The IP code for equipment which provides protection against a solid foreign object of 12.5mm diameter or more and protection against spraying water is represented by which IP code?",
+            options: { A: "IP21", B: "IP23", C: "IP52", D: "IP14" },
+            answer: "B",
+            explanation: "First digit 2 = solid objects ≥ 12.5 mm (finger). Second digit 3 = spraying water (up to 60° from vertical). IP21 is dripping water; IP52 is dust protected with spraying water; IP14 is unusual."
+          },
+          {
+            number: 39,
+            prompt: "What test voltage is recommended when carrying out an insulation resistance test where surge protection devices are incorporated in the equipment?",
+            options: { A: "500 V d.c.", B: "250 V a.c.", C: "500 V a.c.", D: "250 V d.c." },
+            answer: "D",
+            explanation: "SPDs would clamp a 500 V test and either give a misleading low IR or be damaged. Drop the test voltage to 250 V d.c. so the SPD doesn't conduct. IR is always d.c., not a.c."
+          },
+          {
+            number: 40,
+            prompt: "The electricity at work regulations is only one item of legislation which refers to electrical equipment used at work. The voltages covered by this legislation",
+            options: {
+              A: "Are anything below 600V a.c. or 900V d.c. between conductors and earth",
+              B: "Range up to 1000V a.c. or 2500V d.c. between conductors",
+              C: "Range from extra low voltage battery powered items to 400kV transmission equipment",
+              D: "Are anything above the domestic voltage of 230V"
+            },
+            answer: "C",
+            explanation: "EAWR has no voltage limits — it applies from a torch battery up to the National Grid 400 kV equipment. Anyone arguing 'it's only ELV so EAWR doesn't apply' is wrong."
+          },
+          {
+            number: 41,
+            prompt: "When carrying out a low or high current test, in both cases the protective conductor test should be made between accessible conductive paths and",
+            options: {
+              A: "The earth pin of the plug",
+              B: "The neutral conductor",
+              C: "The main earth terminal",
+              D: "Any supplementary bond"
+            },
+            answer: "A",
+            explanation: "PE continuity test on a portable appliance is from the earth pin of the plug to each accessible exposed conductive part. That mimics the full path the fault current would actually take."
+          },
+          {
+            number: 42,
+            prompt: "The minimum cross sectional area of an appliance flex for a portable socket outlet protected by a 13 A plugtop fuse is",
+            options: { A: "1.25mm squared", B: "4mm squared", C: "0.75mm squared", D: "2.5mm squared" },
+            answer: "A",
+            explanation: "BS 1363 fuse / flex pairing — a 13 A plug fuse needs at least 1.25 mm² flex. 0.75 mm² caps at 6 A; 1.0 mm² caps at 10 A. 4 mm² is fixed wiring CSA, not flex."
+          },
+          {
+            number: 43,
+            prompt: "If it is required to carry out a touch current test the recorded value should not exceed",
+            options: {
+              A: "5mA for DC powered equipment",
+              B: "3.5 5mA for DC powered equipment",
+              C: "3.5 5mA for AC powered equipment",
+              D: "5mA for AC powered equipment"
+            },
+            answer: "C",
+            explanation: "IEC 60990 / COP — touch current limits are 3.5 mA RMS for AC-powered equipment, 5 mA d.c. ripple-free for DC. Exceeding the AC limit indicates faulty insulation or excessive EMC filter leakage."
+          },
+          {
+            number: 44,
+            prompt: "The health and safety executive provide guidance documents on maintaining electrical equipment. What publication provides guidance on electrical safety on construction sites?",
+            options: { A: "HSG141", B: "GS38", C: "INDG236", D: "HSG107" },
+            answer: "A",
+            explanation: "HSG141 — Electrical safety on construction sites. GS38 is test probes/leads, INDG236 is maintaining portable equipment summary leaflet, HSG107 is maintaining portable & transportable equipment (the predecessor of the current PAT COP)."
+          },
+          {
+            number: 45,
+            prompt: "Which Code of Practice model form could be used to record a formal visual and combined inspection and test record?",
+            options: { A: "Form 4.3", B: "Form 4.1", C: "Form 4.2", D: "Form 4.4" },
+            answer: "A",
+            explanation: "COP 5th Edition model forms: 4.1 inventory, 4.2 formal visual only, 4.3 combined inspection and test (visual + test results), 4.4 repair register."
+          },
+          {
+            number: 46,
+            prompt: "A portable appliance is fitted with a cable 4.5m long and has a protective condor of 1.0mm2. Calculate the resistance of the protective conductor.",
+            options: { A: "70.2 milliohms", B: "78 milliohms", C: "97.5 milliohms", D: "87.75 milliohms" },
+            answer: "D",
+            explanation: "Tabulated 1.0 mm² flex copper resistance ≈ 19.5 mΩ/m at 20 °C. R = 19.5 × 4.5 = 87.75 mΩ. The COP uses these tabulated values for the 'expected' figure to compare your test against."
+          },
+          {
+            number: 47,
+            prompt: "Extension leads that are longer than the recommended lengths should be protected by a ",
+            options: { A: "BS 3036 fuse", B: "Double pole switch", C: "300mA RCD", D: "30mA RCD" },
+            answer: "D",
+            explanation: "Long extension leads have a higher chance of damage and a higher Zs that may not allow the upstream device to operate fast enough — a 30 mA RCD provides the additional protection. 300 mA is for fire protection, not personal safety."
+          }
+        ]
       }
     ],
     scoring: [
-      { minScore: 11, range: "11–12", label: "Strong — PAT-ready" },
-      { minScore: 9, range: "9–10", label: "Comfortable pass" },
-      { minScore: 7, range: "7–8", label: "Re-read the IET COP equipment-class chapter" },
-      { minScore: 0, range: "< 7", label: "Re-watch the PAT testing webinar" }
+      { minScore: 42, range: "42–47", label: "Strong — homework standard" },
+      { minScore: 33, range: "33–41", label: "Comfortable pass" },
+      { minScore: 24, range: "24–32", label: "Re-read the relevant theory before re-attempting" },
+      { minScore: 0, range: "< 24", label: "Re-watch the topic webinar before re-attempting" }
     ],
     priorities: [
-      "Equipment classes — Class I (earthed), Class II (double-insulated), Class III (SELV) — and which test applies to each.",
-      "The three-tier regime — user check, formal visual, combined inspection and test — and the order they sit in.",
-      "Pass criteria cold — earth continuity ≤ 0.1 Ω + R, IR ≥ 1.0 MΩ at 500 V DC for most appliances, ≥ 0.3 MΩ for heating elements."
+      "Class definitions: 0 = basic insulation only (banned UK); I = basic + earth; II = double/reinforced; III = SELV supply.",
+      "PE continuity tolerance = expected R from CSA & length + 0.1 Ω; touch current limits 3.5 mA AC, 5 mA DC.",
+      "Plug fuse to flex CSA: 0.5 mm² → 3 A, 0.75 mm² → 6 A, 1.0 mm² → 10 A, 1.25/1.5 mm² → 13 A.",
+      "Frequency drivers: equipment class, type (mobile/portable/stationary/fixed), use, environment, history — not the state of the fixed wiring."
     ]
   },
   {
     id: "initial-verification",
-    title: "Initial Verification — Topic Mock",
-    subtitle: "Webinar 5 — testing a new installation before energising",
+    title: "Initial Verification",
+    subtitle: "Combined topic drill + Access Training homework practice bank",
     description:
-      "A focused topic mock built around Webinar 5 — Initial Verification. Covers Part 6 of BS 7671, the inspection schedule, the dead-test sequence (continuity, ring final, IR, polarity), the live-test sequence (Ze, PFC, Zs, RCD), acceptance criteria, and the documentation issued for new work.",
-    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
-    passMark: 9,
+      "A focused exam built around Webinar 5 — Initial Verification. Covers Part 6 of BS 7671, the inspection schedule, the dead-test sequence (continuity, ring final, IR, polarity), the live-test sequence (Ze, PFC, Zs, RCD), acceptance criteria, and the documentation issued for new work. Now combined with 43 questions from the Access Training Initial Verification homework: dead and live test sequence, R1+R2 / Zs / IR / RCD / PFC calculations, EIC documentation and signatories, instrument standards, and IP/class/segregation context.",
+    format: "55 multiple-choice questions. Aim for 39+/55 (70%+) to pass; 50+/55 (90%+) for a strong result.",
+    passMark: 39,
     sections: [
       {
         id: "section-1",
@@ -2479,28 +3625,441 @@ export const EXAMS: Exam[] = [
               "The Schedule of Test Results is the factual numerical record of the verification. Without complete schedules the EIC declarations have nothing behind them; if a fault later develops, the numerical record is the evidence the duty holder uses to demonstrate that due diligence was carried out."
           }
         ]
+      },
+      {
+        id: "section-1",
+        title: "Section 1 — Initial Verification Practice Bank",
+        questions: [
+          {
+            number: 13,
+            prompt: "Fault protection is given by?",
+            options: { A: "Placing out of reach", B: "Barriers or enclosures", C: "Presence of an earthing conductor", D: "Obstacles" },
+            answer: "C",
+            explanation: "Fault protection (against indirect contact) is achieved by Automatic Disconnection of Supply — which depends on the earthing conductor + protective device combination. Barriers/enclosures, out-of-reach and obstacles all give basic protection, not fault protection."
+          },
+          {
+            number: 14,
+            prompt: "Which component will not require functional testing during the electrical testing process?",
+            options: { A: "RCD", B: "Isolator", C: "Light switch", D: "Gas boiler connected to a fused spur" },
+            answer: "D",
+            explanation: "The boiler itself is gas equipment, outside the scope of the electrical installation tested under BS 7671 — only the fused spur supplying it is electrically tested. RCDs, isolators and switches are all functionally checked."
+          },
+          {
+            number: 15,
+            prompt: "What other information is usually stated on a circuit breaker in addition to its rated current (In)?",
+            options: { A: "Rated short circuit capacity (Icn)", B: "Service short circuit capacity (Ics)", C: "Range of trip values", D: "Maximum Zs value" },
+            answer: "A",
+            explanation: "Icn is the printed breaking capacity (e.g. 6000 / 10000 in a square symbol). Ics is also marked but as a smaller secondary figure. Trip ranges and max Zs are derived from manufacturer data, not on the breaker face."
+          },
+          {
+            number: 16,
+            prompt: "A radial circuit is 45m long and wired in 6/2.5mm squared conductors. What is the expected value of R1 + R2 for this circuit at 20?C?",
+            options: { A: "0.62 Ohms", B: "0.47 Ohms", C: "0.72 Ohms", D: "0.57 Ohms" },
+            answer: "B",
+            explanation: "Tabulated R/m at 20 °C: 6 mm² ≈ 3.08 mΩ/m, 2.5 mm² ≈ 7.41 mΩ/m. R1+R2 per m = 10.49 mΩ. For 45 m: 45 × 10.49 ≈ 472 mΩ = 0.47 Ω."
+          },
+          {
+            number: 17,
+            prompt: "Calculate the earth fault loop impedance ZS where Ze = 0.2, R1 = 0.5, R2=0.6",
+            options: { A: "0.22 Ohms", B: "0.18 Ohms", C: "0.06 Ohms", D: "1.3 Ohms" },
+            answer: "D",
+            explanation: "Zs = Ze + (R1 + R2) = 0.2 + (0.5 + 0.6) = 1.3 Ω. The other answers come from subtracting or paralleling instead of adding."
+          },
+          {
+            number: 18,
+            prompt: "After securing an isolation on a piece of equipment and placing warning notices, what will the installer do next?",
+            options: {
+              A: "Use only electrician insulated tools rated at 1000 volts",
+              B: "Inform the client that the equipment is dead and then start work normally.",
+              C: "Try turning the equipment on to make sure it does not start.",
+              D: "Prove dead at the point of work using an approved voltage detector"
+            },
+            answer: "D",
+            explanation: "Safe isolation: prove the voltage indicator on a known live source, prove dead at the point of work, then re-prove the indicator on a known source. Switching back on as a check defeats the purpose of locking off."
+          },
+          {
+            number: 19,
+            prompt: "When two conductors of different resistances are connected in parallel, the resulting resistance will be",
+            options: {
+              A: "Lower than the lowest conductor resistance",
+              B: "Higher than the highest conductor resistance",
+              C: "The same value as the highest conductor resistance",
+              D: "Higher than the lowest conductor resistance"
+            },
+            answer: "A",
+            explanation: "Parallel resistors: 1/R = 1/R1 + 1/R2. The combined value is always lower than the smallest individual resistance — adding any extra parallel path can only reduce total resistance."
+          },
+          {
+            number: 20,
+            prompt: "Which of these areas is not classified as a special installation or location in accordance with BS7671?",
+            options: { A: "Kitchen", B: "Bathroom", C: "An exhibition stand", D: "Floor and ceiling heating system" },
+            answer: "A",
+            explanation: "Bathrooms (701), exhibition stands (711) and floor/ceiling heating (753) are all in Part 7. A standard kitchen has no Part 7 section — it's a normal location with normal rules."
+          },
+          {
+            number: 21,
+            prompt: "The most appropriate human sense for detecting burrs inside a conduit is?",
+            options: { A: "Touch", B: "Sight", C: "Hearing", D: "Smell" },
+            answer: "A",
+            explanation: "You can't see inside a conduit run; the only reliable check before drawing cable is to feel for sharp edges and burrs with a finger or rag. A burr will tear the cable insulation under tension."
+          },
+          {
+            number: 22,
+            prompt: "A metallic test finger is used to test an enclosure to?",
+            options: { A: "IPXXA", B: "IP4X", C: "IPX4", D: "IP2X" },
+            answer: "D",
+            explanation: "IP2X is checked with the standard 12.5 mm jointed test finger (the 'rigid sphere + finger' test in IEC 60529). IP4X uses a 1 mm wire; IPX4 is splashing water; IPXXA is back-of-hand access."
+          },
+          {
+            number: 23,
+            prompt: "It is required to record the value of prospective fault current of a three phase supply by measurement. An acceptable and cautious way to do this is to measure the single phase value and",
+            options: { A: "Multiply by 1.73", B: "Divide by 1.73", C: "Multiply by two", D: "Divide by two" },
+            answer: "C",
+            explanation: "GN3 — measure L–N PFC, then multiply by 2 to give a cautious estimate of the line-to-line three-phase value. This avoids needing an L–L PFC measurement that requires a different probe set-up."
+          },
+          {
+            number: 24,
+            prompt: "Which is not part of the procedure for testing insulation resistance?",
+            options: {
+              A: "Testing between live conductors",
+              B: "Testing between live conductors and protective conductor.",
+              C: "The protective conductor is disconnected from the earthing arrangement",
+              D: "The protective conductor remains connected to the earthing arrangement"
+            },
+            answer: "C",
+            explanation: "IR test is L–N (live-to-live) and L+N–E (lives joined to earth). The protective conductor stays connected to the MET so the test mimics in-service insulation. Disconnecting the PE would invalidate the L–E reading."
+          },
+          {
+            number: 25,
+            prompt: "Why is it necessary to verify the continuity of circuit protective conductors?",
+            options: {
+              A: "To ensure the continuity and correct wiring of every line, neutral and protective conductor.",
+              B: "To determine the prospective fault current under both short circuit and earth fault conditions",
+              C: "To ensure the resistance between line conductors and earth is greater than 1M ohms",
+              D: "To ensure protective conductors are electrically sound and correctly connected"
+            },
+            answer: "D",
+            explanation: "CPC continuity proves the protective conductor is intact and properly terminated end-to-end so fault current has a path back to the source — without it, ADS doesn't work."
+          },
+          {
+            number: 26,
+            prompt: "The test button on an RCD is pressed regularly to check it",
+            options: {
+              A: "Operates mechanically",
+              B: "Will disconnect within its residual operating current",
+              C: "Disconnects within 0.4 seconds",
+              D: "Disconnects within 40ms"
+            },
+            answer: "A",
+            explanation: "The RCD test button only confirms the mechanical trip mechanism works — it injects an internal imbalance via a built-in resistor. It does NOT verify trip current threshold or disconnection time; that needs a calibrated RCD tester."
+          },
+          {
+            number: 27,
+            prompt: "When carrying out electrical work, what is the main safety implication of failing to carry out isolation?",
+            options: {
+              A: "The time it takes to complete the job will be affected",
+              B: "Other workers will not know what is happening",
+              C: "The installer and others may be at risk of coming into contact with live parts.",
+              D: "Production will be stopped?"
+            },
+            answer: "C",
+            explanation: "Failing to isolate leaves live conductors accessible — that's the textbook serious-or-fatal injury scenario the EAWR is built around. Production interruption and worker awareness are operational concerns, not the safety case."
+          },
+          {
+            number: 28,
+            prompt: "When carrying out testing in accordance with IET Guidance Note 3 what action should be taken if unsatisfactory results are obtained?",
+            options: {
+              A: "Carry on with the testing and see if any other tests fail.",
+              B: "Any defects must be made good and inspected and tested again",
+              C: "Record the unsatisfactory results on the Schedule of Test Results and highlight to the client on hand over.",
+              D: "Make a note of the unsatisfactory results when issuing the Electrical Installation Certificate."
+            },
+            answer: "B",
+            explanation: "GN3 — defects must be remedied, then the affected test repeated. You can't certify an installation while it has known unsatisfactory test results, and noting them on the EIC is no substitute for fixing them."
+          },
+          {
+            number: 29,
+            prompt: "Circuits operating at different voltage bands within the same enclosure are segregated to",
+            options: {
+              A: "Increase the resistance of the highest voltage present",
+              B: "Avoid mutual detrimental influence",
+              C: "Ensure that Zs of each circuit will comply with BS7671",
+              D: "Reduce the resistance of the lowest voltage present"
+            },
+            answer: "B",
+            explanation: "BS 7671 528 — segregation of Band I (ELV/data) from Band II (LV) prevents cross-connection, induced voltages on signal cables, and the spread of insulation faults from one band to the other. The phrase 'mutual detrimental influence' is from the regulation itself."
+          },
+          {
+            number: 30,
+            prompt: "The purpose of an electrical installation certificate is to ensure that the installation conforms to",
+            options: { A: "GS38", B: "The Health and Safety at Work Act", C: "Guidance Note 3", D: "BS7671" },
+            answer: "D",
+            explanation: "An EIC certifies conformity with BS 7671 (with any departures listed). GS38 covers test instruments/leads, GN3 is testing guidance, HSWA is a general statute — none are what the EIC certifies against."
+          },
+          {
+            number: 31,
+            prompt: "Three circuits are tested separately for insulation resistance and the results are 100M Ohms, 50M Ohms, 40M Ohms. What will the overall insulation resistance be if they are tested together?",
+            options: { A: "21.14M Ohms", B: "11.34M Ohms", C: "10.06M Ohms", D: "18.18M Ohms" },
+            answer: "D",
+            explanation: "Insulation resistances combine in parallel: 1/R = 1/100 + 1/50 + 1/40 = 0.055; R = 1/0.055 = 18.18 MΩ. Combined IR is always lower than the lowest individual."
+          },
+          {
+            number: 32,
+            prompt: "During which test will two temporary test spikes be used?",
+            options: { A: "Earth fault loop impedance test", B: "Earth electrode resistance test", C: "Insulation resistance to earth", D: "Insulation resistance test of floors" },
+            answer: "B",
+            explanation: "Earth electrode resistance test (fall-of-potential / 3-spike method) uses two temporary auxiliary spikes — current spike and potential spike — together with the electrode under test."
+          },
+          {
+            number: 33,
+            prompt: "Which documents must accompany an Electrical Installation Certificate?",
+            options: {
+              A: "Schedule of Test Results and Electrical Installation Minor Works Certificate",
+              B: "Schedule of Test Results and Schedule of Circuit Details",
+              C: "Schedule of Inspections and Electrical Installation Minor Works Certificate",
+              D: "Electrical Installation Condition Report and Schedule of Inspections"
+            },
+            answer: "B",
+            explanation: "Every EIC is accompanied by a Schedule of Test Results and a Schedule of Inspections / Schedule of Circuit Details. A Minor Works Certificate is an alternative to the EIC, not an attachment; an EICR is for periodic inspection."
+          },
+          {
+            number: 34,
+            prompt: "What signatories are required to complete an Electrical Installation Certificate of a new build?",
+            options: {
+              A: "Contractor, designer, NICEIC representative",
+              B: "Designer, constructor, inspector",
+              C: "Designer, client, contractor",
+              D: "Installer, client, contractor"
+            },
+            answer: "B",
+            explanation: "EIC signatories are designer (responsible for design), constructor (responsible for the installation), and inspector (responsible for the inspection and testing). The same person may sign more than one role on smaller jobs."
+          },
+          {
+            number: 35,
+            prompt: "A 3 phase distribution board runs a number of 3 phase motors. A replacement distribution board is fitted and the phase sequence has been wired differently to the original distribution board. What will happen if the installer tries to run one of the 3 phase motors?",
+            options: {
+              A: "The motor will not run at all",
+              B: "The motor will run in the opposite direction",
+              C: "The protective devices feeding the motor will trip.",
+              D: "The motor will run normally"
+            },
+            answer: "B",
+            explanation: "Reversing the phase sequence to a 3-phase induction motor reverses its direction of rotation. The motor itself is fine — but mechanical equipment driven by it may be damaged when it spins backwards (pumps, conveyors, fans)."
+          },
+          {
+            number: 36,
+            prompt: "Which of the following confirms so far as is reasonably practicable, that the requirement of the Regulations have been met?",
+            options: {
+              A: "Functional Testing",
+              B: "Electrical installation Condition Report",
+              C: "Routine checks including user checks",
+              D: "Initial Verification"
+            },
+            answer: "D",
+            explanation: "BS 7671 Part 6 — initial verification (inspection + testing + certification) is the formal confirmation that a new or altered installation meets the Regulations. EICR confirms ongoing safety, not initial compliance."
+          },
+          {
+            number: 37,
+            prompt: "When inspecting equipment installed in a bathroom, the minimum IP code allowed in zones 1 and 2 is",
+            options: { A: "IP7X", B: "IP4X", C: "IPX4", D: "IPX7" },
+            answer: "C",
+            explanation: "BS 7671 701: Zones 1 and 2 require minimum IPX4 (protection against splashing water from any direction). Where water jets are used, IPX5. Zone 0 (inside the bath/shower) is IPX7."
+          },
+          {
+            number: 38,
+            prompt: "A ring final circuit is wired in 2.5/1.5mm squared twin and CPC cable. From step 1 of the est, the end-to-end r1 is measured at 0.05 Ohms. What value is the end-to-end r2 expected to be?",
+            options: { A: "0.0835 Ohms", B: "0.952 Ohms", C: "0.125 Ohms", D: "0.399 Ohms" },
+            answer: "A",
+            explanation: "r2/r1 = R(1.5 mm²) / R(2.5 mm²) = 12.10 / 7.41 ≈ 1.67. So r2 = 0.05 × 1.67 ≈ 0.0835 Ω. This ratio is the basis of the ring final 2.5/1.5 expected-r2 calculation."
+          },
+          {
+            number: 39,
+            prompt: "Which of the following cannot be used for determining or checking prospective fault current?",
+            options: { A: "Enquiry", B: "Measurement", C: "Substitution", D: "Calculation" },
+            answer: "C",
+            explanation: "Three valid methods for determining PFC: enquiry from the DNO, calculation from supply data, and direct measurement. 'Substitution' isn't a recognised PFC method."
+          },
+          {
+            number: 40,
+            prompt: "An RCD installed for additional protection is to be tested for functionality.  What test current is applied and what disconnection time is required in order to meet the requirements of BS 7671?",
+            options: {
+              A: "30mA and trip within 300ms",
+              B: "15mA and no trip",
+              C: "30mA and trip within 40mS",
+              D: "150mA and trip within 40mS"
+            },
+            answer: "D",
+            explanation: "BS 7671 Reg 415.1.1: a 30 mA RCD used for additional protection must trip within 40 ms when tested at 5 × IΔn (= 150 mA). This proves it will respond fast enough to a serious fault, beyond the 300 ms general test at 1× IΔn."
+          },
+          {
+            number: 41,
+            prompt: "On which document is maximum demand recorded?",
+            options: {
+              A: "Minor Electrical Installation Works Certificate",
+              B: "Schedule of inspections",
+              C: "Electrical Installation Certificate",
+              D: "Schedule of test results"
+            },
+            answer: "C",
+            explanation: "Maximum demand (with diversity applied) is recorded on the EIC main page under supply characteristics & earthing arrangements — it's a design figure, not a test result."
+          },
+          {
+            number: 42,
+            prompt: "What is the source to check values of Zs?",
+            options: { A: "BS7671", B: "BS88", C: "GS38", D: "BS1361" },
+            answer: "A",
+            explanation: "BS 7671 Tables 41.2, 41.3 and 41.4 list maximum Zs by device type and rating. BS 88 is fuse construction, GS38 is test leads, BS 1361 is cartridge fuses."
+          },
+          {
+            number: 43,
+            prompt: "Basic protection is given by",
+            options: { A: "Double insulation?", B: "Reinforced insulation", C: "SELV", D: "Insulation of live parts" },
+            answer: "D",
+            explanation: "Basic protection means preventing direct contact with live parts — achieved primarily by insulation of live parts and barriers/enclosures. Double/reinforced insulation is fault protection (Class II), SELV is its own protective measure."
+          },
+          {
+            number: 44,
+            prompt: "When checking an instrument for use, which british standard document should be consulted for conformity?",
+            options: { A: "BS EN 61010", B: "BS EN 61008", C: "BS EN 61009", D: "BS EN 60898" },
+            answer: "A",
+            explanation: "BS EN 61010 is the safety standard for measuring instruments — every test instrument used to BS 7671 should comply. 61008 is RCDs, 61009 is RCBOs, 60898 is MCBs."
+          },
+          {
+            number: 45,
+            prompt: "A rotating disc type and an indicator lamp type are the main types of which instrument?",
+            options: { A: "Phase sequence tester", B: "RCD tester", C: "Clamp ammeter", D: "Voltage indicator" },
+            answer: "A",
+            explanation: "Phase rotation indicators are either a small motor disc that spins one way for L1-L2-L3 or a lamp set that lights in sequence. Critical when running 3-phase motors after any rewire."
+          },
+          {
+            number: 46,
+            prompt: "Which Provision of the Electricity at Work Regulations relates to safely inspecting electrical systems?",
+            options: {
+              A: "Adverse or hazardous environments",
+              B: "Strength and capability of electrical equipment",
+              C: "Persons to be competent to prevent injury",
+              D: "Connections"
+            },
+            answer: "C",
+            explanation: "EAWR Reg 16: 'No person shall be engaged in any work activity ... unless he possesses such knowledge or experience, or is under such degree of supervision ... to prevent danger and where appropriate injury'. The competence test."
+          },
+          {
+            number: 47,
+            prompt: "An installer carries out an isolation on a lighting circuit. What should the installer do to keep other people safe?",
+            options: {
+              A: "Secure the isolation with a padlock",
+              B: "Prove dead at the point of work",
+              C: "Apply a warning notice",
+              D: "Prevent access to the area."
+            },
+            answer: "C",
+            explanation: "A clear warning notice at the isolated device tells anyone else on site that work is in progress and the supply must not be re-energised. Padlocking is also good practice but the notice is what informs other workers — the question asks specifically about communicating to others."
+          },
+          {
+            number: 48,
+            prompt: "What is the test voltage used during an insulation resistance test of a SELV circuit?",
+            options: { A: "500V a.c", B: "500V d.c", C: "250V d.c", D: "250V a.c" },
+            answer: "C",
+            explanation: "BS 7671 Table 64: SELV / PELV / electrical separation are tested at 250 V d.c. (and must be ≥ 0.5 MΩ). LV is 500 V d.c. with a 1 MΩ minimum. IR is always d.c., never a.c."
+          },
+          {
+            number: 49,
+            prompt: "Who should retain the original copy of an Electrical Installation Certificate?",
+            options: {
+              A: "Local building control",
+              B: "The inspectors registration body",
+              C: "The contractor",
+              D: "The person ordering the work"
+            },
+            answer: "D",
+            explanation: "The original EIC goes to the person ordering the work (the client / duty holder). The contractor keeps a copy. This is so the duty holder has the record they need to comply with EAWR Reg 4(2) and the Building Regs."
+          },
+          {
+            number: 50,
+            prompt: "Which tests may be performed on an incoming 3 Phase 4 wire live supply?",
+            options: {
+              A: "Prospective Fault Current, External Loop Impedance, Phase Rotation",
+              B: "Prospective short circuit current, continuity of mains, polarity.",
+              C: "Insulation Resistance, Earth Fault Loop Impedance, Phase Rotation",
+              D: "Prospective Fault Current, Earth Fault Loop Impedance, Live Polarity"
+            },
+            answer: "A",
+            explanation: "On an incoming live supply you can measure PFC, Ze (external loop impedance), and phase rotation. IR is a dead test; earth fault loop impedance through the installation is a final-circuit test, not the incoming supply test."
+          },
+          {
+            number: 51,
+            prompt: "What is the minimum acceptable value of insulation resistance for the SELV circuit?",
+            options: { A: "1M Ohms", B: "2M Ohms", C: "0.5M Ohms", D: "5M Ohms" },
+            answer: "C",
+            explanation: "Table 64 — SELV/PELV/electrical separation: minimum 0.5 MΩ at 250 V d.c. test. LV (≤ 500 V) is 1 MΩ at 500 V d.c."
+          },
+          {
+            number: 52,
+            prompt: "Which of these is not a precaution to take before carrying out an insulation resistance test?",
+            options: {
+              A: "Remove dimmer switches",
+              B: "Disconnect neons",
+              C: "Disconnect the earthing lead to the main earth terminal",
+              D: "Remove all loads"
+            },
+            answer: "C",
+            explanation: "The PE / earthing conductor stays connected throughout — the IR test is between lives and earth (with PE intact) to mimic the in-service condition. You disconnect electronics that might be damaged or distort the result, not the safety earth."
+          },
+          {
+            number: 53,
+            prompt: "What is the best action to take if an insulation resistance test fails on an individual radial circuit and a PVC/PVC twin and cpc flat cable has been replaced to remedy the fault?",
+            options: {
+              A: "Move on to the next test as the new cable will cure the fault.",
+              B: "Re-inspect and Re-test ",
+              C: "Go back to the beginning and repeat all tests for the installation",
+              D: "Re-test insulation resistance test for that circuit and continue to the next test."
+            },
+            answer: "B",
+            explanation: "Replacing the cable is a physical alteration — re-inspect (check the new install) and re-test (IR plus continuity since the CPC has been disturbed). Just re-running IR alone misses any error introduced when you fitted the new cable."
+          },
+          {
+            number: 54,
+            prompt: "Which system has all exposed conductive part of an installation connected to an earth electrode independent of the source of earth?",
+            options: { A: "TN-C", B: "TN-C-S", C: "TN-S", D: "TT" },
+            answer: "D",
+            explanation: "TT — all exposed parts are bonded to a local earth electrode independent of the supply source. TN systems all use the source earth. TT is common where there is no DNO earth (overhead supplies, farms)."
+          },
+          {
+            number: 55,
+            prompt: "A Primary reason for carrying out safe isolation is to:",
+            options: {
+              A: "Allow uninsulated tools to be used",
+              B: "Avoid a serious or fatal injury occurring",
+              C: "Avoid damage to the equipment",
+              D: "Keep the cables cool whilst testing"
+            },
+            answer: "B",
+            explanation: "Safe isolation prevents the operator (and anyone else nearby) from coming into contact with live parts during work — the primary purpose is preventing electric shock injury or death. Equipment protection is secondary."
+          }
+        ]
       }
     ],
     scoring: [
-      { minScore: 11, range: "11–12", label: "Strong — initial-verification ready" },
-      { minScore: 9, range: "9–10", label: "Comfortable pass" },
-      { minScore: 7, range: "7–8", label: "Re-read GN3 chapters on dead and live test sequence" },
-      { minScore: 0, range: "< 7", label: "Re-watch the initial verification webinar" }
+      { minScore: 50, range: "50–55", label: "Strong — homework standard" },
+      { minScore: 39, range: "39–49", label: "Comfortable pass" },
+      { minScore: 28, range: "28–38", label: "Re-read the relevant theory before re-attempting" },
+      { minScore: 0, range: "< 28", label: "Re-watch the topic webinar before re-attempting" }
     ],
     priorities: [
-      "The dead-test sequence — continuity, ring final, IR, polarity — in the GN3 order, knowing why each one comes before the next.",
-      "Acceptance criteria — IR ≥ 1.0 MΩ at 500 V DC, RCD trip times (0.5×, 1×, 5× IΔn).",
-      "Zs by calculation — Zs = Ze + (R1+R2) — and when to use the no-trip loop mode for direct measurement on RCD-protected circuits."
+      "Test sequence: dead first (continuity → IR → polarity → Ze) then live (polarity → Ze → Zs → PFC → phase rotation → RCD → functional). Defects must be made good and tests repeated.",
+      "Zs = Ze + (R1+R2). Max Zs values are in BS 7671 Table 41.2/41.3/41.4 — measured Zs typically allowed at 80% of tabulated to account for temperature.",
+      "RCD additional protection: trip within 40 ms at 5×IΔn (= 150 mA for a 30 mA RCD); the test button only proves the mechanism, not the threshold.",
+      "EIC documentation: EIC + Schedule of Inspections + Schedule of Test Results. Three signatories: designer, constructor, inspector."
     ]
   },
   {
     id: "periodic-inspection",
-    title: "Periodic Inspection & Testing — Topic Mock",
-    subtitle: "Webinar 6 — testing an existing installation",
+    title: "Periodic Inspection & Testing",
+    subtitle: "Combined topic drill + Access Training homework practice bank",
     description:
-      "A focused topic mock built around Webinar 6 — Periodic Inspection and Testing. Covers the purpose of PIT, recommended intervals, sampling, limitations, the dead/live test approach for an in-service installation, and the legal drivers behind periodic verification.",
-    format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
-    passMark: 9,
+      "A focused exam built around Webinar 6 — Periodic Inspection and Testing. Covers the purpose of PIT, recommended intervals, sampling, limitations, the dead/live test approach for an in-service installation, and the legal drivers behind periodic verification. Now combined with 23 questions from the Access Training Periodic Inspection homework: EICR coding, the periodic inspection process, extent & limitations, and diagnostic interpretation of common test results.",
+    format: "35 multiple-choice questions. Aim for 25+/35 (70%+) to pass; 32+/35 (90%+) for a strong result.",
+    passMark: 25,
     sections: [
       {
         id: "section-1",
@@ -2687,26 +4246,309 @@ export const EXAMS: Exam[] = [
               "The EICR is the report on existing work; the EIC and MEIWC are certificates issued for new work and minor additions/alterations respectively. The EICR is supported by the Schedule of Inspections (what was looked at) and the Schedule of Test Results (what was measured)."
           }
         ]
+      },
+      {
+        id: "section-1",
+        title: "Section 1 — Periodic Inspection Practice Bank",
+        questions: [
+          {
+            number: 13,
+            prompt: "A ring final circuit is tested and these results are found at a socket outlet: Step 2 of test Line/Neutral at Socket - 0.3 Ohms. Step 3 of Test Line/C.P.C at Socket - No Reading. A possible reason for this is",
+            options: {
+              A: "Line and neutral reversal at the socket",
+              B: "Line and CPC reversal at the socket",
+              C: "Insulation resistance is too high",
+              D: "Neutral and CPC reversal at the socket"
+            },
+            answer: "D",
+            explanation: "If N and CPC are reversed at the socket, the L/N test still reads continuity (it goes via what is now the CPC ring) so the value looks normal, but L/CPC reads open because it's now testing through the disconnected neutral end. L/CPC reversal would show the opposite — L/CPC ok, L/N open."
+          },
+          {
+            number: 14,
+            prompt: "Which of these is not a requirement of periodic inspection and testing?",
+            options: {
+              A: "To confirm by inspection during construction, and on completion that the installation complies with the current version of BS7671",
+              B: "Confirming that the disconnection times are met",
+              C: "A detailed visual examination of the installation",
+              D: "Carrying out appropriate tests"
+            },
+            answer: "A",
+            explanation: "Inspection during construction and on completion is initial verification (Part 6, Chapter 64), not periodic inspection. Periodic I&T is carried out on existing in-service installations to assess current safety, not to verify the original install."
+          },
+          {
+            number: 15,
+            prompt: "An insulation resistance test on a 230V circuit gives a result of 0.8 Ohms",
+            options: {
+              A: "Investigate where the fault is",
+              B: "Increase the interval to the next periodic inspection",
+              C: "Record it as a C2",
+              D: "Record it as a C3"
+            },
+            answer: "A",
+            explanation: "0.8 Ω IR is effectively a dead short between conductors — way below the 1 MΩ minimum. The first action is to find and rectify the fault, not to record and walk away. Don't even bother coding until you understand what you're looking at."
+          },
+          {
+            number: 16,
+            prompt: "If a C1 is given to an observation the client should be notified",
+            options: {
+              A: "Immediately and in writing that improvement is recommended to remove the danger",
+              B: "On the final report that urgent remedial action is required",
+              C: "That you have removed the danger and repaired the fault ",
+              D: "On the final report that further investigation is necessary to find out why the danger is present"
+            },
+            answer: "A",
+            explanation: "C1 = Danger present; risk of injury. Best Practice Guide 4 requires the inspector to make safe (or warn / isolate) and notify the duty holder immediately in writing. Don't wait until the final report — the duty holder needs to know now so further use is controlled."
+          },
+          {
+            number: 17,
+            prompt: "What is the maximum operating time of a non time delayed RCBO to BS61009 when tested at 100% of its rated tripping current?",
+            options: {
+              A: "40ms",
+              B: "0.4s",
+              C: "300ms",
+              D: "200ms"
+            },
+            answer: "C",
+            explanation: "BS EN 61009 general-type RCBO: max trip time at 1× IΔn = 300 ms; at 5× IΔn = 40 ms. The 40 ms figure is the well-known one but it's the 5× test, not the 1× test."
+          },
+          {
+            number: 18,
+            prompt: "Which of these is considered a defect?",
+            options: {
+              A: "CPCs connected to Class II equipment",
+              B: "RCD does not operate when test button pushed",
+              C: "Cable colours are to the 15th Edition",
+              D: "Absence of RCDs to circuits supplying chillers in a supermarket"
+            },
+            answer: "B",
+            explanation: "An RCD that fails its built-in mechanical test is a clear defect — protection is unproven. Old cable colours and CPCs landed at Class II terminals are typically C3 observations, not safety defects in themselves. RCD requirements are application-dependent."
+          },
+          {
+            number: 19,
+            prompt: "The periodic test sequence may be undertaken in a different order to initial verification because",
+            options: {
+              A: "It prevents indirect contact to personnel and livestock when the installation is energised.",
+              B: "It follows the sequence in BS7671 for periodic testing and the installation can be decommissioned?",
+              C: "The inspector must follow the sequence as given in IET Guidance Note 3 and test an energised installation",
+              D: "The electrical installation will already be energised and only appropriate tests need to be applied"
+            },
+            answer: "D",
+            explanation: "Periodic inspection happens on a live, in-use installation. The dead-test sequence used at initial verification can't always be applied — the inspector picks appropriate tests using sampling and judgement, guided by GN3."
+          },
+          {
+            number: 20,
+            prompt: "If a low insulation resistance value is measured the inspector should",
+            options: {
+              A: "Record the result and assess it against BS7671",
+              B: "Carry out fault finding and further investigations",
+              C: "Carry out a half split technique to locate the fault",
+              D: "Test with line and neutral connected to earth"
+            },
+            answer: "B",
+            explanation: "A low IR reading means there is a fault — not just a value to record. The inspector investigates further (which may then include half-splitting or additional tests). 'Record and assess' on its own leaves the duty holder with a known fault and no diagnosis."
+          },
+          {
+            number: 21,
+            prompt: "Periodic inspection and testing is carried out, so far as is reasonably practicable, for",
+            options: {
+              A: "Ensuring the safety of persons and that portable equipment is not damaged or deteriorated",
+              B: "Ensuring the installation is under effective supervision in normal use",
+              C: "The safety of persons and livestock against the effects of electric shock and burns",
+              D: "Confirming the installation will only give protection against direct contact"
+            },
+            answer: "C",
+            explanation: "BS 7671 651.1 — periodic I&T is to verify, so far as reasonably practicable, the safety of persons and livestock against electric shock and burns, protection against damage to property by fire and heat, that the installation is not damaged so as to impair safety, and that the installation is not defective."
+          },
+          {
+            number: 22,
+            prompt: "A failure to agree the extent and limitations could result in",
+            options: {
+              A: "The client being liable for faults on excluded circuits",
+              B: "The inspector being held responsible for faults on excluded circuits",
+              C: "Inspection of cables concealed within walls",
+              D: "Test results being invalidated"
+            },
+            answer: "B",
+            explanation: "If the extent and limitations aren't documented and signed off, the report appears to cover everything — and the inspector picks up liability for anything that turns out to be defective. Agreeing in writing what's in and out of scope before starting is what protects you."
+          },
+          {
+            number: 23,
+            prompt: "An electrical installation condition report assessed the installation",
+            options: {
+              A: "Against the inspector?s view of the installation as a duty holder",
+              B: "Against the edition of BS7671 current at the time of installation",
+              C: "Against the edition of BS7671 current at the time of inspection",
+              D: "Against the Electricity at Work Regulations 1989"
+            },
+            answer: "C",
+            explanation: "EICR is coded against the current edition of BS 7671 at the time of inspection. Departures from the current standard that don't constitute a danger are typically C3 (improvement recommended) — for example, old cable colours don't make the install dangerous."
+          },
+          {
+            number: 24,
+            prompt: "The extent and limitations of the report should be agreed",
+            options: {
+              A: "With the client before the tests commence",
+              B: "Before the inspection with the client and other interested parties",
+              C: "Before and during the inspection with the client and other interested parties.",
+              D: "When writing the report with the client and other interested parties"
+            },
+            answer: "C",
+            explanation: "Best practice (BPG4) — agree before, but be ready to revisit during, because real-world site conditions often force a change (e.g. you can't isolate a circuit in use). Revised limitations get added to Section D of the EICR."
+          },
+          {
+            number: 25,
+            prompt: "A covering letter may be necessary with a completed report to",
+            options: {
+              A: "Explain the implications of ignoring the observations with a C3",
+              B: "Explain why the test results are assessed against standard values",
+              C: "Explain the implications of the report with further advice and guidance",
+              D: "Explain the technical terms used in BS7671 and IET GN3"
+            },
+            answer: "C",
+            explanation: "EICRs are highly technical and clients often need plain-English context — what the codes mean, what action is recommended, timeframes, and any further investigation needed. A covering letter is the standard way to deliver that without changing the formal report."
+          },
+          {
+            number: 26,
+            prompt: "A spur off a spur on a ring final circuit can be detected using",
+            options: {
+              A: "A low resistance ohmmeter",
+              B: "An external loop impedance test",
+              C: "An insulation resistance tester",
+              D: "A phase rotation tester"
+            },
+            answer: "A",
+            explanation: "Spur-off-a-spur shows up in the R1+R2 step of the ring final test — the spurred socket reads a noticeably higher value than the in-ring sockets because current goes through the small CSA spur cable and back, not around the ring."
+          },
+          {
+            number: 27,
+            prompt: "Observations will only require further investigation if",
+            options: {
+              A: "A C1 or C2 has been given",
+              B: "It should be recorded why a defect or departure has occurred",
+              C: "It is expected further danger will be revealed",
+              D: "A C1 has been given"
+            },
+            answer: "C",
+            explanation: "FI (further investigation) is used when the inspector reasonably believes that revealing more of the installation (lifting boards, opening accessories) will expose additional danger that hasn't been fully assessed. It is not a default action for every C1/C2."
+          },
+          {
+            number: 28,
+            prompt: "When testing earth fault loop impedance",
+            options: {
+              A: "The protective bonding conductors should be connected?",
+              B: "The protective bonding conductors should be disconnected",
+              C: "A sample of 3 readings should be taken",
+              D: "The test voltage should be adjusted for heating effects"
+            },
+            answer: "A",
+            explanation: "Bonding stays connected during EFLI — you're testing the impedance the fault current will see in service, with all parallel paths in place. Disconnecting bonding to isolate Ze is only done at the origin and only after safe isolation."
+          },
+          {
+            number: 29,
+            prompt: "The periodic tests applied are based on",
+            options: {
+              A: "What is considered appropriate by the tester",
+              B: "The requirements of GS38",
+              C: "The mandatory list given in BS7671",
+              D: "The mandatory list given in Guidance Note 3"
+            },
+            answer: "A",
+            explanation: "Unlike initial verification, BS 7671 doesn't prescribe a fixed mandatory test list for periodic inspection — the inspector selects appropriate tests using sampling, taking GN3 as guidance and the installation's risk profile as the driver."
+          },
+          {
+            number: 30,
+            prompt: "Increase a conductor size will",
+            options: {
+              A: "Decrease circuit current",
+              B: "Decrease voltage drop",
+              C: "Increase resistance",
+              D: "Increase voltage drop"
+            },
+            answer: "B",
+            explanation: "Bigger CSA = lower resistance = lower voltage drop for the same current. Conductor size doesn't change the load current itself."
+          },
+          {
+            number: 31,
+            prompt: "A 34m radial circuit carrying 7 amps has conductors with a voltage drop of 29mV/A/m. What is the voltage drop?",
+            options: {
+              A: "6.9V",
+              B: "5.9V",
+              C: "8.2V",
+              D: "9.2V"
+            },
+            answer: "A",
+            explanation: "Vd = (mV/A/m × A × m) ÷ 1000 = (29 × 7 × 34) ÷ 1000 = 6.902 V."
+          },
+          {
+            number: 32,
+            prompt: "Inspection sampling may not be appropriate?",
+            options: {
+              A: "On ring final circuit accessories which give satisfactory inspection results",
+              B: "On supplementary bonding when checking for signs of damage, overheating and ageing",
+              C: "On lighting circuit accessories which give satisfactory inspection results",
+              D: "On the main switch gear when checking for signs of damage, overheating and ageing"
+            },
+            answer: "D",
+            explanation: "Main switchgear is unique and central to every fault condition — you don't sample it, you inspect 100%. Sampling is reserved for repetitive, distributed accessories where extrapolation from a representative subset is reasonable."
+          },
+          {
+            number: 33,
+            prompt: "A circuit protected by a 20 A type C circuit breaker is tested for earth fault loop impedance where the ambient temperature is 30 Degrees Celsius. Using tables from GN3, what is the maximum measured value allowed?",
+            options: {
+              A: "2.47 Ohms",
+              B: "0.93 Ohms",
+              C: "1.76 Ohms",
+              D: "2.93 Ohms"
+            },
+            answer: "B",
+            explanation: "Type C 20 A: Im = 10×In = 200 A; Zs(table) = 230/200 = 1.15 Ω at full operating temperature. GN3 ambient correction for 30 °C is 0.8 × tabulated, giving max measured ≈ 0.92 Ω. The closest published value is 0.93 Ω."
+          },
+          {
+            number: 34,
+            prompt: "Switching off a supply to an office without consultation may result in",
+            options: {
+              A: "Data loss",
+              B: "An informed client",
+              C: "Indirect contact",
+              D: "Electric shock"
+            },
+            answer: "A",
+            explanation: "Unscheduled isolation in an office crashes computers and servers — corrupted files, lost work, unhappy client. The agreed extent and limitations is exactly where this gets ironed out before the work starts."
+          },
+          {
+            number: 35,
+            prompt: "After agreeing the extent and limitations a circuit cannot be switched off because it is being used. This should be recorded on",
+            options: {
+              A: "The inspection schedule against the items inspected",
+              B: "A letter to the client notifying of an invalidated inspection schedule",
+              C: "The test result schedule in the remarks section",
+              D: "The EICR in section D"
+            },
+            answer: "D",
+            explanation: "Section D of the EICR records the extent and limitations of the inspection. A circuit that couldn't be tested for operational reasons is a limitation — record it there so the duty holder is aware that the circuit hasn't been verified."
+          }
+        ]
       }
     ],
     scoring: [
-      { minScore: 11, range: "11–12", label: "Strong — periodic-inspection ready" },
-      { minScore: 9, range: "9–10", label: "Comfortable pass" },
-      { minScore: 7, range: "7–8", label: "Re-read GN3 chapter on intervals and sampling" },
-      { minScore: 0, range: "< 7", label: "Re-watch the periodic inspection webinar" }
+      { minScore: 32, range: "32–35", label: "Strong — homework standard" },
+      { minScore: 25, range: "25–31", label: "Comfortable pass" },
+      { minScore: 18, range: "18–24", label: "Re-read the relevant theory before re-attempting" },
+      { minScore: 0, range: "< 18", label: "Re-watch the topic webinar before re-attempting" }
     ],
     priorities: [
-      "Recommended maximum intervals — domestic owner-occupied 10 years, PRS 5 years, commercial 5 years, industrial 3 years, high-risk (pools, petrol, theatres) 1 year.",
-      "Sampling logic — agreed in writing, recorded as extent/limitations, sample size grows when defects are found.",
-      "The legal drivers — EAWR 1989 + HSWA in workplaces, ESS PRS Regulations 2020 in English rented homes — and the difference between guidance intervals and statutory intervals."
+      "C1 = danger, immediate written notification to duty holder; C2 = potentially dangerous; C3 = improvement recommended; FI = further investigation may reveal further danger.",
+      "Extent and limitations agreed before AND during; recorded in EICR Section D — protects the inspector's liability.",
+      "Periodic test sequence is judgement-led, not the prescribed initial-verification sequence; sample where it makes sense, but not on origin/main switchgear.",
+      "Any C1, C2 or FI = Unsatisfactory. C3 alone is Satisfactory with improvement recommended."
     ]
   },
   {
     id: "condition-reporting",
-    title: "Condition Reporting (EICR) — Topic Mock",
+    title: "Condition Reporting (EICR)",
     subtitle: "Webinar 7 — classifying and recording condition",
     description:
-      "A focused topic mock built around Webinar 7 — Condition Reporting. Covers the EICR document set, the C1 / C2 / C3 / FI classification codes, what makes a report Satisfactory or Unsatisfactory, the inspector's on-site obligations when danger is found, and the landlord/duty-holder duties under the ESS PRS Regulations 2020.",
+      "A focused exam built around Webinar 7 — Condition Reporting. Covers the EICR document set, the C1 / C2 / C3 / FI classification codes, what makes a report Satisfactory or Unsatisfactory, the inspector's on-site obligations when danger is found, and the landlord/duty-holder duties under the ESS PRS Regulations 2020.",
     format: "12 multiple-choice questions. Aim for 9+/12 (75%).",
     passMark: 9,
     sections: [
@@ -2904,6 +4746,449 @@ export const EXAMS: Exam[] = [
       "On-site response to a C1 — make safe, notify duty holder, record. Walking away from a known C1 is a personal-liability risk for the inspector."
     ]
   }
+
+
+
+  ,
+  {
+    id: "at-formative-mixed-practice",
+    title: "Mixed Topics — AT Formative Test Practice Bank",
+    subtitle: "40-question end-of-theory homework drill from the AT weekend course",
+    description:
+      "Forty mixed-topic questions across BS 7671, building regs, periodic inspection, PAT, special locations, calculations and the EAWR — the cross-cutting end-of-theory homework that sits between the topic-specific banks.",
+    format: "40 multiple-choice questions. Aim for 36+/40 (90%+) — homework standard.",
+    passMark: 36,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Formative Test Practice Bank",
+        questions: [
+          {
+            number: 1,
+            prompt: "When measuring the external earth fault loop impedance (Ze) the:",
+            options: {
+              A: "Main switch should be on and the earthing conductor disconnected",
+              B: "Main switch should be off and the earthing conductor connected",
+              C: "Main switch should be off and earthing conductor disconnected",
+              D: "Main switch should be on and the earthing conductor connected"
+            },
+            answer: "C",
+            explanation: "Ze test isolates the source-side earth path. Main switch OFF (so the installation contributes nothing) and earthing conductor disconnected at the MET (so parallel bonding paths back through gas/water don't influence the reading). Re-connect immediately after the test."
+          },
+          {
+            number: 2,
+            prompt: "One factor which does not influence the initial frequency of inspection and testing of appliances is:",
+            options: {
+              A: "Whether the appliance is Class I or Class II",
+              B: "Whether the appliance is stationary or fixed",
+              C: "The previous inspection and test of the fixed wiring",
+              D: "The environment in which the appliance is utilised"
+            },
+            answer: "C",
+            explanation: "PAT frequency is driven by class, equipment type (mobile/portable/stationary/fixed), use, environment and history of the appliance itself. The state of the fixed wiring is a separate matter — covered by EICR."
+          },
+          {
+            number: 3,
+            prompt: "In Zone 1 of a room containing a bath or shower, a 230V AC wall mounted extractor fan is:",
+            options: {
+              A: "Not allowed under any circumstances",
+              B: "Allowed providing it is rated as SELV and IP4X",
+              C: "Allowed providing it is at least IPX7",
+              D: "Allowed providing it is rated as SELV and IPX4"
+            },
+            answer: "D",
+            explanation: "BS 7671 701: equipment in Zone 1 must be SELV (≤ 12 V a.c.) and at least IPX4. A 230 V mains fan in Zone 1 needs to step down via SELV; otherwise install it in Zone 2 or above the zones."
+          },
+          {
+            number: 4,
+            prompt: "The Approved Documents to the Building Regulations give:",
+            options: {
+              A: "Practical guidance on how to comply with the Building Regulations",
+              B: "Statutory methods on ways to carry out building work",
+              C: "Statutory methods on how to comply with the Building Regulations",
+              D: "Ways in which to carry out electrical work in dwellings"
+            },
+            answer: "A",
+            explanation: "The Building Regulations themselves are statutory. The Approved Documents (A through R) are non-statutory guidance — one route to compliance, but not the only one. Other equivalent solutions remain valid."
+          },
+          {
+            number: 5,
+            prompt: "Which of the following is carried out first during in-service inspection and testing?",
+            options: { A: "Earth continuity tests", B: "Formal visual inspection", C: "Polarity testing", D: "Insulation testing" },
+            answer: "B",
+            explanation: "Always start with a thorough visual inspection — many faults (damaged cables, scorching, missing covers) are spotted before any electrical test. Tests come after the visual confirms the equipment is fit to test."
+          },
+          {
+            number: 6,
+            prompt: "The document that needs completing after spurring off a ring final circuit is;",
+            options: {
+              A: "An Electrical Installation Certificate",
+              B: "An Electrical Installation Condition Report",
+              C: "A Building Notice",
+              D: "A Minor Electrical Installation Works Certificate"
+            },
+            answer: "D",
+            explanation: "An addition to an existing circuit (no new circuit) is a Minor Works — a fused spur off a ring final fits exactly that. EIC is for new installations / new circuits; EICR is for periodic; Building Notice is a notification route, not a certificate."
+          },
+          {
+            number: 7,
+            prompt: "Residual current devices (RCD) detect",
+            options: {
+              A: "Overloads, short circuits and earth faults",
+              B: "Earth faults only",
+              C: "Short circuits and earth faults only",
+              D: "Overloads and short circuits only"
+            },
+            answer: "B",
+            explanation: "An RCD compares L and N current — when they differ (residual leakage to earth) the RCD trips. Overload and short-circuit are the job of the MCB / fuse. RCBOs combine both functions in one device."
+          },
+          {
+            number: 8,
+            prompt: " An Electrical Installation Condition Report: ",
+            options: {
+              A: "Is valid for 10 years",
+              B: "Is proof that the original installation was correctly installed",
+              C: "Must be accompanied by a Condition Report Inspection Schedule, and a Schedule of Test Results and Schedule of Circuit Details",
+              D: "Is valid for 5 years"
+            },
+            answer: "C",
+            explanation: "An EICR is only complete with the inspection schedule and schedule of test results / circuit details. Validity period is recommended in the report (e.g. 5 years for a domestic), not a fixed 5-or-10. The original install is certified by the EIC, not the EICR."
+          },
+          {
+            number: 9,
+            prompt: "The requirements for overload protection are fulfilled when",
+            options: {
+              A: "Ib = 15A In =20A Iz =18A",
+              B: "Ib = 2.5A In =10A Iz =8A",
+              C: "Ib = 20A In =15A Iz =15A",
+              D: "Ib = 10A In =15A Iz =18A"
+            },
+            answer: "D",
+            explanation: "BS 7671 433.1: Ib ≤ In ≤ Iz. Only D satisfies this (10 ≤ 15 ≤ 18). A and B both have In > Iz; C has Ib > In."
+          },
+          {
+            number: 10,
+            prompt: "The breaking capacity of a protective device must:",
+            options: { A: "Not exceed PFC", B: "Exceed PEFC but not PSCC", C: "Exceed PFC", D: "Not exceed PEFC but exceed PSCC" },
+            answer: "C",
+            explanation: "Reg 434.5.1: the breaking capacity must not be less than the prospective fault current at the point of installation. If the PFC exceeds the breaking capacity, an upstream device must back up the protection."
+          },
+          {
+            number: 11,
+            prompt: "The following tests are to be conducted on a new installation: (1) Loop impedance, (2) Polarity, (3) Insulation Resistance, (4) Continuity of CPCs. The correct test sequence is:",
+            options: { A: "3, 2, 4, 1", B: "2, 1, 4, 3", C: "1, 2, 3, 4", D: "4, 3, 2, 1" },
+            answer: "D",
+            explanation: "Dead first, live last: continuity of CPCs (4), insulation resistance (3), polarity (2), then earth fault loop impedance (1) live. Only one of the four options matches the GN3 dead-test order."
+          },
+          {
+            number: 12,
+            prompt: "The items that may be checked during an inspection of a standard 13A socket outlet are:",
+            options: {
+              A: "Connection of conductors, presence of CPC, insulation of live parts",
+              B: "Connection of conductors, identification of conductors, double insulation",
+              C: "Connection of conductors, identification of conductors, obstacles",
+              D: "Connection of conductors, placing out of reach, presence of CPC"
+            },
+            answer: "A",
+            explanation: "All Schedule of Inspections items relevant to a socket — terminals tight, CPC present, live parts adequately insulated. Double insulation, obstacles and out-of-reach all apply to other equipment classes/locations."
+          },
+          {
+            number: 13,
+            prompt: "The result and extent of a periodic inspection and test should be recorded and given to the",
+            options: { A: "Installation designer", B: "Original installer", C: "Person ordering the inspection", D: "Representative of the distributor" },
+            answer: "C",
+            explanation: "Same principle as initial verification — the documentation goes to the person who ordered the work. They are the duty holder under EAWR and need the record to comply."
+          },
+          {
+            number: 14,
+            prompt: "Low voltage as defined in BS7671 has a value not exceeding",
+            options: { A: "650 V AC", B: "50 V AC", C: "1000 V AC", D: "1500 V AC" },
+            answer: "C",
+            explanation: "BS 7671 voltage bands: ELV ≤ 50 V a.c. (Band I), LV from 50 V to 1000 V a.c. or 1500 V d.c. between conductors (Band II). Domestic 230 V sits squarely in LV."
+          },
+          {
+            number: 15,
+            prompt: "Inspection of new electrical work should be:",
+            options: {
+              A: "Conducted on completion",
+              B: "Conducted during construction",
+              C: "Conducted during construction and on completion",
+              D: "Conducted during testing and on completion"
+            },
+            answer: "C",
+            explanation: "Inspection during construction catches problems while they're easy to fix (and while cables are still visible). The completion inspection then verifies the finished installation. Both are required by BS 7671 Chapter 64."
+          },
+          {
+            number: 16,
+            prompt: "Approved Document M gives guidance on the accessibility of switches and sockets in new dwellings and other buildings. In which part of buildings does this guidance apply?",
+            options: {
+              A: "Only in rooms designated by the building owner",
+              B: "Only in rooms where a wheelchair bound person lives",
+              C: "In rooms only on the ground floor level",
+              D: "In all habitable rooms"
+            },
+            answer: "D",
+            explanation: "Part M Volume 1 (dwellings) requires accessible switch / socket heights in all habitable rooms in new dwellings — not just rooms reserved for or used by disabled persons. The point is that anyone may visit or live there in future."
+          },
+          {
+            number: 17,
+            prompt: "The effect thermal insulation has on a cable is to:",
+            options: {
+              A: "Increase the cable bunching",
+              B: "Increase its current carrying capacity",
+              C: "Decrease its voltage drop",
+              D: "Decrease its current carrying capacity"
+            },
+            answer: "D",
+            explanation: "Insulation traps the heat the cable generates — derating factor Ci is applied (BS 7671 523.9 / Table 4B1). The cable's safe Iz drops; design current must drop to match, or a larger CSA used."
+          },
+          {
+            number: 18,
+            prompt: "A member of a competent persons scheme is able to carry out:",
+            options: {
+              A: "Domestic electrical work and act as an intermediary so that someone else can certify it",
+              B: "Notifiable domestic electrical work and request building control to certify it",
+              C: "Notifiable domestic electrical work and certify it without involving building control themselves",
+              D: "Notifiable domestic electrical work without having any need to certify it"
+            },
+            answer: "C",
+            explanation: "The whole point of CPS membership is post-completion self-certification — the member issues a Building Regulations compliance certificate via the scheme, no prior or concurrent involvement of LABC required."
+          },
+          {
+            number: 19,
+            prompt: "A two way lighting circuit would be required to have strappers identified:",
+            options: { A: "As neutral conductors", B: "Green / yellow", C: "As line conductors", D: "Black" },
+            answer: "C",
+            explanation: "Strappers between two-way switches carry switched line, so they're identified as line conductors — usually brown sleeving on each end where the cable colours don't match."
+          },
+          {
+            number: 20,
+            prompt: "The minimum extraction rate for a bathroom is:",
+            options: { A: "60 litres per second", B: "6 litres per second", C: "15 litres per second", D: "30 litres per second" },
+            answer: "C",
+            explanation: "Part F Table 5.1a — intermittent extract: bathroom 15 L/s. Kitchens and utility rooms have higher rates because of cooking moisture and laundry."
+          },
+          {
+            number: 21,
+            prompt: "Overcurrent protection for lighting circuits in domestic installations is",
+            options: {
+              A: "Dependant on the design current of the circuit",
+              B: "Always 6A",
+              C: "Always 10A",
+              D: "Dependant on the supply voltage"
+            },
+            answer: "A",
+            explanation: "There's no fixed lighting-circuit fuse rating — design current Ib drives the choice (BS 7671 433). Common ratings are 6 A or 10 A but a heavily loaded circuit may need 16 A; a small one may use 5 A."
+          },
+          {
+            number: 22,
+            prompt: "Where formal visual inspections are carried out, the results:",
+            options: {
+              A: "Need only be recorded if requested by a supervisor",
+              B: "Need not be recorded, whether results are satisfactory or unsatisfactory",
+              C: "Should be recorded, whether satisfactory or unsatisfactory",
+              D: "Need only be recorded if unsatisfactory"
+            },
+            answer: "C",
+            explanation: "Formal visual inspections are formally recorded — pass or fail — to demonstrate the duty holder's maintenance regime. User checks are different (only faults reported), but formal visuals are always logged."
+          },
+          {
+            number: 23,
+            prompt: " Following a test of earth fault loop impedance, the results are compared to the values given in BS7671. Which of the following statements is true? ",
+            options: {
+              A: "The tabulated or design value should not be less than 80% of the measured value",
+              B: "The measured value should not be less than 80% of the tabulated ot design value",
+              C: "The tabulated or design value should not exceed 80% of the measured value",
+              D: "The measured value should not exceed 80% of the tabulated or design value"
+            },
+            answer: "D",
+            explanation: "GN3 'rule of thumb' — measured Zs (cold conductors) ≤ 80% of the BS 7671 tabulated Zs (which assumes warm conductors). The 0.8 factor accounts for the resistance increase as the cable heats up under fault current."
+          },
+          {
+            number: 24,
+            prompt: "During a periodic inspection and test on a three phase installation, a Prospective Fault Current of 3.6kA is measured between L1 and Earth, and 4.2kA between L1 and Neutral; the value of PFC to be recorded would be:",
+            options: { A: "7.8kA", B: "3.6kA", C: "8.4kA", D: "4.2kA" },
+            answer: "C",
+            explanation: "GN3 cautious method — take the higher single-phase PFC (4.2 kA between L1 and N) and multiply by 2 to estimate three-phase short-circuit fault current: 4.2 × 2 = 8.4 kA. The recorded design figure must accommodate the worst case."
+          },
+          {
+            number: 25,
+            prompt: "The depth of a notch in a joist should be no more than the joist,",
+            options: { A: "Depth x 0.0125", B: "Depth x 1.25", C: "Depth x 0.125", D: "Width x 0.125" },
+            answer: "C",
+            explanation: "Approved Document A — notch depth ≤ 0.125 × joist depth, located between 0.07 and 0.25 of the span from the support, in the top edge only. Drilled holes are limited to ≤ 0.25 × depth on the neutral axis."
+          },
+          {
+            number: 26,
+            prompt: "The correct formula for calculating total earth fault loop impedance is:",
+            options: { A: "Zs = Ze - (R1 + R2)", B: "Zs = Ze + (R1 +R2)", C: "Zs = Ze + (R1 / R2)", D: "Ze = Zs + (R1 + R2)" },
+            answer: "B",
+            explanation: "Zs is the total loop: external (Ze) PLUS the line and CPC of the final circuit (R1 + R2). R1 + R2 are in series, not in parallel — they're the same fault path one after the other."
+          },
+          {
+            number: 27,
+            prompt: "The prevention of indirect energising of a final circuit intended to be isolated must be achieved by",
+            options: {
+              A: "Separation of all final circuits from each other",
+              B: "Ensuring all devices are suitably labelled",
+              C: "Installing a 100 mA RCD protected consumer unit",
+              D: "Displaying a suitable DANGER notice"
+            },
+            answer: "A",
+            explanation: "Indirect energising = an isolated circuit becoming live again via a shared neutral, back-fed source, or interconnected wiring. Separation of circuits at the design stage prevents the path existing in the first place."
+          },
+          {
+            number: 28,
+            prompt: "The horizontal top surface of a barrier or enclosure which is readily accessible must provide a degree of protection of at least",
+            options: { A: "IP 55", B: "IP XXB or IP 2X", C: "IP X4", D: "IP XXD or IP 4X" },
+            answer: "D",
+            explanation: "BS 7671 416.2.2: horizontal top surfaces (where objects might be placed and fall in) need IPXXD / IP4X — protection against a 1 mm wire. Vertical surfaces need only IPXXB / IP2X (finger-safe)."
+          },
+          {
+            number: 29,
+            prompt: "Earth fault loop impedances are measured / calculated to ensure that:",
+            options: {
+              A: "The neutral conductor is continuous and of the correct size",
+              B: "Protective devices will operate in the required time",
+              C: "The correct fuse has been installed",
+              D: "The RCD trip mechanism operates"
+            },
+            answer: "B",
+            explanation: "Zs determines fault current magnitude; fault current determines disconnection time on the device's tripping curve. Verifying Zs is small enough is verifying ADS will operate within the BS 7671 maximum disconnection time."
+          },
+          {
+            number: 30,
+            prompt: "A shower is rated at 8kW and connected to a 230V supply; what is nearest full load current?",
+            options: { A: "355 amps", B: "3.5 amps", C: "35 ohms", D: "35 amps" },
+            answer: "D",
+            explanation: "I = P / V = 8000 / 230 = 34.78 A ≈ 35 A. Pure resistive load, so no power factor correction. Hence the standard 40 A or 50 A breaker for an 8 kW shower."
+          },
+          {
+            number: 31,
+            prompt: "Approved Document B:",
+            options: {
+              A: "Gives guidance on the position of smoke and heat alarms",
+              B: "Gives guidance on the minimum depth of buried cables outdoors",
+              C: "Gives guidance on the minimum size of extractor fans",
+              D: "Gives guidance on where josts can be drilled"
+            },
+            answer: "A",
+            explanation: "Part B (Fire safety) — including the Volume 1 dwellings guidance on smoke and heat alarm coverage. Part F covers extract; Part A covers structural drilling/notching of joists; outdoor cable depth is a BS 7671 / OSG matter."
+          },
+          {
+            number: 32,
+            prompt: "A flat twin cable is to be buried 20mm into a living room wall without mechanical protection, it should be:",
+            options: {
+              A: "Given RCD protection.",
+              B: "Installed anywhere and be buried to 10mm",
+              C: "Installed in a safe zone and have additional protection of a 30mA RCD",
+              D: "Installed in mini trunking and be in the safe zone"
+            },
+            answer: "C",
+            explanation: "BS 7671 522.6 — buried cables less than 50 mm deep without mechanical protection must be in a safe zone AND have 30 mA RCD additional protection. A safe zone alone isn't enough at this depth."
+          },
+          {
+            number: 33,
+            prompt: "Transformers for ELV lighting circuits can cause inrush currents that will operate a type B circuit breaker. This may be overcome by:",
+            options: {
+              A: "Changing the circuit breaker to a type C",
+              B: "Increasing the size of the CPC",
+              C: "Changing the size of the lighting circuit cable",
+              D: "Increasing the current rating of the circuit breaker to 20A"
+            },
+            answer: "A",
+            explanation: "Type B trips at 3–5×In, Type C at 5–10×In. Inductive loads (transformers, motors) have brief inrush currents up to 10–12× normal — Type C absorbs this without nuisance tripping. Bigger CPC or cable doesn't change inrush behaviour."
+          },
+          {
+            number: 34,
+            prompt: "Before measurement, using a low resistance ohmmeter, the leads resistance should be:",
+            options: {
+              A: "Ignored",
+              B: "Nulled or recorded and subtracted from the main instrument reading",
+              C: "No less than 0.5 ohms",
+              D: "Doubled"
+            },
+            answer: "B",
+            explanation: "Test leads have measurable resistance (often 0.05–0.1 Ω) which on its own can be a significant part of a low R1+R2 reading. Modern instruments null automatically; older ones require you to record lead R and subtract."
+          },
+          {
+            number: 35,
+            prompt: "The overall condition of an installation during a periodic inspection and test could be recorded as satisfactory if:",
+            options: {
+              A: "There is only one C1 observation",
+              B: "There is only one C2 observation",
+              C: "There is only one C3 present",
+              D: "There is either a C1 or C2 observation, but the customer agrees to get the remedial work done within one week"
+            },
+            answer: "C",
+            explanation: "Any C1 or C2 makes the report Unsatisfactory — remedial work and re-inspection cannot retroactively change that. C3 is improvement recommended only and does not affect the overall result. FI also makes it Unsatisfactory."
+          },
+          {
+            number: 36,
+            prompt: "Under what circumstances may a metallic water supply pipe be used as an earth electrode",
+            options: {
+              A: "Not under any circumstances",
+              B: "If it is non-metallic",
+              C: "If it is a water utility supply pipe",
+              D: "If it has precautions against its removal"
+            },
+            answer: "A",
+            explanation: "Since the early 1980s, water-utility incoming pipes cannot be relied on as the means of earthing — utilities are increasingly switching to non-metallic pipework, breaking the earth path silently. Bond it (yes); use it as the electrode (no)."
+          },
+          {
+            number: 37,
+            prompt: "In a bathroom, where the space below the bathtub or shower basin is accessible without the use of a tool, the space is classed as",
+            options: { A: "outside the zones", B: "Zone 0", C: "Zone 2", D: "Zone 1" },
+            answer: "D",
+            explanation: "BS 7671 701: the space under the bath / shower basin is classified as Zone 1 if accessible without a tool. If only accessible with a tool (e.g. bath panel screwed on), it is excluded from any zone."
+          },
+          {
+            number: 38,
+            prompt: "An insulation resistance test is conducted on an insulation to ensure that;",
+            options: {
+              A: "Circuit conductor resistances are not too high",
+              B: "The system works efficiently",
+              C: "The cable insulation is of the correct material",
+              D: "There are no connections between the live conductors or between the live conductors and earth"
+            },
+            answer: "D",
+            explanation: "IR test verifies the insulation is intact between live conductors and between live conductors and earth — anything below 1 MΩ (LV) suggests a leakage path that shouldn't exist. The other options are not what IR measures."
+          },
+          {
+            number: 39,
+            prompt: "Socket outlets should? ",
+            options: { A: "Only be switched if used outside", B: "Be switched or unswitched", C: "Always be switched", D: "Only switched if inaccessible" },
+            answer: "B",
+            explanation: "BS 7671 doesn't mandate switched sockets — both switched and unswitched are acceptable. Switched is more common in UK domestic for convenience and child safety, but unswitched (continental style) is permitted."
+          },
+          {
+            number: 40,
+            prompt: "A protective conductor connecting the main earthing terminal of an installation to an earth electrode or other means of earthing is",
+            options: {
+              A: "A main protective bonding conductor",
+              B: "An earth continuity conductor",
+              C: "A circuit protective conductor",
+              D: "The earthing conductor"
+            },
+            answer: "D",
+            explanation: "Earthing conductor: MET → means of earthing (electrode for TT, supply earth for TN). Main protective bonding: MET → extraneous parts (gas, water, structural steel). CPC: distribution board → individual circuit accessory."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { minScore: 36, range: "36–40", label: "Strong — homework standard" },
+      { minScore: 28, range: "28–35", label: "Comfortable pass" },
+      { minScore: 20, range: "20–27", label: "Re-watch the relevant theory webinars and re-attempt" },
+      { minScore: 0, range: "< 20", label: "Re-do all topic webinars before re-attempting" }
+    ],
+    priorities: [
+      "Bathroom zones: Zone 0 = inside; Zone 1 = above bath / shower up to 2.25 m (and under bath if accessible without tool); Zone 2 = 0.6 m beyond Zone 1.",
+      "EICR overall: any C1 / C2 / FI = Unsatisfactory. C3 alone = Satisfactory with improvement recommended.",
+      "Test sequence: dead first (continuity → IR → polarity → Ze) then live. Measured Zs ≤ 80% tabulated to allow for warm conductors."
+    ]
+  }
+
 ];
 
 export function countQuestions(exam: Exam): number {
