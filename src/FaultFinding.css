@@ -848,3 +848,12 @@
     max-height: none;
   }
 }
+
+@media (max-width: 600px) {
+  .ff-shell { min-height: 0; height: auto; }
+  .ff-scene { min-height: 320px; }
+  .ff-scene-header { padding: 8px 10px; }
+  .ff-scene-name { font-size: 0.85rem; }
+  .ff-hud { padding: 10px; gap: 8px; overflow-y: visible; }
+  .ff-card { padding: 10px 12px; }
+}
