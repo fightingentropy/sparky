@@ -78,6 +78,13 @@
   }
 }
 
+@media (max-width: 600px) {
+  .pt-shell { min-height: 0; height: auto; }
+  .pt-scene { min-height: 360px; }
+  .pt-hud { padding: 10px; gap: 10px; }
+  .pt-library-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Card ─────────────────────────────────────────────────────────────── */
 
 .pt-card {
