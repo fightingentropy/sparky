@@ -38,10 +38,15 @@ export function usePersistedState<T>(
 
   const [value, setValue] = useState<T>(() => readStoredValue(key, defaultValue, validate));
 
+  const validateRef = useRef(validate);
+  validateRef.current = validate;
+  const defaultValueRef = useRef(defaultValue);
+  defaultValueRef.current = defaultValue;
+
   useEffect(() => {
     if (prevKeyRef.current !== key) {
       prevKeyRef.current = key;
-      setValue(readStoredValue(key, defaultValue, validate));
+      setValue(readStoredValue(key, defaultValueRef.current, validateRef.current));
       return;
     }
 
@@ -50,7 +55,7 @@ export function usePersistedState<T>(
     } catch {
       // quota exceeded — ignore
     }
-  }, [key, value, validate]);
+  }, [key, value]);
 
   return [value, setValue];
 }
