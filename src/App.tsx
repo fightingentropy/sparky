@@ -22,6 +22,7 @@ import {
 import { usePersistedState } from "./usePersistedState";
 import { useHistory } from "./useHistory";
 import { useTheme } from "./useTheme";
+import { useFocusTrap } from "./useFocusTrap";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
 import { ExamPage } from "./ExamPage";
@@ -870,12 +871,18 @@ export default function App() {
 
   const [page, setPage] = useState<PageId>(getPageFromLocation());
   const [searchQuery, setSearchQuery] = useState("");
+  const searchQueryRef = useRef(searchQuery);
+  searchQueryRef.current = searchQuery;
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteQuery, setPaletteQuery] = useState("");
   const [activePaletteIndex, setActivePaletteIndex] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [copiedSectionId, setCopiedSectionId] = useState<string | null>(null);
+
+  const paletteTrapRef = useFocusTrap<HTMLDivElement>(paletteOpen);
+  const helpTrapRef = useFocusTrap<HTMLDivElement>(helpOpen);
+  const historyTrapRef = useFocusTrap<HTMLDivElement>(historyOpen);
 
   // ── Persisted calculator state ──
   const [containmentRodOverallHeight, setContainmentRodOverallHeight] = usePersistedState<string>(
@@ -1281,7 +1288,7 @@ export default function App() {
 
       if (commandKey && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setPaletteQuery(searchQuery);
+        setPaletteQuery(searchQueryRef.current);
         setPaletteOpen(true);
       }
 
@@ -1299,7 +1306,7 @@ export default function App() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [searchQuery]);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -2508,7 +2515,15 @@ export default function App() {
 
       {paletteOpen ? (
         <div className="modal-backdrop" onClick={() => setPaletteOpen(false)}>
-          <div className="modal-shell" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+          <div
+            ref={paletteTrapRef}
+            className="modal-shell"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <div>
                 <h2>Command palette</h2>
@@ -2564,9 +2579,12 @@ export default function App() {
       {helpOpen ? (
         <div className="modal-backdrop" onClick={() => setHelpOpen(false)}>
           <div
+            ref={helpTrapRef}
             className="modal-shell help-shell"
             role="dialog"
             aria-modal="true"
+            aria-label="Help"
+            tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
@@ -2616,9 +2634,12 @@ export default function App() {
       {historyOpen ? (
         <div className="modal-backdrop" onClick={() => setHistoryOpen(false)}>
           <div
+            ref={historyTrapRef}
             className="modal-shell history-shell"
             role="dialog"
             aria-modal="true"
+            aria-label="History"
+            tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">

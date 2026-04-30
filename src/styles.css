@@ -1909,12 +1909,21 @@ input:disabled {
 }
 
 .copyable-result:hover .copy-icon,
-.copyable-result.is-copied .copy-icon {
+.copyable-result.is-copied .copy-icon,
+.copyable-result.is-failed .copy-icon {
   opacity: 1;
 }
 
 .copyable-result.is-copied .copy-icon {
   color: var(--accent);
+}
+
+.copyable-result.is-failed {
+  color: var(--danger, #d8504a);
+}
+
+.copyable-result.is-failed .copy-icon {
+  color: var(--danger, #d8504a);
 }
 
 /* ── Formula toggle ────────────────────── */
