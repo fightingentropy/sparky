@@ -1,10 +1,13 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { EXAMS, getScoringBand, type Exam, type ExamChoice, type ExamQuestion } from "./exams";
 import { usePersistedState } from "./usePersistedState";
 
 type Answers = Record<number, ExamChoice>;
 
 const LETTERS: ExamChoice[] = ["A", "B", "C", "D"];
+const EXAM_STORAGE_VERSION = "2026-05-consolidated-topic-bank";
+const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
+const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
 
 function isExamChoice(value: unknown): value is ExamChoice {
   return typeof value === "string" && (LETTERS as string[]).includes(value);
@@ -26,11 +29,37 @@ function isBoolean(value: unknown): value is boolean {
   return typeof value === "boolean";
 }
 
+function clearStaleExamProgress() {
+  try {
+    const validStorageKeys = new Set(
+      EXAMS.flatMap((exam) => [
+        `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`,
+        `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`
+      ])
+    );
+
+    for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+      const key = localStorage.key(index);
+      if (!key) continue;
+
+      const isExamProgressKey =
+        key.startsWith("exam-answers-") || key.startsWith("exam-submitted-");
+      if (isExamProgressKey && !validStorageKeys.has(key)) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {}
+}
+
 type Props = {
   isActive: boolean;
 };
 
 export function ExamPage({ isActive }: Props) {
+  useEffect(() => {
+    clearStaleExamProgress();
+  }, []);
+
   const [selectedExamId, setSelectedExamId] = usePersistedState<string>(
     "exam-selected",
     EXAMS[0].id,
@@ -42,12 +71,12 @@ export function ExamPage({ isActive }: Props) {
   );
 
   const [answers, setAnswers] = usePersistedState<Answers>(
-    `exam-answers-${exam.id}`,
+    `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`,
     {},
     isAnswers
   );
   const [submitted, setSubmitted] = usePersistedState<boolean>(
-    `exam-submitted-${exam.id}`,
+    `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`,
     false,
     isBoolean
   );
