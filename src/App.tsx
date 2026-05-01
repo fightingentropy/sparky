@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   CONTAINMENT_OPTIONS,
   DEFAULT_CONTAINMENT_ROD_VALUES,
@@ -961,6 +961,7 @@ export default function App() {
   const [structureJoist, setStructureJoist] = usePersistedState("struct-joist", "200");
 
   const [activeToolIndex, setActiveToolIndex] = useState(0);
+  const [toolGridHeight, setToolGridHeight] = useState<number | null>(null);
 
   const toolGridRef = useRef<HTMLDivElement | null>(null);
   const paletteInputRef = useRef<HTMLInputElement | null>(null);
@@ -991,7 +992,10 @@ export default function App() {
   function scrollToTool(index: number) {
     const grid = toolGridRef.current;
     if (!grid) return;
-    grid.scrollTo({ left: grid.clientWidth * index, behavior: "smooth" });
+    const maxIndex = Math.max(filteredApplets.length - 1, 0);
+    const nextIndex = Math.min(Math.max(index, 0), maxIndex);
+    setActiveToolIndex((current) => (current === nextIndex ? current : nextIndex));
+    grid.scrollTo({ left: grid.clientWidth * nextIndex, behavior: "smooth" });
   }
 
   function clearContainmentRod() {
@@ -1139,6 +1143,10 @@ export default function App() {
         matchesQuery(`${applet.title} ${applet.subtitle} ${applet.keywords}`, searchQuery)
       ),
     [searchQuery]
+  );
+  const filteredAppletIds = useMemo(
+    () => filteredApplets.map((applet) => applet.id).join("|"),
+    [filteredApplets]
   );
 
   const filteredCheatSections = useMemo(
@@ -1359,6 +1367,45 @@ export default function App() {
     setActiveToolIndex((current) => (current === index ? current : index));
   }, [filteredApplets]);
 
+  useEffect(() => {
+    const grid = toolGridRef.current;
+    if (!grid || page !== "home" || filteredApplets.length === 0) {
+      setToolGridHeight(null);
+      return;
+    }
+
+    let frame = 0;
+    const panelIndex = Math.min(activeToolIndex, grid.children.length - 1);
+    const activePanel = grid.children.item(panelIndex) as HTMLElement | null;
+
+    const updateHeight = () => {
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+
+      frame = window.requestAnimationFrame(() => {
+        const nextHeight = activePanel ? Math.ceil(activePanel.scrollHeight) : null;
+        setToolGridHeight((current) => (current === nextHeight ? current : nextHeight));
+      });
+    };
+
+    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(updateHeight);
+    if (activePanel && resizeObserver) {
+      resizeObserver.observe(activePanel);
+    }
+
+    window.addEventListener("resize", updateHeight);
+    updateHeight();
+
+    return () => {
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, [activeToolIndex, filteredAppletIds, filteredApplets.length, page]);
+
   function handlePaletteKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (!paletteItems.length) return;
 
@@ -1404,6 +1451,10 @@ export default function App() {
       setCopiedSectionId(null);
     }
   }
+
+  const toolGridStyle = toolGridHeight
+    ? ({ "--tool-grid-height": `${toolGridHeight}px` } as CSSProperties)
+    : undefined;
 
   return (
     <div className="site-shell">
@@ -1491,6 +1542,10 @@ export default function App() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </button>
           <label className="search-field" htmlFor="site-search">
+            <svg className="search-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none">
+              <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M12.7 12.7 17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
             <input
               id="site-search"
               type="search"
@@ -1506,7 +1561,7 @@ export default function App() {
 
       <main className="workspace">
         <section className={`page page-home ${page === "home" ? "is-active" : ""}`}>
-          <div className="tool-grid" ref={toolGridRef}>
+          <div className="tool-grid" ref={toolGridRef} style={toolGridStyle}>
             {filteredApplets.some((a) => a.id === "tool-containment-rod") ? (
               <article id="tool-containment-rod" className="tool-panel">
                 <div className="tool-heading">
