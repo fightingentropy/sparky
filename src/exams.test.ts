@@ -39,7 +39,6 @@ describe("exam data", () => {
       examById.get(id)!.sections.flatMap((section) => section.questions);
 
     expect(ids).toEqual([
-      "am2-installation-assessment",
       "basic-electrics",
       "building-regulations",
       "18th-edition",
@@ -47,6 +46,7 @@ describe("exam data", () => {
       "initial-verification",
       "periodic-inspection",
       "condition-reporting",
+      "am2-installation-assessment",
       "at-formative-mixed-practice"
     ]);
     expect(titles).toEqual(

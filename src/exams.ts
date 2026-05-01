@@ -28,486 +28,6 @@ export type Exam = {
 
 export const EXAMS: Exam[] = [
   {
-    id: "am2-installation-assessment",
-    title: "AM2 / AM2E — Installation Electrician EPA",
-    subtitle: "Knowledge / written element",
-    description:
-      "Representative of the knowledge and written-response element of the AM2 / AM2E end-point assessment for the Installation & Maintenance Electrician apprenticeship standard, delivered by NET. The practical assessment is hands-on installation, inspection, testing, fault-finding and commissioning — this exam drills the underpinning knowledge those practical tasks rely on. Built against BS 7671 (18th Edition, A2:2022 + A3:2024), HSG85, GS38 and Guidance Note 3.",
-    format: "30 multiple-choice questions. Aim for 70%+ in about 60 minutes — the AM2 practical is a separate test of skill, but consistent knowledge of these topics underpins every task.",
-    passMark: 21,
-    sections: [
-      {
-        id: "section-1",
-        title: "Section 1 — Safe Isolation & Preparation",
-        questions: [
-          {
-            number: 1,
-            prompt:
-              "Which HSE document provides the practical guidance on working on or near electrical equipment that AM2 candidates are expected to apply?",
-            options: {
-              A: "BS 7671 Wiring Regulations",
-              B: "HSG85 — Electricity at Work: Safe Working Practices",
-              C: "IET Guidance Note 3",
-              D: "PUWER 1998 Approved Code of Practice"
-            },
-            answer: "B",
-            explanation:
-              "HSG85 is HSE's practical guidance on safe electrical working — criteria for dead vs live work, competence, risk control, and procedures. BS 7671 is the installation standard, GN3 covers inspection & testing, and PUWER covers work equipment generally. On AM2, your safe-isolation approach is judged against HSG85."
-          },
-          {
-            number: 2,
-            prompt:
-              "The full safe isolation sequence you must demonstrate on AM2 is:",
-            options: {
-              A: "Isolate → prove tester → test for dead → lock off → re-prove tester",
-              B: "Identify the circuit → seek permission → isolate → secure by lock-off → prove tester on a known source → test for dead at the point of work → re-prove the tester on a known source → post caution/warning notices",
-              C: "Turn off the main switch → check no lights are on → start work",
-              D: "Isolate → begin work → test dead whenever in doubt"
-            },
-            answer: "B",
-            explanation:
-              "Identification and permission matter on shared or commercial premises. Lock-off secures the isolation. Proving the tester on a known source BEFORE and AFTER the dead test is the part candidates most often miss — it's what makes the 'dead' reading trustworthy."
-          },
-          {
-            number: 3,
-            prompt:
-              "Under HSE Guidance Note GS38, voltage indicators and test probes used on LV equipment should have:",
-            options: {
-              A: "Unshrouded metal probes with a 25 mm exposed tip for better contact",
-              B: "Finger barriers, an exposed metal tip of no more than 4 mm (preferably 2 mm or spring-loaded/shrouded), adequately insulated leads, and fused or current-limited leads",
-              C: "Neon screwdrivers only",
-              D: "Standard multimeter leads with no modification"
-            },
-            answer: "B",
-            explanation:
-              "GS38 sets the minimum probe/lead requirements. A short exposed tip stops bridging between adjacent conductors; finger barriers reduce hand-slip onto live parts; fused or current-limited leads limit the fault current if a probe slips. Unsuitable probes are a common root cause in investigated shock incidents."
-          },
-          {
-            number: 4,
-            prompt:
-              "You arrive on site to find the final circuit you must isolate is shared with equipment belonging to another occupier. The correct action is to:",
-            options: {
-              A: "Isolate anyway and apologise later",
-              B: "Seek permission from the duty holder / responsible person, agree a timed isolation or permit-to-work, then proceed",
-              C: "Pull the fuse and leave a note",
-              D: "Work live to avoid the disruption"
-            },
-            answer: "B",
-            explanation:
-              "Regulation 14 of EAWR 1989 and HSG85 require isolation to be carried out with permission where others may be affected. On larger sites a permit-to-work formalises this. Isolating without permission is a common AM2 failure point — the assessor is watching for it."
-          },
-          {
-            number: 5,
-            prompt:
-              "Your approved voltage indicator confirmed 'dead' at the point of work. You then fail to re-prove it on a known source. You should:",
-            options: {
-              A: "Record the test as valid — the indicator clearly worked a moment ago",
-              B: "Treat the circuit as live, replace/repair the indicator, and repeat the whole safe-isolation sequence from scratch",
-              C: "Continue working — indicators rarely fail",
-              D: "Swap to a multimeter and retest to confirm"
-            },
-            answer: "B",
-            explanation:
-              "The re-prove confirms the indicator was still working when it showed 'dead'. If it fails the re-prove, the earlier 'dead' reading cannot be trusted. A multimeter is not a GS38-approved voltage indicator and is no substitute."
-          }
-        ]
-      },
-      {
-        id: "section-2",
-        title: "Section 2 — Wiring Systems & Containment",
-        questions: [
-          {
-            number: 6,
-            prompt:
-              "Band I (e.g. ELV fire-alarm or data) cables are to share a metal trunking with Band II (230/400 V mains) cables. The installation must:",
-            options: {
-              A: "Simply share the trunking with no further measures",
-              B: "Segregate Band I from Band II by a continuous earthed metallic partition, OR use Band I cables insulated for the highest voltage present",
-              C: "Require no segregation provided the trunking is earthed",
-              D: "Separate them only with cable ties"
-            },
-            answer: "B",
-            explanation:
-              "Section 528.1 of BS 7671. The goal is to prevent inductive interference and to contain the consequences of an insulation breakdown between bands. Fire-alarm circuits (BS 5839) have additional category-specific segregation requirements on top of this."
-          },
-          {
-            number: 7,
-            prompt:
-              "The generally accepted maximum 'space factor' when filling cable trunking, calculated using the cable factor / trunking factor method in the On-Site Guide, is approximately:",
-            options: {
-              A: "25% of the trunking csa",
-              B: "45% of the trunking csa",
-              C: "70% of the trunking csa",
-              D: "100% of the trunking csa"
-            },
-            answer: "B",
-            explanation:
-              "The OSG cable-factor method caps effective fill at roughly 45% of the trunking cross-sectional area. Over-filling reduces heat dissipation (and therefore the cable's current-carrying capacity) and makes drawing in difficult. Conduit has its own separate, tighter table."
-          },
-          {
-            number: 8,
-            prompt:
-              "When planning a steel conduit run, the maximum number of 90° bends (or equivalent) usually permitted between two successive draw-in points is:",
-            options: {
-              A: "0",
-              B: "1",
-              C: "2",
-              D: "5"
-            },
-            answer: "C",
-            explanation:
-              "Two 90° bends between draw-in boxes — or four 45° bends, etc. — is the traditional practical limit in IET guidance. Exceeding this makes drawing-in difficult, risks damaging the cable insulation, and may require an additional draw-in box."
-          },
-          {
-            number: 9,
-            prompt:
-              "When terminating a 4 mm² 3-core SWA cable into a steel enclosure and using the armour as the cpc, the correct method is to:",
-            options: {
-              A: "Rely on the compression of the gland nut against the enclosure alone",
-              B: "Fit a suitable BS EN compression gland of the correct size, dress the armour under the gland cone so it is firmly clamped, bond the armour to the enclosure earth terminal via an earth tag/banjo where required, and fit a shroud to maintain the IP rating",
-              C: "Wrap the armour in PVC tape and terminate only the inner cores",
-              D: "Omit the armour bond as the cable contains an internal cpc"
-            },
-            answer: "B",
-            explanation:
-              "The armour is a cpc and requires a reliable low-resistance connection. A correctly-sized compression gland with earth tag — or an external earth banjo/tail where the enclosure is insulated or painted — provides this. If the cable also has an internal cpc core, the armour bond is in addition to, not instead of, it."
-          },
-          {
-            number: 10,
-            prompt:
-              "Cables passing through the holes drilled in floor/ceiling joists must, under Regulation 522.6.201, be:",
-            options: {
-              A: "Run through any convenient hole with no other precaution",
-              B: "At least 50 mm from the top or bottom of the joist, OR mechanically protected (e.g. enclosed in earthed metal, or incorporate an earthed metallic covering), OR otherwise protected from penetration by nails and screws",
-              C: "Stapled to the top of the joist for neatness",
-              D: "Always routed within plastic conduit, regardless of depth"
-            },
-            answer: "B",
-            explanation:
-              "Reg 522.6.201. The 50 mm rule keeps cables clear of where nails and screws are typically driven. If 50 mm clearance cannot be achieved, the cable must be mechanically protected or run in earthed metallic enclosure / incorporate an earthed metal covering."
-          }
-        ]
-      },
-      {
-        id: "section-3",
-        title: "Section 3 — Terminations & Accessories",
-        questions: [
-          {
-            number: 11,
-            prompt:
-              "Which statement about terminating a PVC/SWA cable into a metallic enclosure is correct?",
-            options: {
-              A: "The outer PVC sheath must be retained right up to the gland pot so that no armour is visible",
-              B: "The outer sheath is stripped back to expose the armour for the gland cone to grip; the inner bedding is stripped further back so the cores reach the terminals; a shroud is fitted over the gland to restore the IP rating",
-              C: "The inner cores should be twisted together before termination",
-              D: "Glands may be finger-tight only"
-            },
-            answer: "B",
-            explanation:
-              "Correct SWA termination: strip the sheath to expose the armour, dress the armour into the gland cone so it is firmly compressed, strip the bedding, terminate the cores. A rubber shroud restores the IP rating. The gland must be tightened to the manufacturer's specification — not so loose that the armour can move, not so tight that the cone deforms."
-          },
-          {
-            number: 12,
-            prompt:
-              "When terminating a stranded copper conductor into a screw terminal the recommended practice is to:",
-            options: {
-              A: "Tin the strands with solder first to give a firm mass",
-              B: "Strip the correct length, gently twist the strands to prevent strays, ensure the whole strand bundle sits under the clamping face, and tighten to the manufacturer's specified torque (using a torque screwdriver where called for)",
-              C: "Leave the outer insulation under the screw",
-              D: "Terminate only one strand to keep the joint neat"
-            },
-            answer: "B",
-            explanation:
-              "Solder-tinning is now discouraged — solder creeps under sustained pressure, creating a loose, high-resistance joint over time. The aim is to capture all strands under the terminal at the correct torque — too little causes high resistance, too much damages the conductor. Torque requirements are increasingly called up by Reg 526."
-          },
-          {
-            number: 13,
-            prompt:
-              "A 1.25 mm² 3-core flexible cord (3183Y) is being terminated at a BS 1363 13 A fused plug. The correct termination includes:",
-            options: {
-              A: "The brown core to the neutral pin and the blue to the line pin",
-              B: "The cord anchorage clamped on the outer sheath (not on the individual cores), the brown core to the fused (line) terminal, the blue to N, and the green/yellow cpc cut slightly longer than L and N",
-              C: "No cord grip, so the cores can flex freely",
-              D: "The cpc made shortest to save copper"
-            },
-            answer: "B",
-            explanation:
-              "Standard BS 1363 practice. The cpc is deliberately the longest core so that if the cord grip fails and the cable is pulled, the cpc is the last to disconnect — maintaining earth continuity as long as possible. The cord grip must clamp the outer sheath, never the cores themselves."
-          },
-          {
-            number: 14,
-            prompt:
-              "When a switched socket outlet is mounted on a flush metal back box fed by T&E, the correct detail is:",
-            options: {
-              A: "The outer sheath of the T&E terminated at the edge of the back-box knockout, with cores exposed through the hole",
-              B: "The outer sheath continued into the back box, a grommet or bush protecting the cable at the knockout, green/yellow sleeving over the bare cpc inside the box, and the metal back box earthed via a fly-lead or the accessory's earth terminal",
-              C: "The cpc left bare inside the box — no sleeve required on a metal accessory",
-              D: "No grommet, sleeve or sheath continuation needed"
-            },
-            answer: "B",
-            explanation:
-              "The sheath is retained into the box so the cores are protected; a grommet prevents sheath damage on the cut edge of the steel knockout; T&E cpc is bare and must be sleeved in green/yellow inside the enclosure. Metal back boxes require a cpc connection — achieved via a fly-lead to the back-box earth terminal or via a suitable earthed fixed-lug accessory."
-          }
-        ]
-      },
-      {
-        id: "section-4",
-        title: "Section 4 — Inspection, Testing & Certification",
-        questions: [
-          {
-            number: 15,
-            prompt:
-              "The full GN3 sequence of DEAD tests on a new installation is:",
-            options: {
-              A: "Continuity of protective conductors (and main/supplementary bonding) → continuity of ring final conductors (r1, rn, r2) → insulation resistance → polarity (dead) → earth electrode resistance where applicable",
-              B: "Insulation resistance → continuity → polarity",
-              C: "Polarity → insulation resistance → continuity",
-              D: "Functional testing → insulation resistance → continuity"
-            },
-            answer: "A",
-            explanation:
-              "GN3 sequence. cpc continuity is first so the circuit is safe for subsequent tests; the ring-final end-to-end values come next (with the figure-of-eight cross-connection test done after); IR and polarity dead follow; earth electrode resistance where applicable. Live tests (polarity live, Ze, PFC, Zs, RCD, functional) are done only after all dead tests pass and the installation is energised."
-          },
-          {
-            number: 16,
-            prompt:
-              "To verify the continuity of a main protective bonding conductor from the MET to the incoming metallic water service using a wander-lead R2 test you should:",
-            options: {
-              A: "Connect the test leads between the line conductor at the consumer unit and the pipework",
-              B: "Null the wander-lead resistance first, then connect one lead at the MET and the other at the clamp on the pipework, and read the resistance directly",
-              C: "Use a 500 V DC insulation resistance tester between MET and pipe",
-              D: "Measure between the outside tap and the boiler case"
-            },
-            answer: "B",
-            explanation:
-              "Wander-lead R2: null the leads so the instrument subtracts the wander-lead resistance, then measure from MET to the bonded part. The reading is the resistance of the bonding conductor alone. For a short 10 mm² run, expect a value well under 0.05 Ω."
-          },
-          {
-            number: 17,
-            prompt:
-              "A 500 V DC insulation resistance test on a 230 V lighting final circuit, with live conductors linked and measured to the cpc, reads 0.8 MΩ. The correct action is to:",
-            options: {
-              A: "Record as a pass — above the 0.5 MΩ SELV minimum",
-              B: "Record as a FAIL — below the 1.0 MΩ LV minimum in Table 64; isolate, progressively disconnect accessories, dimmers, SPDs or lamps to localise, rectify the fault, and retest",
-              C: "Record as a healthy reading typical of a new circuit",
-              D: "Repeat the test at 250 V DC and hope for a better reading"
-            },
-            answer: "B",
-            explanation:
-              "Table 64, BS 7671: 1.0 MΩ is the minimum for a 230 V LV circuit. 0.8 MΩ is a fail. Typical causes: pinched/nicked cable at a back-box grommet, moisture ingress, or voltage-sensitive equipment left in circuit (dimmers, SPDs, electronic RCBOs, lamps). Localise by section."
-          },
-          {
-            number: 18,
-            prompt:
-              "During a live polarity check at a switched lampholder, the lamp extinguishes when the wall switch is operated, but a voltage indicator shows 230 V between the lamp's live pin and earth even when the switch is OFF. The most likely fault is:",
-            options: {
-              A: "Correct wiring — the residual 230 V is normal capacitive coupling on a long lighting circuit and can be ignored",
-              B: "The single-pole switch has been wired into the NEUTRAL conductor rather than the line — a polarity fault requiring immediate correction",
-              C: "An RCD on the lighting circuit has tripped, leaving the line conductor at supply potential through the open contacts",
-              D: "The lamp is simply loose in the holder, allowing a small leakage current to register on the voltage indicator"
-            },
-            answer: "B",
-            explanation:
-              "A single-pole switch must only interrupt the line conductor (Reg 132.14 / 537). If it interrupts the neutral instead, the accessory remains live with the switch off — very dangerous during lamp changes. Polarity must be confirmed both dead (during dead tests) and live (after energising)."
-          },
-          {
-            number: 19,
-            prompt:
-              "The Schedule of Test Results must, as a minimum, record for each circuit:",
-            options: {
-              A: "Only the RCD disconnection times at 0.5×, 1× and 5× IΔn, since these are the safety-critical figures that BS 7671 calls up by name",
-              B: "Circuit reference, conductor csa, OCPD type and rating, R1+R2 (or R2 by wander lead), ring r1/rn/r2 where applicable, insulation resistance values, polarity confirmation, Zs (measured or calculated), RCD times at 1× and 5× IΔn (and 0.5× where recorded), and functional test confirmation",
-              C: "A pass/fail tick per circuit, with the underlying numerical values retained on the inspector's instrument download as the audit record",
-              D: "A written narrative of the test session signed by the duty holder, in place of the per-circuit numerical values that the EIC would otherwise reference"
-            },
-            answer: "B",
-            explanation:
-              "The Schedule of Test Results is the numerical evidence behind the EIC or EICR and the baseline against which future periodic tests will be compared. Missing entries can invalidate the certificate and make the next inspection harder."
-          },
-          {
-            number: 20,
-            prompt:
-              "An Electrical Installation Certificate for new work is signed, in separate signature blocks, by the person(s) responsible for:",
-            options: {
-              A: "The customer only, who confirms by signature that the work has been completed to their satisfaction and the installation is fit for purpose",
-              B: "Design, construction, and inspection & testing — each as a distinct signed responsibility (one competent person may sign all three on smaller projects)",
-              C: "Only the DNO engineer who has approved the connection of the installation to the public LV distribution network",
-              D: "Only the local-authority building control officer for notifiable Part P work in dwellings, with the contractor signing the schedules separately"
-            },
-            answer: "B",
-            explanation:
-              "Three distinct signature blocks on the EIC keep responsibility traceable, even when a single competent person discharges all three roles. Each signatory certifies, for their part, that the work complies with BS 7671 at the date of certification."
-          }
-        ]
-      },
-      {
-        id: "section-5",
-        title: "Section 5 — Fault Diagnosis & Rectification",
-        questions: [
-          {
-            number: 21,
-            prompt:
-              "On a ring final circuit, line–neutral readings at all sockets are correct, but line–earth continuity at one group of sockets is significantly higher than elsewhere on the ring. The most likely fault is:",
-            options: {
-              A: "An open-circuit (broken) cpc between two sockets on the ring, which removes the parallel cpc path for the affected group",
-              B: "An open line conductor",
-              C: "An open neutral conductor",
-              D: "Insulation breakdown between line and earth"
-            },
-            answer: "A",
-            explanation:
-              "With L-N healthy but L-E drifting up at a specific group of sockets, the line and neutral copper are intact but the cpc has a break — often a missed termination at a ceiling rose-style JB, a broken core at a spur, or a damaged accessory. Localise by sweeping R1+R2 around the ring and finding where the values change sharply."
-          },
-          {
-            number: 22,
-            prompt:
-              "A Type B 32 A MCB trips instantly each time it is closed. With all loads disconnected, an IR test between L and N on the affected circuit reads below 0.01 MΩ. The most likely fault is:",
-            options: {
-              A: "A direct line-to-neutral short — possibly a nail or screw through the cable, a crushed cable at a back-box, or a short at an accessory",
-              B: "An open-circuit cpc somewhere on the circuit, removing the path the MCB needs to clear an earth fault",
-              C: "High ambient temperature at the consumer unit causing the MCB's thermal element to trip on its rated current",
-              D: "An earth-leakage fault alone, since 32 A is well within the magnetic trip range of a Type B device"
-            },
-            answer: "A",
-            explanation:
-              "A near-zero L-N IR with loads removed is a direct short on the fixed wiring. Common causes: nail/screw penetration (especially outside safe zones), pinched cable at a back-box or under a flooring pin, or a shorted accessory. Localise by section — disconnect at the DB and each accessory in turn, retesting IR."
-          },
-          {
-            number: 23,
-            prompt:
-              "A 30 mA RCD protecting a socket circuit trips intermittently, mainly on damp mornings, with no appliance connected. An IR test between NEUTRAL and the cpc reads 0.3 MΩ. The most likely cause is:",
-            options: {
-              A: "A faulty RCD whose magnetic latch weakens at low ambient temperature, causing nuisance tripping in cool morning conditions",
-              B: "An intermittent neutral-to-earth insulation fault — leakage through the damaged N insulation adds to the residual current and trips the RCD; the fault becomes worse when damp",
-              C: "An oversized circuit breaker upstream of the RCD, allowing fault current to bypass the residual-current sensing coil",
-              D: "A loose line connection at the consumer unit producing intermittent voltage dips that mimic a residual current"
-            },
-            answer: "B",
-            explanation:
-              "RCDs operate on the imbalance between line and neutral. N-to-earth leakage (a damaged neutral conductor, or a shared neutral between circuits) produces residual current during normal operation and nuisance-trips the RCD. A poor N-E IR reading is the diagnostic fingerprint. Moisture makes it worse, hence the pattern on damp mornings."
-          },
-          {
-            number: 24,
-            prompt:
-              "A single final circuit measures a Zs significantly above its Table 41.3 maximum, while Ze and the Zs on other circuits in the same DB are within limits. The most likely cause(s) are:",
-            options: {
-              A: "High Ze at the origin — but that would affect every circuit",
-              B: "Excessive cable length on that circuit, an undersized or damaged cpc, or a poor/high-resistance termination at a JB or accessory",
-              C: "Incorrect DNO supply",
-              D: "An open RCD"
-            },
-            answer: "B",
-            explanation:
-              "A problem confined to one circuit points to that circuit's installation: a long run, undersized cpc, loose joint, or damaged termination. Compliant remedies include shortening the run, increasing cpc csa, re-terminating, or providing ADS via a 30 mA RCD and re-assessing. Up-rating the OCPD is NOT a valid fix — it would defeat overload protection."
-          },
-          {
-            number: 25,
-            prompt:
-              "On a ring final circuit under the figure-of-eight (cross-connected) test, the R1+R2 readings measured at each socket vary by more than 0.05 Ω around the ring. The most likely cause is:",
-            options: {
-              A: "The ring is correctly wired and balanced",
-              B: "A break in one leg of the ring, an interconnection between the two legs, or a spur fed from a spur",
-              C: "A polarity fault",
-              D: "An insulation fault"
-            },
-            answer: "B",
-            explanation:
-              "With a correctly-wired ring and line/cpc cross-connected at the DB, the R1+R2 at every socket should equal (r1+r2)/4 with only minor variation. Significant variation indicates one of the three classic ring defects. Comparing the end-to-end r1, rn, r2 values, then re-walking the ring, usually pin-points the cause."
-          }
-        ]
-      },
-      {
-        id: "section-6",
-        title: "Section 6 — Functional Testing & Commissioning",
-        questions: [
-          {
-            number: 26,
-            prompt:
-              "The correct sequence for initially energising a newly-installed installation is:",
-            options: {
-              A: "Close every MCB and RCD first to prove they hold against load, then close the main switch to energise the entire installation in one step",
-              B: "With all final-circuit devices OFF (including RCDs), close the main switch; verify supply polarity and Ze at the origin; then energise each circuit in turn, carrying out the relevant live tests (polarity live, Zs, RCD times, functional) before moving to the next",
-              C: "Plug in representative appliances on every circuit first, so that the live tests can include real-world load currents from the outset",
-              D: "Back-feed the installation from a known-energised socket on an adjacent circuit and work outwards through the consumer unit from there"
-            },
-            answer: "B",
-            explanation:
-              "Selective circuit-by-circuit energisation isolates any fault to a known circuit and keeps the installation under control. It also allows live tests to be carried out and recorded as each circuit is brought into service. Never back-feed the installation."
-          },
-          {
-            number: 27,
-            prompt:
-              "During RCD commissioning, a general-purpose 30 mA RCD (BS EN 61008/61009) measures: 0.5×IΔn — no trip in 2 s; 1×IΔn — trip at 180 ms; 5×IΔn — trip at 35 ms. The correct record is:",
-            options: {
-              A: "Pass — all three criteria met (no trip at 0.5×, ≤ 300 ms at 1×, ≤ 40 ms at 5×)",
-              B: "Fail at 5×IΔn — 35 ms is below the maximum permitted figure but exceeds the 25 ms manufacturer target for general-type RCDs",
-              C: "Fail at 1×IΔn — 180 ms exceeds the 150 ms half-rating proof figure that BS 7671 calls up for general-type RCDs",
-              D: "Fail at 0.5×IΔn — the device must trip at half rated current within 2 s, but on this test it remained closed throughout"
-            },
-            answer: "A",
-            explanation:
-              "General-type 30 mA RCD limits: 0.5×IΔn must NOT trip within 2 s, 1×IΔn must trip in ≤ 300 ms, 5×IΔn must trip in ≤ 40 ms. All three must be recorded. S-type (time-delayed) RCDs have different figures — used for selectivity with a downstream 30 mA RCD."
-          },
-          {
-            number: 28,
-            prompt:
-              "Commissioning a three-phase distribution board, a phase-rotation indicator at the DB shows reverse rotation. The correct action is to:",
-            options: {
-              A: "Leave it — phase rotation only matters for motor-driven plant, and the rotation can be corrected locally at each motor as it is brought into service",
-              B: "Identify and correct the cross-connection (at the origin or within the installation) so rotation is in the expected L1–L2–L3 sequence, then re-verify; correcting at an individual motor only hides the problem for every other three-phase load on the board",
-              C: "Change the motor windings on every three-phase machine connected to the board so each one matches the supplied rotation as installed",
-              D: "Swap the neutral conductor and one phase at the origin to invert the apparent rotation displayed on the indicator at the DB"
-            },
-            answer: "B",
-            explanation:
-              "Rotation at the DB must match the convention so every three-phase load (motors, HVAC plant, lifts, fire pumps) starts the correct way. Fixing rotation at a single motor only masks the board-level cross. Always correct at the root cause and re-verify."
-          },
-          {
-            number: 29,
-            prompt:
-              "Functional testing of a two-way and intermediate lighting circuit requires you to:",
-            options: {
-              A: "Confirm one strapper conductor carries voltage when its associated switch is operated, then move on once that single combination is proven",
-              B: "Operate each switch (both way-switches and each intermediate switch) through every combination, confirming the lamp turns ON/OFF correctly in each state and is off when every switch is in the rest position",
-              C: "Test only the insulation resistance of the circuit at 500 V DC, with all switches placed in the rest position before the test is applied",
-              D: "Measure the lamp current at each switch position and confirm it falls within ±10% of the design value calculated from the lamp wattage"
-            },
-            answer: "B",
-            explanation:
-              "All-combinations operation is the only way to prove the wiring of a multi-way lighting circuit. A miswire on an intermediate switch can look correct until a specific combination reveals it — so every sequence must be exercised."
-          },
-          {
-            number: 30,
-            prompt:
-              "At handover of a new installation the minimum documentation issued to the client normally includes:",
-            options: {
-              A: "The signed EIC alone, with the schedules and other supporting documents retained by the contractor for audit purposes",
-              B: "The signed EIC with its Schedule of Inspections and Schedule of Test Results, any Part P notification/compliance certificate where applicable, and operation/maintenance information — including a circuit list, protective device schedule, and manufacturer instructions for installed equipment",
-              C: "A verbal walk-through with no written documents on the day, provided the duty holder confirms acceptance in writing within 28 days of the work",
-              D: "A note of the RCD test-button location and a one-page summary of the protective device ratings on the consumer unit, with no schedules"
-            },
-            answer: "B",
-            explanation:
-              "BS 7671 and the Building Regulations set out the minimum handover pack. The two schedules carry the technical evidence behind the EIC; Part P notification/certification is required for notifiable domestic work in England; O&M information enables the client (and any future electrician) to operate and maintain the installation safely. On AM2, a missing or incomplete handover pack is a significant mark deduction."
-          }
-        ]
-      }
-    ],
-    scoring: [
-      { minScore: 27, range: "27–30", label: "Strong — AM2-ready on knowledge" },
-      { minScore: 24, range: "24–26", label: "Comfortable pass, polish weak topics" },
-      { minScore: 21, range: "21–23", label: "Borderline — review gaps before the EPA" },
-      { minScore: 0, range: "< 21", label: "More revision needed before sitting AM2" }
-    ],
-    priorities: [
-      "Safe isolation — rehearse the full sequence until it is automatic. The assessor will watch for permission, lock-off, prove/re-prove of the indicator, and GS38-compliant probes.",
-      "GN3 test sequence — dead tests first in the correct order, then live tests; be able to state WHY each step comes where it does.",
-      "RCD acceptance criteria cold — 0.5× IΔn no trip in 2 s, 1× IΔn ≤ 300 ms (general type), 5× IΔn ≤ 40 ms; know S-type figures separately.",
-      "Fault-finding discipline — the AM2 fault-find sub-test is heavily weighted. Practise interpreting Zs, IR and ring-final anomalies and working from symptom to root cause by splitting the circuit.",
-      "Commissioning & handover — selective energisation, three-phase rotation, multi-way lighting functional tests, and a complete documentation pack (EIC + both schedules + Part P + O&M)."
-    ]
-  },
-  {
     id: "basic-electrics",
     title: "Basic Electrics",
     subtitle: "Webinar 1 — fundamentals",
@@ -4571,6 +4091,486 @@ export const EXAMS: Exam[] = [
       "C1 / C2 / C3 / FI — be able to recite each definition exactly, and to apply them to real-world observations.",
       "Unsatisfactory triggers — any C1, C2 or FI; C3 alone is not Unsatisfactory.",
       "On-site response to a C1 — make safe, notify duty holder, record. Walking away from a known C1 is a personal-liability risk for the inspector."
+    ]
+  },
+  {
+    id: "am2-installation-assessment",
+    title: "AM2 / AM2E — Installation Electrician EPA",
+    subtitle: "Knowledge / written element",
+    description:
+      "Representative of the knowledge and written-response element of the AM2 / AM2E end-point assessment for the Installation & Maintenance Electrician apprenticeship standard, delivered by NET. The practical assessment is hands-on installation, inspection, testing, fault-finding and commissioning — this exam drills the underpinning knowledge those practical tasks rely on. Built against BS 7671 (18th Edition, A2:2022 + A3:2024), HSG85, GS38 and Guidance Note 3.",
+    format: "30 multiple-choice questions. Aim for 70%+ in about 60 minutes — the AM2 practical is a separate test of skill, but consistent knowledge of these topics underpins every task.",
+    passMark: 21,
+    sections: [
+      {
+        id: "section-1",
+        title: "Section 1 — Safe Isolation & Preparation",
+        questions: [
+          {
+            number: 1,
+            prompt:
+              "Which HSE document provides the practical guidance on working on or near electrical equipment that AM2 candidates are expected to apply?",
+            options: {
+              A: "BS 7671 Wiring Regulations",
+              B: "HSG85 — Electricity at Work: Safe Working Practices",
+              C: "IET Guidance Note 3",
+              D: "PUWER 1998 Approved Code of Practice"
+            },
+            answer: "B",
+            explanation:
+              "HSG85 is HSE's practical guidance on safe electrical working — criteria for dead vs live work, competence, risk control, and procedures. BS 7671 is the installation standard, GN3 covers inspection & testing, and PUWER covers work equipment generally. On AM2, your safe-isolation approach is judged against HSG85."
+          },
+          {
+            number: 2,
+            prompt:
+              "The full safe isolation sequence you must demonstrate on AM2 is:",
+            options: {
+              A: "Isolate → prove tester → test for dead → lock off → re-prove tester",
+              B: "Identify the circuit → seek permission → isolate → secure by lock-off → prove tester on a known source → test for dead at the point of work → re-prove the tester on a known source → post caution/warning notices",
+              C: "Turn off the main switch → check no lights are on → start work",
+              D: "Isolate → begin work → test dead whenever in doubt"
+            },
+            answer: "B",
+            explanation:
+              "Identification and permission matter on shared or commercial premises. Lock-off secures the isolation. Proving the tester on a known source BEFORE and AFTER the dead test is the part candidates most often miss — it's what makes the 'dead' reading trustworthy."
+          },
+          {
+            number: 3,
+            prompt:
+              "Under HSE Guidance Note GS38, voltage indicators and test probes used on LV equipment should have:",
+            options: {
+              A: "Unshrouded metal probes with a 25 mm exposed tip for better contact",
+              B: "Finger barriers, an exposed metal tip of no more than 4 mm (preferably 2 mm or spring-loaded/shrouded), adequately insulated leads, and fused or current-limited leads",
+              C: "Neon screwdrivers only",
+              D: "Standard multimeter leads with no modification"
+            },
+            answer: "B",
+            explanation:
+              "GS38 sets the minimum probe/lead requirements. A short exposed tip stops bridging between adjacent conductors; finger barriers reduce hand-slip onto live parts; fused or current-limited leads limit the fault current if a probe slips. Unsuitable probes are a common root cause in investigated shock incidents."
+          },
+          {
+            number: 4,
+            prompt:
+              "You arrive on site to find the final circuit you must isolate is shared with equipment belonging to another occupier. The correct action is to:",
+            options: {
+              A: "Isolate anyway and apologise later",
+              B: "Seek permission from the duty holder / responsible person, agree a timed isolation or permit-to-work, then proceed",
+              C: "Pull the fuse and leave a note",
+              D: "Work live to avoid the disruption"
+            },
+            answer: "B",
+            explanation:
+              "Regulation 14 of EAWR 1989 and HSG85 require isolation to be carried out with permission where others may be affected. On larger sites a permit-to-work formalises this. Isolating without permission is a common AM2 failure point — the assessor is watching for it."
+          },
+          {
+            number: 5,
+            prompt:
+              "Your approved voltage indicator confirmed 'dead' at the point of work. You then fail to re-prove it on a known source. You should:",
+            options: {
+              A: "Record the test as valid — the indicator clearly worked a moment ago",
+              B: "Treat the circuit as live, replace/repair the indicator, and repeat the whole safe-isolation sequence from scratch",
+              C: "Continue working — indicators rarely fail",
+              D: "Swap to a multimeter and retest to confirm"
+            },
+            answer: "B",
+            explanation:
+              "The re-prove confirms the indicator was still working when it showed 'dead'. If it fails the re-prove, the earlier 'dead' reading cannot be trusted. A multimeter is not a GS38-approved voltage indicator and is no substitute."
+          }
+        ]
+      },
+      {
+        id: "section-2",
+        title: "Section 2 — Wiring Systems & Containment",
+        questions: [
+          {
+            number: 6,
+            prompt:
+              "Band I (e.g. ELV fire-alarm or data) cables are to share a metal trunking with Band II (230/400 V mains) cables. The installation must:",
+            options: {
+              A: "Simply share the trunking with no further measures",
+              B: "Segregate Band I from Band II by a continuous earthed metallic partition, OR use Band I cables insulated for the highest voltage present",
+              C: "Require no segregation provided the trunking is earthed",
+              D: "Separate them only with cable ties"
+            },
+            answer: "B",
+            explanation:
+              "Section 528.1 of BS 7671. The goal is to prevent inductive interference and to contain the consequences of an insulation breakdown between bands. Fire-alarm circuits (BS 5839) have additional category-specific segregation requirements on top of this."
+          },
+          {
+            number: 7,
+            prompt:
+              "The generally accepted maximum 'space factor' when filling cable trunking, calculated using the cable factor / trunking factor method in the On-Site Guide, is approximately:",
+            options: {
+              A: "25% of the trunking csa",
+              B: "45% of the trunking csa",
+              C: "70% of the trunking csa",
+              D: "100% of the trunking csa"
+            },
+            answer: "B",
+            explanation:
+              "The OSG cable-factor method caps effective fill at roughly 45% of the trunking cross-sectional area. Over-filling reduces heat dissipation (and therefore the cable's current-carrying capacity) and makes drawing in difficult. Conduit has its own separate, tighter table."
+          },
+          {
+            number: 8,
+            prompt:
+              "When planning a steel conduit run, the maximum number of 90° bends (or equivalent) usually permitted between two successive draw-in points is:",
+            options: {
+              A: "0",
+              B: "1",
+              C: "2",
+              D: "5"
+            },
+            answer: "C",
+            explanation:
+              "Two 90° bends between draw-in boxes — or four 45° bends, etc. — is the traditional practical limit in IET guidance. Exceeding this makes drawing-in difficult, risks damaging the cable insulation, and may require an additional draw-in box."
+          },
+          {
+            number: 9,
+            prompt:
+              "When terminating a 4 mm² 3-core SWA cable into a steel enclosure and using the armour as the cpc, the correct method is to:",
+            options: {
+              A: "Rely on the compression of the gland nut against the enclosure alone",
+              B: "Fit a suitable BS EN compression gland of the correct size, dress the armour under the gland cone so it is firmly clamped, bond the armour to the enclosure earth terminal via an earth tag/banjo where required, and fit a shroud to maintain the IP rating",
+              C: "Wrap the armour in PVC tape and terminate only the inner cores",
+              D: "Omit the armour bond as the cable contains an internal cpc"
+            },
+            answer: "B",
+            explanation:
+              "The armour is a cpc and requires a reliable low-resistance connection. A correctly-sized compression gland with earth tag — or an external earth banjo/tail where the enclosure is insulated or painted — provides this. If the cable also has an internal cpc core, the armour bond is in addition to, not instead of, it."
+          },
+          {
+            number: 10,
+            prompt:
+              "Cables passing through the holes drilled in floor/ceiling joists must, under Regulation 522.6.201, be:",
+            options: {
+              A: "Run through any convenient hole with no other precaution",
+              B: "At least 50 mm from the top or bottom of the joist, OR mechanically protected (e.g. enclosed in earthed metal, or incorporate an earthed metallic covering), OR otherwise protected from penetration by nails and screws",
+              C: "Stapled to the top of the joist for neatness",
+              D: "Always routed within plastic conduit, regardless of depth"
+            },
+            answer: "B",
+            explanation:
+              "Reg 522.6.201. The 50 mm rule keeps cables clear of where nails and screws are typically driven. If 50 mm clearance cannot be achieved, the cable must be mechanically protected or run in earthed metallic enclosure / incorporate an earthed metal covering."
+          }
+        ]
+      },
+      {
+        id: "section-3",
+        title: "Section 3 — Terminations & Accessories",
+        questions: [
+          {
+            number: 11,
+            prompt:
+              "Which statement about terminating a PVC/SWA cable into a metallic enclosure is correct?",
+            options: {
+              A: "The outer PVC sheath must be retained right up to the gland pot so that no armour is visible",
+              B: "The outer sheath is stripped back to expose the armour for the gland cone to grip; the inner bedding is stripped further back so the cores reach the terminals; a shroud is fitted over the gland to restore the IP rating",
+              C: "The inner cores should be twisted together before termination",
+              D: "Glands may be finger-tight only"
+            },
+            answer: "B",
+            explanation:
+              "Correct SWA termination: strip the sheath to expose the armour, dress the armour into the gland cone so it is firmly compressed, strip the bedding, terminate the cores. A rubber shroud restores the IP rating. The gland must be tightened to the manufacturer's specification — not so loose that the armour can move, not so tight that the cone deforms."
+          },
+          {
+            number: 12,
+            prompt:
+              "When terminating a stranded copper conductor into a screw terminal the recommended practice is to:",
+            options: {
+              A: "Tin the strands with solder first to give a firm mass",
+              B: "Strip the correct length, gently twist the strands to prevent strays, ensure the whole strand bundle sits under the clamping face, and tighten to the manufacturer's specified torque (using a torque screwdriver where called for)",
+              C: "Leave the outer insulation under the screw",
+              D: "Terminate only one strand to keep the joint neat"
+            },
+            answer: "B",
+            explanation:
+              "Solder-tinning is now discouraged — solder creeps under sustained pressure, creating a loose, high-resistance joint over time. The aim is to capture all strands under the terminal at the correct torque — too little causes high resistance, too much damages the conductor. Torque requirements are increasingly called up by Reg 526."
+          },
+          {
+            number: 13,
+            prompt:
+              "A 1.25 mm² 3-core flexible cord (3183Y) is being terminated at a BS 1363 13 A fused plug. The correct termination includes:",
+            options: {
+              A: "The brown core to the neutral pin and the blue to the line pin",
+              B: "The cord anchorage clamped on the outer sheath (not on the individual cores), the brown core to the fused (line) terminal, the blue to N, and the green/yellow cpc cut slightly longer than L and N",
+              C: "No cord grip, so the cores can flex freely",
+              D: "The cpc made shortest to save copper"
+            },
+            answer: "B",
+            explanation:
+              "Standard BS 1363 practice. The cpc is deliberately the longest core so that if the cord grip fails and the cable is pulled, the cpc is the last to disconnect — maintaining earth continuity as long as possible. The cord grip must clamp the outer sheath, never the cores themselves."
+          },
+          {
+            number: 14,
+            prompt:
+              "When a switched socket outlet is mounted on a flush metal back box fed by T&E, the correct detail is:",
+            options: {
+              A: "The outer sheath of the T&E terminated at the edge of the back-box knockout, with cores exposed through the hole",
+              B: "The outer sheath continued into the back box, a grommet or bush protecting the cable at the knockout, green/yellow sleeving over the bare cpc inside the box, and the metal back box earthed via a fly-lead or the accessory's earth terminal",
+              C: "The cpc left bare inside the box — no sleeve required on a metal accessory",
+              D: "No grommet, sleeve or sheath continuation needed"
+            },
+            answer: "B",
+            explanation:
+              "The sheath is retained into the box so the cores are protected; a grommet prevents sheath damage on the cut edge of the steel knockout; T&E cpc is bare and must be sleeved in green/yellow inside the enclosure. Metal back boxes require a cpc connection — achieved via a fly-lead to the back-box earth terminal or via a suitable earthed fixed-lug accessory."
+          }
+        ]
+      },
+      {
+        id: "section-4",
+        title: "Section 4 — Inspection, Testing & Certification",
+        questions: [
+          {
+            number: 15,
+            prompt:
+              "The full GN3 sequence of DEAD tests on a new installation is:",
+            options: {
+              A: "Continuity of protective conductors (and main/supplementary bonding) → continuity of ring final conductors (r1, rn, r2) → insulation resistance → polarity (dead) → earth electrode resistance where applicable",
+              B: "Insulation resistance → continuity → polarity",
+              C: "Polarity → insulation resistance → continuity",
+              D: "Functional testing → insulation resistance → continuity"
+            },
+            answer: "A",
+            explanation:
+              "GN3 sequence. cpc continuity is first so the circuit is safe for subsequent tests; the ring-final end-to-end values come next (with the figure-of-eight cross-connection test done after); IR and polarity dead follow; earth electrode resistance where applicable. Live tests (polarity live, Ze, PFC, Zs, RCD, functional) are done only after all dead tests pass and the installation is energised."
+          },
+          {
+            number: 16,
+            prompt:
+              "To verify the continuity of a main protective bonding conductor from the MET to the incoming metallic water service using a wander-lead R2 test you should:",
+            options: {
+              A: "Connect the test leads between the line conductor at the consumer unit and the pipework",
+              B: "Null the wander-lead resistance first, then connect one lead at the MET and the other at the clamp on the pipework, and read the resistance directly",
+              C: "Use a 500 V DC insulation resistance tester between MET and pipe",
+              D: "Measure between the outside tap and the boiler case"
+            },
+            answer: "B",
+            explanation:
+              "Wander-lead R2: null the leads so the instrument subtracts the wander-lead resistance, then measure from MET to the bonded part. The reading is the resistance of the bonding conductor alone. For a short 10 mm² run, expect a value well under 0.05 Ω."
+          },
+          {
+            number: 17,
+            prompt:
+              "A 500 V DC insulation resistance test on a 230 V lighting final circuit, with live conductors linked and measured to the cpc, reads 0.8 MΩ. The correct action is to:",
+            options: {
+              A: "Record as a pass — above the 0.5 MΩ SELV minimum",
+              B: "Record as a FAIL — below the 1.0 MΩ LV minimum in Table 64; isolate, progressively disconnect accessories, dimmers, SPDs or lamps to localise, rectify the fault, and retest",
+              C: "Record as a healthy reading typical of a new circuit",
+              D: "Repeat the test at 250 V DC and hope for a better reading"
+            },
+            answer: "B",
+            explanation:
+              "Table 64, BS 7671: 1.0 MΩ is the minimum for a 230 V LV circuit. 0.8 MΩ is a fail. Typical causes: pinched/nicked cable at a back-box grommet, moisture ingress, or voltage-sensitive equipment left in circuit (dimmers, SPDs, electronic RCBOs, lamps). Localise by section."
+          },
+          {
+            number: 18,
+            prompt:
+              "During a live polarity check at a switched lampholder, the lamp extinguishes when the wall switch is operated, but a voltage indicator shows 230 V between the lamp's live pin and earth even when the switch is OFF. The most likely fault is:",
+            options: {
+              A: "Correct wiring — the residual 230 V is normal capacitive coupling on a long lighting circuit and can be ignored",
+              B: "The single-pole switch has been wired into the NEUTRAL conductor rather than the line — a polarity fault requiring immediate correction",
+              C: "An RCD on the lighting circuit has tripped, leaving the line conductor at supply potential through the open contacts",
+              D: "The lamp is simply loose in the holder, allowing a small leakage current to register on the voltage indicator"
+            },
+            answer: "B",
+            explanation:
+              "A single-pole switch must only interrupt the line conductor (Reg 132.14 / 537). If it interrupts the neutral instead, the accessory remains live with the switch off — very dangerous during lamp changes. Polarity must be confirmed both dead (during dead tests) and live (after energising)."
+          },
+          {
+            number: 19,
+            prompt:
+              "The Schedule of Test Results must, as a minimum, record for each circuit:",
+            options: {
+              A: "Only the RCD disconnection times at 0.5×, 1× and 5× IΔn, since these are the safety-critical figures that BS 7671 calls up by name",
+              B: "Circuit reference, conductor csa, OCPD type and rating, R1+R2 (or R2 by wander lead), ring r1/rn/r2 where applicable, insulation resistance values, polarity confirmation, Zs (measured or calculated), RCD times at 1× and 5× IΔn (and 0.5× where recorded), and functional test confirmation",
+              C: "A pass/fail tick per circuit, with the underlying numerical values retained on the inspector's instrument download as the audit record",
+              D: "A written narrative of the test session signed by the duty holder, in place of the per-circuit numerical values that the EIC would otherwise reference"
+            },
+            answer: "B",
+            explanation:
+              "The Schedule of Test Results is the numerical evidence behind the EIC or EICR and the baseline against which future periodic tests will be compared. Missing entries can invalidate the certificate and make the next inspection harder."
+          },
+          {
+            number: 20,
+            prompt:
+              "An Electrical Installation Certificate for new work is signed, in separate signature blocks, by the person(s) responsible for:",
+            options: {
+              A: "The customer only, who confirms by signature that the work has been completed to their satisfaction and the installation is fit for purpose",
+              B: "Design, construction, and inspection & testing — each as a distinct signed responsibility (one competent person may sign all three on smaller projects)",
+              C: "Only the DNO engineer who has approved the connection of the installation to the public LV distribution network",
+              D: "Only the local-authority building control officer for notifiable Part P work in dwellings, with the contractor signing the schedules separately"
+            },
+            answer: "B",
+            explanation:
+              "Three distinct signature blocks on the EIC keep responsibility traceable, even when a single competent person discharges all three roles. Each signatory certifies, for their part, that the work complies with BS 7671 at the date of certification."
+          }
+        ]
+      },
+      {
+        id: "section-5",
+        title: "Section 5 — Fault Diagnosis & Rectification",
+        questions: [
+          {
+            number: 21,
+            prompt:
+              "On a ring final circuit, line–neutral readings at all sockets are correct, but line–earth continuity at one group of sockets is significantly higher than elsewhere on the ring. The most likely fault is:",
+            options: {
+              A: "An open-circuit (broken) cpc between two sockets on the ring, which removes the parallel cpc path for the affected group",
+              B: "An open line conductor",
+              C: "An open neutral conductor",
+              D: "Insulation breakdown between line and earth"
+            },
+            answer: "A",
+            explanation:
+              "With L-N healthy but L-E drifting up at a specific group of sockets, the line and neutral copper are intact but the cpc has a break — often a missed termination at a ceiling rose-style JB, a broken core at a spur, or a damaged accessory. Localise by sweeping R1+R2 around the ring and finding where the values change sharply."
+          },
+          {
+            number: 22,
+            prompt:
+              "A Type B 32 A MCB trips instantly each time it is closed. With all loads disconnected, an IR test between L and N on the affected circuit reads below 0.01 MΩ. The most likely fault is:",
+            options: {
+              A: "A direct line-to-neutral short — possibly a nail or screw through the cable, a crushed cable at a back-box, or a short at an accessory",
+              B: "An open-circuit cpc somewhere on the circuit, removing the path the MCB needs to clear an earth fault",
+              C: "High ambient temperature at the consumer unit causing the MCB's thermal element to trip on its rated current",
+              D: "An earth-leakage fault alone, since 32 A is well within the magnetic trip range of a Type B device"
+            },
+            answer: "A",
+            explanation:
+              "A near-zero L-N IR with loads removed is a direct short on the fixed wiring. Common causes: nail/screw penetration (especially outside safe zones), pinched cable at a back-box or under a flooring pin, or a shorted accessory. Localise by section — disconnect at the DB and each accessory in turn, retesting IR."
+          },
+          {
+            number: 23,
+            prompt:
+              "A 30 mA RCD protecting a socket circuit trips intermittently, mainly on damp mornings, with no appliance connected. An IR test between NEUTRAL and the cpc reads 0.3 MΩ. The most likely cause is:",
+            options: {
+              A: "A faulty RCD whose magnetic latch weakens at low ambient temperature, causing nuisance tripping in cool morning conditions",
+              B: "An intermittent neutral-to-earth insulation fault — leakage through the damaged N insulation adds to the residual current and trips the RCD; the fault becomes worse when damp",
+              C: "An oversized circuit breaker upstream of the RCD, allowing fault current to bypass the residual-current sensing coil",
+              D: "A loose line connection at the consumer unit producing intermittent voltage dips that mimic a residual current"
+            },
+            answer: "B",
+            explanation:
+              "RCDs operate on the imbalance between line and neutral. N-to-earth leakage (a damaged neutral conductor, or a shared neutral between circuits) produces residual current during normal operation and nuisance-trips the RCD. A poor N-E IR reading is the diagnostic fingerprint. Moisture makes it worse, hence the pattern on damp mornings."
+          },
+          {
+            number: 24,
+            prompt:
+              "A single final circuit measures a Zs significantly above its Table 41.3 maximum, while Ze and the Zs on other circuits in the same DB are within limits. The most likely cause(s) are:",
+            options: {
+              A: "High Ze at the origin — but that would affect every circuit",
+              B: "Excessive cable length on that circuit, an undersized or damaged cpc, or a poor/high-resistance termination at a JB or accessory",
+              C: "Incorrect DNO supply",
+              D: "An open RCD"
+            },
+            answer: "B",
+            explanation:
+              "A problem confined to one circuit points to that circuit's installation: a long run, undersized cpc, loose joint, or damaged termination. Compliant remedies include shortening the run, increasing cpc csa, re-terminating, or providing ADS via a 30 mA RCD and re-assessing. Up-rating the OCPD is NOT a valid fix — it would defeat overload protection."
+          },
+          {
+            number: 25,
+            prompt:
+              "On a ring final circuit under the figure-of-eight (cross-connected) test, the R1+R2 readings measured at each socket vary by more than 0.05 Ω around the ring. The most likely cause is:",
+            options: {
+              A: "The ring is correctly wired and balanced",
+              B: "A break in one leg of the ring, an interconnection between the two legs, or a spur fed from a spur",
+              C: "A polarity fault",
+              D: "An insulation fault"
+            },
+            answer: "B",
+            explanation:
+              "With a correctly-wired ring and line/cpc cross-connected at the DB, the R1+R2 at every socket should equal (r1+r2)/4 with only minor variation. Significant variation indicates one of the three classic ring defects. Comparing the end-to-end r1, rn, r2 values, then re-walking the ring, usually pin-points the cause."
+          }
+        ]
+      },
+      {
+        id: "section-6",
+        title: "Section 6 — Functional Testing & Commissioning",
+        questions: [
+          {
+            number: 26,
+            prompt:
+              "The correct sequence for initially energising a newly-installed installation is:",
+            options: {
+              A: "Close every MCB and RCD first to prove they hold against load, then close the main switch to energise the entire installation in one step",
+              B: "With all final-circuit devices OFF (including RCDs), close the main switch; verify supply polarity and Ze at the origin; then energise each circuit in turn, carrying out the relevant live tests (polarity live, Zs, RCD times, functional) before moving to the next",
+              C: "Plug in representative appliances on every circuit first, so that the live tests can include real-world load currents from the outset",
+              D: "Back-feed the installation from a known-energised socket on an adjacent circuit and work outwards through the consumer unit from there"
+            },
+            answer: "B",
+            explanation:
+              "Selective circuit-by-circuit energisation isolates any fault to a known circuit and keeps the installation under control. It also allows live tests to be carried out and recorded as each circuit is brought into service. Never back-feed the installation."
+          },
+          {
+            number: 27,
+            prompt:
+              "During RCD commissioning, a general-purpose 30 mA RCD (BS EN 61008/61009) measures: 0.5×IΔn — no trip in 2 s; 1×IΔn — trip at 180 ms; 5×IΔn — trip at 35 ms. The correct record is:",
+            options: {
+              A: "Pass — all three criteria met (no trip at 0.5×, ≤ 300 ms at 1×, ≤ 40 ms at 5×)",
+              B: "Fail at 5×IΔn — 35 ms is below the maximum permitted figure but exceeds the 25 ms manufacturer target for general-type RCDs",
+              C: "Fail at 1×IΔn — 180 ms exceeds the 150 ms half-rating proof figure that BS 7671 calls up for general-type RCDs",
+              D: "Fail at 0.5×IΔn — the device must trip at half rated current within 2 s, but on this test it remained closed throughout"
+            },
+            answer: "A",
+            explanation:
+              "General-type 30 mA RCD limits: 0.5×IΔn must NOT trip within 2 s, 1×IΔn must trip in ≤ 300 ms, 5×IΔn must trip in ≤ 40 ms. All three must be recorded. S-type (time-delayed) RCDs have different figures — used for selectivity with a downstream 30 mA RCD."
+          },
+          {
+            number: 28,
+            prompt:
+              "Commissioning a three-phase distribution board, a phase-rotation indicator at the DB shows reverse rotation. The correct action is to:",
+            options: {
+              A: "Leave it — phase rotation only matters for motor-driven plant, and the rotation can be corrected locally at each motor as it is brought into service",
+              B: "Identify and correct the cross-connection (at the origin or within the installation) so rotation is in the expected L1–L2–L3 sequence, then re-verify; correcting at an individual motor only hides the problem for every other three-phase load on the board",
+              C: "Change the motor windings on every three-phase machine connected to the board so each one matches the supplied rotation as installed",
+              D: "Swap the neutral conductor and one phase at the origin to invert the apparent rotation displayed on the indicator at the DB"
+            },
+            answer: "B",
+            explanation:
+              "Rotation at the DB must match the convention so every three-phase load (motors, HVAC plant, lifts, fire pumps) starts the correct way. Fixing rotation at a single motor only masks the board-level cross. Always correct at the root cause and re-verify."
+          },
+          {
+            number: 29,
+            prompt:
+              "Functional testing of a two-way and intermediate lighting circuit requires you to:",
+            options: {
+              A: "Confirm one strapper conductor carries voltage when its associated switch is operated, then move on once that single combination is proven",
+              B: "Operate each switch (both way-switches and each intermediate switch) through every combination, confirming the lamp turns ON/OFF correctly in each state and is off when every switch is in the rest position",
+              C: "Test only the insulation resistance of the circuit at 500 V DC, with all switches placed in the rest position before the test is applied",
+              D: "Measure the lamp current at each switch position and confirm it falls within ±10% of the design value calculated from the lamp wattage"
+            },
+            answer: "B",
+            explanation:
+              "All-combinations operation is the only way to prove the wiring of a multi-way lighting circuit. A miswire on an intermediate switch can look correct until a specific combination reveals it — so every sequence must be exercised."
+          },
+          {
+            number: 30,
+            prompt:
+              "At handover of a new installation the minimum documentation issued to the client normally includes:",
+            options: {
+              A: "The signed EIC alone, with the schedules and other supporting documents retained by the contractor for audit purposes",
+              B: "The signed EIC with its Schedule of Inspections and Schedule of Test Results, any Part P notification/compliance certificate where applicable, and operation/maintenance information — including a circuit list, protective device schedule, and manufacturer instructions for installed equipment",
+              C: "A verbal walk-through with no written documents on the day, provided the duty holder confirms acceptance in writing within 28 days of the work",
+              D: "A note of the RCD test-button location and a one-page summary of the protective device ratings on the consumer unit, with no schedules"
+            },
+            answer: "B",
+            explanation:
+              "BS 7671 and the Building Regulations set out the minimum handover pack. The two schedules carry the technical evidence behind the EIC; Part P notification/certification is required for notifiable domestic work in England; O&M information enables the client (and any future electrician) to operate and maintain the installation safely. On AM2, a missing or incomplete handover pack is a significant mark deduction."
+          }
+        ]
+      }
+    ],
+    scoring: [
+      { minScore: 27, range: "27–30", label: "Strong — AM2-ready on knowledge" },
+      { minScore: 24, range: "24–26", label: "Comfortable pass, polish weak topics" },
+      { minScore: 21, range: "21–23", label: "Borderline — review gaps before the EPA" },
+      { minScore: 0, range: "< 21", label: "More revision needed before sitting AM2" }
+    ],
+    priorities: [
+      "Safe isolation — rehearse the full sequence until it is automatic. The assessor will watch for permission, lock-off, prove/re-prove of the indicator, and GS38-compliant probes.",
+      "GN3 test sequence — dead tests first in the correct order, then live tests; be able to state WHY each step comes where it does.",
+      "RCD acceptance criteria cold — 0.5× IΔn no trip in 2 s, 1× IΔn ≤ 300 ms (general type), 5× IΔn ≤ 40 ms; know S-type figures separately.",
+      "Fault-finding discipline — the AM2 fault-find sub-test is heavily weighted. Practise interpreting Zs, IR and ring-final anomalies and working from symptom to root cause by splitting the circuit.",
+      "Commissioning & handover — selective energisation, three-phase rotation, multi-way lighting functional tests, and a complete documentation pack (EIC + both schedules + Part P + O&M)."
     ]
   },
   {
