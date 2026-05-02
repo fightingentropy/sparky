@@ -5,7 +5,7 @@ import { usePersistedState } from "./usePersistedState";
 type Answers = Record<number, ExamChoice>;
 
 const LETTERS: ExamChoice[] = ["A", "B", "C", "D"];
-const EXAM_STORAGE_VERSION = "2026-05-consolidated-topic-bank";
+const EXAM_STORAGE_VERSION = "2026-05-merged-topic-banks";
 const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
 const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
 
