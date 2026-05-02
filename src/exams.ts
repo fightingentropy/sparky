@@ -33,8 +33,8 @@ export const EXAMS: Exam[] = [
     subtitle: "Webinar 1 — fundamentals",
     description:
       "A focused exam built around Webinar 1 — Introduction to Basic Electrics. Covers voltage, current, resistance, power, Ohm's law, the power law, AC vs DC, single- and three-phase basics, and the conductor behaviour you'll rely on throughout the rest of the course.",
-    format: "17 multiple-choice questions. Aim for 13+/17 (75%) before moving on to regulations material.",
-    passMark: 13,
+    format: "20 multiple-choice questions. Aim for 15+/20 (75%) before moving on to regulations material.",
+    passMark: 15,
     sections: [
       {
         id: "section-1",
@@ -237,16 +237,17 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 14,
-            prompt: "Three 6 Ω resistors are connected in parallel. The total resistance is:",
+            prompt:
+              "Two copper conductors have the same length, but one has a cross-sectional area of 1.25 mm² and the other is 2.5 mm². The resistance of the 1.25 mm² conductor will be:",
             options: {
-              A: "0.5 Ω",
-              B: "2 Ω",
-              C: "6 Ω",
-              D: "18 Ω"
+              A: "Half the resistance of the 2.5 mm² conductor",
+              B: "The same resistance as the 2.5 mm² conductor",
+              C: "Double the resistance of the 2.5 mm² conductor",
+              D: "Four times the resistance of the 2.5 mm² conductor"
             },
-            answer: "B",
+            answer: "C",
             explanation:
-              "2 Ω. For n equal resistors in parallel, RT = R/n = 6/3 = 2 Ω. General formula: 1/RT = 1/R1 + 1/R2 + 1/R3."
+              "R = ρL/A, so for the same material and length, resistance is inversely proportional to CSA. Halving the CSA from 2.5 mm² to 1.25 mm² doubles the resistance. This is the same relationship behind voltage drop and R1+R2 values."
           },
           {
             number: 15,
@@ -289,15 +290,57 @@ export const EXAMS: Exam[] = [
             answer: "A",
             explanation:
               "The ring's parallel paths share the load, allowing 2.5 mm² cable with 32 A protection (Appendix 15). \"Redundancy\" (B) is actually undesirable — a break in the ring creates an undetected radial that can be overloaded, which is why the continuity (r1/rn/r2) tests exist."
+          },
+          {
+            number: 18,
+            prompt:
+              "Two 10 Ω heating elements are connected in series across a 230 V supply. The circuit current is approximately:",
+            options: {
+              A: "5.75 A",
+              B: "11.5 A",
+              C: "23 A",
+              D: "46 A"
+            },
+            answer: "B",
+            explanation:
+              "Series resistances add: 10 Ω + 10 Ω = 20 Ω. I = V/R = 230/20 = 11.5 A. The trap is to treat the two heaters as parallel, which would halve the resistance and double the current instead."
+          },
+          {
+            number: 19,
+            prompt:
+              "A balanced three-phase load draws equal current in each line. The current in the neutral conductor is:",
+            options: {
+              A: "The sum of all three line currents",
+              B: "The same as one line current",
+              C: "Approximately zero",
+              D: "1.732 times one line current"
+            },
+            answer: "C",
+            explanation:
+              "In a balanced three-phase system the three line currents are 120° apart and cancel vectorially in the neutral, so neutral current is approximately zero. Unbalanced single-phase loads and harmonics are what make neutral current appear in practice."
+          },
+          {
+            number: 20,
+            prompt:
+              "A 230 V supply feeds a purely resistive load drawing 8 A. The power consumed is:",
+            options: {
+              A: "28.75 W",
+              B: "238 W",
+              C: "1.84 kW",
+              D: "184 kW"
+            },
+            answer: "C",
+            explanation:
+              "P = V × I = 230 × 8 = 1840 W = 1.84 kW. Because the load is purely resistive, power factor is 1 and there is no separate apparent-power correction."
           }
         ]
       }
     ],
     scoring: [
-      { minScore: 16, range: "16–17", label: "Strong — fundamentals secure" },
-      { minScore: 13, range: "13–15", label: "Comfortable pass" },
-      { minScore: 10, range: "10–12", label: "Some gaps — revisit Ohm's and the power law" },
-      { minScore: 0, range: "< 10", label: "Re-watch the basic electrics webinar before moving on" }
+      { minScore: 18, range: "18–20", label: "Strong — fundamentals secure" },
+      { minScore: 15, range: "15–17", label: "Comfortable pass" },
+      { minScore: 12, range: "12–14", label: "Some gaps — revisit Ohm's and the power law" },
+      { minScore: 0, range: "< 12", label: "Re-watch the basic electrics webinar before moving on" }
     ],
     priorities: [
       "Ohm's law and the power law triangles — be able to rearrange V = IR and P = VI on demand without writing them down.",
@@ -310,9 +353,9 @@ export const EXAMS: Exam[] = [
     title: "Building Regulations & Part P",
     subtitle: "Combined topic drill + Access Training homework practice bank",
     description:
-      "A focused exam built around Webinar 2 — Basic Electrics & Building Regulations, with the emphasis on the Building Regulations side. Covers Part P scope, notifiable work, the relevant Approved Documents, the routes to compliance for an electrician, and how BS 7671 sits inside the regulatory framework in England. Now combined with 20 questions from the Access Training Building Regulations homework — covering Approved Documents A, B, C, E, F, L, M and P, plus the practical install detail (notch & chase depths, gas/electricity spacing, EV charge-point provisions).",
-    format: "32 multiple-choice questions. Aim for 22+/32 (70%+) to pass; 29+/32 (90%+) for a strong result.",
-    passMark: 22,
+      "A focused exam built around Webinar 2 — Basic Electrics & Building Regulations, with the emphasis on the Building Regulations side. Covers Part P scope, notifiable work, the relevant Approved Documents, the routes to compliance for an electrician, and how BS 7671 sits inside the regulatory framework in England. Combines the Access Training Building Regulations homework practice bank with additional tricky scenario questions on Approved Documents A, B, C, E, F, L, M and P, plus practical install detail such as notch and chase depths, gas/electricity spacing, EV charge-point provisions and Part P scope traps.",
+    format: "40 multiple-choice questions. Aim for 28+/40 (70%+) to pass; 36+/40 (90%+) for a strong result.",
+    passMark: 28,
     sections: [
       {
         id: "section-1",
@@ -496,8 +539,8 @@ export const EXAMS: Exam[] = [
         ]
       },
       {
-        id: "section-1",
-        title: "Section 1 — Building Regulations Practice Bank",
+        id: "section-4",
+        title: "Section 4 — Building Regulations Practice Bank",
         questions: [
           {
             number: 13,
@@ -629,7 +672,7 @@ export const EXAMS: Exam[] = [
             },
             answer: "C",
             explanation:
-              "Since 2013 only two categories are notifiable: a new circuit, or a consumer unit replacement. Connecting an electric gate to an existing isolator is an addition to an existing circuit, so it is non-notifiable. Both the new central heating circuit and the new outdoor lighting circuit are new circuits and therefore notifiable."
+              "Since 2013 the notifiable categories are a new circuit, a consumer unit replacement, or an addition/alteration to an existing circuit in a special location. Connecting an electric gate to an existing isolator is an addition to an existing circuit outside a special location, so it is non-notifiable. The central-heating and outdoor-lighting examples are new circuits, and the extractor fan is within the bath/shower special-location dimensions."
           },
           {
             number: 23,
@@ -640,9 +683,9 @@ export const EXAMS: Exam[] = [
               C: "In the common access areas of blocks of flats such as corridors",
               D: "In business premises in the same building as a dwelling with separate metering"
             },
-            answer: "C",
+            answer: "D",
             explanation:
-              "Part P applies to dwellings and to outbuildings/gardens that are part of a dwelling — so a detached garage and a pond pump are in scope. Common access areas of blocks of flats and separately-metered business premises are explicitly excluded; common parts come under other Approved Documents (B, M etc.)."
+              "Part P applies to dwellings, associated outbuildings/gardens, common access areas in blocks of flats, shared amenities, and business premises sharing a supply with a dwelling. It does not apply to business premises in the same building where they have separate metering."
           },
           {
             number: 24,
@@ -678,7 +721,7 @@ export const EXAMS: Exam[] = [
               A: "0.25 x joist depth",
               B: "Between 0.25 and 0.4 x span",
               C: "Between 0.07 and 0.25 x span",
-              D: "A maximum of 0.125 x joint depth"
+              D: "A maximum of 0.125 x joist depth"
             },
             answer: "D",
             explanation:
@@ -731,7 +774,7 @@ export const EXAMS: Exam[] = [
             options: {
               A: "Between 1350mm and 1450mm above floor level",
               B: "Between 25mm and 600mm below the ceiling",
-              C: "Below 450mm?",
+              C: "Below 450mm",
               D: "Between 450mm and 1200mm from the finished floor level"
             },
             answer: "D",
@@ -765,15 +808,127 @@ export const EXAMS: Exam[] = [
             answer: "C",
             explanation:
               "OSG Table 7.1 — a 32 A radial socket-outlet circuit needs 4 mm² live conductors (typically with 1.5 mm² CPC in T+E) on the standard reference methods. 2.5 mm² T+E only carries up to 27 A in many install methods, so it cannot be protected by a 32 A device."
+          },
+          {
+            number: 33,
+            prompt:
+              "A contractor adds an extra socket to an existing ring final circuit in a living room, outside any special location. Under Part P in England this work is:",
+            options: {
+              A: "Notifiable because all socket work is notifiable",
+              B: "Notifiable only if the circuit is RCD protected",
+              C: "Non-notifiable, but still required to comply with BS 7671 and be certified appropriately",
+              D: "Outside the scope of Part P"
+            },
+            answer: "C",
+            explanation:
+              "An addition to an existing circuit outside a special location is non-notifiable. That does not make it unregulated: the work is still within Part P, must be safe, and should be recorded on a Minor Electrical Installation Works Certificate."
+          },
+          {
+            number: 34,
+            prompt:
+              "Replacing a domestic consumer unit in England is:",
+            options: {
+              A: "Always non-notifiable if no new circuits are added",
+              B: "Notifiable work under Part P",
+              C: "Only notifiable if it is in a bathroom",
+              D: "Only controlled by the DNO"
+            },
+            answer: "B",
+            explanation:
+              "The three notifiable categories include replacement of a consumer unit. It remains notifiable even if the outgoing circuits are unchanged, because the consumer unit is central to fault protection, RCD provision, main isolation and circuit identification."
+          },
+          {
+            number: 35,
+            prompt:
+              "A shop sits below a flat in the same building. The shop has its own separate electricity meter and supply. Part P applies to the shop's electrical installation:",
+            options: {
+              A: "Always, because there is a dwelling in the same building",
+              B: "Only if the shop contains a kitchen",
+              C: "Only if the flat owner requests it",
+              D: "No, because the business premises are separately metered"
+            },
+            answer: "D",
+            explanation:
+              "Part P includes business premises only where they are connected to the same meter or source as the dwelling. A separately metered shop is outside Part P, although BS 7671 and workplace legislation still apply."
+          },
+          {
+            number: 36,
+            prompt:
+              "In a new dwelling, one way of satisfying Approved Document M for ordinary light switches and socket-outlets is to install them:",
+            options: {
+              A: "Between 25 mm and 150 mm below the ceiling",
+              B: "Between 450 mm and 1200 mm above finished floor level",
+              C: "At exactly 1350 mm above finished floor level",
+              D: "Only on the ground floor"
+            },
+            answer: "B",
+            explanation:
+              "Part M guidance for new dwellings puts frequently used switches and sockets between 450 mm and 1200 mm above finished floor level. Consumer unit switch heights are a separate Part M detail and should not be confused with accessory heights."
+          },
+          {
+            number: 37,
+            prompt:
+              "A horizontal chase in a masonry wall should generally not exceed:",
+            options: {
+              A: "One sixth of the wall thickness",
+              B: "One third of the wall thickness",
+              C: "Half of the wall thickness",
+              D: "The full wall thickness if filled with plaster"
+            },
+            answer: "A",
+            explanation:
+              "Horizontal chases are limited to 1/6 of wall thickness; vertical chases are limited to 1/3. The trap is swapping those two figures. Chasing beyond the limits weakens the wall and can crack finishes or structure."
+          },
+          {
+            number: 38,
+            prompt:
+              "Holes drilled through timber joists for cables should generally be located:",
+            options: {
+              A: "In the top edge, within 0.07 to 0.25 of the span",
+              B: "On the neutral axis, between 0.25 and 0.4 of the span, and no larger than 0.25 of the joist depth",
+              C: "Anywhere in the joist provided the cable is RCD protected",
+              D: "At the very end of the joist next to the support"
+            },
+            answer: "B",
+            explanation:
+              "Approved Document A differentiates notches and holes. Notches are in the top edge between 0.07 and 0.25 of span and max 0.125 depth; drilled holes are on the neutral axis between 0.25 and 0.4 of span and max 0.25 depth."
+          },
+          {
+            number: 39,
+            prompt:
+              "Where cables pass through a fire-resisting wall or floor, the Building Regulations concern most directly raised is:",
+            options: {
+              A: "Part B — maintaining fire resistance by suitable fire-stopping around the penetration",
+              B: "Part M — switch heights",
+              C: "Part F — fan extract rates",
+              D: "Part E — socket staggering"
+            },
+            answer: "A",
+            explanation:
+              "Part B requires the fire resistance of compartment walls and floors to be maintained. Cable penetrations need suitable fire-stopping so the electrical work does not create a route for smoke or flame."
+          },
+          {
+            number: 40,
+            prompt:
+              "A new circuit is installed from a dwelling consumer unit to supply fixed garden lighting. Under Part P in England it is:",
+            options: {
+              A: "Non-notifiable because it is outdoors",
+              B: "Notifiable because it is a new circuit",
+              C: "Only notifiable if it uses SWA cable",
+              D: "Outside Part P because the lighting is not inside the dwelling"
+            },
+            answer: "B",
+            explanation:
+              "Part P applies to fixed electrical installations in gardens or land associated with a dwelling where supplied from the dwelling. Any new circuit is notifiable, regardless of whether it runs indoors or outdoors."
           }
         ]
       }
     ],
     scoring: [
-      { minScore: 29, range: "29–32", label: "Strong — homework standard" },
-      { minScore: 22, range: "22–28", label: "Comfortable pass" },
-      { minScore: 16, range: "16–21", label: "Re-read the relevant theory before re-attempting" },
-      { minScore: 0, range: "< 16", label: "Re-watch the topic webinar before re-attempting" }
+      { minScore: 36, range: "36–40", label: "Strong — homework standard" },
+      { minScore: 28, range: "28–35", label: "Comfortable pass" },
+      { minScore: 20, range: "20–27", label: "Re-read the relevant theory before re-attempting" },
+      { minScore: 0, range: "< 20", label: "Re-watch the topic webinar before re-attempting" }
     ],
     priorities: [
       "The three notifiable categories under Part P — new circuit, consumer unit, special location — these are the only ones that trigger notification.",
@@ -975,8 +1130,8 @@ export const EXAMS: Exam[] = [
         ]
       },
       {
-        id: "section-1",
-        title: "Section 1 — 18th Edition Practice Bank",
+        id: "section-4-practice",
+        title: "Section 4 — 18th Edition Practice Bank",
         questions: [
           {
             number: 13,
@@ -1156,7 +1311,7 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 31,
-            prompt: "A 20A 400V 3-phase motor circuit, connected to a TN system has a maximum disconnection time of?  ",
+            prompt: "A 20A 400V 3-phase motor circuit, connected to a TN system, has a maximum disconnection time of:",
             options: { A: "0.2s", B: "5s", C: "0.4s", D: "0.1s" },
             answer: "A",
             explanation: "Table 41.1 — TN system, final circuit at U₀ > 230 V: max disconnection time 0.2 s. (At 230 V the limit is 0.4 s; distribution circuits get 5 s.)"
@@ -1363,7 +1518,7 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 52,
-            prompt: "A distribution circuit supplying a garage, connected to a 230V A.C. TN system has a maximum disconnection time off?",
+            prompt: "A distribution circuit supplying a garage, connected to a 230V A.C. TN system, has a maximum disconnection time of:",
             options: { A: "0.2s", B: "0.4s", C: "5s", D: "1s" },
             answer: "C",
             explanation: "Table 41.1 — distribution circuits (and final circuits > 32 A) on TN system: maximum 5 s. Final circuits ≤ 32 A on 230 V TN: 0.4 s. The garage is fed via a sub-main/distribution circuit, not a final circuit."
@@ -1523,8 +1678,8 @@ export const EXAMS: Exam[] = [
         ]
       },
       {
-        id: "section-4",
-        title: "Section 4 — Consolidated BS 7671 Application",
+        id: "section-5",
+        title: "Section 5 — Consolidated BS 7671 Application",
         questions: [
           {
             number: 69,
@@ -1713,9 +1868,9 @@ export const EXAMS: Exam[] = [
     title: "PAT Testing (5th Edition COP)",
     subtitle: "Combined topic drill + Access Training homework practice bank",
     description:
-      "A focused exam built around the PAT-testing portion of Webinar 4. Covers the IET Code of Practice for In-service Inspection and Testing of Electrical Equipment (5th edition), equipment classes, the formal visual / combined inspection-and-test, pass values, intervals, and the legal driver behind the work. Now combined with 35 questions from the Access Training PAT homework: equipment classification, test sequence and tolerances, instruments, leakage and load testing, legal framework and recordkeeping.",
-    format: "47 multiple-choice questions. Aim for 33+/47 (70%+) to pass; 42+/47 (90%+) for a strong result.",
-    passMark: 33,
+      "A focused exam built around the PAT-testing portion of Webinar 4. Covers the IET Code of Practice for In-service Inspection and Testing of Electrical Equipment (5th edition), equipment classes, the formal visual / combined inspection-and-test, pass values, intervals, and the legal driver behind the work. Combines the Access Training PAT homework practice bank with additional tricky questions on detachable leads, surge-protected equipment and Class II metalwork.",
+    format: "50 multiple-choice questions. Aim for 35+/50 (70%+) to pass; 45+/50 (90%+) for a strong result.",
+    passMark: 35,
     sections: [
       {
         id: "section-1",
@@ -1904,8 +2059,8 @@ export const EXAMS: Exam[] = [
         ]
       },
       {
-        id: "section-1",
-        title: "Section 1 — PAT Testing Practice Bank",
+        id: "section-4",
+        title: "Section 4 — PAT Testing Practice Bank",
         questions: [
           {
             number: 13,
@@ -2187,8 +2342,8 @@ export const EXAMS: Exam[] = [
             prompt: "If it is required to carry out a touch current test the recorded value should not exceed",
             options: {
               A: "5mA for DC powered equipment",
-              B: "3.5 5mA for DC powered equipment",
-              C: "3.5 5mA for AC powered equipment",
+              B: "3.5mA for DC powered equipment",
+              C: "3.5mA for AC powered equipment",
               D: "5mA for AC powered equipment"
             },
             answer: "C",
@@ -2210,26 +2365,68 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 46,
-            prompt: "A portable appliance is fitted with a cable 4.5m long and has a protective condor of 1.0mm2. Calculate the resistance of the protective conductor.",
+            prompt: "A portable appliance is fitted with a cable 4.5m long and has a protective conductor of 1.0mm2. Calculate the resistance of the protective conductor.",
             options: { A: "70.2 milliohms", B: "78 milliohms", C: "97.5 milliohms", D: "87.75 milliohms" },
             answer: "D",
             explanation: "Tabulated 1.0 mm² flex copper resistance ≈ 19.5 mΩ/m at 20 °C. R = 19.5 × 4.5 = 87.75 mΩ. The COP uses these tabulated values for the 'expected' figure to compare your test against."
           },
           {
             number: 47,
-            prompt: "Extension leads that are longer than the recommended lengths should be protected by a ",
+            prompt: "Extension leads that are longer than the recommended lengths should be protected by a:",
             options: { A: "BS 3036 fuse", B: "Double pole switch", C: "300mA RCD", D: "30mA RCD" },
             answer: "D",
             explanation: "Long extension leads have a higher chance of damage and a higher Zs that may not allow the upstream device to operate fast enough — a 30 mA RCD provides the additional protection. 300 mA is for fire protection, not personal safety."
+          },
+          {
+            number: 48,
+            prompt:
+              "A Class I appliance has an IEC detachable supply lead. For a proper in-service check, the lead set should be:",
+            options: {
+              A: "Ignored if the appliance passes its own tests",
+              B: "Tested separately for earth continuity, insulation resistance and polarity, then recorded against its own ID or as part of the appliance record",
+              C: "Only visually checked because detachable leads cannot fail electrically",
+              D: "Replaced automatically at every formal inspection"
+            },
+            answer: "B",
+            explanation:
+              "Detachable leads are often swapped between appliances, so a faulty lead can move around the workplace. The lead set is tested as an item in its own right: earth continuity for 3-core leads, IR, polarity and fuse/plug condition."
+          },
+          {
+            number: 49,
+            prompt:
+              "An item of IT equipment contains surge suppression that would clamp a normal 500 V DC insulation resistance test. The appropriate approach is usually to:",
+            options: {
+              A: "Carry out the 500 V DC test anyway and accept a low reading",
+              B: "Use a 250 V DC insulation resistance test or a suitable protective-conductor/touch-current test in accordance with the COP and manufacturer's instructions",
+              C: "Skip all electrical tests and rely on the label",
+              D: "Test it at 1000 V DC so the SPD operates more clearly"
+            },
+            answer: "B",
+            explanation:
+              "SPDs and EMC filters can be damaged or give misleading low IR values at 500 V DC. The COP allows a lower 250 V DC test or an appropriate leakage/touch-current route where the equipment construction makes a standard IR test unsuitable."
+          },
+          {
+            number: 50,
+            prompt:
+              "A Class II drill has an accessible metal chuck but no protective conductor. The correct test approach is:",
+            options: {
+              A: "Carry out earth continuity from the plug earth pin to the chuck",
+              B: "Treat it as Class I because metal is accessible",
+              C: "Carry out a Class II insulation resistance test using the probe on accessible metal parts, plus the formal visual and functional checks",
+              D: "Fail it automatically because all accessible metal must be earthed"
+            },
+            answer: "C",
+            explanation:
+              "Class II can have accessible metalwork, but it is separated from live parts by double or reinforced insulation. There is no earth path to test; the relevant electrical test is insulation resistance to accessible conductive parts using the test probe."
           }
         ]
       }
     ],
     scoring: [
-      { minScore: 42, range: "42–47", label: "Strong — homework standard" },
-      { minScore: 33, range: "33–41", label: "Comfortable pass" },
-      { minScore: 24, range: "24–32", label: "Re-read the relevant theory before re-attempting" },
-      { minScore: 0, range: "< 24", label: "Re-watch the topic webinar before re-attempting" }
+      { minScore: 45, range: "45–50", label: "Strong — homework standard" },
+      { minScore: 35, range: "35–44", label: "Comfortable pass" },
+      { minScore: 25, range: "25–34", label: "Re-read the relevant theory before re-attempting" },
+      { minScore: 0, range: "< 25", label: "Re-watch the topic webinar before re-attempting" }
     ],
     priorities: [
       "Class definitions: 0 = basic insulation only (banned UK); I = basic + earth; II = double/reinforced; III = SELV supply.",
@@ -2243,8 +2440,8 @@ export const EXAMS: Exam[] = [
     title: "Initial Verification",
     subtitle: "Combined topic drill + Access Training homework practice bank",
     description:
-      "A focused exam built around Webinar 5 — Initial Verification. Covers Part 6 of BS 7671, the inspection schedule, the dead-test sequence (continuity, ring final, IR, polarity), the live-test sequence (Ze, PFC, Zs, RCD), acceptance criteria, and the documentation issued for new work. Now combined with 43 questions from the Access Training Initial Verification homework: dead and live test sequence, R1+R2 / Zs / IR / RCD / PFC calculations, EIC documentation and signatories, instrument standards, and IP/class/segregation context.",
-    format: "89 multiple-choice questions. Aim for 63+/89 (70%+) to pass; 81+/89 (90%+) for a strong result.",
+      "A focused exam built around Webinar 5 — Initial Verification. Covers Part 6 of BS 7671, the inspection schedule, the dead-test sequence (continuity, ring final, IR, polarity), the live-test sequence (Ze, PFC, Zs, RCD), acceptance criteria, and the documentation issued for new work. Combines the Access Training Initial Verification homework practice bank with additional tricky questions on dead-test logic, voltage-sensitive equipment, RCD test points and live-polarity faults.",
+    format: "90 multiple-choice questions. Aim for 63+/90 (70%+) to pass; 81+/90 (90%+) for a strong result.",
     passMark: 63,
     sections: [
       {
@@ -2434,8 +2631,8 @@ export const EXAMS: Exam[] = [
         ]
       },
       {
-        id: "section-1",
-        title: "Section 1 — Initial Verification Practice Bank",
+        id: "section-4-practice",
+        title: "Section 4 — Initial Verification Practice Bank",
         questions: [
           {
             number: 13,
@@ -2460,7 +2657,7 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 16,
-            prompt: "A radial circuit is 45m long and wired in 6/2.5mm squared conductors. What is the expected value of R1 + R2 for this circuit at 20?C?",
+            prompt: "A radial circuit is 45m long and wired in 6/2.5mm squared conductors. What is the expected value of R1 + R2 for this circuit at 20°C?",
             options: { A: "0.62 Ohms", B: "0.47 Ohms", C: "0.72 Ohms", D: "0.57 Ohms" },
             answer: "B",
             explanation: "Tabulated R/m at 20 °C: 6 mm² ≈ 3.08 mΩ/m, 2.5 mm² ≈ 7.41 mΩ/m. R1+R2 per m = 10.49 mΩ. For 45 m: 45 × 10.49 ≈ 472 mΩ = 0.47 Ω."
@@ -2567,7 +2764,7 @@ export const EXAMS: Exam[] = [
               A: "The time it takes to complete the job will be affected",
               B: "Other workers will not know what is happening",
               C: "The installer and others may be at risk of coming into contact with live parts.",
-              D: "Production will be stopped?"
+              D: "Production will be stopped"
             },
             answer: "C",
             explanation: "Failing to isolate leaves live conductors accessible — that's the textbook serious-or-fatal injury scenario the EAWR is built around. Production interruption and worker awareness are operational concerns, not the safety case."
@@ -2674,7 +2871,7 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 38,
-            prompt: "A ring final circuit is wired in 2.5/1.5mm squared twin and CPC cable. From step 1 of the est, the end-to-end r1 is measured at 0.05 Ohms. What value is the end-to-end r2 expected to be?",
+            prompt: "A ring final circuit is wired in 2.5/1.5mm squared twin and CPC cable. From step 1 of the test, the end-to-end r1 is measured at 0.05 Ohms. What value is the end-to-end r2 expected to be?",
             options: { A: "0.0835 Ohms", B: "0.952 Ohms", C: "0.125 Ohms", D: "0.399 Ohms" },
             answer: "A",
             explanation: "r2/r1 = R(1.5 mm²) / R(2.5 mm²) = 12.10 / 7.41 ≈ 1.67. So r2 = 0.05 × 1.67 ≈ 0.0835 Ω. This ratio is the basis of the ring final 2.5/1.5 expected-r2 calculation."
@@ -2720,13 +2917,13 @@ export const EXAMS: Exam[] = [
           {
             number: 43,
             prompt: "Basic protection is given by",
-            options: { A: "Double insulation?", B: "Reinforced insulation", C: "SELV", D: "Insulation of live parts" },
+            options: { A: "Double insulation", B: "Reinforced insulation", C: "SELV", D: "Insulation of live parts" },
             answer: "D",
             explanation: "Basic protection means preventing direct contact with live parts — achieved primarily by insulation of live parts and barriers/enclosures. Double/reinforced insulation is fault protection (Class II), SELV is its own protective measure."
           },
           {
             number: 44,
-            prompt: "When checking an instrument for use, which british standard document should be consulted for conformity?",
+            prompt: "When checking an instrument for use, which British Standard document should be consulted for conformity?",
             options: { A: "BS EN 61010", B: "BS EN 61008", C: "BS EN 61009", D: "BS EN 60898" },
             answer: "A",
             explanation: "BS EN 61010 is the safety standard for measuring instruments — every test instrument used to BS 7671 should comply. 61008 is RCDs, 61009 is RCBOs, 60898 is MCBs."
@@ -2817,7 +3014,7 @@ export const EXAMS: Exam[] = [
             prompt: "What is the best action to take if an insulation resistance test fails on an individual radial circuit and a PVC/PVC twin and cpc flat cable has been replaced to remedy the fault?",
             options: {
               A: "Move on to the next test as the new cable will cure the fault.",
-              B: "Re-inspect and Re-test ",
+              B: "Re-inspect and Re-test",
               C: "Go back to the beginning and repeat all tests for the installation",
               D: "Re-test insulation resistance test for that circuit and continue to the next test."
             },
@@ -3066,16 +3263,16 @@ export const EXAMS: Exam[] = [
           {
             number: 71,
             prompt:
-              "The correct sequence of DEAD tests on a new installation, per GN3, is:",
+              "Why is continuity of protective conductors normally verified before insulation resistance during initial verification?",
             options: {
-              A: "Insulation resistance → continuity → polarity",
-              B: "Continuity of protective conductors → continuity of ring final conductors → insulation resistance → polarity (dead) → earth electrode resistance (where applicable)",
-              C: "Polarity → earth fault loop impedance → insulation resistance",
-              D: "Functional testing → insulation resistance → continuity"
+              A: "Because the insulation resistance tester needs the cpc as part of the fault path being checked, and the cpc must be known continuous before later tests rely on it",
+              B: "Because continuity is a live test and must be completed before dead testing starts",
+              C: "Because insulation resistance values are higher when the cpc is open circuit",
+              D: "Because BS 7671 does not require insulation resistance if continuity passes"
             },
-            answer: "B",
+            answer: "A",
             explanation:
-              "GN3 sequence. cpc continuity is first so the circuit is proven safe to energise for subsequent steps; IR is then carried out (a 500 V DC test on unproven cpc is hazardous); polarity dead and earth electrode resistance follow. Live tests (polarity live, Ze, Zs, PFC, RCD, functional) are carried out only after all dead tests pass and the installation is energised."
+              "The dead-test sequence is logical, not arbitrary. CPC continuity proves the protective path is intact before IR, polarity and any later Zs calculation rely on it. An open cpc can make later test results misleading and would leave ADS unable to operate correctly."
           },
           {
             number: 72,
@@ -3122,16 +3319,16 @@ export const EXAMS: Exam[] = [
           {
             number: 75,
             prompt:
-              "The minimum acceptable insulation resistance for a 230 V LV final circuit tested at 500 V DC is:",
+              "A lighting circuit contains electronic dimmers that cannot be disconnected without damaging the finish. Before applying a 500 V DC insulation resistance test, the inspector should:",
             options: {
-              A: "0.5 MΩ",
-              B: "1 MΩ",
-              C: "2 MΩ",
-              D: "10 MΩ"
+              A: "Test through the dimmers anyway because the test is short",
+              B: "Link line and neutral together and test to earth only, or otherwise disconnect/short out the voltage-sensitive equipment in accordance with the manufacturer's instructions",
+              C: "Increase the test voltage to 1000 V DC to overcome the electronics",
+              D: "Record the circuit as passed without testing"
             },
             answer: "B",
             explanation:
-              "Table 64, BS 7671: minimum 1.0 MΩ for LV installations up to 500 V, tested at 500 V DC. A reading between 1 and 2 MΩ is a pass, but it indicates deteriorating insulation and should be recorded and investigated. SELV/PELV circuits are tested at 250 V DC with a minimum of 0.5 MΩ."
+              "Voltage-sensitive equipment can be damaged by a 500 V DC IR test and can also distort the result. Linking L and N together and testing to earth avoids applying the test voltage across electronic components; where that still is not suitable, disconnect or short out the equipment as instructed and record any limitation."
           },
           {
             number: 76,
@@ -3254,16 +3451,16 @@ export const EXAMS: Exam[] = [
           {
             number: 84,
             prompt:
-              "The maximum permitted disconnection time for a general-purpose 30 mA RCD (to BS EN 61008 or 61009) tested at 1 × IΔn is:",
+              "When testing a general-purpose 30 mA RCD at 0.5 × IΔn, the expected result is:",
             options: {
-              A: "40 ms",
-              B: "100 ms",
-              C: "200 ms",
-              D: "300 ms"
+              A: "No trip within 2 s",
+              B: "Trip within 40 ms",
+              C: "Trip within 300 ms",
+              D: "Trip immediately, then lock out"
             },
-            answer: "D",
+            answer: "A",
             explanation:
-              "300 ms at 1×IΔn for a general (non-S) type RCD. The other two test points are 0.5×IΔn (must NOT trip within 2 s) and 5×IΔn (must trip within 40 ms). S-type (time-delayed) RCDs are allowed 130–500 ms at 1×IΔn and are used where selectivity with a downstream RCD is required."
+              "At half rated residual current the device must not trip within 2 seconds. This proves the RCD is not oversensitive. The 300 ms value applies at 1×IΔn; the 40 ms value applies at 5×IΔn."
           },
           {
             number: 85,
@@ -3334,12 +3531,26 @@ export const EXAMS: Exam[] = [
             answer: "B",
             explanation:
               "340 ms exceeds the 300 ms limit at 1 × IΔn — the device has failed and no longer provides the additional protection claimed. Replace and retest at 0.5×, 1× and 5×IΔn, and record all three results on the schedule. Never uprate the IΔn or disable a test facility as a way to \"pass\" a failing RCD."
+          },
+          {
+            number: 90,
+            prompt:
+              "After energising a new lighting circuit, a live polarity check shows the switch interrupts the neutral instead of the line conductor. The correct response is to:",
+            options: {
+              A: "Record a departure and leave the circuit in service because the lamp still switches off",
+              B: "Isolate, rectify the wiring so the single-pole switch is in the line conductor, then repeat the relevant polarity and functional tests",
+              C: "Fit a lower-rated lamp to reduce the shock risk",
+              D: "Only note it on the Schedule of Test Results"
+            },
+            answer: "B",
+            explanation:
+              "A single-pole switch in the neutral leaves the lampholder live when it appears switched off. That is a polarity fault, not a paperwork issue. The circuit must be isolated, corrected and retested before certification."
           }
         ]
       }
     ],
     scoring: [
-      { minScore: 81, range: "81–89", label: "Strong — homework standard" },
+      { minScore: 81, range: "81–90", label: "Strong — homework standard" },
       { minScore: 63, range: "63–80", label: "Comfortable pass" },
       { minScore: 45, range: "45–62", label: "Re-read the relevant theory before re-attempting" },
       { minScore: 0, range: "< 45", label: "Re-watch the topic webinar before re-attempting" }
@@ -3356,9 +3567,9 @@ export const EXAMS: Exam[] = [
     title: "Periodic Inspection & Testing",
     subtitle: "Combined topic drill + Access Training homework practice bank",
     description:
-      "A focused exam built around Webinar 6 — Periodic Inspection and Testing. Covers the purpose of PIT, recommended intervals, sampling, limitations, the dead/live test approach for an in-service installation, and the legal drivers behind periodic verification. Now combined with 23 questions from the Access Training Periodic Inspection homework: EICR coding, the periodic inspection process, extent & limitations, and diagnostic interpretation of common test results.",
-    format: "35 multiple-choice questions. Aim for 25+/35 (70%+) to pass; 32+/35 (90%+) for a strong result.",
-    passMark: 25,
+      "A focused exam built around Webinar 6 — Periodic Inspection and Testing. Covers the purpose of PIT, recommended intervals, sampling, limitations, the dead/live test approach for an in-service installation, and the legal drivers behind periodic verification. Combines the Access Training Periodic Inspection homework practice bank with additional tricky questions on EICR coding, sampling escalation, limitations, and diagnostic interpretation of common test results.",
+    format: "40 multiple-choice questions. Aim for 28+/40 (70%+) to pass; 36+/40 (90%+) for a strong result.",
+    passMark: 28,
     sections: [
       {
         id: "section-1",
@@ -3547,8 +3758,8 @@ export const EXAMS: Exam[] = [
         ]
       },
       {
-        id: "section-1",
-        title: "Section 1 — Periodic Inspection Practice Bank",
+        id: "section-4",
+        title: "Section 4 — Periodic Inspection Practice Bank",
         questions: [
           {
             number: 13,
@@ -3576,7 +3787,7 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 15,
-            prompt: "An insulation resistance test on a 230V circuit gives a result of 0.8 Ohms",
+            prompt: "An insulation resistance test on a 230V circuit gives a result of 0.8 MΩ",
             options: {
               A: "Investigate where the fault is",
               B: "Increase the interval to the next periodic inspection",
@@ -3584,7 +3795,7 @@ export const EXAMS: Exam[] = [
               D: "Record it as a C3"
             },
             answer: "A",
-            explanation: "0.8 Ω IR is effectively a dead short between conductors — way below the 1 MΩ minimum. The first action is to find and rectify the fault, not to record and walk away. Don't even bother coding until you understand what you're looking at."
+            explanation: "0.8 MΩ is below the 1 MΩ minimum for a 230 V circuit. The first action is to investigate and locate the fault, not to record and walk away. Don't code the observation until you understand whether it is an isolated circuit defect, a connected load, moisture, or another issue."
           },
           {
             number: 16,
@@ -3592,7 +3803,7 @@ export const EXAMS: Exam[] = [
             options: {
               A: "Immediately and in writing that improvement is recommended to remove the danger",
               B: "On the final report that urgent remedial action is required",
-              C: "That you have removed the danger and repaired the fault ",
+              C: "That you have removed the danger and repaired the fault",
               D: "On the final report that further investigation is necessary to find out why the danger is present"
             },
             answer: "A",
@@ -3627,7 +3838,7 @@ export const EXAMS: Exam[] = [
             prompt: "The periodic test sequence may be undertaken in a different order to initial verification because",
             options: {
               A: "It prevents indirect contact to personnel and livestock when the installation is energised.",
-              B: "It follows the sequence in BS7671 for periodic testing and the installation can be decommissioned?",
+              B: "It follows the sequence in BS7671 for periodic testing and the installation can be decommissioned",
               C: "The inspector must follow the sequence as given in IET Guidance Note 3 and test an energised installation",
               D: "The electrical installation will already be energised and only appropriate tests need to be applied"
             },
@@ -3672,9 +3883,9 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 23,
-            prompt: "An electrical installation condition report assessed the installation",
+            prompt: "An electrical installation condition report assesses the installation",
             options: {
-              A: "Against the inspector?s view of the installation as a duty holder",
+              A: "Against the inspector's view of the installation as a duty holder",
               B: "Against the edition of BS7671 current at the time of installation",
               C: "Against the edition of BS7671 current at the time of inspection",
               D: "Against the Electricity at Work Regulations 1989"
@@ -3734,7 +3945,7 @@ export const EXAMS: Exam[] = [
             number: 28,
             prompt: "When testing earth fault loop impedance",
             options: {
-              A: "The protective bonding conductors should be connected?",
+              A: "The protective bonding conductors should be connected",
               B: "The protective bonding conductors should be disconnected",
               C: "A sample of 3 readings should be taken",
               D: "The test voltage should be adjusted for heating effects"
@@ -3756,7 +3967,7 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 30,
-            prompt: "Increase a conductor size will",
+            prompt: "Increasing a conductor size will",
             options: {
               A: "Decrease circuit current",
               B: "Decrease voltage drop",
@@ -3825,15 +4036,85 @@ export const EXAMS: Exam[] = [
             },
             answer: "D",
             explanation: "Section D of the EICR records the extent and limitations of the inspection. A circuit that couldn't be tested for operational reasons is a limitation — record it there so the duty holder is aware that the circuit hasn't been verified."
+          },
+          {
+            number: 36,
+            prompt:
+              "A low insulation resistance reading is found, but the circuit cannot be isolated further during the visit because it supplies critical equipment. The most appropriate EICR observation is:",
+            options: {
+              A: "C3 only, because no fault has been proven",
+              B: "FI, with the limitation and reason recorded, because further investigation is required without delay",
+              C: "No code, because the circuit was agreed as a limitation",
+              D: "Satisfactory, provided the next inspection interval is shortened"
+            },
+            answer: "B",
+            explanation:
+              "A suspicious low IR value that cannot be diagnosed during the visit is exactly when FI is used. A limitation records why the inspector could not go further; it does not make the concern disappear. FI makes the report Unsatisfactory until resolved."
+          },
+          {
+            number: 37,
+            prompt:
+              "A C2 observation is identified on an EICR, and the client promises to arrange remedial work next week. The overall assessment of the report should be:",
+            options: {
+              A: "Satisfactory, because the client has agreed to repair it",
+              B: "Unsatisfactory, because any C2 makes the report Unsatisfactory at the time of inspection",
+              C: "Satisfactory if there are no C1 observations",
+              D: "Deferred until the client chooses a contractor"
+            },
+            answer: "B",
+            explanation:
+              "The EICR records the condition at the time of inspection. Any C1, C2 or FI makes the result Unsatisfactory. Later remedial work needs written confirmation or a follow-up certificate/report; it does not alter the original finding."
+          },
+          {
+            number: 38,
+            prompt:
+              "During a sampled inspection, two of ten sampled lighting points show the same missing cpc sleeving and loose termination issue. The inspector should normally:",
+            options: {
+              A: "Leave the sample at 10 because a sample size must not change once agreed",
+              B: "Increase the sample size for similar lighting points and extend towards full inspection if the pattern continues",
+              C: "Ignore the repeated issue because it is only accessory-level work",
+              D: "Record one generic C3 and stop inspecting the circuit"
+            },
+            answer: "B",
+            explanation:
+              "Sampling is conditional on the sample being representative. Repeated defects in the sample increase the likelihood that the unsampled population has the same defect, so the sample must expand and may become 100% for that group."
+          },
+          {
+            number: 39,
+            prompt:
+              "Which item should not normally be treated as a sampling item during periodic inspection?",
+            options: {
+              A: "Identical office socket-outlets on a large radial circuit",
+              B: "Identical lighting points in a repeated suspended-ceiling layout",
+              C: "The main switchgear and earthing/bonding arrangements at the origin",
+              D: "A run of similar dado trunking accessories"
+            },
+            answer: "C",
+            explanation:
+              "The origin, main switchgear and main earthing/bonding arrangements are central to the whole installation and should be inspected directly. Sampling is for repeated distributed items, not the single point on which every protective measure depends."
+          },
+          {
+            number: 40,
+            prompt:
+              "An agreed limitation on an EICR is acceptable only when it is:",
+            options: {
+              A: "Used to avoid recording a defect the inspector has already seen",
+              B: "Agreed with the client, recorded clearly with the reason, and does not conceal an observed dangerous or potentially dangerous condition",
+              C: "Added after the report is issued to shorten the document",
+              D: "Used for every circuit that would take longer than expected to test"
+            },
+            answer: "B",
+            explanation:
+              "Limitations are legitimate when access, isolation or operational restrictions prevent inspection or testing. They must be agreed and recorded. They are not a way to downgrade or hide an observed defect; once danger is seen, it must be coded and communicated."
           }
         ]
       }
     ],
     scoring: [
-      { minScore: 32, range: "32–35", label: "Strong — homework standard" },
-      { minScore: 25, range: "25–31", label: "Comfortable pass" },
-      { minScore: 18, range: "18–24", label: "Re-read the relevant theory before re-attempting" },
-      { minScore: 0, range: "< 18", label: "Re-watch the topic webinar before re-attempting" }
+      { minScore: 36, range: "36–40", label: "Strong — homework standard" },
+      { minScore: 28, range: "28–35", label: "Comfortable pass" },
+      { minScore: 20, range: "20–27", label: "Re-read the relevant theory before re-attempting" },
+      { minScore: 0, range: "< 20", label: "Re-watch the topic webinar before re-attempting" }
     ],
     priorities: [
       "C1 = danger, immediate written notification to duty holder; C2 = potentially dangerous; C3 = improvement recommended; FI = further investigation may reveal further danger.",
@@ -3848,8 +4129,8 @@ export const EXAMS: Exam[] = [
     subtitle: "Webinar 7 — classifying and recording condition",
     description:
       "A focused exam built around Webinar 7 — Condition Reporting. Covers the EICR document set, the C1 / C2 / C3 / FI classification codes, what makes a report Satisfactory or Unsatisfactory, the inspector's on-site obligations when danger is found, and the landlord/duty-holder duties under the ESS PRS Regulations 2020.",
-    format: "15 multiple-choice questions. Aim for 12+/15 (75%).",
-    passMark: 12,
+    format: "20 multiple-choice questions. Aim for 15+/20 (75%).",
+    passMark: 15,
     sections: [
       {
         id: "section-1",
@@ -3866,7 +4147,7 @@ export const EXAMS: Exam[] = [
             },
             answer: "B",
             explanation:
-              "Electrical Installation Condition Report — the standard BS 7671 model form for reporting on the condition of an existing installation. \"Condition\" rather than \"compliance\" because installations are assessed against the edition of BS 7671 in force when they were built, not retrospectively against the current edition."
+              "Electrical Installation Condition Report — the standard BS 7671 model form for reporting on the condition of an existing installation. The inspector uses current safety expectations and coding guidance, but does not automatically require every older installation to be upgraded just because a later edition has introduced improvements."
           },
           {
             number: 2,
@@ -4077,15 +4358,85 @@ export const EXAMS: Exam[] = [
             answer: "B",
             explanation:
               "C2 indicates a fault that could become dangerous if circumstances change — e.g. missing supplementary bonding in a bathroom where the omission conditions are not fully met, or a damaged accessory likely to expose live parts in use. C2 renders the report Unsatisfactory and must be remedied promptly, but does not necessarily require same-visit make-safe action."
+          },
+          {
+            number: 16,
+            prompt:
+              "A report contains only C3 observations. The overall EICR outcome should normally be:",
+            options: {
+              A: "Unsatisfactory because any code makes the report fail",
+              B: "Satisfactory, with improvements recommended",
+              C: "FI because more work is always needed",
+              D: "Invalid until every C3 is upgraded"
+            },
+            answer: "B",
+            explanation:
+              "C3 means improvement recommended. It should be recorded and explained, but it does not by itself make the report Unsatisfactory. C1, C2 and FI are the codes that drive an Unsatisfactory outcome."
+          },
+          {
+            number: 17,
+            prompt:
+              "An unexplained insulation resistance reading below the permitted minimum is found, but the inspector cannot safely access the concealed joint boxes during the visit. The most appropriate code is:",
+            options: {
+              A: "C3",
+              B: "FI",
+              C: "No code",
+              D: "Satisfactory"
+            },
+            answer: "B",
+            explanation:
+              "FI is used where the inspector has evidence of a possible dangerous condition but cannot fully determine its cause or extent during the inspection. It requires further investigation without delay and renders the report Unsatisfactory."
+          },
+          {
+            number: 18,
+            prompt:
+              "A missing circuit identification label on a consumer unit, with all circuits otherwise safe and traceable during the inspection, would most commonly be coded:",
+            options: {
+              A: "C1",
+              B: "C2",
+              C: "C3",
+              D: "FI"
+            },
+            answer: "C",
+            explanation:
+              "Poor or missing identification is normally an improvement recommendation where it does not create immediate danger. It still matters because future isolation, maintenance and emergency work rely on clear circuit identification."
+          },
+          {
+            number: 19,
+            prompt:
+              "A C1 observation is found and the inspector isolates the affected circuit before leaving. The report should:",
+            options: {
+              A: "Omit the C1 because the danger was made safe",
+              B: "Record the C1, the make-safe action taken, and the notification to the duty holder",
+              C: "Downgrade automatically to C3",
+              D: "Be marked Satisfactory because isolation removed the immediate risk"
+            },
+            answer: "B",
+            explanation:
+              "Making safe is the immediate duty, but the original dangerous condition still existed at the inspection and must be recorded. The report should say what was found, what was isolated or repaired, and how the duty holder was notified."
+          },
+          {
+            number: 20,
+            prompt:
+              "For a privately rented dwelling in England, remedial work following an Unsatisfactory EICR must normally be completed:",
+            options: {
+              A: "Within 7 days in every case",
+              B: "Within 28 days, or sooner if the report specifies a shorter period",
+              C: "Only before the next tenancy starts",
+              D: "At the next scheduled five-year inspection"
+            },
+            answer: "B",
+            explanation:
+              "The ESS PRS Regulations require remedial work or further investigative work within 28 days of the inspection, or within any shorter period specified in the report. Written confirmation then needs to be supplied as required by the Regulations."
           }
         ]
       }
     ],
     scoring: [
-      { minScore: 14, range: "14–15", label: "Strong — confident with EICR coding" },
-      { minScore: 12, range: "12–13", label: "Comfortable pass" },
-      { minScore: 9, range: "9–11", label: "Re-read the C1/C2/C3/FI definitions and Best-Practice Guide 4 from Electrical Safety First" },
-      { minScore: 0, range: "< 9", label: "Re-watch the condition reporting webinar" }
+      { minScore: 18, range: "18–20", label: "Strong — confident with EICR coding" },
+      { minScore: 15, range: "15–17", label: "Comfortable pass" },
+      { minScore: 12, range: "12–14", label: "Re-read the C1/C2/C3/FI definitions and Best-Practice Guide 4 from Electrical Safety First" },
+      { minScore: 0, range: "< 12", label: "Re-watch the condition reporting webinar" }
     ],
     priorities: [
       "C1 / C2 / C3 / FI — be able to recite each definition exactly, and to apply them to real-world observations.",
@@ -4576,11 +4927,11 @@ export const EXAMS: Exam[] = [
   {
     id: "at-formative-mixed-practice",
     title: "Mixed Topics — AT Formative Test Practice Bank",
-    subtitle: "40-question end-of-theory homework drill from the AT weekend course",
+    subtitle: "50-question end-of-theory homework drill from the AT weekend course",
     description:
-      "Forty mixed-topic questions across BS 7671, building regs, periodic inspection, PAT, special locations, calculations and the EAWR — the cross-cutting end-of-theory homework that sits between the topic-specific banks.",
-    format: "45 multiple-choice questions. Aim for 41+/45 (90%+) — homework standard.",
-    passMark: 41,
+      "Fifty mixed-topic questions across BS 7671, building regs, periodic inspection, PAT, special locations, calculations and the EAWR — the cross-cutting end-of-theory homework that sits between the topic-specific banks.",
+    format: "50 multiple-choice questions. Aim for 45+/50 (90%+) — homework standard.",
+    passMark: 45,
     sections: [
       {
         id: "section-1",
@@ -4612,15 +4963,15 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 3,
-            prompt: "In Zone 1 of a room containing a bath or shower, a 230V AC wall mounted extractor fan is:",
+            prompt: "In Zone 1 of a room containing a bath or shower, a wall mounted extractor fan is:",
             options: {
               A: "Not allowed under any circumstances",
-              B: "Allowed providing it is rated as SELV and IP4X",
+              B: "Allowed providing it is rated IP4X only",
               C: "Allowed providing it is at least IPX7",
-              D: "Allowed providing it is rated as SELV and IPX4"
+              D: "Allowed if it is suitable for Zone 1, at least IPX4 (IPX5 where water jets are likely), and protected as required by a 30 mA RCD"
             },
             answer: "D",
-            explanation: "BS 7671 701: equipment in Zone 1 must be SELV (≤ 12 V a.c.) and at least IPX4. A 230 V mains fan in Zone 1 needs to step down via SELV; otherwise install it in Zone 2 or above the zones."
+            explanation: "BS 7671 Section 701 requires equipment in Zone 1 to be suitable for that zone, with at least IPX4 protection (IPX5 where water jets are likely) and 30 mA RCD additional protection for the circuits. SELV fans are common, but Zone 1 is not automatically a blanket ban on all fixed mains-rated fans if the equipment is specifically suitable."
           },
           {
             number: 4,
@@ -4667,7 +5018,7 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 8,
-            prompt: " An Electrical Installation Condition Report: ",
+            prompt: "An Electrical Installation Condition Report:",
             options: {
               A: "Is valid for 10 years",
               B: "Is proof that the original installation was correctly installed",
@@ -4817,10 +5168,10 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 23,
-            prompt: " Following a test of earth fault loop impedance, the results are compared to the values given in BS7671. Which of the following statements is true? ",
+            prompt: "Following a test of earth fault loop impedance, the results are compared to the values given in BS7671. Which of the following statements is true?",
             options: {
               A: "The tabulated or design value should not be less than 80% of the measured value",
-              B: "The measured value should not be less than 80% of the tabulated ot design value",
+              B: "The measured value should not be less than 80% of the tabulated or design value",
               C: "The tabulated or design value should not exceed 80% of the measured value",
               D: "The measured value should not exceed 80% of the tabulated or design value"
             },
@@ -4893,7 +5244,7 @@ export const EXAMS: Exam[] = [
               A: "Gives guidance on the position of smoke and heat alarms",
               B: "Gives guidance on the minimum depth of buried cables outdoors",
               C: "Gives guidance on the minimum size of extractor fans",
-              D: "Gives guidance on where josts can be drilled"
+              D: "Gives guidance on where joists can be drilled"
             },
             answer: "A",
             explanation: "Part B (Fire safety) — including the Volume 1 dwellings guidance on smoke and heat alarm coverage. Part F covers extract; Part A covers structural drilling/notching of joists; outdoor cable depth is a BS 7671 / OSG matter."
@@ -4979,7 +5330,7 @@ export const EXAMS: Exam[] = [
           },
           {
             number: 39,
-            prompt: "Socket outlets should? ",
+            prompt: "Socket outlets should:",
             options: { A: "Only be switched if used outside", B: "Be switched or unswitched", C: "Always be switched", D: "Only switched if inaccessible" },
             answer: "B",
             explanation: "BS 7671 doesn't mandate switched sockets — both switched and unswitched are acceptable. Switched is more common in UK domestic for convenience and child safety, but unswitched (continental style) is permitted."
@@ -5071,15 +5422,85 @@ export const EXAMS: Exam[] = [
             answer: "B",
             explanation:
               "On-Site Guide diversity for household cookers: first 10 A of rated current at 100% + 30% of the remainder + 5 A if a socket is included in the control unit. Example for a 30 A cooker with socket: 10 + (0.30 × 20) + 5 = 10 + 6 + 5 = 21 A assumed demand."
+          },
+          {
+            number: 46,
+            prompt:
+              "A cooker circuit has a 45 A rated load and the control unit includes a 13 A socket. Using the On-Site Guide diversity rule, the assumed demand is:",
+            options: {
+              A: "13.5 A",
+              B: "20.5 A",
+              C: "25.5 A",
+              D: "45 A"
+            },
+            answer: "C",
+            explanation:
+              "Cooker diversity = first 10 A + 30% of the remaining load + 5 A for an integral socket. 10 + (0.30 × 35) + 5 = 25.5 A. The trick is to apply the 30% only to the current above the first 10 A."
+          },
+          {
+            number: 47,
+            prompt:
+              "A 32 A Type B final circuit has a measured Zs of 1.10 Ω. The current BS 7671 tabulated maximum is 1.37 Ω. Using the usual 80% measured-value rule of thumb, the result is:",
+            options: {
+              A: "A pass, because 1.10 Ω is below 1.37 Ω",
+              B: "A fail against the measured-value rule, because 80% of 1.37 Ω is approximately 1.10 Ω and the reading is at the limit",
+              C: "Always a fail because Type B devices cannot protect 32 A circuits",
+              D: "Not assessable because Zs is never measured on final circuits"
+            },
+            answer: "B",
+            explanation:
+              "The GN3 rule of thumb compares measured cold Zs with 80% of the tabulated value to allow for conductor heating. 1.37 × 0.8 = 1.096 Ω, so a 1.10 Ω reading is effectively on or just above the limit and should not be waved through without checking the exact table/device data and conditions."
+          },
+          {
+            number: 48,
+            prompt:
+              "Which conductor connects the MET to incoming metallic water or gas service pipework?",
+            options: {
+              A: "Circuit protective conductor",
+              B: "Main protective bonding conductor",
+              C: "Earthing conductor",
+              D: "Functional earthing conductor"
+            },
+            answer: "B",
+            explanation:
+              "Main protective bonding conductors connect extraneous-conductive-parts such as metallic gas or water services to the MET. The earthing conductor connects the MET to the means of earthing; the CPC connects exposed-conductive-parts of individual circuits back to the installation earth."
+          },
+          {
+            number: 49,
+            prompt:
+              "A multi-function tester is checked before use. Which item is specifically a GS38 live-testing safety concern?",
+            options: {
+              A: "The instrument case colour",
+              B: "A long unshrouded probe tip that could bridge between live parts",
+              C: "Whether the instrument has Bluetooth logging",
+              D: "Whether the test leads are stored in a pouch"
+            },
+            answer: "B",
+            explanation:
+              "GS38 is about safe test probes and leads: short exposed tips, finger barriers, suitable insulation and fused/current-limited leads where appropriate. Long bare probe tips can bridge terminals and create a fault or shock risk."
+          },
+          {
+            number: 50,
+            prompt:
+              "A Class I appliance passes earth continuity but fails insulation resistance between live conductors and accessible metalwork. The next action should be:",
+            options: {
+              A: "Apply a pass label because the earth is continuous",
+              B: "Fail/withdraw the item from service and investigate or repair before retesting",
+              C: "Increase the plug fuse rating",
+              D: "Record it as Class II"
+            },
+            answer: "B",
+            explanation:
+              "Earth continuity proves the fault path exists; it does not make failed insulation acceptable. A Class I appliance with live-to-earth insulation failure is unsafe and must be taken out of service until repaired and retested."
           }
         ]
       }
     ],
     scoring: [
-      { minScore: 41, range: "41–45", label: "Strong — homework standard" },
-      { minScore: 32, range: "32–40", label: "Comfortable pass" },
-      { minScore: 23, range: "23–31", label: "Re-watch the relevant theory webinars and re-attempt" },
-      { minScore: 0, range: "< 23", label: "Re-do all topic webinars before re-attempting" }
+      { minScore: 45, range: "45–50", label: "Strong — homework standard" },
+      { minScore: 40, range: "40–44", label: "Comfortable pass" },
+      { minScore: 25, range: "25–39", label: "Re-watch the relevant theory webinars and re-attempt" },
+      { minScore: 0, range: "< 25", label: "Re-do all topic webinars before re-attempting" }
     ],
     priorities: [
       "Bathroom zones: Zone 0 = inside; Zone 1 = above bath / shower up to 2.25 m (and under bath if accessible without tool); Zone 2 = 0.6 m beyond Zone 1.",
