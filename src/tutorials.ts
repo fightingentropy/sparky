@@ -39,6 +39,20 @@ export const TUTORIALS: Tutorial[] = [
     ]
   },
   {
+    id: "trunking-flat-90-gusset",
+    videoId: "o-olAySYyTc",
+    title: "Making a (45-45) Flat 90 Gusset Bend in Electrical Trunking - made easy",
+    channel: "Sparky Help",
+    sourceUrl: "https://youtu.be/o-olAySYyTc",
+    category: "Trunking",
+    workplaceUse: "Flat 90° direction changes in trunking runs where a fabricated gusset bend is neater than separate fittings.",
+    practiceFocus: [
+      "Marking both 45° cuts from the centre line",
+      "Keeping the trunking width consistent through the bend",
+      "Deburring and dressing edges before lid fit"
+    ]
+  },
+  {
     id: "tray-gusset-bend",
     videoId: "wSgQEFFO-tk",
     title: "Make a (45-45) 90 Gusset Bend in Electrical Cable Tray In One Piece",
