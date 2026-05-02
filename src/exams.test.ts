@@ -6,29 +6,58 @@ describe("exam data", () => {
     for (const exam of EXAMS) {
       const questionNumbers = new Set<number>();
       const prompts = new Set<string>();
+      const sectionIds = new Set<string>();
       const total = countQuestions(exam);
 
       expect(total).toBeGreaterThan(0);
       expect(exam.passMark).toBeGreaterThan(0);
       expect(exam.passMark).toBeLessThanOrEqual(total);
+      expect(exam.format).toContain(`${total} multiple-choice questions`);
       expect(exam.scoring.length).toBeGreaterThan(0);
       expect(exam.scoring[0].minScore).toBeLessThanOrEqual(total);
       expect(exam.scoring.at(-1)?.minScore).toBe(0);
 
       for (const section of exam.sections) {
+        expect(sectionIds.has(section.id)).toBe(false);
+        sectionIds.add(section.id);
+        expect(section.title).toBeTruthy();
         for (const question of section.questions) {
           expect(questionNumbers.has(question.number)).toBe(false);
           questionNumbers.add(question.number);
           expect(prompts.has(question.prompt)).toBe(false);
           prompts.add(question.prompt);
+          expect(question.prompt.trim()).toBe(question.prompt);
+          expect(question.explanation.trim()).toBe(question.explanation);
           expect(question.options[question.answer]).toBeTruthy();
+          for (const choice of Object.values(question.options)) {
+            expect(choice.trim()).toBe(choice);
+            expect(choice.length).toBeGreaterThan(0);
+          }
         }
+      }
+
+      for (let questionNumber = 1; questionNumber <= total; questionNumber += 1) {
+        expect(questionNumbers.has(questionNumber)).toBe(true);
       }
 
       for (let i = 1; i < exam.scoring.length; i += 1) {
         expect(exam.scoring[i - 1].minScore).toBeGreaterThan(exam.scoring[i].minScore);
       }
     }
+  });
+
+  it("keeps each exam at a round question count", () => {
+    expect(Object.fromEntries(EXAMS.map((exam) => [exam.id, countQuestions(exam)]))).toEqual({
+      "basic-electrics": 20,
+      "building-regulations": 40,
+      "18th-edition": 80,
+      "pat-testing": 50,
+      "initial-verification": 90,
+      "periodic-inspection": 40,
+      "condition-reporting": 20,
+      "am2-installation-assessment": 30,
+      "at-formative-mixed-practice": 50
+    });
   });
 
   it("consolidates the old Level 3 mocks into topic categories", () => {
@@ -103,10 +132,10 @@ describe("exam data", () => {
     const exam = EXAMS.find((candidate) => candidate.id === "basic-electrics");
 
     expect(exam).toBeDefined();
-    expect(countQuestions(exam!)).toBe(17);
-    expect(getScoringBand(exam!, 16).range).toBe("16–17");
-    expect(getScoringBand(exam!, 13).range).toBe("13–15");
-    expect(getScoringBand(exam!, 10).range).toBe("10–12");
-    expect(getScoringBand(exam!, 9).range).toBe("< 10");
+    expect(countQuestions(exam!)).toBe(20);
+    expect(getScoringBand(exam!, 18).range).toBe("18–20");
+    expect(getScoringBand(exam!, 15).range).toBe("15–17");
+    expect(getScoringBand(exam!, 12).range).toBe("12–14");
+    expect(getScoringBand(exam!, 11).range).toBe("< 12");
   });
 });
