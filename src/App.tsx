@@ -29,6 +29,8 @@ import { ExamPage } from "./ExamPage";
 import { TutorialsPage } from "./TutorialsPage";
 import { InteractivePage } from "./InteractivePage";
 import { TUTORIALS } from "./tutorials";
+import { useAuth } from "./AuthContext";
+import { AuthModal } from "./AuthModal";
 
 type PageId = "home" | "cheatsheet" | "exams" | "tutorials" | "interactive";
 
@@ -868,6 +870,8 @@ export default function App() {
   const { theme, toggleTheme } = useTheme();
   const { entries: historyEntries, addEntry: addHistoryEntry, clearHistory } = useHistory();
   const [historyOpen, setHistoryOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const [authOpen, setAuthOpen] = useState(false);
 
   const [page, setPage] = useState<PageId>(getPageFromLocation());
   const [searchQuery, setSearchQuery] = useState("");
@@ -1541,6 +1545,14 @@ export default function App() {
           <button type="button" className="theme-toggle" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </button>
+          {user ? (
+            <div className="account-chip">
+              <span className="account-avatar">{user.email[0].toUpperCase()}</span>
+              <button type="button" className="ghost-button account-logout" onClick={logout}>Log out</button>
+            </div>
+          ) : (
+            <button type="button" className="ghost-button account-login-btn" onClick={() => setAuthOpen(true)}>Log in</button>
+          )}
           <label className="search-field" htmlFor="site-search">
             <svg className="search-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none">
               <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
@@ -2767,6 +2779,8 @@ export default function App() {
           </button>
         </div>
       ) : null}
+
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </div>
   );
 }

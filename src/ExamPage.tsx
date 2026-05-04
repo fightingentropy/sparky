@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useCallback } from "react";
 import { EXAMS, getScoringBand, type Exam, type ExamChoice, type ExamQuestion } from "./exams";
 import { usePersistedState } from "./usePersistedState";
+import { useAuth } from "./AuthContext";
+import { getExamProgress, saveExamProgress } from "./api";
 
 type Answers = Record<number, ExamChoice>;
 
@@ -56,6 +58,8 @@ type Props = {
 };
 
 export function ExamPage({ isActive }: Props) {
+  const { user } = useAuth();
+
   useEffect(() => {
     clearStaleExamProgress();
   }, []);
@@ -79,6 +83,48 @@ export function ExamPage({ isActive }: Props) {
     `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`,
     false,
     isBoolean
+  );
+
+  const syncedForUserRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user || syncedForUserRef.current === user.id) return;
+    syncedForUserRef.current = user.id;
+    getExamProgress()
+      .then((res) => {
+        for (const [examId, data] of Object.entries(res.progress)) {
+          const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`;
+          const submittedKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`;
+          const localRaw = localStorage.getItem(answersKey);
+          const localAnswers: Answers = localRaw ? JSON.parse(localRaw) : {};
+          const hasLocal = Object.keys(localAnswers).length > 0;
+          if (!hasLocal || new Date(data.updatedAt) > new Date()) {
+            localStorage.setItem(answersKey, JSON.stringify(data.answers));
+            localStorage.setItem(submittedKey, JSON.stringify(data.submitted));
+          }
+        }
+        const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`;
+        const stored = localStorage.getItem(answersKey);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (isAnswers(parsed)) setAnswers(parsed);
+        }
+        const subKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`;
+        const subStored = localStorage.getItem(subKey);
+        if (subStored) setSubmitted(JSON.parse(subStored));
+      })
+      .catch(() => {});
+  }, [user, exam.id, setAnswers, setSubmitted]);
+
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const syncToServer = useCallback(
+    (nextAnswers: Answers, nextSubmitted: boolean) => {
+      if (!user) return;
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        saveExamProgress(exam.id, nextAnswers as Record<string, string>, nextSubmitted).catch(() => {});
+      }, 1000);
+    },
+    [user, exam.id]
   );
 
   const reviewRef = useRef<HTMLDivElement | null>(null);
@@ -110,11 +156,16 @@ export function ExamPage({ isActive }: Props) {
 
   function setAnswer(questionNumber: number, choice: ExamChoice) {
     if (submitted) return;
-    setAnswers((current) => ({ ...current, [questionNumber]: choice }));
+    setAnswers((current) => {
+      const next = { ...current, [questionNumber]: choice };
+      syncToServer(next, false);
+      return next;
+    });
   }
 
   function handleSubmit() {
     setSubmitted(true);
+    syncToServer(answers, true);
     window.setTimeout(() => {
       reviewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 60);
@@ -123,6 +174,7 @@ export function ExamPage({ isActive }: Props) {
   function handleReset() {
     setAnswers({});
     setSubmitted(false);
+    syncToServer({} as Answers, false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 

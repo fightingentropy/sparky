@@ -1,0 +1,15 @@
+{
+  "name": "sparky-api",
+  "private": true,
+  "scripts": {
+    "dev": "unset CLOUDFLARE_API_TOKEN; wrangler dev",
+    "deploy": "unset CLOUDFLARE_API_TOKEN; wrangler deploy",
+    "secret:put": "unset CLOUDFLARE_API_TOKEN; wrangler secret put",
+    "migrate:remote": "unset CLOUDFLARE_API_TOKEN; wrangler d1 migrations apply sparky-db --remote",
+    "migrate:local": "unset CLOUDFLARE_API_TOKEN; wrangler d1 migrations apply sparky-db --local"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250501.0",
+    "wrangler": "^4.14.0"
+  }
+}
