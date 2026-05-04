@@ -164,19 +164,20 @@ h1, h2, h3 {
 
 .primary-nav {
   display: inline-flex;
-  gap: 4px;
-  padding: 3px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  gap: 8px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  align-items: center;
 }
 
-.primary-nav a {
+.primary-nav > a {
   min-height: 34px;
   padding: 0 14px;
   border: 0;
   border-radius: 6px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--muted);
   font-size: 0.85rem;
   font-weight: 500;
@@ -186,16 +187,115 @@ h1, h2, h3 {
   transition: all 180ms var(--ease);
 }
 
-.primary-nav a.is-active {
+.primary-nav > a.is-active {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text);
   font-weight: 600;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-.primary-nav a:hover:not(.is-active) {
+.primary-nav > a:hover:not(.is-active) {
   color: var(--muted-strong);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Hamburger nav menu ─────────────────── */
+
+.nav-menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.nav-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 180ms var(--ease);
+}
+
+.nav-menu-toggle:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-strong);
+}
+
+.nav-menu-toggle[aria-expanded="true"] {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.nav-menu-toggle svg {
+  display: block;
+}
+
+.nav-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 25;
+  display: grid;
+  gap: 2px;
+  min-width: 180px;
+  padding: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: linear-gradient(to bottom, var(--surface), rgba(20, 23, 27, 0.97));
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 1px rgba(255, 255, 255, 0.08);
+  animation: nav-menu-in 140ms var(--ease);
+}
+
+.nav-menu-item {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 140ms var(--ease);
+}
+
+.nav-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.nav-menu-item:focus-visible {
+  outline: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.nav-menu-item.is-active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-weight: 600;
+}
+
+@keyframes nav-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .topbar-actions {
@@ -1411,7 +1511,7 @@ input:disabled {
   }
 
   .primary-nav {
-    overflow: auto;
+    overflow: visible;
     width: 100%;
   }
 
@@ -1593,23 +1693,27 @@ input:disabled {
     display: inline-flex;
     width: 100%;
     min-width: 0;
-    gap: 2px;
-    overflow: hidden;
-    padding: 2px;
+    gap: 6px;
+    overflow: visible;
+    padding: 0;
     margin-left: 0;
+    border-radius: 0;
+    align-items: center;
+  }
+
+  .primary-nav > a {
+    min-width: 0;
+    min-height: 32px;
+    padding: 0 12px;
+    overflow: hidden;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     border-radius: 6px;
   }
 
-  .primary-nav a {
-    flex: 1 1 0;
-    min-width: 0;
-    min-height: 28px;
-    padding: 0 5px;
-    overflow: hidden;
-    font-size: 0.74rem;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    border-radius: 5px;
+  .nav-menu {
+    min-width: 200px;
   }
 
   .topbar-actions {

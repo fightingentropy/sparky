@@ -872,6 +872,9 @@ export default function App() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const { user, logout } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
+  const [navMenuOpen, setNavMenuOpen] = useState(false);
+  const navMenuRef = useRef<HTMLDivElement | null>(null);
+  const navMenuButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const [page, setPage] = useState<PageId>(getPageFromLocation());
   const [searchQuery, setSearchQuery] = useState("");
@@ -1313,12 +1316,26 @@ export default function App() {
         setPaletteOpen(false);
         setHelpOpen(false);
         setHistoryOpen(false);
+        setNavMenuOpen(false);
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  useEffect(() => {
+    if (!navMenuOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (navMenuRef.current?.contains(target)) return;
+      if (navMenuButtonRef.current?.contains(target)) return;
+      setNavMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [navMenuOpen]);
 
   useEffect(() => {
     return () => {
@@ -1511,27 +1528,75 @@ export default function App() {
         </a>
 
         <nav className="primary-nav" aria-label="Primary">
-          {(
-            [
-              { id: "home", label: "Home" },
-              { id: "cheatsheet", label: "Notes" },
-              { id: "exams", label: "Exams" },
-              { id: "tutorials", label: "Tutorials" },
-              { id: "interactive", label: "Interactive" }
-            ] as const
-          ).map((item) => (
-            <a
-              key={item.id}
-              href={getPageHref(item.id)}
-              className={page === item.id ? "is-active" : undefined}
-              onClick={(event) => {
-                event.preventDefault();
-                navigateTo(item.id);
-              }}
+          <a
+            href={getPageHref("home")}
+            className={page === "home" ? "is-active" : undefined}
+            onClick={(event) => {
+              event.preventDefault();
+              navigateTo("home");
+            }}
+          >
+            Home
+          </a>
+          <div className="nav-menu-wrap">
+            <button
+              type="button"
+              ref={navMenuButtonRef}
+              className="nav-menu-toggle"
+              aria-label="Open navigation menu"
+              aria-haspopup="menu"
+              aria-expanded={navMenuOpen}
+              aria-controls="primary-nav-menu"
+              onClick={() => setNavMenuOpen((open) => !open)}
             >
-              {item.label}
-            </a>
-          ))}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="4" y1="7" x2="20" y2="7" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <line x1="4" y1="17" x2="20" y2="17" />
+              </svg>
+            </button>
+            {navMenuOpen ? (
+              <div
+                id="primary-nav-menu"
+                ref={navMenuRef}
+                className="nav-menu"
+                role="menu"
+                aria-label="Pages"
+              >
+                {(
+                  [
+                    { id: "cheatsheet", label: "Notes" },
+                    { id: "exams", label: "Exams" },
+                    { id: "tutorials", label: "Tutorials" },
+                    { id: "interactive", label: "Interactive" }
+                  ] as const
+                ).map((item) => (
+                  <a
+                    key={item.id}
+                    role="menuitem"
+                    href={getPageHref(item.id)}
+                    className={`nav-menu-item${page === item.id ? " is-active" : ""}`}
+                    aria-current={page === item.id ? "page" : undefined}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      navigateTo(item.id);
+                      setNavMenuOpen(false);
+                    }}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          {user ? (
+            <div className="account-chip">
+              <span className="account-avatar">{user.email[0].toUpperCase()}</span>
+              <button type="button" className="ghost-button account-logout" onClick={logout}>Log out</button>
+            </div>
+          ) : (
+            <button type="button" className="ghost-button account-login-btn" onClick={() => setAuthOpen(true)}>Log in</button>
+          )}
         </nav>
 
         <div className="topbar-actions">
@@ -1545,14 +1610,6 @@ export default function App() {
           <button type="button" className="theme-toggle" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </button>
-          {user ? (
-            <div className="account-chip">
-              <span className="account-avatar">{user.email[0].toUpperCase()}</span>
-              <button type="button" className="ghost-button account-logout" onClick={logout}>Log out</button>
-            </div>
-          ) : (
-            <button type="button" className="ghost-button account-login-btn" onClick={() => setAuthOpen(true)}>Log in</button>
-          )}
           <label className="search-field" htmlFor="site-search">
             <svg className="search-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none">
               <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
