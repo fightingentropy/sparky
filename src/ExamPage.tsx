@@ -1,5 +1,17 @@
 import { useEffect, useMemo, useRef, useCallback } from "react";
-import { EXAMS, getScoringBand, type Exam, type ExamChoice, type ExamQuestion } from "./exams";
+import {
+  EXAMS,
+  getActiveVariantIndex,
+  getPassMark,
+  getScoringBand,
+  getScoringRanges,
+  getSectionQuestionsForVariant,
+  getVariantCount,
+  type Exam,
+  type ExamChoice,
+  type ExamQuestion,
+  type ScoringRange
+} from "./exams";
 import { usePersistedState } from "./usePersistedState";
 import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
@@ -7,9 +19,10 @@ import { getExamProgress, saveExamProgress } from "./api";
 type Answers = Record<number, ExamChoice>;
 
 const LETTERS: ExamChoice[] = ["A", "B", "C", "D"];
-const EXAM_STORAGE_VERSION = "2026-05-merged-topic-banks";
+const EXAM_STORAGE_VERSION = "2026-05-rotating-variants";
 const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
 const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
+const EXAM_VARIANT_STORAGE_PREFIX = `exam-variant-${EXAM_STORAGE_VERSION}-`;
 
 function isExamChoice(value: unknown): value is ExamChoice {
   return typeof value === "string" && (LETTERS as string[]).includes(value);
@@ -31,12 +44,17 @@ function isBoolean(value: unknown): value is boolean {
   return typeof value === "boolean";
 }
 
+function isNonNegativeInt(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0;
+}
+
 function clearStaleExamProgress() {
   try {
     const validStorageKeys = new Set(
       EXAMS.flatMap((exam) => [
         `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`,
-        `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`
+        `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`,
+        `${EXAM_VARIANT_STORAGE_PREFIX}${exam.id}`
       ])
     );
 
@@ -45,7 +63,9 @@ function clearStaleExamProgress() {
       if (!key) continue;
 
       const isExamProgressKey =
-        key.startsWith("exam-answers-") || key.startsWith("exam-submitted-");
+        key.startsWith("exam-answers-") ||
+        key.startsWith("exam-submitted-") ||
+        key.startsWith("exam-variant-");
       if (isExamProgressKey && !validStorageKeys.has(key)) {
         localStorage.removeItem(key);
       }
@@ -73,6 +93,14 @@ export function ExamPage({ isActive }: Props) {
     () => EXAMS.find((e) => e.id === selectedExamId) ?? EXAMS[0],
     [selectedExamId]
   );
+
+  const [attemptCount, setAttemptCount] = usePersistedState<number>(
+    `${EXAM_VARIANT_STORAGE_PREFIX}${exam.id}`,
+    0,
+    isNonNegativeInt
+  );
+  const variantCount = getVariantCount(exam);
+  const variantIndex = getActiveVariantIndex(attemptCount, exam);
 
   const [answers, setAnswers] = usePersistedState<Answers>(
     `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`,
@@ -129,11 +157,18 @@ export function ExamPage({ isActive }: Props) {
 
   const reviewRef = useRef<HTMLDivElement | null>(null);
 
+  const sectionGroups = useMemo(
+    () => getSectionQuestionsForVariant(exam, variantIndex),
+    [exam, variantIndex]
+  );
   const questions = useMemo(
-    () => exam.sections.flatMap((section) => section.questions),
-    [exam]
+    () => sectionGroups.flatMap((g) => g.questions),
+    [sectionGroups]
   );
   const total = questions.length;
+  const passMark = useMemo(() => getPassMark(exam, total), [exam, total]);
+  const scoringRanges = useMemo(() => getScoringRanges(exam, total), [exam, total]);
+
   const answeredCount = useMemo(
     () => questions.reduce((count, question) => count + (answers[question.number] ? 1 : 0), 0),
     [answers, questions]
@@ -147,11 +182,11 @@ export function ExamPage({ isActive }: Props) {
   }, [answers, questions]);
 
   const percent = total ? Math.round((correctCount / total) * 100) : 0;
-  const passed = correctCount >= exam.passMark;
+  const passed = correctCount >= passMark;
 
   const scoringBand = useMemo(
-    () => getScoringBand(exam, correctCount),
-    [correctCount, exam]
+    () => getScoringBand(exam, correctCount, total),
+    [correctCount, exam, total]
   );
 
   function setAnswer(questionNumber: number, choice: ExamChoice) {
@@ -174,19 +209,18 @@ export function ExamPage({ isActive }: Props) {
   function handleReset() {
     setAnswers({});
     setSubmitted(false);
+    setAttemptCount((current) => current + 1);
     syncToServer({} as Answers, false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function scrollToFirstUnanswered() {
-    for (const section of exam.sections) {
-      for (const q of section.questions) {
-        if (!(q.number in answers)) {
-          document
-            .getElementById(`exam-q-${q.number}`)
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
-          return;
-        }
+    for (const q of questions) {
+      if (!(q.number in answers)) {
+        document
+          .getElementById(`exam-q-${q.number}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
       }
     }
   }
@@ -232,6 +266,13 @@ export function ExamPage({ isActive }: Props) {
           </div>
           <div className="exam-hero-stats">
             <div className="exam-stat">
+              <span>Test</span>
+              <strong>
+                {variantIndex + 1}
+                <span className="exam-stat-sub">/{variantCount}</span>
+              </strong>
+            </div>
+            <div className="exam-stat">
               <span>Questions</span>
               <strong>{total}</strong>
             </div>
@@ -244,7 +285,7 @@ export function ExamPage({ isActive }: Props) {
             </div>
             <div className="exam-stat">
               <span>Pass mark</span>
-              <strong>{exam.passMark}</strong>
+              <strong>{passMark}</strong>
             </div>
           </div>
         </header>
@@ -266,22 +307,24 @@ export function ExamPage({ isActive }: Props) {
         {submitted ? (
           <ExamResults
             exam={exam}
+            sectionGroups={sectionGroups}
             answers={answers}
             correctCount={correctCount}
             total={total}
             percent={percent}
             passed={passed}
             scoringBand={scoringBand}
+            scoringRanges={scoringRanges}
             reviewRef={reviewRef}
           />
         ) : null}
 
         <div className="exam-sections">
-          {exam.sections.map((section) => (
+          {sectionGroups.map(({ section, questions: sectionQuestions }) => (
             <article key={section.id} className="exam-section" id={section.id}>
               <h3 className="exam-section-title">{section.title}</h3>
               <div className="exam-question-list">
-                {section.questions.map((question) => (
+                {sectionQuestions.map((question) => (
                   <QuestionCard
                     key={question.number}
                     question={question}
@@ -328,7 +371,7 @@ export function ExamPage({ isActive }: Props) {
                 </span>
               </div>
               <button type="button" className="ghost-button" onClick={handleReset}>
-                Reset &amp; retry
+                Reset &amp; try next test
               </button>
             </>
           )}
@@ -418,31 +461,37 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
   );
 }
 
+type SectionGroup = ReturnType<typeof getSectionQuestionsForVariant>[number];
+
 type ResultsProps = {
   exam: Exam;
+  sectionGroups: SectionGroup[];
   answers: Answers;
   correctCount: number;
   total: number;
   percent: number;
   passed: boolean;
-  scoringBand: Exam["scoring"][number];
+  scoringBand: ScoringRange;
+  scoringRanges: ScoringRange[];
   reviewRef: React.RefObject<HTMLDivElement | null>;
 };
 
 function ExamResults({
   exam,
+  sectionGroups,
   answers,
   correctCount,
   total,
   percent,
   passed,
   scoringBand,
+  scoringRanges,
   reviewRef
 }: ResultsProps) {
   const sectionStats = useMemo(() => {
-    return exam.sections.map((section) => {
-      const sectionTotal = section.questions.length;
-      const correct = section.questions.reduce(
+    return sectionGroups.map(({ section, questions: sectionQuestions }) => {
+      const sectionTotal = sectionQuestions.length;
+      const correct = sectionQuestions.reduce(
         (acc, q) => acc + (answers[q.number] === q.answer ? 1 : 0),
         0
       );
@@ -454,7 +503,7 @@ function ExamResults({
         pct: sectionTotal ? Math.round((correct / sectionTotal) * 100) : 0
       };
     });
-  }, [exam, answers]);
+  }, [sectionGroups, answers]);
 
   return (
     <div className="exam-results" ref={reviewRef}>
@@ -476,7 +525,7 @@ function ExamResults({
         <div className="exam-results-card">
           <h4>Scoring guide</h4>
           <ul className="exam-scoring-list">
-            {exam.scoring.map((band) => {
+            {scoringRanges.map((band) => {
               const isActive = band.range === scoringBand.range;
               return (
                 <li key={band.range} className={isActive ? "is-active" : undefined}>
