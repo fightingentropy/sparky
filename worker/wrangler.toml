@@ -1,0 +1,15 @@
+name = "sparky-api"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+
+# JWT_SECRET is set as a secret via `wrangler secret put JWT_SECRET`.
+# For local dev, set it in .dev.vars (gitignored).
+
+# CORS_ORIGIN is the production frontend origin. Override per-env if needed.
+[vars]
+CORS_ORIGIN = "*"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sparky-db"
+database_id = "b38c9adc-5e65-4a49-84f3-ee636a23ab89"

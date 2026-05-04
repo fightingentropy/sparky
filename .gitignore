@@ -6,3 +6,8 @@ dev-dist/
 .claude/
 package-lock.json
 *.tsbuildinfo
+.env
+.env.local
+.env.*.local
+worker/.dev.vars
+worker/.wrangler/
