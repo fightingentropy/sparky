@@ -1,0 +1,8 @@
+name = "electrics"
+compatibility_date = "2026-03-17"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sparky-db"
+database_id = "b38c9adc-5e65-4a49-84f3-ee636a23ab89"

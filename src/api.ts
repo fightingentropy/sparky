@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8787";
+const API_BASE = "/api";
 
 type AuthResponse = { token: string; user: { id: string; email: string } };
 type MeResponse = { user: { id: string; email: string } };
