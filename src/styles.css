@@ -172,6 +172,10 @@ h1, h2, h3 {
   align-items: center;
 }
 
+.primary-nav .nav-menu-wrap {
+  margin-left: auto;
+}
+
 .primary-nav > a {
   min-height: 34px;
   padding: 0 14px;
@@ -241,7 +245,7 @@ h1, h2, h3 {
 .nav-menu {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
+  right: 0;
   z-index: 25;
   display: grid;
   gap: 2px;
