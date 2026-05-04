@@ -6,6 +6,10 @@
   "packageManager": "bun@1.3.10",
   "scripts": {
     "dev": "vite",
+    "pages:dev": "unset CLOUDFLARE_API_TOKEN; wrangler pages dev public --port 8788 --binding JWT_SECRET=dev-secret-not-for-production",
+    "pages:deploy": "unset CLOUDFLARE_API_TOKEN; wrangler pages deploy dist --project-name electrics",
+    "migrate:local": "unset CLOUDFLARE_API_TOKEN; wrangler d1 migrations apply sparky-db --local",
+    "migrate:remote": "unset CLOUDFLARE_API_TOKEN; wrangler d1 migrations apply sparky-db --remote",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -21,6 +25,7 @@
     "three": "^0.184.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260504.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/three": "^0.184.0",
