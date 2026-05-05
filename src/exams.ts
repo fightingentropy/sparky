@@ -1,4 +1,5 @@
 import type { Exam, ExamQuestion, ExamSection } from "./exams/types";
+import { electricsExam } from "./exams/electrics";
 import { buildingRegulationsExam } from "./exams/building-regulations";
 import { eighteenthEditionExam } from "./exams/18th-edition";
 import { patTestingExam } from "./exams/pat-testing";
@@ -17,6 +18,7 @@ export type {
 } from "./exams/types";
 
 export const EXAMS: Exam[] = [
+  electricsExam,
   buildingRegulationsExam,
   eighteenthEditionExam,
   patTestingExam,
