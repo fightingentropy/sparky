@@ -33,6 +33,7 @@ export function isValidPassword(password: string): boolean {
 // Allowed exam IDs. Mirror of EXAMS in src/exams.ts. Kept here so the server
 // can reject unknown examIds without importing client code.
 export const VALID_EXAM_IDS = new Set([
+  "electrics",
   "building-regulations",
   "18th-edition",
   "pat-testing",
