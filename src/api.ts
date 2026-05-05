@@ -21,14 +21,40 @@ export function setToken(token: string | null) {
   } catch {}
 }
 
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = { "Content-Type": "application/json", ...((options.headers as Record<string, string>) ?? {}) };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  const data = await res.json();
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? `Request failed (${res.status})`);
-  return data as T;
+
+  // Read the body once. Try JSON; fall back to text. Tolerate 204/empty.
+  let payload: unknown = undefined;
+  const raw = await res.text();
+  if (raw.length > 0) {
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      payload = raw;
+    }
+  }
+
+  if (!res.ok) {
+    const message =
+      (payload && typeof payload === "object" && "error" in payload && typeof (payload as { error: unknown }).error === "string"
+        ? (payload as { error: string }).error
+        : null) ?? `Request failed (${res.status})`;
+    throw new ApiError(message, res.status);
+  }
+
+  return (payload ?? ({} as unknown)) as T;
 }
 
 export async function signup(email: string, password: string): Promise<AuthResponse> {

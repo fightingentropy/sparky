@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
-import { login as apiLogin, signup as apiSignup, getMe, setToken } from "./api";
+import { login as apiLogin, signup as apiSignup, getMe, setToken, ApiError } from "./api";
 
 type User = { id: string; email: string };
 
@@ -35,7 +35,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     getMe()
       .then((res) => setUser(res.user))
-      .catch(() => setToken(null))
+      .catch((err) => {
+        // Only clear the token on an explicit auth failure. Network errors,
+        // timeouts and 5xx should leave the user signed in so they can retry
+        // when the connection comes back.
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+          setToken(null);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 

@@ -1,17 +1,20 @@
-import { getUserFromRequest, json, type Env } from "../../_lib/auth";
+import { getUserFromRequest, json, readJsonBody, validateAnswers, VALID_EXAM_IDS, type Env } from "../../_lib/auth";
 
 export const onRequestPut: PagesFunction<Env> = async ({ request, env, params }) => {
   const user = await getUserFromRequest(request, env);
   if (!user) return json({ error: "Unauthorized" }, 401);
 
   const examId = Array.isArray(params.examId) ? params.examId[0] : params.examId;
-  if (!examId) return json({ error: "Missing exam ID" }, 400);
+  if (!examId || !VALID_EXAM_IDS.has(examId)) return json({ error: "Unknown exam" }, 400);
 
-  const body = (await request.json()) as { answers?: Record<string, string>; submitted?: boolean };
-  if (!body.answers || typeof body.answers !== "object") return json({ error: "Invalid answers" }, 400);
+  const body = await readJsonBody<{ answers?: unknown; submitted?: unknown }>(request);
+  if (!body) return json({ error: "Invalid JSON body" }, 400);
 
-  const answersJson = JSON.stringify(body.answers);
-  const submitted = body.submitted ? 1 : 0;
+  const validated = validateAnswers(body.answers);
+  if (!validated.ok) return json({ error: validated.error }, 400);
+  const submitted = body.submitted === true ? 1 : 0;
+
+  const answersJson = JSON.stringify(validated.value);
 
   await env.DB.prepare(
     `INSERT INTO exam_progress (user_id, exam_id, answers, submitted, updated_at)
