@@ -70,15 +70,18 @@ describe("exam data", () => {
     }
   });
 
-  it("keeps each exam at expected per-attempt and total question counts", () => {
+  it("keeps each exam at the configured per-attempt question count", () => {
+    // Per-attempt totals after the SECTION_QUESTION_LIMITS trim that keeps
+    // only the hardest questions per variant. The full underlying banks are
+    // still 5 × the pre-trim variant size and live in the per-exam files.
     const expectedPerAttempt: Record<string, number> = {
-      "building-regulations": 115,
-      "18th-edition": 140,
-      "pat-testing": 115,
-      "initial-verification": 190,
-      "periodic-inspection": 115,
-      "condition-reporting": 110,
-      "am2-installation-assessment": 145
+      "building-regulations": 20,
+      "18th-edition": 56,
+      "pat-testing": 35,
+      "initial-verification": 43,
+      "periodic-inspection": 23,
+      "condition-reporting": 23,
+      "am2-installation-assessment": 50
     };
 
     for (const exam of EXAMS) {
@@ -89,8 +92,6 @@ describe("exam data", () => {
       for (let v = 0; v < 5; v += 1) {
         expect(countQuestionsForVariant(exam, v)).toBe(expected);
       }
-      // Total across variants is 5 × per-attempt
-      expect(countQuestionsTotal(exam)).toBe(expected * 5);
     }
   });
 
@@ -142,19 +143,19 @@ describe("exam data", () => {
     const exam = EXAMS.find((e) => e.id === "condition-reporting");
     expect(exam).toBeDefined();
     const total = countQuestions(exam!);
-    expect(total).toBe(110);
+    expect(total).toBe(23);
 
-    // 90% threshold = ceil(0.9 * 110) = 99
-    expect(getScoringBand(exam!, 99, total).minScore).toBe(99);
-    expect(getScoringBand(exam!, 110, total).minScore).toBe(99);
-    // 70% threshold = ceil(0.7 * 110) = 77
-    expect(getScoringBand(exam!, 77, total).minScore).toBe(77);
-    expect(getScoringBand(exam!, 98, total).minScore).toBe(77);
-    // 50% threshold = ceil(0.5 * 110) = 55
-    expect(getScoringBand(exam!, 55, total).minScore).toBe(55);
-    expect(getScoringBand(exam!, 76, total).minScore).toBe(55);
+    // 90% threshold = ceil(0.9 * 23) = 21
+    expect(getScoringBand(exam!, 21, total).minScore).toBe(21);
+    expect(getScoringBand(exam!, 23, total).minScore).toBe(21);
+    // 70% threshold = ceil(0.7 * 23) = 17
+    expect(getScoringBand(exam!, 17, total).minScore).toBe(17);
+    expect(getScoringBand(exam!, 20, total).minScore).toBe(17);
+    // 50% threshold = ceil(0.5 * 23) = 12
+    expect(getScoringBand(exam!, 12, total).minScore).toBe(12);
+    expect(getScoringBand(exam!, 16, total).minScore).toBe(12);
     // 0% (bottom band)
     expect(getScoringBand(exam!, 0, total).minScore).toBe(0);
-    expect(getScoringBand(exam!, 54, total).minScore).toBe(0);
+    expect(getScoringBand(exam!, 11, total).minScore).toBe(0);
   });
 });
