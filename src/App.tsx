@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   CONTAINMENT_OPTIONS,
   DEFAULT_CONTAINMENT_ROD_VALUES,
@@ -25,9 +25,13 @@ import { useTheme } from "./useTheme";
 import { useFocusTrap } from "./useFocusTrap";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
-import { ExamPage } from "./ExamPage";
-import { TutorialsPage } from "./TutorialsPage";
-import { InteractivePage } from "./InteractivePage";
+// Lazy-load heavy pages so the home/cheat-sheet bundle stays small. The
+// chunks are fetched the first time the user navigates to each page and the
+// component stays mounted thereafter (so per-page state is preserved across
+// navigation, same as before the split).
+const ExamPage = lazy(() => import("./ExamPage").then((m) => ({ default: m.ExamPage })));
+const TutorialsPage = lazy(() => import("./TutorialsPage").then((m) => ({ default: m.TutorialsPage })));
+const InteractivePage = lazy(() => import("./InteractivePage").then((m) => ({ default: m.InteractivePage })));
 import { TUTORIALS } from "./tutorials";
 import { useAuth } from "./AuthContext";
 import { AuthModal } from "./AuthModal";
@@ -877,6 +881,14 @@ export default function App() {
   const navMenuButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const [page, setPage] = useState<PageId>(getPageFromLocation());
+  // Track which lazy-loaded pages we have ever activated. We only mount each
+  // lazy page after its first activation so its chunk isn't downloaded for
+  // users who never visit it. After the first visit it stays mounted so its
+  // state is preserved when the user navigates away and back.
+  const [visitedPages, setVisitedPages] = useState<Set<PageId>>(() => new Set([page]));
+  useEffect(() => {
+    setVisitedPages((prev) => (prev.has(page) ? prev : new Set(prev).add(page)));
+  }, [page]);
   const [searchQuery, setSearchQuery] = useState("");
   const searchQueryRef = useRef(searchQuery);
   searchQueryRef.current = searchQuery;
@@ -1022,7 +1034,13 @@ export default function App() {
   }
 
   function setUnistrutContainmentCount(nextCount: number) {
-    const normalizedCount = Number.isFinite(nextCount) ? Math.max(0, Math.trunc(nextCount)) : 0;
+    // Cap at a sane upper bound to avoid pathological inputs (e.g. someone
+    // pasting a huge number) freezing the tab or blowing the localStorage
+    // quota.
+    const MAX_CONTAINMENTS = 50;
+    const normalizedCount = Number.isFinite(nextCount)
+      ? Math.min(MAX_CONTAINMENTS, Math.max(0, Math.trunc(nextCount)))
+      : 0;
 
     setUnistrutContainments((current) => {
       if (normalizedCount === current.length) return current;
@@ -1591,7 +1609,7 @@ export default function App() {
           </div>
           {user ? (
             <div className="account-chip">
-              <span className="account-avatar">{user.email[0].toUpperCase()}</span>
+              <span className="account-avatar">{(user.email[0] ?? "?").toUpperCase()}</span>
               <button type="button" className="ghost-button account-logout" onClick={logout}>Log out</button>
             </div>
           ) : (
@@ -2632,9 +2650,11 @@ export default function App() {
           ) : null}
         </section>
 
-        <ExamPage isActive={page === "exams"} />
-        <TutorialsPage isActive={page === "tutorials"} />
-        <InteractivePage isActive={page === "interactive"} />
+        <Suspense fallback={null}>
+          {visitedPages.has("exams") ? <ExamPage isActive={page === "exams"} /> : null}
+          {visitedPages.has("tutorials") ? <TutorialsPage isActive={page === "tutorials"} /> : null}
+          {visitedPages.has("interactive") ? <InteractivePage isActive={page === "interactive"} /> : null}
+        </Suspense>
       </main>
 
       {paletteOpen ? (

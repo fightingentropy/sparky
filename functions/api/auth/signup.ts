@@ -1,10 +1,11 @@
 import { hashPassword, createJWT } from "../_lib/crypto";
-import { json, isValidEmail, isValidPassword, type Env } from "../_lib/auth";
+import { json, readJsonBody, isValidEmail, isValidPassword, type Env } from "../_lib/auth";
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  const body = (await request.json()) as { email?: string; password?: string };
-  const email = body.email?.trim().toLowerCase();
-  const password = body.password;
+  const body = await readJsonBody<{ email?: string; password?: string }>(request);
+  if (!body) return json({ error: "Invalid JSON body" }, 400);
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const password = typeof body.password === "string" ? body.password : "";
   if (!email || !isValidEmail(email)) return json({ error: "Invalid email" }, 400);
   if (!password || !isValidPassword(password)) return json({ error: "Password must be 6–128 characters" }, 400);
 

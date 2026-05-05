@@ -23,6 +23,7 @@ const EXAM_STORAGE_VERSION = "2026-05-rotating-variants";
 const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
 const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
 const EXAM_VARIANT_STORAGE_PREFIX = `exam-variant-${EXAM_STORAGE_VERSION}-`;
+const EXAM_UPDATED_STORAGE_PREFIX = `exam-updated-${EXAM_STORAGE_VERSION}-`;
 
 function isExamChoice(value: unknown): value is ExamChoice {
   return typeof value === "string" && (LETTERS as string[]).includes(value);
@@ -54,7 +55,8 @@ function clearStaleExamProgress() {
       EXAMS.flatMap((exam) => [
         `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`,
         `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`,
-        `${EXAM_VARIANT_STORAGE_PREFIX}${exam.id}`
+        `${EXAM_VARIANT_STORAGE_PREFIX}${exam.id}`,
+        `${EXAM_UPDATED_STORAGE_PREFIX}${exam.id}`
       ])
     );
 
@@ -65,7 +67,8 @@ function clearStaleExamProgress() {
       const isExamProgressKey =
         key.startsWith("exam-answers-") ||
         key.startsWith("exam-submitted-") ||
-        key.startsWith("exam-variant-");
+        key.startsWith("exam-variant-") ||
+        key.startsWith("exam-updated-");
       if (isExamProgressKey && !validStorageKeys.has(key)) {
         localStorage.removeItem(key);
       }
@@ -120,40 +123,92 @@ export function ExamPage({ isActive }: Props) {
     getExamProgress()
       .then((res) => {
         for (const [examId, data] of Object.entries(res.progress)) {
-          const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`;
-          const submittedKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`;
-          const localRaw = localStorage.getItem(answersKey);
-          const localAnswers: Answers = localRaw ? JSON.parse(localRaw) : {};
-          const hasLocal = Object.keys(localAnswers).length > 0;
-          if (!hasLocal || new Date(data.updatedAt) > new Date()) {
-            localStorage.setItem(answersKey, JSON.stringify(data.answers));
-            localStorage.setItem(submittedKey, JSON.stringify(data.submitted));
+          try {
+            // Skip examIds we don't recognise — protects against poisoned rows.
+            if (!EXAMS.some((e) => e.id === examId)) continue;
+            if (!isAnswers(data.answers) || typeof data.submitted !== "boolean") continue;
+            const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`;
+            const submittedKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`;
+            const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${examId}`;
+            const localRaw = localStorage.getItem(answersKey);
+            let localAnswers: Answers = {};
+            try {
+              if (localRaw) {
+                const parsedLocal = JSON.parse(localRaw);
+                if (isAnswers(parsedLocal)) localAnswers = parsedLocal;
+              }
+            } catch {}
+            const hasLocal = Object.keys(localAnswers).length > 0;
+            const localUpdatedAt = Number(localStorage.getItem(localUpdatedKey)) || 0;
+            const serverUpdatedAt = Date.parse(data.updatedAt) || 0;
+            // Use the server copy if there's nothing local, or if the server is strictly newer.
+            if (!hasLocal || serverUpdatedAt > localUpdatedAt) {
+              localStorage.setItem(answersKey, JSON.stringify(data.answers));
+              localStorage.setItem(submittedKey, JSON.stringify(data.submitted));
+              localStorage.setItem(localUpdatedKey, String(serverUpdatedAt || Date.now()));
+            }
+          } catch {}
+        }
+        // Re-hydrate React state for the currently selected exam after the merge.
+        try {
+          const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`;
+          const stored = localStorage.getItem(answersKey);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (isAnswers(parsed)) setAnswers(parsed);
           }
-        }
-        const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`;
-        const stored = localStorage.getItem(answersKey);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (isAnswers(parsed)) setAnswers(parsed);
-        }
-        const subKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`;
-        const subStored = localStorage.getItem(subKey);
-        if (subStored) setSubmitted(JSON.parse(subStored));
+        } catch {}
+        try {
+          const subKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`;
+          const subStored = localStorage.getItem(subKey);
+          if (subStored) {
+            const parsed = JSON.parse(subStored);
+            if (isBoolean(parsed)) setSubmitted(parsed);
+          }
+        } catch {}
       })
       .catch(() => {});
   }, [user, exam.id, setAnswers, setSubmitted]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSaveRef = useRef<{ answers: Answers; submitted: boolean } | null>(null);
+  const flushSave = useCallback(() => {
+    if (!user || !pendingSaveRef.current) return;
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    const { answers: pendingAnswers, submitted: pendingSubmitted } = pendingSaveRef.current;
+    pendingSaveRef.current = null;
+    saveExamProgress(exam.id, pendingAnswers as Record<string, string>, pendingSubmitted).catch(() => {});
+  }, [user, exam.id]);
   const syncToServer = useCallback(
     (nextAnswers: Answers, nextSubmitted: boolean) => {
       if (!user) return;
+      pendingSaveRef.current = { answers: nextAnswers, submitted: nextSubmitted };
+      try {
+        const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${exam.id}`;
+        localStorage.setItem(localUpdatedKey, String(Date.now()));
+      } catch {}
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-      saveTimerRef.current = setTimeout(() => {
-        saveExamProgress(exam.id, nextAnswers as Record<string, string>, nextSubmitted).catch(() => {});
-      }, 1000);
+      saveTimerRef.current = setTimeout(flushSave, 1000);
     },
-    [user, exam.id]
+    [user, exam.id, flushSave]
   );
+
+  // Flush any pending save when the user closes/refreshes the tab or unmounts the page.
+  useEffect(() => {
+    const handler = () => {
+      if (pendingSaveRef.current) flushSave();
+    };
+    window.addEventListener("beforeunload", handler);
+    window.addEventListener("pagehide", handler);
+    return () => {
+      window.removeEventListener("beforeunload", handler);
+      window.removeEventListener("pagehide", handler);
+      handler();
+    };
+  }, [flushSave]);
 
   const reviewRef = useRef<HTMLDivElement | null>(null);
 

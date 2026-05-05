@@ -69,16 +69,34 @@ export async function verifyJWT(token: string, secret: string): Promise<Record<s
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   const [header, body, signature] = parts;
+
+  // Reject tokens whose advertised algorithm is anything other than HS256, so
+  // a future change to the verifier never accidentally honours `alg: none` or
+  // an asymmetric algorithm via header confusion.
+  let parsedHeader: { alg?: unknown; typ?: unknown };
+  try {
+    parsedHeader = JSON.parse(atob(header.replace(/-/g, "+").replace(/_/g, "/")));
+  } catch {
+    return null;
+  }
+  if (parsedHeader.alg !== "HS256") return null;
+
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [
     "verify",
   ]);
-  const sigBytes = Uint8Array.from(atob(signature.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+  let sigBytes: Uint8Array;
+  try {
+    sigBytes = Uint8Array.from(atob(signature.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+  } catch {
+    return null;
+  }
   const valid = await crypto.subtle.verify("HMAC", key, sigBytes, encoder.encode(`${header}.${body}`));
   if (!valid) return null;
   try {
     const payload = JSON.parse(atob(body.replace(/-/g, "+").replace(/_/g, "/")));
-    if (payload.exp && Date.now() > payload.exp * 1000) return null;
+    // Require an `exp` claim and reject expired tokens.
+    if (typeof payload.exp !== "number" || Date.now() > payload.exp * 1000) return null;
     return payload;
   } catch {
     return null;
