@@ -1607,14 +1607,6 @@ export default function App() {
               </div>
             ) : null}
           </div>
-          {user ? (
-            <div className="account-chip">
-              <span className="account-avatar">{(user.email[0] ?? "?").toUpperCase()}</span>
-              <button type="button" className="ghost-button account-logout" onClick={logout}>Log out</button>
-            </div>
-          ) : (
-            <button type="button" className="ghost-button account-login-btn" onClick={() => setAuthOpen(true)}>Log in</button>
-          )}
         </nav>
 
         <div className="topbar-actions">
@@ -1643,6 +1635,14 @@ export default function App() {
             />
             <span className="search-hint">⌘ K</span>
           </label>
+          {user ? (
+            <div className="account-chip">
+              <span className="account-avatar">{(user.email[0] ?? "?").toUpperCase()}</span>
+              <button type="button" className="ghost-button account-logout" onClick={logout}>Log out</button>
+            </div>
+          ) : (
+            <button type="button" className="ghost-button account-login-btn" onClick={() => setAuthOpen(true)}>Log in</button>
+          )}
         </div>
       </header>
 
