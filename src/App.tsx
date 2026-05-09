@@ -6,6 +6,7 @@ import {
   calcContainmentRod,
   calcUnistrutLength,
   calcAngle,
+  calcContainmentBendStart,
   calcPower,
   calcVoltageDrop,
   calcBreaker,
@@ -14,6 +15,7 @@ import {
   formulas,
   widthLabel,
   widthValue,
+  type ContainmentBendDirection,
   type PhaseType,
   type PowerTarget,
   type BreakerInputMode,
@@ -78,9 +80,14 @@ type AngleUnit = "mm" | "cm" | "m";
 
 const DEFAULT_PAGE: PageId = "home";
 const ANGLE_UNITS: readonly AngleUnit[] = ["mm", "cm", "m"];
+const CONTAINMENT_BEND_DIRECTIONS: readonly ContainmentBendDirection[] = ["out", "in"];
 const POWER_TARGETS: readonly PowerTarget[] = ["power", "current", "voltage"];
 const PHASE_TYPES: readonly PhaseType[] = ["single", "three"];
 const BREAKER_INPUT_MODES: readonly BreakerInputMode[] = ["current", "power"];
+const containmentBendDirectionLabels: Record<ContainmentBendDirection, string> = {
+  out: "Further out",
+  in: "Further in"
+};
 
 const powerConfig: Record<
   PowerTarget,
@@ -797,6 +804,13 @@ const applets: Applet[] = [
     keywords: "angle drop tray bracket piece length offset trig 45 degree bend top straight bottom straight allowance developed length"
   },
   {
+    id: "tool-containment-bend-start",
+    title: "Containment bend start",
+    subtitle: "Line up parallel bends",
+    keywords:
+      "containment bend start align offset centreline centerline tray basket trunking ladder rack conduit further out further in tangent geometry"
+  },
+  {
     id: "tool-power",
     title: "kW / A / V",
     subtitle: "Power current voltage",
@@ -834,6 +848,8 @@ const toolHints = {
   unistrutLength:
     "Length = total containment widths + left allowance + right allowance + ((containments - 1) x gap). Side allowances cover the rod or square plate position at each end.",
   angle: "Angled length = drop / sin(theta). Advanced: total = top + angled + bottom + allowance.",
+  containmentBendStart:
+    "Forward offset = centreline offset x tan(angle / 2). Add it when the new containment is further out; subtract it when further in.",
   power: "Single-phase: P = V x I x PF. Three-phase: P = sqrt(3) x V x I x PF.",
   vdrop: "Single-phase: Vd = 2 x I x L x rho / A. Three-phase: Vd = sqrt(3) x I x L x rho / A.",
   breaker: "Rounds design current up to the next standard breaker size.",
@@ -869,6 +885,10 @@ function isBoolean(value: unknown): value is boolean {
 
 function isAngleUnit(value: unknown): value is AngleUnit {
   return isOneOf(ANGLE_UNITS, value);
+}
+
+function isContainmentBendDirection(value: unknown): value is ContainmentBendDirection {
+  return isOneOf(CONTAINMENT_BEND_DIRECTIONS, value);
 }
 
 function isPowerTarget(value: unknown): value is PowerTarget {
@@ -1036,6 +1056,25 @@ export default function App() {
   const [angleBottomBend, setAngleBottomBend] = usePersistedState("angle-bottom-bend", false, isBoolean);
   const [angleBendHeight, setAngleBendHeight] = usePersistedState("angle-bend-height", "5");
   const [angleAdvanced, setAngleAdvanced] = useState(false);
+
+  const [containmentBendReferenceStart, setContainmentBendReferenceStart] = usePersistedState(
+    "cbs-reference",
+    "2000"
+  );
+  const [containmentBendOffset, setContainmentBendOffset] = usePersistedState(
+    "cbs-offset",
+    "50"
+  );
+  const [containmentBendAngle, setContainmentBendAngle] = usePersistedState(
+    "cbs-angle",
+    "60"
+  );
+  const [containmentBendDirection, setContainmentBendDirection] =
+    usePersistedState<ContainmentBendDirection>(
+      "cbs-direction",
+      "out",
+      isContainmentBendDirection
+    );
 
   const [powerTarget, setPowerTarget] = usePersistedState<PowerTarget>("power-target", "current", isPowerTarget);
   const [powerPhase, setPowerPhase] = usePersistedState<PhaseType>("power-phase", "single", isPhaseType);
@@ -1232,6 +1271,25 @@ export default function App() {
     setAngleAdvanced(topStraight !== "0" || bottomStraight !== "0" || allowance !== "0");
   }
 
+  function clearContainmentBendStart() {
+    setContainmentBendReferenceStart("");
+    setContainmentBendOffset("");
+    setContainmentBendAngle("");
+    setContainmentBendDirection("out");
+  }
+
+  function applyContainmentBendStartPreset(
+    referenceStart: string,
+    centrelineOffset: string,
+    angle: string,
+    direction: ContainmentBendDirection
+  ) {
+    setContainmentBendReferenceStart(referenceStart);
+    setContainmentBendOffset(centrelineOffset);
+    setContainmentBendAngle(angle);
+    setContainmentBendDirection(direction);
+  }
+
   function applyPowerPreset(target: PowerTarget, phase: PhaseType, valueA: string, valueB: string, pf = "0.95") {
     setPowerTarget(target);
     setPowerPhase(phase);
@@ -1306,6 +1364,21 @@ export default function App() {
       angleTopStraight,
       angleUnit,
       angleValue
+    ]
+  );
+
+  const containmentBendStartResult = useMemo(() =>
+    calcContainmentBendStart(
+      containmentBendReferenceStart,
+      containmentBendOffset,
+      containmentBendAngle,
+      containmentBendDirection
+    ),
+    [
+      containmentBendAngle,
+      containmentBendDirection,
+      containmentBendOffset,
+      containmentBendReferenceStart
     ]
   );
 
@@ -2356,6 +2429,157 @@ export default function App() {
                   ) : null}
                 </div>
                 <FormulaToggle formula={formulas.angle} />
+              </article>
+            ) : null}
+
+            {filteredApplets.some((a) => a.id === "tool-containment-bend-start") ? (
+              <article id="tool-containment-bend-start" className="tool-panel">
+                <div className="tool-heading">
+                  <ToolTitle title="Containment bend start" hint={toolHints.containmentBendStart} />
+                  <button type="button" className="ghost-button" onClick={clearContainmentBendStart}>
+                    Clear
+                  </button>
+                </div>
+
+                <div className="tool-form">
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Reference bend start (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.1"
+                        aria-invalid={
+                          containmentBendStartResult.validationMessage === "Distances cannot be negative."
+                            ? true
+                            : undefined
+                        }
+                        value={containmentBendReferenceStart}
+                        onChange={(e) => setContainmentBendReferenceStart(e.target.value)}
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span>Centreline offset (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step="0.1"
+                        aria-invalid={
+                          containmentBendStartResult.validationMessage === "Distances cannot be negative."
+                            ? true
+                            : undefined
+                        }
+                        value={containmentBendOffset}
+                        onChange={(e) => setContainmentBendOffset(e.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Bend angle</span>
+                      <div className="input-wrap">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="0.1"
+                          max="179.9"
+                          step="0.1"
+                          aria-invalid={
+                            containmentBendStartResult.validationMessage?.includes("angle")
+                              ? true
+                              : undefined
+                          }
+                          value={containmentBendAngle}
+                          onChange={(e) => setContainmentBendAngle(e.target.value)}
+                        />
+                        <span className="suffix">deg</span>
+                      </div>
+                    </label>
+
+                    <div className="field">
+                      <span>Direction</span>
+                      <div className="segmented" role="group" aria-label="Containment direction">
+                        {CONTAINMENT_BEND_DIRECTIONS.map((direction) => (
+                          <button
+                            key={direction}
+                            type="button"
+                            className={`segment ${containmentBendDirection === direction ? "active" : ""}`}
+                            aria-pressed={containmentBendDirection === direction}
+                            onClick={() => setContainmentBendDirection(direction)}
+                          >
+                            {containmentBendDirectionLabels[direction]}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="field-note">
+                    Measure centreline to centreline. Basket, tray, trunking, ladder rack, and conduit use the same geometry unless the bend radius changes.
+                  </p>
+
+                  <PresetButtons
+                    ariaLabel="Containment bend start presets"
+                    presets={[
+                      {
+                        label: "Example out",
+                        onSelect: () =>
+                          applyContainmentBendStartPreset("2000", "50", "60", "out")
+                      },
+                      {
+                        label: "Example in",
+                        onSelect: () =>
+                          applyContainmentBendStartPreset("2000", "50", "60", "in")
+                      },
+                      {
+                        label: "90° / 100 mm",
+                        onSelect: () =>
+                          applyContainmentBendStartPreset("2400", "100", "90", "out")
+                      }
+                    ]}
+                  />
+
+                  {containmentBendStartResult.validationMessage ? (
+                    <p className="field-error" role="alert">
+                      {containmentBendStartResult.validationMessage}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="tool-output">
+                  <div className="result-main">
+                    <p className="result-label">New bend start</p>
+                    <p className="result-value">
+                      <CopyableResult
+                        value={containmentBendStartResult.newStartValue}
+                        onCopy={() =>
+                          addHistoryEntry(
+                            "Containment bend start",
+                            "New bend start",
+                            containmentBendStartResult.newStartValue
+                          )
+                        }
+                      />
+                    </p>
+                  </div>
+                  <div className="mini-metrics">
+                    <div>
+                      <span>Forward offset</span>
+                      <strong>
+                        <CopyableResult value={containmentBendStartResult.forwardOffsetValue} />
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Direction</span>
+                      <strong>{containmentBendDirectionLabels[containmentBendDirection]}</strong>
+                    </div>
+                  </div>
+                </div>
+                <FormulaToggle formula={formulas.containmentBendStart} />
               </article>
             ) : null}
 
