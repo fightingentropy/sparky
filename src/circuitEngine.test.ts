@@ -122,6 +122,26 @@ describe("simulate", () => {
     expect(result.totalCurrent).toBeCloseTo(0, 4);
   });
 
+  it("keeps an already-tripped breaker open and reports it", () => {
+    const circuit: Circuit = {
+      components: [
+        { ...makeComponent("B", "battery", 0, 0), voltage: 12 },
+        { ...makeComponent("Br", "breaker", 1, 0), rating: 5, tripped: true },
+        { ...makeComponent("L", "lamp", 2, 0), resistance: 60 }
+      ],
+      wires: [
+        wire("w1", "B", 0, "Br", 0),
+        wire("w2", "Br", 1, "L", 0),
+        wire("w3", "L", 1, "B", 1)
+      ]
+    };
+    const result = simulate(circuit);
+    expect(result.ok).toBe(true);
+    expect(result.trippedBreakers).toEqual(["Br"]);
+    expect(result.totalCurrent).toBeCloseTo(0, 4);
+    expect(result.componentCurrents["L"] ?? 0).toBeCloseTo(0, 4);
+  });
+
   it("does not trip a breaker when current is below its rating", () => {
     const circuit: Circuit = {
       components: [

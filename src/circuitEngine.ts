@@ -71,7 +71,11 @@ export function makeComponent(
   };
 }
 
-function emptyResult(fault: FaultKind, terminalNetIds: Record<string, string>): SimulationResult {
+function emptyResult(
+  fault: FaultKind,
+  terminalNetIds: Record<string, string>,
+  trippedBreakers: string[] = []
+): SimulationResult {
   return {
     ok: false,
     fault,
@@ -80,7 +84,7 @@ function emptyResult(fault: FaultKind, terminalNetIds: Record<string, string>): 
     componentVoltageDrops: {},
     terminalNetIds,
     totalCurrent: 0,
-    trippedBreakers: []
+    trippedBreakers
   };
 }
 
@@ -153,13 +157,19 @@ function gaussSolve(A: number[][], b: number[]): number[] | null {
 
 function solveCircuit(circuit: Circuit, forcedTrips: Set<string>): SimulationResult {
   const terminalNetIds = buildTerminalNets(circuit);
+  const trippedBreakerIds = new Set(forcedTrips);
+  for (const c of circuit.components) {
+    if (c.type === "breaker" && c.tripped) {
+      trippedBreakerIds.add(c.id);
+    }
+  }
 
   const battery = circuit.components.find((c) => c.type === "battery");
-  if (!battery) return emptyResult("no-source", terminalNetIds);
+  if (!battery) return emptyResult("no-source", terminalNetIds, Array.from(trippedBreakerIds));
 
   const active = circuit.components.filter((c) => {
     if (c.type === "switch" && c.closed === false) return false;
-    if (c.type === "breaker" && (c.tripped || forcedTrips.has(c.id))) return false;
+    if (c.type === "breaker" && trippedBreakerIds.has(c.id)) return false;
     return true;
   });
 
@@ -221,7 +231,7 @@ function solveCircuit(circuit: Circuit, forcedTrips: Set<string>): SimulationRes
       componentVoltageDrops: {},
       terminalNetIds,
       totalCurrent: 0,
-      trippedBreakers: []
+      trippedBreakers: Array.from(trippedBreakerIds)
     };
   }
 
@@ -256,7 +266,7 @@ function solveCircuit(circuit: Circuit, forcedTrips: Set<string>): SimulationRes
   });
 
   const x = gaussSolve(A, z);
-  if (!x) return emptyResult("short", terminalNetIds);
+  if (!x) return emptyResult("short", terminalNetIds, Array.from(trippedBreakerIds));
 
   const nodeVoltages: Record<string, number> = { [ground]: 0 };
   nonGroundNets.forEach((n, i) => {
@@ -288,7 +298,7 @@ function solveCircuit(circuit: Circuit, forcedTrips: Set<string>): SimulationRes
   }
 
   if (newTrips.length > 0) {
-    const next = new Set(forcedTrips);
+    const next = new Set(trippedBreakerIds);
     for (const id of newTrips) next.add(id);
     const re = solveCircuit(circuit, next);
     return {
@@ -307,7 +317,7 @@ function solveCircuit(circuit: Circuit, forcedTrips: Set<string>): SimulationRes
     componentVoltageDrops,
     terminalNetIds,
     totalCurrent,
-    trippedBreakers: Array.from(forcedTrips)
+    trippedBreakers: Array.from(trippedBreakerIds)
   };
 }
 

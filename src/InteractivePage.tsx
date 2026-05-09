@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
   simulate,
   makeComponent,
@@ -9,8 +9,9 @@ import {
   type ComponentType,
   type Wire
 } from "./circuitEngine";
-import { PanelTrainer } from "./PanelTrainer";
-import { FaultFinding } from "./FaultFinding";
+
+const PanelTrainer = lazy(() => import("./PanelTrainer").then((m) => ({ default: m.PanelTrainer })));
+const FaultFinding = lazy(() => import("./FaultFinding").then((m) => ({ default: m.FaultFinding })));
 
 type Props = {
   isActive: boolean;
@@ -254,6 +255,28 @@ export function InteractivePage({ isActive }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   const sim = useMemo(() => (energized ? simulate(circuit) : null), [circuit, energized]);
+  const trippedBreakerKey = sim?.trippedBreakers.join("|") ?? "";
+  const trippedBreakerIds = useMemo(
+    () => new Set(sim?.trippedBreakers ?? []),
+    [trippedBreakerKey]
+  );
+
+  useEffect(() => {
+    if (!energized || trippedBreakerIds.size === 0) return;
+
+    setCircuit((current) => {
+      let changed = false;
+      const components = current.components.map((component) => {
+        if (component.type !== "breaker" || !trippedBreakerIds.has(component.id) || component.tripped) {
+          return component;
+        }
+        changed = true;
+        return { ...component, tripped: true };
+      });
+
+      return changed ? { ...current, components } : current;
+    });
+  }, [energized, trippedBreakerIds]);
 
   function dismissWelcome() {
     writeWelcome();
@@ -477,12 +500,16 @@ export function InteractivePage({ isActive }: Props) {
 
       {tab === "panel" ? (
         <div className="ix-3d-wrap">
-          <PanelTrainer />
+          <Suspense fallback={<div className="ix-panel-loading" role="status">Loading panel trainer...</div>}>
+            <PanelTrainer />
+          </Suspense>
         </div>
       ) : null}
       {tab === "faults" ? (
         <div className="ix-3d-wrap">
-          <FaultFinding />
+          <Suspense fallback={<div className="ix-panel-loading" role="status">Loading fault finder...</div>}>
+            <FaultFinding />
+          </Suspense>
         </div>
       ) : null}
 
@@ -582,6 +609,10 @@ export function InteractivePage({ isActive }: Props) {
               const isHover = hoverId === c.id;
               const cur = sim?.componentCurrents?.[c.id] ?? 0;
               const lampGlow = c.type === "lamp" ? lampBrightness(cur) : 0;
+              const renderedComponent =
+                c.type === "breaker" && trippedBreakerIds.has(c.id) && !c.tripped
+                  ? { ...c, tripped: true }
+                  : c;
               return (
                 <g
                   key={c.id}
@@ -592,7 +623,7 @@ export function InteractivePage({ isActive }: Props) {
                   onPointerEnter={() => setHoverId(c.id)}
                   onPointerLeave={() => setHoverId(null)}
                 >
-                  <ComponentGlyph c={c} energized={energized && sim?.ok === true && !sim.fault} />
+                  <ComponentGlyph c={renderedComponent} energized={energized && sim?.ok === true && !sim.fault} />
                   <circle
                     cx={t0.x - c.x}
                     cy={t0.y - c.y}
