@@ -590,6 +590,46 @@ kbd {
   box-shadow: var(--shadow-card-hover);
 }
 
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.preset-button,
+.sheet-practice-btn {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 160ms var(--ease), background 160ms var(--ease), color 160ms var(--ease);
+}
+
+.preset-button:hover,
+.sheet-practice-btn:hover {
+  border-color: var(--accent-muted);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.sheet-practice-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sheet-practice-btn {
+  min-height: 28px;
+  font-size: 0.76rem;
+}
+
 /* ── Tutorials ─────────────────────────── */
 
 .page-tutorials {
@@ -2700,6 +2740,70 @@ input:disabled {
   box-shadow: none;
 }
 
+.exam-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.exam-review-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.exam-review-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.exam-review-filter {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 160ms var(--ease), background 160ms var(--ease), color 160ms var(--ease);
+}
+
+.exam-review-filter:hover,
+.exam-review-filter.is-active {
+  border-color: var(--accent-muted);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.exam-review-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.exam-review-section select {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  color: var(--text);
+  padding: 0 8px;
+}
+
 /* ── Exam results ──────────────────────── */
 
 .exam-results {
@@ -2943,6 +3047,20 @@ input:disabled {
     align-items: start;
   }
 
+  .exam-review-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .exam-review-section {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .exam-review-section select {
+    width: 100%;
+  }
+
   .exam-results-verdict {
     text-align: left;
   }
@@ -3127,6 +3245,17 @@ input:disabled {
     min-height: 32px;
     padding: 0 12px;
     font-size: 0.86rem;
+  }
+
+  .exam-footer-actions {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  .exam-footer-actions .ghost-button {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 0.78rem;
   }
 
   .exam-jump-btn {
@@ -3369,6 +3498,30 @@ body[data-page="interactive"] .ix-3d-wrap {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.ix-save-group {
+  align-items: center;
+  margin-left: auto;
+}
+
+.ix-save-input,
+.ix-save-select {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 10px;
+  font-size: 0.82rem;
+}
+
+.ix-save-input {
+  width: min(180px, 100%);
+}
+
+.ix-save-select {
+  width: min(220px, 100%);
 }
 
 .ix-layout {

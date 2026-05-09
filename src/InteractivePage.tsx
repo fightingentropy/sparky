@@ -51,9 +51,17 @@ type PendingWire = {
   terminal: 0 | 1;
 } | null;
 
+type SavedCircuit = {
+  id: string;
+  name: string;
+  circuit: Circuit;
+  updatedAt: number;
+};
+
 const CANVAS_W = 1200;
 const CANVAS_H = 720;
 const GRID = 16;
+const SAVED_CIRCUITS_KEY = "ix-saved-circuits-v1";
 const PALETTE_TOOLS: { tool: Tool; label: string; hint: string }[] = [
   { tool: "select", label: "Move", hint: "Drag a component to reposition it." },
   { tool: "battery", label: "Battery", hint: "12 V source. Provides the push that drives current." },
@@ -130,6 +138,41 @@ function readWelcome(): boolean {
 function writeWelcome() {
   try {
     localStorage.setItem("ix-welcome-seen", "1");
+  } catch {
+    // quota — ignore
+  }
+}
+
+function isCircuit(value: unknown): value is Circuit {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const circuit = value as Partial<Circuit>;
+  return Array.isArray(circuit.components) && Array.isArray(circuit.wires);
+}
+
+function readSavedCircuits(): SavedCircuit[] {
+  try {
+    const raw = localStorage.getItem(SAVED_CIRCUITS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((entry): entry is SavedCircuit => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return false;
+      const saved = entry as Partial<SavedCircuit>;
+      return (
+        typeof saved.id === "string" &&
+        typeof saved.name === "string" &&
+        typeof saved.updatedAt === "number" &&
+        isCircuit(saved.circuit)
+      );
+    });
+  } catch {
+    return [];
+  }
+}
+
+function writeSavedCircuits(circuits: SavedCircuit[]) {
+  try {
+    localStorage.setItem(SAVED_CIRCUITS_KEY, JSON.stringify(circuits));
   } catch {
     // quota — ignore
   }
@@ -250,6 +293,9 @@ export function InteractivePage({ isActive }: Props) {
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [pointerPos, setPointerPos] = useState<{ x: number; y: number } | null>(null);
   const [showWelcome, setShowWelcome] = useState(() => !readWelcome());
+  const [savedCircuits, setSavedCircuits] = useState<SavedCircuit[]>(readSavedCircuits);
+  const [circuitName, setCircuitName] = useState("");
+  const [selectedSavedCircuitId, setSelectedSavedCircuitId] = useState("");
 
   const dragRef = useRef<DragState>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -288,6 +334,48 @@ export function InteractivePage({ isActive }: Props) {
     setEnergized(false);
     setPendingWire(null);
     setSelectedId(null);
+  }
+
+  function persistSavedCircuits(next: SavedCircuit[]) {
+    const sorted = [...next].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 24);
+    setSavedCircuits(sorted);
+    writeSavedCircuits(sorted);
+  }
+
+  function saveCurrentCircuit() {
+    const name = circuitName.trim() || `Circuit ${savedCircuits.length + 1}`;
+    const now = Date.now();
+    const existingId = selectedSavedCircuitId || "";
+    const id = existingId || uid("saved");
+    const saved: SavedCircuit = {
+      id,
+      name,
+      circuit,
+      updatedAt: now
+    };
+    persistSavedCircuits([
+      saved,
+      ...savedCircuits.filter((entry) => entry.id !== id)
+    ]);
+    setSelectedSavedCircuitId(id);
+    setCircuitName(name);
+  }
+
+  function loadSavedCircuit(id = selectedSavedCircuitId) {
+    const saved = savedCircuits.find((entry) => entry.id === id);
+    if (!saved) return;
+    setCircuit(saved.circuit);
+    setCircuitName(saved.name);
+    setSelectedSavedCircuitId(saved.id);
+    setEnergized(false);
+    setPendingWire(null);
+    setSelectedId(null);
+  }
+
+  function deleteSavedCircuit() {
+    if (!selectedSavedCircuitId) return;
+    persistSavedCircuits(savedCircuits.filter((entry) => entry.id !== selectedSavedCircuitId));
+    setSelectedSavedCircuitId("");
   }
 
   function svgPoint(e: { clientX: number; clientY: number }): { x: number; y: number } {
@@ -528,6 +616,53 @@ export function InteractivePage({ isActive }: Props) {
           </button>
           <button type="button" className="ghost-button" onClick={() => loadPreset("empty")}>
             Clear
+          </button>
+        </div>
+        <div className="ix-toolbar-group ix-save-group" role="group" aria-label="Saved circuits">
+          <input
+            className="ix-save-input"
+            type="text"
+            value={circuitName}
+            onChange={(event) => setCircuitName(event.target.value)}
+            placeholder="Circuit name"
+            aria-label="Circuit name"
+          />
+          <button type="button" className="ghost-button" onClick={saveCurrentCircuit}>
+            Save
+          </button>
+          <select
+            className="ix-save-select"
+            value={selectedSavedCircuitId}
+            onChange={(event) => {
+              const id = event.target.value;
+              setSelectedSavedCircuitId(id);
+              const saved = savedCircuits.find((entry) => entry.id === id);
+              if (saved) setCircuitName(saved.name);
+            }}
+            aria-label="Saved circuits"
+          >
+            <option value="">Saved circuits</option>
+            {savedCircuits.map((entry) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.name}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="ghost-button"
+            onClick={() => loadSavedCircuit()}
+            disabled={!selectedSavedCircuitId}
+          >
+            Load
+          </button>
+          <button
+            type="button"
+            className="ghost-button"
+            onClick={deleteSavedCircuit}
+            disabled={!selectedSavedCircuitId}
+          >
+            Delete
           </button>
         </div>
       </div>

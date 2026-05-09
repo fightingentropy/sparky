@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./FaultFinding.css";
 
 // ---------- Types ----------
@@ -71,10 +71,25 @@ type ScenarioState = {
   attempts: number;
 };
 
+type FaultScenarioStats = {
+  attempts: number;
+  solves: number;
+  firstTrySolves: number;
+  hintsUsed: number;
+  totalSeconds: number;
+  bestSeconds: number | null;
+  lastSolvedAt: number | null;
+};
+
+type FaultStats = {
+  scenarios: Record<string, FaultScenarioStats>;
+};
+
 // ---------- Constants & helpers ----------
 
 const SVG_W = 800;
 const SVG_H = 520;
+const FAULT_STATS_KEY = "ff-practice-stats-v1";
 
 const DEFAULT_MODE_READING: Record<Mode, Reading> = {
   VAC: { value: 0, unit: "V" },
@@ -83,6 +98,62 @@ const DEFAULT_MODE_READING: Record<Mode, Reading> = {
   CONT: { value: 0, unit: "Ω", ol: true },
   OFF: { value: 0, unit: "V" }
 };
+
+function emptyScenarioStats(): FaultScenarioStats {
+  return {
+    attempts: 0,
+    solves: 0,
+    firstTrySolves: 0,
+    hintsUsed: 0,
+    totalSeconds: 0,
+    bestSeconds: null,
+    lastSolvedAt: null
+  };
+}
+
+function readFaultStats(): FaultStats {
+  try {
+    const raw = localStorage.getItem(FAULT_STATS_KEY);
+    if (!raw) return { scenarios: {} };
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return { scenarios: {} };
+    const scenarios = (parsed as Partial<FaultStats>).scenarios;
+    if (!scenarios || typeof scenarios !== "object" || Array.isArray(scenarios)) return { scenarios: {} };
+    const out: Record<string, FaultScenarioStats> = {};
+    for (const [id, value] of Object.entries(scenarios)) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) continue;
+      const stat = value as Partial<FaultScenarioStats>;
+      out[id] = {
+        attempts: Number.isFinite(stat.attempts) ? Number(stat.attempts) : 0,
+        solves: Number.isFinite(stat.solves) ? Number(stat.solves) : 0,
+        firstTrySolves: Number.isFinite(stat.firstTrySolves) ? Number(stat.firstTrySolves) : 0,
+        hintsUsed: Number.isFinite(stat.hintsUsed) ? Number(stat.hintsUsed) : 0,
+        totalSeconds: Number.isFinite(stat.totalSeconds) ? Number(stat.totalSeconds) : 0,
+        bestSeconds: typeof stat.bestSeconds === "number" ? stat.bestSeconds : null,
+        lastSolvedAt: typeof stat.lastSolvedAt === "number" ? stat.lastSolvedAt : null
+      };
+    }
+    return { scenarios: out };
+  } catch {
+    return { scenarios: {} };
+  }
+}
+
+function writeFaultStats(stats: FaultStats) {
+  try {
+    localStorage.setItem(FAULT_STATS_KEY, JSON.stringify(stats));
+  } catch {
+    // quota — ignore
+  }
+}
+
+function formatDuration(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "--";
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remaining = Math.round(seconds % 60);
+  return `${minutes}m ${remaining}s`;
+}
 
 function readingKey(red: string, black: string, mode: Mode, knobs: Record<string, string>): string {
   const knobStr = Object.keys(knobs)
@@ -724,6 +795,7 @@ const initialState = (sc: Scenario): ScenarioState => ({
 
 export function FaultFinding(): React.ReactElement {
   const [scenarioIdx, setScenarioIdx] = useState(0);
+  const [faultStats, setFaultStats] = useState<FaultStats>(readFaultStats);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [solvedSet, setSolvedSet] = useState<Set<string>>(new Set());
@@ -735,6 +807,15 @@ export function FaultFinding(): React.ReactElement {
 
   const scenario = SCENARIOS[scenarioIdx] ?? SCENARIOS[0]!;
   const st = states[scenario.id] ?? initialState(scenario);
+  const scenarioStartedAtRef = useRef(Date.now());
+
+  useEffect(() => {
+    writeFaultStats(faultStats);
+  }, [faultStats]);
+
+  useEffect(() => {
+    scenarioStartedAtRef.current = Date.now();
+  }, [scenario.id]);
 
   const updateState = useCallback((id: string, patch: Partial<ScenarioState>) => {
     setStates((prev) => {
@@ -747,6 +828,33 @@ export function FaultFinding(): React.ReactElement {
   const reading = useMemo(() => lookupReading(scenario, st), [scenario, st]);
   const formatted = useMemo(() => formatReading(reading, st.mode), [reading, st.mode]);
   const beeping = st.mode === "CONT" && reading != null && !reading.ol && reading.value < 30;
+  const statsSummary = useMemo(() => {
+    const values = SCENARIOS.map((s) => faultStats.scenarios[s.id] ?? emptyScenarioStats());
+    const attempts = values.reduce((sum, value) => sum + value.attempts, 0);
+    const solves = values.filter((value) => value.solves > 0).length;
+    const hintsUsed = values.reduce((sum, value) => sum + value.hintsUsed, 0);
+    const totalSeconds = values.reduce((sum, value) => sum + value.totalSeconds, 0);
+    const rankedWeakScenarios = SCENARIOS.map((s) => ({
+      scenario: s,
+      stats: faultStats.scenarios[s.id] ?? emptyScenarioStats()
+    })).sort((a, b) => {
+      const aUnsolved = a.stats.solves === 0 ? 1 : 0;
+      const bUnsolved = b.stats.solves === 0 ? 1 : 0;
+      if (aUnsolved !== bUnsolved) return bUnsolved - aUnsolved;
+      const aMisses = Math.max(a.stats.attempts - a.stats.solves, 0);
+      const bMisses = Math.max(b.stats.attempts - b.stats.solves, 0);
+      if (aMisses !== bMisses) return bMisses - aMisses;
+      return b.stats.hintsUsed - a.stats.hintsUsed;
+    });
+    const weakScenario = attempts > 0 ? rankedWeakScenarios[0]?.scenario : null;
+    return {
+      attempts,
+      solves,
+      averageHints: attempts ? hintsUsed / attempts : 0,
+      averageSeconds: attempts ? totalSeconds / attempts : 0,
+      weakScenario
+    };
+  }, [faultStats]);
 
   const handleTPClick = (tpId: string) => {
     if (st.submission?.correct) return;
@@ -782,9 +890,32 @@ export function FaultFinding(): React.ReactElement {
     if (!choice) return;
     const correct = !!choice.correct;
     const attempts = st.attempts + 1;
+    const elapsedSeconds = Math.max(1, Math.round((Date.now() - scenarioStartedAtRef.current) / 1000));
     updateState(scenario.id, {
       submission: { choice: st.selectedChoice, correct },
       attempts
+    });
+    setFaultStats((prev) => {
+      const current = prev.scenarios[scenario.id] ?? emptyScenarioStats();
+      const next: FaultScenarioStats = {
+        attempts: current.attempts + 1,
+        solves: current.solves + (correct ? 1 : 0),
+        firstTrySolves: current.firstTrySolves + (correct && attempts === 1 ? 1 : 0),
+        hintsUsed: current.hintsUsed + st.hintsShown,
+        totalSeconds: current.totalSeconds + elapsedSeconds,
+        bestSeconds: correct
+          ? current.bestSeconds === null
+            ? elapsedSeconds
+            : Math.min(current.bestSeconds, elapsedSeconds)
+          : current.bestSeconds,
+        lastSolvedAt: correct ? Date.now() : current.lastSolvedAt
+      };
+      return {
+        scenarios: {
+          ...prev.scenarios,
+          [scenario.id]: next
+        }
+      };
     });
     if (correct) {
       if (attempts === 1) {
@@ -822,9 +953,16 @@ export function FaultFinding(): React.ReactElement {
     updateState(scenario.id, { knobs: { ...st.knobs, [id]: value } });
   };
 
+  const practiceWeakArea = () => {
+    if (!statsSummary.weakScenario) return;
+    const index = SCENARIOS.findIndex((s) => s.id === statsSummary.weakScenario?.id);
+    if (index >= 0) setScenarioIdx(index);
+  };
+
   const allSolved = solvedSet.size === SCENARIOS.length;
   const submission = st.submission;
   const submittedChoice = submission ? scenario.choices.find((c) => c.key === submission.choice) : null;
+  const currentScenarioStats = faultStats.scenarios[scenario.id] ?? emptyScenarioStats();
 
   const redPos = st.redTP ? scenario.testPoints.find((tp) => tp.id === st.redTP) ?? null : null;
   const blackPos = st.blackTP ? scenario.testPoints.find((tp) => tp.id === st.blackTP) ?? null : null;
@@ -949,6 +1087,46 @@ export function FaultFinding(): React.ReactElement {
             <div className="ff-best">Best: {bestStreak}</div>
             <div className="ff-solved-chip">{solvedSet.size}/{SCENARIOS.length} solved</div>
           </div>
+        </section>
+
+        <section className="ff-card ff-card-progress">
+          <header className="ff-card-head">
+            <span className="ff-card-icon"><IconGauge /></span>
+            <h3 className="ff-card-title">Practice history</h3>
+          </header>
+          <div className="ff-progress-grid">
+            <div>
+              <span>Attempts</span>
+              <strong>{statsSummary.attempts}</strong>
+            </div>
+            <div>
+              <span>Solved</span>
+              <strong>{statsSummary.solves}/{SCENARIOS.length}</strong>
+            </div>
+            <div>
+              <span>Avg hints</span>
+              <strong>{statsSummary.averageHints.toFixed(1)}</strong>
+            </div>
+            <div>
+              <span>Avg time</span>
+              <strong>{formatDuration(statsSummary.averageSeconds)}</strong>
+            </div>
+          </div>
+          <div className="ff-current-stats">
+            <span>This scenario</span>
+            <strong>
+              {currentScenarioStats.solves} solved / {currentScenarioStats.attempts} attempts
+              {currentScenarioStats.bestSeconds ? `, best ${formatDuration(currentScenarioStats.bestSeconds)}` : ""}
+            </strong>
+          </div>
+          <button
+            type="button"
+            className="ff-hint-btn ff-weak-btn"
+            onClick={practiceWeakArea}
+            disabled={!statsSummary.weakScenario}
+          >
+            Practice weak area
+          </button>
         </section>
 
         {allSolved ? (
@@ -1231,6 +1409,16 @@ function IconBolt() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
       <path d="M13 2 L4 14 h7 l-1 8 9-12 h-7 z" />
+    </svg>
+  );
+}
+
+function IconGauge() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12a9 9 0 1 0-18 0" />
+      <path d="M12 12l4-4" />
+      <path d="M8 15h8" />
     </svg>
   );
 }

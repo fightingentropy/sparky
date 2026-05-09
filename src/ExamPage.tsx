@@ -25,8 +25,16 @@ import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
 
 type Answers = Record<number, ExamChoice>;
+type ReviewFilter = "all" | "missed" | "wrong" | "unanswered" | "correct";
 
 const LETTERS: ExamChoice[] = ["A", "B", "C", "D"];
+const REVIEW_FILTER_LABELS: Record<ReviewFilter, string> = {
+  all: "All",
+  missed: "Missed",
+  wrong: "Wrong",
+  unanswered: "Unanswered",
+  correct: "Correct"
+};
 const EXAM_STORAGE_VERSION = "2026-05-rotating-variants";
 const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
 const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
@@ -55,6 +63,19 @@ function isBoolean(value: unknown): value is boolean {
 
 function isNonNegativeInt(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0;
+}
+
+function questionState(question: ExamQuestion, answers: Answers): "correct" | "wrong" | "unanswered" {
+  const selected = answers[question.number];
+  if (selected === undefined) return "unanswered";
+  return selected === question.answer ? "correct" : "wrong";
+}
+
+function matchesReviewFilter(question: ExamQuestion, answers: Answers, filter: ReviewFilter): boolean {
+  if (filter === "all") return true;
+  const state = questionState(question, answers);
+  if (filter === "missed") return state === "wrong" || state === "unanswered";
+  return state === filter;
 }
 
 function clearStaleExamProgress() {
@@ -87,9 +108,13 @@ function clearStaleExamProgress() {
 
 type Props = {
   isActive: boolean;
+  practiceTarget?: {
+    examId: string;
+    nonce: number;
+  } | null;
 };
 
-export function ExamPage({ isActive }: Props) {
+export function ExamPage({ isActive, practiceTarget }: Props) {
   const { user } = useAuth();
 
   useEffect(() => {
@@ -101,6 +126,12 @@ export function ExamPage({ isActive }: Props) {
     DEFAULT_EXAM_ID,
     isExamId
   );
+
+  useEffect(() => {
+    if (!practiceTarget || !isKnownExamId(practiceTarget.examId)) return;
+    setSelectedExamId(practiceTarget.examId);
+  }, [practiceTarget?.examId, practiceTarget?.nonce, setSelectedExamId]);
+
   const selectedExamEntry = getExamEntry(selectedExamId);
   const [loadedExam, setLoadedExam] = useState<Exam | null>(null);
 
@@ -140,6 +171,15 @@ export function ExamPage({ isActive }: Props) {
     false,
     isBoolean
   );
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
+  const [reviewSectionId, setReviewSectionId] = useState("all");
+  const [retryQuestionNumbers, setRetryQuestionNumbers] = useState<number[] | null>(null);
+
+  useEffect(() => {
+    setReviewFilter("all");
+    setReviewSectionId("all");
+    setRetryQuestionNumbers(null);
+  }, [selectedExamEntry.id, variantIndex]);
 
   const syncedForUserRef = useRef<string | null>(null);
   useEffect(() => {
@@ -242,9 +282,19 @@ export function ExamPage({ isActive }: Props) {
     () => (exam ? getSectionQuestionsForVariant(exam, variantIndex) : []),
     [exam, variantIndex]
   );
+  const activeSectionGroups = useMemo(() => {
+    if (!retryQuestionNumbers || submitted) return sectionGroups;
+    const retrySet = new Set(retryQuestionNumbers);
+    return sectionGroups
+      .map(({ section, questions: sectionQuestions }) => ({
+        section,
+        questions: sectionQuestions.filter((question) => retrySet.has(question.number))
+      }))
+      .filter((group) => group.questions.length > 0);
+  }, [retryQuestionNumbers, sectionGroups, submitted]);
   const questions = useMemo(
-    () => sectionGroups.flatMap((g) => g.questions),
-    [sectionGroups]
+    () => activeSectionGroups.flatMap((g) => g.questions),
+    [activeSectionGroups]
   );
   const total = questions.length;
   const passMark = useMemo(() => (exam ? getPassMark(exam, total) : 0), [exam, total]);
@@ -269,6 +319,38 @@ export function ExamPage({ isActive }: Props) {
     () => (exam ? getScoringBand(exam, correctCount, total) : null),
     [correctCount, exam, total]
   );
+  const reviewCounts = useMemo(() => {
+    return activeSectionGroups
+      .flatMap((group) => group.questions)
+      .reduce(
+        (counts, question) => {
+          const state = questionState(question, answers);
+          counts.all += 1;
+          counts[state] += 1;
+          if (state !== "correct") counts.missed += 1;
+          return counts;
+        },
+        { all: 0, missed: 0, wrong: 0, unanswered: 0, correct: 0 } as Record<ReviewFilter, number>
+      );
+  }, [activeSectionGroups, answers]);
+  const missedQuestionNumbers = useMemo(
+    () =>
+      activeSectionGroups
+        .flatMap((group) => group.questions)
+        .filter((question) => questionState(question, answers) !== "correct")
+        .map((question) => question.number),
+    [activeSectionGroups, answers]
+  );
+  const displaySectionGroups = useMemo(() => {
+    if (!submitted) return activeSectionGroups;
+    return activeSectionGroups
+      .filter(({ section }) => reviewSectionId === "all" || section.id === reviewSectionId)
+      .map(({ section, questions: sectionQuestions }) => ({
+        section,
+        questions: sectionQuestions.filter((question) => matchesReviewFilter(question, answers, reviewFilter))
+      }))
+      .filter((group) => group.questions.length > 0);
+  }, [activeSectionGroups, answers, reviewFilter, reviewSectionId, submitted]);
 
   function setAnswer(questionNumber: number, choice: ExamChoice) {
     if (!exam || submitted) return;
@@ -281,6 +363,7 @@ export function ExamPage({ isActive }: Props) {
 
   function handleSubmit() {
     if (!exam) return;
+    setRetryQuestionNumbers(null);
     setSubmitted(true);
     syncToServer(answers, true);
     window.setTimeout(() => {
@@ -292,9 +375,37 @@ export function ExamPage({ isActive }: Props) {
     if (!exam) return;
     setAnswers({});
     setSubmitted(false);
+    setRetryQuestionNumbers(null);
     setAttemptCount((current) => current + 1);
     syncToServer({} as Answers, false);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function handleRetryMissed() {
+    if (!exam || missedQuestionNumbers.length === 0) return;
+    const missedSet = new Set(missedQuestionNumbers);
+    setAnswers((current) => {
+      const next = { ...current };
+      for (const questionNumber of missedSet) {
+        delete next[questionNumber];
+      }
+      syncToServer(next, false);
+      return next;
+    });
+    setRetryQuestionNumbers(missedQuestionNumbers);
+    setSubmitted(false);
+    setReviewFilter("all");
+    setReviewSectionId("all");
+    window.setTimeout(() => {
+      document
+        .getElementById(`exam-q-${missedQuestionNumbers[0]}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 60);
+  }
+
+  function exitRetryMode() {
+    setRetryQuestionNumbers(null);
+    setSubmitted(false);
   }
 
   function scrollToFirstUnanswered() {
@@ -394,7 +505,7 @@ export function ExamPage({ isActive }: Props) {
         {submitted && exam && scoringBand ? (
           <ExamResults
             exam={exam}
-            sectionGroups={sectionGroups}
+            sectionGroups={activeSectionGroups}
             answers={answers}
             correctCount={correctCount}
             total={total}
@@ -406,12 +517,53 @@ export function ExamPage({ isActive }: Props) {
           />
         ) : null}
 
+        {submitted && exam ? (
+          <div className="exam-review-tools" aria-label="Review filters">
+            <div className="exam-review-filter-row" role="group" aria-label="Question status filter">
+              {(Object.keys(REVIEW_FILTER_LABELS) as ReviewFilter[]).map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  className={`exam-review-filter${reviewFilter === filter ? " is-active" : ""}`}
+                  onClick={() => setReviewFilter(filter)}
+                  aria-pressed={reviewFilter === filter}
+                >
+                  <span>{REVIEW_FILTER_LABELS[filter]}</span>
+                  <strong>{reviewCounts[filter]}</strong>
+                </button>
+              ))}
+            </div>
+            <label className="exam-review-section">
+              <span>Section</span>
+              <select
+                value={reviewSectionId}
+                onChange={(event) => setReviewSectionId(event.target.value)}
+              >
+                <option value="all">All sections</option>
+                {activeSectionGroups.map(({ section }) => (
+                  <option key={section.id} value={section.id}>
+                    {section.title.replace(/^Section \d+ — /, "")}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              className="ghost-button"
+              onClick={handleRetryMissed}
+              disabled={missedQuestionNumbers.length === 0}
+            >
+              Retry missed questions
+            </button>
+          </div>
+        ) : null}
+
         {!exam ? (
           <p className="empty-state" role="status">Loading {selectedExamEntry.title}...</p>
         ) : null}
 
         <div className="exam-sections">
-          {sectionGroups.map(({ section, questions: sectionQuestions }) => (
+          {displaySectionGroups.map(({ section, questions: sectionQuestions }) => (
             <article key={section.id} className="exam-section" id={section.id}>
               <h3 className="exam-section-title">{section.title}</h3>
               <div className="exam-question-list">
@@ -429,12 +581,20 @@ export function ExamPage({ isActive }: Props) {
           ))}
         </div>
 
+        {submitted && exam && displaySectionGroups.length === 0 ? (
+          <p className="empty-state">No questions match the current review filters.</p>
+        ) : null}
+
         <footer className="exam-footer">
           {!submitted ? (
             <>
               <div className="exam-footer-status">
                 {!exam ? (
                   <span>Loading exam.</span>
+                ) : retryQuestionNumbers ? (
+                  <span>
+                    Retrying {retryQuestionNumbers.length} missed question{retryQuestionNumbers.length === 1 ? "" : "s"}.
+                  </span>
                 ) : answeredCount === total ? (
                   <span className="exam-status-ok">Ready to submit.</span>
                 ) : (
@@ -447,6 +607,11 @@ export function ExamPage({ isActive }: Props) {
                   </button>
                 )}
               </div>
+              {retryQuestionNumbers ? (
+                <button type="button" className="ghost-button" onClick={exitRetryMode}>
+                  Exit retry
+                </button>
+              ) : null}
               <button
                 type="button"
                 className="exam-submit-btn"
@@ -463,9 +628,19 @@ export function ExamPage({ isActive }: Props) {
                   {passed ? "Pass" : "Below pass mark"} — {correctCount}/{total} ({percent}%)
                 </span>
               </div>
-              <button type="button" className="ghost-button" onClick={handleReset}>
-                Reset &amp; try next test
-              </button>
+              <div className="exam-footer-actions">
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={handleRetryMissed}
+                  disabled={missedQuestionNumbers.length === 0}
+                >
+                  Retry missed
+                </button>
+                <button type="button" className="ghost-button" onClick={handleReset}>
+                  Reset &amp; try next test
+                </button>
+              </div>
             </>
           )}
         </footer>

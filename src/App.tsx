@@ -25,6 +25,7 @@ import { useTheme } from "./useTheme";
 import { useFocusTrap } from "./useFocusTrap";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
+import type { ExamId } from "./examRegistry";
 // Lazy-load heavy pages so the home/cheat-sheet bundle stays small. The
 // chunks are fetched the first time the user navigates to each page and the
 // component stays mounted thereafter (so per-page state is preserved across
@@ -66,6 +67,11 @@ type PaletteItem = {
   tag: string;
   keywords: string;
   action: () => void;
+};
+
+type PracticeLink = {
+  examId: ExamId;
+  label: string;
 };
 
 type AngleUnit = "mm" | "cm" | "m";
@@ -710,6 +716,66 @@ const cheatSheetSections: CheatSheetSection[] = [
   }
 ];
 
+const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
+  "cheat-core-formulas": [{ examId: "electrics", label: "Basic electrics" }],
+  "cheat-key-definitions": [{ examId: "electrics", label: "Basic electrics" }],
+  "cheat-protection-devices": [
+    { examId: "electrics", label: "Basic electrics" },
+    { examId: "18th-edition", label: "18th Edition" }
+  ],
+  "cheat-regulations": [
+    { examId: "building-regulations", label: "Building regs" },
+    { examId: "18th-edition", label: "18th Edition" }
+  ],
+  "cheat-safe-zones": [
+    { examId: "building-regulations", label: "Building regs" },
+    { examId: "18th-edition", label: "18th Edition" }
+  ],
+  "cheat-structural-limits": [{ examId: "building-regulations", label: "Building regs" }],
+  "cheat-site-math": [{ examId: "electrics", label: "Basic electrics" }],
+  "cheat-course-earthing-systems": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-earthing-bonding-sizing": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-supplementary-bonding": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-disconnection-times": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-zs-tables": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-rcd-types": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-where-rcd-required": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-consumer-unit": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-cable-design-sequence": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-correction-factors": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-volt-drop": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-final-circuit-specs": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-iv-test-sequence": [{ examId: "initial-verification", label: "Initial verification" }],
+  "cheat-course-test-methods": [{ examId: "initial-verification", label: "Initial verification" }],
+  "cheat-course-ir-detail": [{ examId: "initial-verification", label: "Initial verification" }],
+  "cheat-course-pat-testing": [{ examId: "pat-testing", label: "PAT testing" }],
+  "cheat-course-eicr-codes": [{ examId: "condition-reporting", label: "Condition reporting" }],
+  "cheat-course-eicr-procedure": [
+    { examId: "periodic-inspection", label: "Periodic inspection" },
+    { examId: "condition-reporting", label: "Condition reporting" }
+  ],
+  "cheat-course-bathroom-zones": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-iv-inspection-checklist": [{ examId: "initial-verification", label: "Initial verification" }],
+  "cheat-course-safe-isolation": [
+    { examId: "initial-verification", label: "Initial verification" },
+    { examId: "am2-installation-assessment", label: "AM2" }
+  ],
+  "cheat-course-instruments-gs38": [{ examId: "initial-verification", label: "Initial verification" }],
+  "cheat-course-rcd-trip-times": [{ examId: "initial-verification", label: "Initial verification" }],
+  "cheat-course-supply-intake": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-adiabatic-pfc": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-three-phase-basics": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-special-cables-fp200": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-buried-cables-outbuildings": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-conduit-sizing": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-diversity": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-eic-paperwork": [
+    { examId: "initial-verification", label: "Initial verification" },
+    { examId: "periodic-inspection", label: "Periodic inspection" }
+  ],
+  "cheat-course-protective-measures": [{ examId: "18th-edition", label: "18th Edition" }]
+};
+
 const applets: Applet[] = [
   {
     id: "tool-containment-rod",
@@ -846,6 +912,24 @@ function ToolTitle({ title, hint }: { title: string; hint: string }) {
   );
 }
 
+function PresetButtons({
+  ariaLabel,
+  presets
+}: {
+  ariaLabel: string;
+  presets: Array<{ label: string; onSelect: () => void }>;
+}) {
+  return (
+    <div className="preset-row" role="group" aria-label={ariaLabel}>
+      {presets.map((preset) => (
+        <button key={preset.label} type="button" className="preset-button" onClick={preset.onSelect}>
+          {preset.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function getPageFromLocation(): PageId {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   if (path === "/notes" || path === "/cheatsheet") return "cheatsheet";
@@ -898,6 +982,7 @@ export default function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [copiedSectionId, setCopiedSectionId] = useState<string | null>(null);
+  const [examPracticeTarget, setExamPracticeTarget] = useState<{ examId: ExamId; nonce: number } | null>(null);
 
   const paletteTrapRef = useFocusTrap<HTMLDivElement>(paletteOpen);
   const helpTrapRef = useFocusTrap<HTMLDivElement>(helpOpen);
@@ -1008,6 +1093,11 @@ export default function App() {
     }
   }
 
+  function openPracticeExam(examId: ExamId) {
+    setExamPracticeTarget({ examId, nonce: Date.now() });
+    navigateTo("exams");
+  }
+
   function scrollToTool(index: number) {
     const grid = toolGridRef.current;
     if (!grid) return;
@@ -1022,6 +1112,13 @@ export default function App() {
     setContainmentRodTopOfUnistrut("");
     setContainmentRodBuffer("");
     setContainmentRodUnistrutDepth("");
+  }
+
+  function applyContainmentRodPreset(overallHeight: string, topOfUnistrut: string, buffer: string, unistrutDepth: string) {
+    setContainmentRodOverallHeight(overallHeight);
+    setContainmentRodTopOfUnistrut(topOfUnistrut);
+    setContainmentRodBuffer(buffer);
+    setContainmentRodUnistrutDepth(unistrutDepth);
   }
 
   function buildUnistrutContainmentRow(): UnistrutContainmentRow {
@@ -1099,6 +1196,81 @@ export default function App() {
     setUnistrutLeftAllowance(DEFAULT_UNISTRUT_LENGTH_VALUES.leftAllowance);
     setUnistrutRightAllowance(DEFAULT_UNISTRUT_LENGTH_VALUES.rightAllowance);
     setUnistrutGap(DEFAULT_UNISTRUT_LENGTH_VALUES.gap);
+  }
+
+  function applyUnistrutPreset(
+    containments: Array<{ label: string; width: string }>,
+    sideAllowance: string,
+    gap: string
+  ) {
+    const nextRows = containments.map((containment) => ({
+      id: nextUnistrutContainmentIdRef.current++,
+      label: containment.label,
+      width: containment.width
+    }));
+    setUnistrutContainments(nextRows);
+    setUnistrutCountInput(String(nextRows.length));
+    setUnistrutLeftAllowance(sideAllowance);
+    setUnistrutRightAllowance(sideAllowance);
+    setUnistrutGap(gap);
+  }
+
+  function applyAnglePreset(
+    drop: string,
+    angle: string,
+    unit: AngleUnit,
+    topStraight = "0",
+    bottomStraight = "0",
+    allowance = "0"
+  ) {
+    setAngleDrop(drop);
+    setAngleValue(angle);
+    setAngleUnit(unit);
+    setAngleTopStraight(topStraight);
+    setAngleBottomStraight(bottomStraight);
+    setAngleAllowance(allowance);
+    setAngleAdvanced(topStraight !== "0" || bottomStraight !== "0" || allowance !== "0");
+  }
+
+  function applyPowerPreset(target: PowerTarget, phase: PhaseType, valueA: string, valueB: string, pf = "0.95") {
+    setPowerTarget(target);
+    setPowerPhase(phase);
+    setPowerValueA(valueA);
+    setPowerValueB(valueB);
+    setPowerPf(pf);
+  }
+
+  function applyVoltageDropPreset(phase: PhaseType, current: string, length: string, cableSize: string, voltage: string) {
+    setVdropPhase(phase);
+    setVdropCurrent(current);
+    setVdropLength(length);
+    setVdropCableSize(cableSize);
+    setVdropVoltage(voltage);
+  }
+
+  function applyBreakerCurrentPreset(current: string) {
+    setBreakerMode("current");
+    setBreakerCurrent(current);
+  }
+
+  function applyBreakerPowerPreset(power: string, phase: PhaseType, voltage: string, pf = "0.95") {
+    setBreakerMode("power");
+    setBreakerPower(power);
+    setBreakerPhase(phase);
+    setBreakerVoltage(voltage);
+    setBreakerPf(pf);
+  }
+
+  function applyConduitPreset(diameter: string, cableDiameter: string, cableCount: string, maxFill = "40") {
+    setConduitDiameter(diameter);
+    setConduitCableDiameter(cableDiameter);
+    setConduitCableCount(cableCount);
+    setConduitMaxFill(maxFill);
+  }
+
+  function applyStructurePreset(wall: string, joist: string) {
+    setStructureWall(wall);
+    setStructureJoist(joist);
   }
 
   // ── Calculator results ──
@@ -1717,6 +1889,15 @@ export default function App() {
 
                   <p className="field-note">Leave Unistrut depth blank to use 40 mm.</p>
 
+                  <PresetButtons
+                    ariaLabel="Containment rod presets"
+                    presets={[
+                      { label: "Ceiling trapeze", onSelect: () => applyContainmentRodPreset("3000", "2700", "25", "40") },
+                      { label: "Low bulkhead", onSelect: () => applyContainmentRodPreset("2600", "2450", "20", "40") },
+                      { label: "Deep drop", onSelect: () => applyContainmentRodPreset("3500", "2850", "50", "40") }
+                    ]}
+                  />
+
                   {containmentRodResult.validationMessage ? (
                     <p className="field-error" role="alert">
                       {containmentRodResult.validationMessage}
@@ -1840,6 +2021,49 @@ export default function App() {
                   <p className="field-note">
                     Side allowances cover the rod or square plate position at each end.
                   </p>
+
+                  <PresetButtons
+                    ariaLabel="Unistrut presets"
+                    presets={[
+                      {
+                        label: "Basket + tray",
+                        onSelect: () =>
+                          applyUnistrutPreset(
+                            [
+                              { label: "Basket", width: "300" },
+                              { label: "Tray", width: "225" }
+                            ],
+                            "75",
+                            "50"
+                          )
+                      },
+                      {
+                        label: "Lighting run",
+                        onSelect: () =>
+                          applyUnistrutPreset(
+                            [
+                              { label: "Trunking", width: "100" },
+                              { label: "Basket", width: "100" }
+                            ],
+                            "50",
+                            "50"
+                          )
+                      },
+                      {
+                        label: "Main ladder",
+                        onSelect: () =>
+                          applyUnistrutPreset(
+                            [
+                              { label: "Ladder", width: "650" },
+                              { label: "Tray", width: "300" },
+                              { label: "Basket", width: "200" }
+                            ],
+                            "100",
+                            "75"
+                          )
+                      }
+                    ]}
+                  />
 
                   <div className="containment-rows">
                     {unistrutContainments.map((containment, index) => {
@@ -2050,6 +2274,15 @@ export default function App() {
                     </label>
                   </div>
 
+                  <PresetButtons
+                    ariaLabel="Angle presets"
+                    presets={[
+                      { label: "45° tray drop", onSelect: () => applyAnglePreset("300", "45", "mm") },
+                      { label: "30° long offset", onSelect: () => applyAnglePreset("450", "30", "mm", "200", "200", "50") },
+                      { label: "60° tight rise", onSelect: () => applyAnglePreset("250", "60", "mm") }
+                    ]}
+                  />
+
                   {angleAdvanced ? (
                     <>
                       <div className="field-row">
@@ -2158,6 +2391,15 @@ export default function App() {
                     </label>
                   </div>
 
+                  <PresetButtons
+                    ariaLabel="Power presets"
+                    presets={[
+                      { label: "1 kW @ 230 V", onSelect: () => applyPowerPreset("current", "single", "1", "230", "1") },
+                      { label: "13 A socket", onSelect: () => applyPowerPreset("power", "single", "13", "230", "1") },
+                      { label: "10 kW 3P", onSelect: () => applyPowerPreset("current", "three", "10", "400", "0.95") }
+                    ]}
+                  />
+
                   <div className="field-row">
                     <label className="field">
                       <span>{powerConfig[powerTarget].inputLabels[0]}</span>
@@ -2242,6 +2484,15 @@ export default function App() {
                     </label>
                   </div>
 
+                  <PresetButtons
+                    ariaLabel="Voltage drop presets"
+                    presets={[
+                      { label: "32 A ring", onSelect: () => applyVoltageDropPreset("single", "32", "30", "2.5", "230") },
+                      { label: "6 A lights", onSelect: () => applyVoltageDropPreset("single", "6", "25", "1.5", "230") },
+                      { label: "32 A 3P", onSelect: () => applyVoltageDropPreset("three", "32", "40", "6", "400") }
+                    ]}
+                  />
+
                   <div className="field-row">
                     <label className="field">
                       <span>Current (A)</span>
@@ -2320,6 +2571,15 @@ export default function App() {
                       <option value="power">Power load</option>
                     </select>
                   </label>
+
+                  <PresetButtons
+                    ariaLabel="Breaker presets"
+                    presets={[
+                      { label: "18 A load", onSelect: () => applyBreakerCurrentPreset("18") },
+                      { label: "4 kW single", onSelect: () => applyBreakerPowerPreset("4", "single", "230", "1") },
+                      { label: "18 kW 3P", onSelect: () => applyBreakerPowerPreset("18", "three", "400", "0.95") }
+                    ]}
+                  />
 
                   {breakerMode === "current" ? (
                     <label className="field">
@@ -2467,6 +2727,15 @@ export default function App() {
                       />
                     </label>
                   </div>
+
+                  <PresetButtons
+                    ariaLabel="Conduit presets"
+                    presets={[
+                      { label: "20 mm / 3 x 6", onSelect: () => applyConduitPreset("20", "6", "3") },
+                      { label: "25 mm / 6 x 4", onSelect: () => applyConduitPreset("25", "4", "6") },
+                      { label: "32 mm / 10 x 6", onSelect: () => applyConduitPreset("32", "6", "10") }
+                    ]}
+                  />
                 </div>
 
                 <div className="tool-output">
@@ -2528,6 +2797,15 @@ export default function App() {
                       />
                     </label>
                   </div>
+
+                  <PresetButtons
+                    ariaLabel="Structural presets"
+                    presets={[
+                      { label: "100 mm wall", onSelect: () => applyStructurePreset("100", structureJoist) },
+                      { label: "140 mm block", onSelect: () => applyStructurePreset("140", structureJoist) },
+                      { label: "220 mm joist", onSelect: () => applyStructurePreset(structureWall, "220") }
+                    ]}
+                  />
                 </div>
 
                 <div className="tool-output">
@@ -2599,6 +2877,20 @@ export default function App() {
                   </button>
                 </div>
                 <p className="sheet-summary">{section.summary}</p>
+                {(NOTE_PRACTICE_LINKS[section.id] ?? []).length > 0 ? (
+                  <div className="sheet-practice-links" aria-label={`${section.title} practice exams`}>
+                    {(NOTE_PRACTICE_LINKS[section.id] ?? []).map((link) => (
+                      <button
+                        key={`${section.id}-${link.examId}`}
+                        type="button"
+                        className="sheet-practice-btn"
+                        onClick={() => openPracticeExam(link.examId)}
+                      >
+                        Practice {link.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
                 {section.items.length > 0 ? (
                   <ul className="sheet-list">
                     {section.items.map((item) => (
@@ -2651,7 +2943,7 @@ export default function App() {
         </section>
 
         <Suspense fallback={null}>
-          {visitedPages.has("exams") ? <ExamPage isActive={page === "exams"} /> : null}
+          {visitedPages.has("exams") ? <ExamPage isActive={page === "exams"} practiceTarget={examPracticeTarget} /> : null}
           {visitedPages.has("tutorials") ? <TutorialsPage isActive={page === "tutorials"} /> : null}
           {visitedPages.has("interactive") ? <InteractivePage isActive={page === "interactive"} /> : null}
         </Suspense>
