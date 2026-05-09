@@ -19,6 +19,14 @@ const AuthContext = createContext<AuthState>({
   logout: () => {},
 });
 
+function hasStoredToken(): boolean {
+  try {
+    return localStorage.getItem("sparky-token") !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function useAuth() {
   return useContext(AuthContext);
 }
@@ -28,8 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("sparky-token");
-    if (!token) {
+    if (!hasStoredToken()) {
       setLoading(false);
       return;
     }

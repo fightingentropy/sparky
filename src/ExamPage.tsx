@@ -1,17 +1,25 @@
-import { useEffect, useMemo, useRef, useCallback } from "react";
+import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import {
-  EXAMS,
   getActiveVariantIndex,
   getPassMark,
   getScoringBand,
   getScoringRanges,
   getSectionQuestionsForVariant,
   getVariantCount,
+  type ScoringRange
+} from "./examUtils";
+import {
   type Exam,
   type ExamChoice,
-  type ExamQuestion,
-  type ScoringRange
-} from "./exams";
+  type ExamQuestion
+} from "./exams/types";
+import {
+  DEFAULT_EXAM_ID,
+  EXAM_REGISTRY,
+  getExamEntry,
+  getValidExamIds,
+  isKnownExamId
+} from "./examRegistry";
 import { usePersistedState } from "./usePersistedState";
 import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
@@ -38,7 +46,7 @@ function isAnswers(value: unknown): value is Answers {
 }
 
 function isExamId(value: unknown): value is string {
-  return typeof value === "string" && EXAMS.some((exam) => exam.id === value);
+  return isKnownExamId(value);
 }
 
 function isBoolean(value: unknown): value is boolean {
@@ -51,12 +59,13 @@ function isNonNegativeInt(value: unknown): value is number {
 
 function clearStaleExamProgress() {
   try {
+    const validExamIds = getValidExamIds();
     const validStorageKeys = new Set(
-      EXAMS.flatMap((exam) => [
-        `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`,
-        `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`,
-        `${EXAM_VARIANT_STORAGE_PREFIX}${exam.id}`,
-        `${EXAM_UPDATED_STORAGE_PREFIX}${exam.id}`
+      validExamIds.flatMap((examId) => [
+        `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`,
+        `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`,
+        `${EXAM_VARIANT_STORAGE_PREFIX}${examId}`,
+        `${EXAM_UPDATED_STORAGE_PREFIX}${examId}`
       ])
     );
 
@@ -89,29 +98,45 @@ export function ExamPage({ isActive }: Props) {
 
   const [selectedExamId, setSelectedExamId] = usePersistedState<string>(
     "exam-selected",
-    EXAMS[0].id,
+    DEFAULT_EXAM_ID,
     isExamId
   );
-  const exam = useMemo(
-    () => EXAMS.find((e) => e.id === selectedExamId) ?? EXAMS[0],
-    [selectedExamId]
-  );
+  const selectedExamEntry = getExamEntry(selectedExamId);
+  const [loadedExam, setLoadedExam] = useState<Exam | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadedExam(null);
+
+    selectedExamEntry.load().then((loadedExam) => {
+      if (!cancelled) {
+        setLoadedExam(loadedExam);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedExamEntry]);
+  const exam = loadedExam?.id === selectedExamEntry.id ? loadedExam : null;
+  const selectedExamIdRef = useRef(selectedExamEntry.id);
+  selectedExamIdRef.current = selectedExamEntry.id;
 
   const [attemptCount, setAttemptCount] = usePersistedState<number>(
-    `${EXAM_VARIANT_STORAGE_PREFIX}${exam.id}`,
+    `${EXAM_VARIANT_STORAGE_PREFIX}${selectedExamEntry.id}`,
     0,
     isNonNegativeInt
   );
-  const variantCount = getVariantCount(exam);
-  const variantIndex = getActiveVariantIndex(attemptCount, exam);
+  const variantCount = exam ? getVariantCount(exam) : 0;
+  const variantIndex = exam ? getActiveVariantIndex(attemptCount, exam) : 0;
 
   const [answers, setAnswers] = usePersistedState<Answers>(
-    `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`,
+    `${EXAM_ANSWERS_STORAGE_PREFIX}${selectedExamEntry.id}`,
     {},
     isAnswers
   );
   const [submitted, setSubmitted] = usePersistedState<boolean>(
-    `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`,
+    `${EXAM_SUBMITTED_STORAGE_PREFIX}${selectedExamEntry.id}`,
     false,
     isBoolean
   );
@@ -125,7 +150,7 @@ export function ExamPage({ isActive }: Props) {
         for (const [examId, data] of Object.entries(res.progress)) {
           try {
             // Skip examIds we don't recognise — protects against poisoned rows.
-            if (!EXAMS.some((e) => e.id === examId)) continue;
+            if (!isKnownExamId(examId)) continue;
             if (!isAnswers(data.answers) || typeof data.submitted !== "boolean") continue;
             const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`;
             const submittedKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`;
@@ -150,8 +175,9 @@ export function ExamPage({ isActive }: Props) {
           } catch {}
         }
         // Re-hydrate React state for the currently selected exam after the merge.
+        const currentExamId = selectedExamIdRef.current;
         try {
-          const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${exam.id}`;
+          const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${currentExamId}`;
           const stored = localStorage.getItem(answersKey);
           if (stored) {
             const parsed = JSON.parse(stored);
@@ -159,7 +185,7 @@ export function ExamPage({ isActive }: Props) {
           }
         } catch {}
         try {
-          const subKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${exam.id}`;
+          const subKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${currentExamId}`;
           const subStored = localStorage.getItem(subKey);
           if (subStored) {
             const parsed = JSON.parse(subStored);
@@ -168,32 +194,32 @@ export function ExamPage({ isActive }: Props) {
         } catch {}
       })
       .catch(() => {});
-  }, [user, exam.id, setAnswers, setSubmitted]);
+  }, [user, selectedExamEntry.id, setAnswers, setSubmitted]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingSaveRef = useRef<{ answers: Answers; submitted: boolean } | null>(null);
+  const pendingSaveRef = useRef<{ examId: string; answers: Answers; submitted: boolean } | null>(null);
   const flushSave = useCallback(() => {
     if (!user || !pendingSaveRef.current) return;
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = null;
     }
-    const { answers: pendingAnswers, submitted: pendingSubmitted } = pendingSaveRef.current;
+    const { examId, answers: pendingAnswers, submitted: pendingSubmitted } = pendingSaveRef.current;
     pendingSaveRef.current = null;
-    saveExamProgress(exam.id, pendingAnswers as Record<string, string>, pendingSubmitted).catch(() => {});
-  }, [user, exam.id]);
+    saveExamProgress(examId, pendingAnswers as Record<string, string>, pendingSubmitted).catch(() => {});
+  }, [user]);
   const syncToServer = useCallback(
     (nextAnswers: Answers, nextSubmitted: boolean) => {
       if (!user) return;
-      pendingSaveRef.current = { answers: nextAnswers, submitted: nextSubmitted };
+      pendingSaveRef.current = { examId: selectedExamEntry.id, answers: nextAnswers, submitted: nextSubmitted };
       try {
-        const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${exam.id}`;
+        const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${selectedExamEntry.id}`;
         localStorage.setItem(localUpdatedKey, String(Date.now()));
       } catch {}
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(flushSave, 1000);
     },
-    [user, exam.id, flushSave]
+    [user, selectedExamEntry.id, flushSave]
   );
 
   // Flush any pending save when the user closes/refreshes the tab or unmounts the page.
@@ -213,7 +239,7 @@ export function ExamPage({ isActive }: Props) {
   const reviewRef = useRef<HTMLDivElement | null>(null);
 
   const sectionGroups = useMemo(
-    () => getSectionQuestionsForVariant(exam, variantIndex),
+    () => (exam ? getSectionQuestionsForVariant(exam, variantIndex) : []),
     [exam, variantIndex]
   );
   const questions = useMemo(
@@ -221,8 +247,8 @@ export function ExamPage({ isActive }: Props) {
     [sectionGroups]
   );
   const total = questions.length;
-  const passMark = useMemo(() => getPassMark(exam, total), [exam, total]);
-  const scoringRanges = useMemo(() => getScoringRanges(exam, total), [exam, total]);
+  const passMark = useMemo(() => (exam ? getPassMark(exam, total) : 0), [exam, total]);
+  const scoringRanges = useMemo(() => (exam ? getScoringRanges(exam, total) : []), [exam, total]);
 
   const answeredCount = useMemo(
     () => questions.reduce((count, question) => count + (answers[question.number] ? 1 : 0), 0),
@@ -237,15 +263,15 @@ export function ExamPage({ isActive }: Props) {
   }, [answers, questions]);
 
   const percent = total ? Math.round((correctCount / total) * 100) : 0;
-  const passed = correctCount >= passMark;
+  const passed = Boolean(exam) && correctCount >= passMark;
 
   const scoringBand = useMemo(
-    () => getScoringBand(exam, correctCount, total),
+    () => (exam ? getScoringBand(exam, correctCount, total) : null),
     [correctCount, exam, total]
   );
 
   function setAnswer(questionNumber: number, choice: ExamChoice) {
-    if (submitted) return;
+    if (!exam || submitted) return;
     setAnswers((current) => {
       const next = { ...current, [questionNumber]: choice };
       syncToServer(next, false);
@@ -254,6 +280,7 @@ export function ExamPage({ isActive }: Props) {
   }
 
   function handleSubmit() {
+    if (!exam) return;
     setSubmitted(true);
     syncToServer(answers, true);
     window.setTimeout(() => {
@@ -262,6 +289,7 @@ export function ExamPage({ isActive }: Props) {
   }
 
   function handleReset() {
+    if (!exam) return;
     setAnswers({});
     setSubmitted(false);
     setAttemptCount((current) => current + 1);
@@ -286,37 +314,41 @@ export function ExamPage({ isActive }: Props) {
         <header className="exam-hero">
           <div className="exam-hero-text">
             <div className="exam-title-wrap">
-              {EXAMS.length > 1 ? (
+              {EXAM_REGISTRY.length > 1 ? (
                 <select
                   className="exam-title-select"
                   aria-label="Mock exam"
-                  value={exam.id}
+                  value={selectedExamEntry.id}
                   onChange={(event) => {
                     setSelectedExamId(event.target.value);
                   }}
                 >
-                  {EXAMS.map((e) => (
+                  {EXAM_REGISTRY.map((e) => (
                     <option key={e.id} value={e.id}>
                       {e.title}
                     </option>
                   ))}
                 </select>
               ) : (
-                <h2>{exam.title}</h2>
+                <h2>{selectedExamEntry.title}</h2>
               )}
-              <span
-                className="exam-title-info"
-                tabIndex={0}
-                role="button"
-                aria-label="About this exam"
-              >
-                i
-              </span>
-              <div className="exam-tooltip" role="tooltip">
-                <span className="exam-tooltip-subtitle">{exam.subtitle}</span>
-                <p className="exam-tooltip-description">{exam.description}</p>
-                <p className="exam-tooltip-format">{exam.format}</p>
-              </div>
+              {exam ? (
+                <>
+                  <span
+                    className="exam-title-info"
+                    tabIndex={0}
+                    role="button"
+                    aria-label="About this exam"
+                  >
+                    i
+                  </span>
+                  <div className="exam-tooltip" role="tooltip">
+                    <span className="exam-tooltip-subtitle">{exam.subtitle}</span>
+                    <p className="exam-tooltip-description">{exam.description}</p>
+                    <p className="exam-tooltip-format">{exam.format}</p>
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
           <div className="exam-hero-stats">
@@ -359,7 +391,7 @@ export function ExamPage({ isActive }: Props) {
           />
         </div>
 
-        {submitted ? (
+        {submitted && exam && scoringBand ? (
           <ExamResults
             exam={exam}
             sectionGroups={sectionGroups}
@@ -372,6 +404,10 @@ export function ExamPage({ isActive }: Props) {
             scoringRanges={scoringRanges}
             reviewRef={reviewRef}
           />
+        ) : null}
+
+        {!exam ? (
+          <p className="empty-state" role="status">Loading {selectedExamEntry.title}...</p>
         ) : null}
 
         <div className="exam-sections">
@@ -397,7 +433,9 @@ export function ExamPage({ isActive }: Props) {
           {!submitted ? (
             <>
               <div className="exam-footer-status">
-                {answeredCount === total ? (
+                {!exam ? (
+                  <span>Loading exam.</span>
+                ) : answeredCount === total ? (
                   <span className="exam-status-ok">Ready to submit.</span>
                 ) : (
                   <button
@@ -413,7 +451,7 @@ export function ExamPage({ isActive }: Props) {
                 type="button"
                 className="exam-submit-btn"
                 onClick={handleSubmit}
-                disabled={answeredCount === 0}
+                disabled={!exam || answeredCount === 0}
               >
                 Submit exam
               </button>
