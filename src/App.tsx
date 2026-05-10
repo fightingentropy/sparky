@@ -48,12 +48,19 @@ type LegendItem = {
   swatchExtra?: string;
 };
 
+type ReferenceTable = {
+  title: string;
+  headers: string[];
+  rows: string[][];
+};
+
 type CheatSheetSection = {
   id: string;
   title: string;
   summary: string;
   items: string[];
   legend?: LegendItem[];
+  tables?: ReferenceTable[];
 };
 
 type Applet = {
@@ -272,6 +279,28 @@ const cheatSheetSections: CheatSheetSection[] = [
       "Bonding to gas/water: connect within 600 mm of where the service enters, after the meter; loop conductor through clamps - do not cut.",
       "Every BS 951 clamp must carry the 'Safety Electrical Connection - Do Not Remove' label.",
       "Plastic incoming services (e.g. blue MDPE) are NOT extraneous-conductive-parts - no main bonding required."
+    ],
+    tables: [
+      {
+        title: "Table 54.7 CPC sizing, same material",
+        headers: ["Line conductor S", "Minimum CPC"],
+        rows: [
+          ["S <= 16 mm^2", "Same size as line"],
+          [">16 and <=35 mm^2", "16 mm^2"],
+          [">35 mm^2", "S / 2"]
+        ]
+      },
+      {
+        title: "Table 54.8 PME main bonding, copper",
+        headers: ["Supply neutral", "Main bonding"],
+        rows: [
+          ["<=35 mm^2", "10 mm^2"],
+          ["50 mm^2", "16 mm^2"],
+          ["70 or 95 mm^2", "25 mm^2"],
+          ["120 mm^2", "35 mm^2"],
+          [">=150 mm^2", "50 mm^2"]
+        ]
+      }
     ]
   },
   {
@@ -309,11 +338,28 @@ const cheatSheetSections: CheatSheetSection[] = [
     items: [
       "Tabulated Zs (BS 7671 Table 41.3) is at operating temperature; for initial verification use 80% (max measured).",
       "Max measured Zs = max tabulated Zs x 0.8 (cables cold on first energisation).",
-      "B6: tab 7.28 / measured 5.82 ohm. B16: tab 2.73 / meas 2.19. B20: tab 2.19 / meas 1.75. B32: tab 1.09 / meas 0.87.",
-      "C6: tab 3.64 / meas 2.91. C32: tab 0.68 / meas 0.55.",
       "Read question for the word 'measured' - if present multiply tabulated by 0.8.",
+      "B32 example: tabulated 1.37 ohm; cold measured target 1.10 ohm.",
+      "Zs = Ze + R1+R2. Compare cold calculated Zs to the 80% target unless you separately apply a temperature correction.",
       "On EICR (cables hot, in service) the tabulated Table 41.x values may be used; on initial verification use the 80% values.",
       "Table 41.5 (TT): max Zs 30 mA = 1667, 100 mA = 500, 300 mA = 167, 500 mA = 100 ohm. Use I_dn in amps in RA x I_dn <= 50 V."
+    ],
+    tables: [
+      {
+        title: "MCB/RCBO Table 41.3 quick ref: tabulated / 80%",
+        headers: ["Rating", "Type B", "Type C", "Type D"],
+        rows: [
+          ["6 A", "7.28 / 5.82", "3.64 / 2.91", "1.82 / 1.46"],
+          ["10 A", "4.37 / 3.50", "2.19 / 1.75", "1.09 / 0.87"],
+          ["16 A", "2.73 / 2.18", "1.37 / 1.10", "0.68 / 0.55"],
+          ["20 A", "2.19 / 1.75", "1.09 / 0.87", "0.55 / 0.44"],
+          ["25 A", "1.75 / 1.40", "0.87 / 0.70", "0.44 / 0.35"],
+          ["32 A", "1.37 / 1.10", "0.68 / 0.55", "0.34 / 0.27"],
+          ["40 A", "1.09 / 0.87", "0.55 / 0.44", "0.27 / 0.22"],
+          ["50 A", "0.87 / 0.70", "0.44 / 0.35", "0.22 / 0.18"],
+          ["63 A", "0.69 / 0.55", "0.35 / 0.28", "0.17 / 0.14"]
+        ]
+      }
     ]
   },
   {
@@ -388,6 +434,82 @@ const cheatSheetSections: CheatSheetSection[] = [
       "Cable rating method 100 (T&E above plasterboard, insulation <=100 mm); 102 (touching insulation one side); 103 (fully surrounded).",
       "Method C clipped-direct gives the highest rating; method 103 the lowest.",
       "CCC factor applied for cables with >4 loaded cores."
+    ],
+    tables: [
+      {
+        title: "Ambient Ca, 70 deg C PVC cable",
+        headers: ["Ambient", "Ca"],
+        rows: [
+          ["25 deg C", "1.03"],
+          ["30 deg C", "1.00"],
+          ["35 deg C", "0.94"],
+          ["40 deg C", "0.87"],
+          ["45 deg C", "0.79"],
+          ["50 deg C", "0.71"],
+          ["55 deg C", "0.61"],
+          ["60 deg C", "0.50"]
+        ]
+      },
+      {
+        title: "Grouping Cg quick ref",
+        headers: ["Circuits", "Cg"],
+        rows: [
+          ["1", "1.00"],
+          ["2", "0.80"],
+          ["3", "0.70"],
+          ["4", "0.65"],
+          ["5", "0.60"],
+          ["6", "0.57"],
+          ["7", "0.54"],
+          ["8", "0.52"],
+          ["9", "0.50"],
+          ["12", "0.45"],
+          ["16", "0.41"],
+          ["20", "0.38"]
+        ]
+      }
+    ]
+  },
+  {
+    id: "cheat-course-cable-resistance",
+    title: "Cable resistance at 20C",
+    summary: "Common copper conductor resistance values and R1+R2 pairs for quick expected readings.",
+    items: [
+      "Single conductor: resistance = mOhm/m x length / 1000.",
+      "Radial R1+R2: add line mOhm/m + CPC mOhm/m, then multiply by route length / 1000.",
+      "Example 6/2.5 mm^2 T&E at 45 m: (3.08 + 7.41) x 45 / 1000 = 0.47 ohm.",
+      "Hot PVC estimate: multiply cold R1+R2 by about 1.20 for 70C operation.",
+      "If measured continuity is materially higher than expected, check lead nulling, terminations, spurs, hidden joints and actual route length."
+    ],
+    tables: [
+      {
+        title: "Copper conductor resistance",
+        headers: ["CSA", "mOhm/m", "ohm/km"],
+        rows: [
+          ["1.0 mm^2", "18.10", "18.10"],
+          ["1.5 mm^2", "12.10", "12.10"],
+          ["2.5 mm^2", "7.41", "7.41"],
+          ["4.0 mm^2", "4.61", "4.61"],
+          ["6.0 mm^2", "3.08", "3.08"],
+          ["10 mm^2", "1.83", "1.83"],
+          ["16 mm^2", "1.15", "1.15"],
+          ["25 mm^2", "0.727", "0.727"],
+          ["35 mm^2", "0.524", "0.524"]
+        ]
+      },
+      {
+        title: "Common T&E R1+R2 per metre",
+        headers: ["Cable", "Line", "CPC", "R1+R2"],
+        rows: [
+          ["1.0/1.0", "18.10", "18.10", "36.20 mOhm/m"],
+          ["1.5/1.0", "12.10", "18.10", "30.20 mOhm/m"],
+          ["2.5/1.5", "7.41", "12.10", "19.51 mOhm/m"],
+          ["4.0/1.5", "4.61", "12.10", "16.71 mOhm/m"],
+          ["6.0/2.5", "3.08", "7.41", "10.49 mOhm/m"],
+          ["10/4.0", "1.83", "4.61", "6.44 mOhm/m"],
+          ["16/6.0", "1.15", "3.08", "4.23 mOhm/m"]
+        ]
+      }
     ]
   },
   {
@@ -400,8 +522,24 @@ const cheatSheetSections: CheatSheetSection[] = [
       "Limits per Appendix 12 / Reg 525: 3% lighting, 5% other circuits (LV public supply).",
       "230 V single-phase: 3% = 6.9 V; 5% = 11.5 V. 400 V three-phase: 3% = 12 V; 5% = 20 V.",
       "Limit applies from origin of installation - sum drops across distribution + final circuit.",
-      "Typical mV/A/m (T&E): 1.0 mm^2 = 44; 2.5 mm^2 = 18; 6 mm^2 = 7.3; 10 mm^2 = 4.4; 16 mm^2 = 2.8.",
       "Volt drop fix is a LARGER cable, never smaller."
+    ],
+    tables: [
+      {
+        title: "Typical single-phase PVC/T&E mV/A/m",
+        headers: ["CSA", "mV/A/m"],
+        rows: [
+          ["1.0 mm^2", "44"],
+          ["1.5 mm^2", "29"],
+          ["2.5 mm^2", "18"],
+          ["4.0 mm^2", "11"],
+          ["6.0 mm^2", "7.3"],
+          ["10 mm^2", "4.4"],
+          ["16 mm^2", "2.8"],
+          ["25 mm^2", "1.75"],
+          ["35 mm^2", "1.25"]
+        ]
+      }
     ]
   },
   {
@@ -416,6 +554,19 @@ const cheatSheetSections: CheatSheetSection[] = [
       "Spurs: only ONE unfused spur per ring socket; FCU (BS 1363) <=13 A allows multiple sockets downstream.",
       "Cooker diversity (Table A1): first 10 A + 30% remainder + 5 A if socket in control unit.",
       "Immersion 3 kW: 16 A MCB, 20 A DP local switch, heat-resistant flex to element."
+    ],
+    tables: [
+      {
+        title: "Common domestic final circuits",
+        headers: ["Circuit", "Device", "Cable", "Limit"],
+        rows: [
+          ["Ring final", "30/32 A", "2.5/1.5 T&E", "100 m^2 floor area"],
+          ["Socket radial", "20 A", "2.5/1.5 T&E", "50 m^2 floor area"],
+          ["Socket radial", "32 A", "4.0/1.5 T&E", "75 m^2 floor area"],
+          ["Lighting", "6 or 10 A", "1.0 or 1.5 T&E", "Load and volt drop check"],
+          ["Immersion", "16 A", "2.5 T&E typical", "Dedicated fixed load"]
+        ]
+      }
     ]
   },
   {
@@ -585,6 +736,26 @@ const cheatSheetSections: CheatSheetSection[] = [
       "TT formula: RA x I_dn (in amps) <= 50 V. Convert mA to A (30 mA = 0.03 A).",
       "Earth electrode resistance >200 ohm regarded as unstable regardless of formula compliance.",
       "RCD warning notice (Reg 514.12) - test 6-monthly via test button (no longer mandatory in dwellings under latest amendment)."
+    ],
+    tables: [
+      {
+        title: "RCD test-time quick ref",
+        headers: ["Device", "0.5 x I_dn", "1 x I_dn", "5 x I_dn"],
+        rows: [
+          ["General type", "No trip within 2 s", "<=300 ms", "<=40 ms"],
+          ["S-type", "No trip within 2 s", "130-500 ms", "50-150 ms"]
+        ]
+      },
+      {
+        title: "TT maximum RA from RA x I_dn <= 50 V",
+        headers: ["RCD", "Max RA"],
+        rows: [
+          ["30 mA", "1667 ohm"],
+          ["100 mA", "500 ohm"],
+          ["300 mA", "167 ohm"],
+          ["500 mA", "100 ohm"]
+        ]
+      }
     ]
   },
   {
@@ -750,6 +921,10 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
   "cheat-course-consumer-unit": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-cable-design-sequence": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-correction-factors": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-cable-resistance": [
+    { examId: "initial-verification", label: "Initial verification" },
+    { examId: "electrics", label: "Basic electrics" }
+  ],
   "cheat-course-volt-drop": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-final-circuit-specs": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-iv-test-sequence": [{ examId: "initial-verification", label: "Initial verification" }],
@@ -873,6 +1048,16 @@ function matchesQuery(haystack: string, query: string) {
   if (!terms.length) return true;
   const normalizedHaystack = normalize(haystack);
   return terms.every((term) => normalizedHaystack.includes(term));
+}
+
+function referenceTableText(table: ReferenceTable) {
+  return [table.title, ...table.headers, ...table.rows.flat()].join(" ");
+}
+
+function referenceTableClipboardText(table: ReferenceTable) {
+  const header = table.headers.join(" | ");
+  const rows = table.rows.map((row) => row.join(" | "));
+  return [table.title, header, ...rows].join("\n");
 }
 
 function isOneOf<T extends string>(options: readonly T[], value: unknown): value is T {
@@ -1424,7 +1609,8 @@ export default function App() {
       cheatSheetSections
         .map((section) => {
           const legendLabels = section.legend ? section.legend.map((l) => l.label) : [];
-          const allText = [section.title, section.summary, ...section.items, ...legendLabels].join(" ");
+          const tableTexts = section.tables ? section.tables.map(referenceTableText) : [];
+          const allText = [section.title, section.summary, ...section.items, ...legendLabels, ...tableTexts].join(" ");
           if (!searchQuery) return section;
 
           const matchingItems = section.items.filter((item) =>
@@ -1433,21 +1619,26 @@ export default function App() {
           const matchingLegend = section.legend?.filter((l) =>
             matchesQuery(`${section.title} ${l.label}`, searchQuery)
           );
+          const matchingTables = section.tables?.filter((table) =>
+            matchesQuery(`${section.title} ${referenceTableText(table)}`, searchQuery)
+          );
 
           if (matchesQuery(allText, searchQuery)) {
             return {
               ...section,
               items: matchingItems.length ? matchingItems : section.items,
-              legend: matchingLegend?.length ? matchingLegend : section.legend
+              legend: matchingLegend?.length ? matchingLegend : section.legend,
+              tables: matchingTables?.length ? matchingTables : section.tables
             };
           }
 
-          if (!matchingItems.length && !matchingLegend?.length) return null;
+          if (!matchingItems.length && !matchingLegend?.length && !matchingTables?.length) return null;
 
           return {
             ...section,
             items: matchingItems,
-            legend: matchingLegend?.length ? matchingLegend : undefined
+            legend: matchingLegend?.length ? matchingLegend : undefined,
+            tables: matchingTables?.length ? matchingTables : undefined
           };
         })
         .filter((section): section is CheatSheetSection => section !== null),
@@ -1517,7 +1708,7 @@ export default function App() {
           title: section.title,
           subtitle: section.summary,
           tag: "Sheet",
-          keywords: `${section.title} ${section.summary} ${section.items.join(" ")} ${(section.legend || []).map((l) => l.label).join(" ")}`,
+          keywords: `${section.title} ${section.summary} ${section.items.join(" ")} ${(section.legend || []).map((l) => l.label).join(" ")} ${(section.tables || []).map(referenceTableText).join(" ")}`,
           action: () => navigateTo("cheatsheet", section.id)
         },
         ...section.items.map((item) => ({
@@ -1719,7 +1910,8 @@ export default function App() {
 
   async function copyNoteSection(section: CheatSheetSection) {
     const legendLabels = section.legend ? section.legend.map((l) => l.label) : [];
-    const text = [section.title, section.summary, ...section.items, ...legendLabels].join("\n");
+    const tableBlocks = section.tables ? section.tables.map(referenceTableClipboardText) : [];
+    const text = [section.title, section.summary, ...section.items, ...legendLabels, ...tableBlocks].join("\n");
 
     try {
       await navigator.clipboard.writeText(text);
@@ -3121,6 +3313,35 @@ export default function App() {
                       <li key={item}>{item}</li>
                     ))}
                   </ul>
+                ) : null}
+                {section.tables?.length ? (
+                  <div className="reference-table-stack">
+                    {section.tables.map((table) => (
+                      <div key={table.title} className="reference-table">
+                        <h4>{table.title}</h4>
+                        <div className="reference-table-scroll">
+                          <table>
+                            <thead>
+                              <tr>
+                                {table.headers.map((header) => (
+                                  <th key={header} scope="col">{header}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {table.rows.map((row) => (
+                                <tr key={row.join("|")}>
+                                  {row.map((cell, index) => (
+                                    <td key={`${row.join("|")}-${index}`}>{cell}</td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : null}
                 {section.legend ? (
                   <div className="legend-grid">
