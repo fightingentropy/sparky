@@ -50,6 +50,11 @@ export const DEFAULT_UNISTRUT_LENGTH_VALUES = {
   gap: "50"
 } as const;
 
+export const DEFAULT_TRUNKING_OPPOSITE_VALUES = {
+  angle: "45",
+  adjacent: "100"
+} as const;
+
 // ── Types ──────────────────────────────────────────────
 export type PhaseType = "single" | "three";
 export type PowerTarget = "power" | "current" | "voltage";
@@ -89,6 +94,15 @@ export type ContainmentBendStartResult = {
   validationMessage: string | null;
   forwardOffsetValue: string;
   newStartValue: string;
+};
+
+export type TrunkingOppositeResult = {
+  validationMessage: string | null;
+  desiredAngleValue: string;
+  calculationAngleValue: string;
+  adjacentValue: string;
+  oppositeValue: string;
+  roundedOppositeValue: string;
 };
 
 export type PowerResult = {
@@ -137,6 +151,18 @@ export function formatMeasure(value: number, unit: string): string {
   return `${formatNumber(value)} ${unit}`;
 }
 
+function formatTenths(value: number): string {
+  if (!Number.isFinite(value)) {
+    return "--";
+  }
+
+  return value.toFixed(1).replace(/\.0$/, "");
+}
+
+function formatTenthMeasure(value: number, unit: string): string {
+  return `${formatTenths(value)} ${unit}`;
+}
+
 // ── Formulas ───────────────────────────────────────────
 
 export const formulas = {
@@ -148,6 +174,8 @@ export const formulas = {
     "Angled piece = drop / sin(angle)\nHorizontal offset = angled piece x cos(angle)\nTotal = top straight + angled + bottom straight + allowance",
   containmentBendStart:
     "Forward offset = centreline offset x tan(bend angle / 2)\nFurther out: new bend start = reference bend start + forward offset\nFurther in: new bend start = reference bend start - forward offset",
+  trunkingOpposite:
+    "Calculation angle = desired bend angle / 2\nOpposite = tan(calculation angle) x adjacent\nFor 100 mm trunking: opposite = tan(A / 2) x 100",
   power:
     "Single-phase: P = V x I x PF\nThree-phase: P = sqrt(3) x V x I x PF",
   vdrop:
@@ -420,6 +448,65 @@ export function calcContainmentBendStart(
     validationMessage: null,
     forwardOffsetValue: formatMeasure(forwardOffset, "mm"),
     newStartValue: formatMeasure(newStart, "mm")
+  };
+}
+
+export function calcTrunkingOppositeMark(
+  angleStr: string,
+  adjacentStr: string
+): TrunkingOppositeResult {
+  const angle = Number.parseFloat(angleStr);
+  const adjacent = Number.parseFloat(adjacentStr);
+
+  const empty: TrunkingOppositeResult = {
+    validationMessage: null,
+    desiredAngleValue: "-- deg",
+    calculationAngleValue: "-- deg",
+    adjacentValue: "-- mm",
+    oppositeValue: "-- mm",
+    roundedOppositeValue: "-- mm"
+  };
+
+  if (Number.isFinite(angle) && (angle <= 0 || angle >= 180)) {
+    return {
+      ...empty,
+      validationMessage: "Desired bend angle must be greater than 0 and less than 180 degrees."
+    };
+  }
+
+  if (Number.isFinite(adjacent) && adjacent < 0) {
+    return {
+      ...empty,
+      validationMessage: "Adjacent measurement cannot be negative."
+    };
+  }
+
+  if (!Number.isFinite(angle) || !Number.isFinite(adjacent)) {
+    return empty;
+  }
+
+  if (adjacent <= 0) {
+    return {
+      ...empty,
+      validationMessage: "Adjacent measurement must be greater than 0 mm."
+    };
+  }
+
+  const calculationAngle = angle / 2;
+  const calculationAngleRadians = (calculationAngle * Math.PI) / 180;
+  const tangent = Math.tan(calculationAngleRadians);
+
+  if (!Number.isFinite(tangent)) return empty;
+
+  const opposite = tangent * adjacent;
+
+  return {
+    validationMessage: null,
+    desiredAngleValue: `${formatNumber(angle)} deg`,
+    calculationAngleValue: `${formatNumber(calculationAngle)} deg`,
+    adjacentValue: formatMeasure(adjacent, "mm"),
+    oppositeValue: formatTenthMeasure(opposite, "mm"),
+    roundedOppositeValue: formatMeasure(Math.round(opposite), "mm")
   };
 }
 
