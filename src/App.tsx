@@ -2,11 +2,13 @@ import { Suspense, lazy, useEffect, useMemo, useRef, useState, type CSSPropertie
 import {
   CONTAINMENT_OPTIONS,
   DEFAULT_CONTAINMENT_ROD_VALUES,
+  DEFAULT_TRUNKING_OPPOSITE_VALUES,
   DEFAULT_UNISTRUT_LENGTH_VALUES,
   calcContainmentRod,
   calcUnistrutLength,
   calcAngle,
   calcContainmentBendStart,
+  calcTrunkingOppositeMark,
   calcPower,
   calcVoltageDrop,
   calcBreaker,
@@ -193,6 +195,7 @@ const cheatSheetSections: CheatSheetSection[] = [
       "Angled piece length = vertical drop / sin(angle from horizontal).",
       "Horizontal offset = angled piece length x cos(angle from horizontal).",
       "Total developed length = top straight + angled piece + bottom straight + extra allowance.",
+      "100 mm trunking opposite mark = tan(desired bend angle / 2) x 100 mm; a 45 degree bend gives 41.4 mm, rounded to 41 mm.",
       "These relationships assume the angle is measured from the horizontal."
     ]
   },
@@ -986,6 +989,13 @@ const applets: Applet[] = [
       "containment bend start align offset centreline centerline tray basket trunking ladder rack conduit further out further in tangent geometry"
   },
   {
+    id: "tool-trunking-opposite-mark",
+    title: "100 mm trunking mark",
+    subtitle: "Opposite by tangent",
+    keywords:
+      "trunking opposite mark 100mm 100 mm layout bend angle adjacent tangent half angle tan calculation"
+  },
+  {
     id: "tool-power",
     title: "kW / A / V",
     subtitle: "Power current voltage",
@@ -1025,6 +1035,8 @@ const toolHints = {
   angle: "Angled length = drop / sin(theta). Advanced: total = top + angled + bottom + allowance.",
   containmentBendStart:
     "Forward offset = centreline offset x tan(angle / 2). Add it when the new containment is further out; subtract it when further in.",
+  trunkingOpposite:
+    "Calculation angle = desired bend angle / 2. Opposite = tan(calculation angle) x adjacent. Use adjacent 100 mm for 100 mm trunking.",
   power: "Single-phase: P = V x I x PF. Three-phase: P = sqrt(3) x V x I x PF.",
   vdrop: "Single-phase: Vd = 2 x I x L x rho / A. Three-phase: Vd = sqrt(3) x I x L x rho / A.",
   breaker: "Rounds design current up to the next standard breaker size.",
@@ -1260,6 +1272,14 @@ export default function App() {
       "out",
       isContainmentBendDirection
     );
+  const [trunkingOppositeAngle, setTrunkingOppositeAngle] = usePersistedState<string>(
+    "to-angle",
+    DEFAULT_TRUNKING_OPPOSITE_VALUES.angle
+  );
+  const [trunkingOppositeAdjacent, setTrunkingOppositeAdjacent] = usePersistedState<string>(
+    "to-adjacent",
+    DEFAULT_TRUNKING_OPPOSITE_VALUES.adjacent
+  );
 
   const [powerTarget, setPowerTarget] = usePersistedState<PowerTarget>("power-target", "current", isPowerTarget);
   const [powerPhase, setPowerPhase] = usePersistedState<PhaseType>("power-phase", "single", isPhaseType);
@@ -1475,6 +1495,19 @@ export default function App() {
     setContainmentBendDirection(direction);
   }
 
+  function clearTrunkingOppositeMark() {
+    setTrunkingOppositeAngle("");
+    setTrunkingOppositeAdjacent("");
+  }
+
+  function applyTrunkingOppositePreset(
+    angle: string,
+    adjacent = DEFAULT_TRUNKING_OPPOSITE_VALUES.adjacent
+  ) {
+    setTrunkingOppositeAngle(angle);
+    setTrunkingOppositeAdjacent(adjacent);
+  }
+
   function applyPowerPreset(target: PowerTarget, phase: PhaseType, valueA: string, valueB: string, pf = "0.95") {
     setPowerTarget(target);
     setPowerPhase(phase);
@@ -1565,6 +1598,11 @@ export default function App() {
       containmentBendOffset,
       containmentBendReferenceStart
     ]
+  );
+
+  const trunkingOppositeResult = useMemo(() =>
+    calcTrunkingOppositeMark(trunkingOppositeAngle, trunkingOppositeAdjacent),
+    [trunkingOppositeAdjacent, trunkingOppositeAngle]
   );
 
   const powerResult = useMemo(() =>
@@ -2772,6 +2810,121 @@ export default function App() {
                   </div>
                 </div>
                 <FormulaToggle formula={formulas.containmentBendStart} />
+              </article>
+            ) : null}
+
+            {filteredApplets.some((a) => a.id === "tool-trunking-opposite-mark") ? (
+              <article id="tool-trunking-opposite-mark" className="tool-panel">
+                <div className="tool-heading">
+                  <ToolTitle title="100 mm trunking mark" hint={toolHints.trunkingOpposite} />
+                  <button type="button" className="ghost-button" onClick={clearTrunkingOppositeMark}>
+                    Clear
+                  </button>
+                </div>
+
+                <div className="tool-form">
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Desired bend angle</span>
+                      <div className="input-wrap">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="0.1"
+                          max="179.9"
+                          step="0.1"
+                          aria-invalid={
+                            trunkingOppositeResult.validationMessage?.includes("angle")
+                              ? true
+                              : undefined
+                          }
+                          value={trunkingOppositeAngle}
+                          onChange={(e) => setTrunkingOppositeAngle(e.target.value)}
+                        />
+                        <span className="suffix">deg</span>
+                      </div>
+                    </label>
+
+                    <label className="field">
+                      <span>Adjacent measurement</span>
+                      <div className="input-wrap">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="0.1"
+                          step="0.1"
+                          aria-invalid={
+                            trunkingOppositeResult.validationMessage?.includes("Adjacent")
+                              ? true
+                              : undefined
+                          }
+                          value={trunkingOppositeAdjacent}
+                          onChange={(e) => setTrunkingOppositeAdjacent(e.target.value)}
+                        />
+                        <span className="suffix">mm</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <p className="field-note">
+                    For 100 mm trunking, keep Adj at 100 mm. The tangent calculation uses half of the desired bend angle.
+                  </p>
+
+                  <PresetButtons
+                    ariaLabel="Trunking opposite mark presets"
+                    presets={[
+                      { label: "45° / 100 mm", onSelect: () => applyTrunkingOppositePreset("45") },
+                      { label: "60° / 100 mm", onSelect: () => applyTrunkingOppositePreset("60") },
+                      { label: "90° / 100 mm", onSelect: () => applyTrunkingOppositePreset("90") }
+                    ]}
+                  />
+
+                  {trunkingOppositeResult.validationMessage ? (
+                    <p className="field-error" role="alert">
+                      {trunkingOppositeResult.validationMessage}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="tool-output">
+                  <div className="result-main">
+                    <p className="result-label">Rounded opposite</p>
+                    <p className="result-value">
+                      <CopyableResult
+                        value={trunkingOppositeResult.roundedOppositeValue}
+                        onCopy={() =>
+                          addHistoryEntry(
+                            "100 mm trunking mark",
+                            "Rounded opposite",
+                            trunkingOppositeResult.roundedOppositeValue
+                          )
+                        }
+                      />
+                    </p>
+                    <p className="result-sub">Rounded to nearest mm</p>
+                  </div>
+                  <div className="mini-metrics">
+                    <div>
+                      <span>Desired bend angle</span>
+                      <strong>{trunkingOppositeResult.desiredAngleValue}</strong>
+                    </div>
+                    <div>
+                      <span>Calculation angle</span>
+                      <strong>{trunkingOppositeResult.calculationAngleValue}</strong>
+                    </div>
+                    <div>
+                      <span>Opposite distance</span>
+                      <strong>
+                        <CopyableResult value={trunkingOppositeResult.oppositeValue} />
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Adjacent</span>
+                      <strong>{trunkingOppositeResult.adjacentValue}</strong>
+                    </div>
+                  </div>
+                </div>
+                <FormulaToggle formula={formulas.trunkingOpposite} />
               </article>
             ) : null}
 

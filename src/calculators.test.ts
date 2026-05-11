@@ -6,6 +6,7 @@ import {
   calcUnistrutLength,
   calcAngle,
   calcContainmentBendStart,
+  calcTrunkingOppositeMark,
   calcPower,
   calcVoltageDrop,
   calcBreaker,
@@ -212,6 +213,48 @@ describe("calcContainmentBendStart", () => {
     const result = calcContainmentBendStart("2000", "-50", "60", "out");
     expect(result.validationMessage).toBe("Distances cannot be negative.");
     expect(result.newStartValue).toBe("-- mm");
+  });
+});
+
+// ── Trunking opposite mark ──
+
+describe("calcTrunkingOppositeMark", () => {
+  it("calculates the 45-degree 100 mm trunking example", () => {
+    const result = calcTrunkingOppositeMark("45", "100");
+    expect(result.validationMessage).toBeNull();
+    expect(result.desiredAngleValue).toBe("45 deg");
+    expect(result.calculationAngleValue).toBe("22.5 deg");
+    expect(result.adjacentValue).toBe("100 mm");
+    expect(result.oppositeValue).toBe("41.4 mm");
+    expect(result.roundedOppositeValue).toBe("41 mm");
+  });
+
+  it("calculates a 90-degree bend using half angle tangent", () => {
+    const result = calcTrunkingOppositeMark("90", "100");
+    expect(result.calculationAngleValue).toBe("45 deg");
+    expect(result.oppositeValue).toBe("100 mm");
+    expect(result.roundedOppositeValue).toBe("100 mm");
+  });
+
+  it("returns placeholders for empty values", () => {
+    const result = calcTrunkingOppositeMark("", "");
+    expect(result.validationMessage).toBeNull();
+    expect(result.oppositeValue).toBe("-- mm");
+    expect(result.roundedOppositeValue).toBe("-- mm");
+  });
+
+  it("rejects invalid bend angles", () => {
+    const result = calcTrunkingOppositeMark("180", "100");
+    expect(result.validationMessage).toBe(
+      "Desired bend angle must be greater than 0 and less than 180 degrees."
+    );
+    expect(result.oppositeValue).toBe("-- mm");
+  });
+
+  it("rejects negative adjacent measurements", () => {
+    const result = calcTrunkingOppositeMark("45", "-100");
+    expect(result.validationMessage).toBe("Adjacent measurement cannot be negative.");
+    expect(result.oppositeValue).toBe("-- mm");
   });
 });
 
