@@ -25,6 +25,20 @@ export const TUTORIALS: Tutorial[] = [
     ]
   },
   {
+    id: "flat-90-trunking",
+    videoId: "xKminn2HwOI",
+    title: "How to Make a Flat 90 Bend in Electrical Trunking. Nearly Cut Thumb Off with Angle Grinder!",
+    channel: "Sparky Help",
+    sourceUrl: "https://www.youtube.com/watch?v=xKminn2HwOI",
+    category: "Trunking",
+    workplaceUse: "Flat 90° direction changes in metal trunking where a fabricated bend keeps the run continuous and tidy.",
+    practiceFocus: [
+      "Setting out the flat 90° cut lines accurately",
+      "Controlling grinder cuts and keeping hands clear",
+      "Folding, dressing, and checking lid fit before fixing"
+    ]
+  },
+  {
     id: "trunking-45-set",
     videoId: "6qiNOQ5GpUI",
     title: "How to Make A 45° Set in Electrical Trunking Using an Angle Grinder to Measurement.",
