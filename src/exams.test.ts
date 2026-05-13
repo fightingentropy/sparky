@@ -111,7 +111,7 @@ describe("exam data", () => {
     }
   });
 
-  it("exposes the 8 canonical exams in the expected order", () => {
+  it("exposes the canonical exams in the expected order", () => {
     const ids = EXAMS.map((exam) => exam.id);
     expect(ids).toEqual([
       "electrics",
