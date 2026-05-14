@@ -5,7 +5,38 @@ import { AuthProvider } from "./AuthContext";
 import App from "./App";
 import "./styles.css";
 
-registerSW({ immediate: true });
+if ("serviceWorker" in navigator) {
+  let hadController = Boolean(navigator.serviceWorker.controller);
+  let reloadingForServiceWorker = false;
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController) {
+      hadController = true;
+      return;
+    }
+    if (reloadingForServiceWorker) return;
+    reloadingForServiceWorker = true;
+    window.location.reload();
+  });
+}
+
+registerSW({
+  immediate: true,
+  onRegisteredSW: (_swScriptUrl, registration) => {
+    if (!registration) return;
+
+    const updateServiceWorker = () => {
+      registration.update().catch(() => {});
+    };
+
+    updateServiceWorker();
+    window.setInterval(updateServiceWorker, 60 * 1000);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") updateServiceWorker();
+    });
+  }
+});
 
 // When a deploy lands while a tab is open, the running React tree still holds
 // references to old chunk hashes. Lazy-loaded pages will fail to fetch their
