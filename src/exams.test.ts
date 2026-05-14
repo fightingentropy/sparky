@@ -111,6 +111,33 @@ describe("exam data", () => {
     }
   });
 
+  it("keeps the five attempt variants distinct for every exam", () => {
+    for (const exam of EXAMS) {
+      const signatures = new Set<string>();
+      for (let v = 0; v < 5; v += 1) {
+        const signature = getQuestionsForVariant(exam, v)
+          .map((question) => question.prompt)
+          .join("\n");
+        expect(signatures.has(signature)).toBe(false);
+        signatures.add(signature);
+      }
+    }
+  });
+
+  it("uses the official PAT homework set as the fifth PAT variation", () => {
+    const exam = EXAMS.find((e) => e.id === "pat-testing");
+    expect(exam).toBeDefined();
+
+    const officialAttempt = getQuestionsForVariant(exam!, 4);
+    expect(officialAttempt).toHaveLength(35);
+    expect(officialAttempt[0].prompt).toBe(
+      "Which of these does not describe a category of inspection and testing, referred to in the Code of Practice?"
+    );
+    expect(officialAttempt[34].prompt).toBe(
+      "Which regulations place a legal requirement on a landlord, who provides electrical equipment as part of a tenancy, to ensure that it is safe when first supplied?"
+    );
+  });
+
   it("exposes the canonical exams in the expected order", () => {
     const ids = EXAMS.map((exam) => exam.id);
     expect(ids).toEqual([
