@@ -432,7 +432,7 @@ function makeOfficialPatVariant(sectionIndex: number): ExamQuestion[] {
 
 export const patTestingExam: Exam = {
   id: "pat-testing",
-  title: "PAT Testing (5th Edition COP)",
+  title: "Pat Testing",
   subtitle: "Combined topic drill + official PAT homework variation",
   description:
     "A focused exam built around the PAT-testing portion of Webinar 4. Covers the IET Code of Practice for In-service Inspection and Testing of Electrical Equipment (5th edition), equipment classes, the formal visual / combined inspection-and-test, pass values, intervals, and the legal driver behind the work. Keeps four broad revision variants and adds the official Access Training PAT homework set as the fifth variation. Includes tricky questions on detachable leads, surge-protected equipment, Class II metalwork, appliance inspection, recordkeeping, and electrical-science calculations that support PAT assessment.",
