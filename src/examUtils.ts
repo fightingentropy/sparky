@@ -21,7 +21,11 @@ const SECTION_QUESTION_LIMITS: Record<string, Record<string, number>> = {
     "section-6-merged-design-rules": 9,
   },
   "pat-testing": {
-    "section-1": 35,
+    "section-1": 7,
+    "section-2": 7,
+    "section-3": 7,
+    "section-4": 7,
+    "section-5-merged-pat-fundamentals": 7,
   },
   "initial-verification": {
     "section-1": 5,
