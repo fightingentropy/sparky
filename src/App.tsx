@@ -2079,6 +2079,39 @@ export default function App() {
                     {item.label}
                   </a>
                 ))}
+                <div className="nav-menu-account" role="none">
+                  {user ? (
+                    <>
+                      <span className="nav-menu-account-label">
+                        <span className="account-avatar">{(user.email[0] ?? "?").toUpperCase()}</span>
+                        <span>{user.email}</span>
+                      </span>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="nav-menu-item nav-menu-account-action"
+                        onClick={() => {
+                          logout();
+                          setNavMenuOpen(false);
+                        }}
+                      >
+                        Log out
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="nav-menu-item nav-menu-account-action"
+                      onClick={() => {
+                        setAuthOpen(true);
+                        setNavMenuOpen(false);
+                      }}
+                    >
+                      Log in
+                    </button>
+                  )}
+                </div>
               </div>
             ) : null}
           </div>
