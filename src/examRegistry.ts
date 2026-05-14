@@ -24,7 +24,7 @@ export const EXAM_REGISTRY = [
   },
   {
     id: "pat-testing",
-    title: "PAT Testing (5th Edition COP)",
+    title: "Pat Testing",
     load: () => import("./exams/pat-testing").then((m) => m.patTestingExam)
   },
   {
