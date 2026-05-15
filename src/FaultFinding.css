@@ -87,9 +87,7 @@
   min-height: 0;
   width: 100%;
   display: block;
-  background:
-    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(245, 158, 11, 0.04), transparent 70%),
-    #0d1014;
+  background: #0d1014;
 }
 
 /* Test points */
@@ -104,9 +102,9 @@
 }
 
 .ff-tp:hover .ff-tp-dot {
-  fill: var(--accent-soft);
-  stroke: var(--accent);
-  filter: drop-shadow(0 0 6px var(--accent-glow));
+  fill: var(--surface);
+  stroke: var(--accent-strong);
+  filter: none;
 }
 
 .ff-tp-red {
@@ -387,9 +385,9 @@
 }
 
 .ff-icon-btn:hover:not(:disabled) {
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  border-color: var(--accent-muted);
+  background: var(--surface-soft);
+  color: var(--muted-strong);
+  border-color: var(--border-strong);
 }
 
 .ff-icon-btn:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -465,7 +463,7 @@
 
 /* Multimeter */
 .ff-meter {
-  background: linear-gradient(180deg, #2a2c2f, #1a1c1f);
+  background: #232628;
   border: 1px solid #3a3d40;
   border-radius: var(--radius-md);
   padding: 14px;
@@ -591,7 +589,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(253, 230, 138, 0.15), transparent 70%);
+  background: rgba(253, 230, 138, 0.08);
   animation: ff-beep 480ms ease-in-out infinite;
 }
 
@@ -604,7 +602,7 @@
 .ff-mode-btn {
   appearance: none;
   border: 1px solid #3a3d40;
-  background: linear-gradient(180deg, #36393d, #232628);
+  background: #2b2f33;
   border-radius: var(--radius-sm);
   color: rgba(255, 255, 255, 0.65);
   font-weight: 700;
@@ -614,13 +612,13 @@
   transition: background 140ms var(--ease), color 140ms var(--ease);
 }
 
-.ff-mode-btn:hover { color: var(--text); border-color: var(--accent-muted); }
+.ff-mode-btn:hover { color: rgba(255, 255, 255, 0.65); border-color: #3a3d40; }
 
 .ff-mode-active {
-  background: linear-gradient(180deg, #fbbf24, #f59e0b);
+  background: var(--accent);
   color: #1a1c1f;
-  border-color: #fbbf24;
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-color: var(--accent);
+  box-shadow: none;
 }
 
 .ff-active-row {
@@ -677,7 +675,7 @@
   transition: background 140ms var(--ease), border-color 140ms var(--ease);
 }
 
-.ff-hint-btn:hover { background: var(--accent-muted); border-color: var(--accent-strong); }
+.ff-hint-btn:hover { background: transparent; border-color: var(--border); }
 
 .ff-hint-list {
   list-style: none;
@@ -744,8 +742,8 @@
 }
 
 .ff-choice:hover:not(:disabled) {
-  border-color: var(--accent-muted);
-  background: var(--surface);
+  border-color: var(--border);
+  background: var(--surface-alt);
 }
 
 .ff-choice-key {
@@ -809,7 +807,7 @@
   padding: 10px 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--accent);
-  background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+  background: var(--accent);
   color: #1a1c1f;
   font-weight: 700;
   font-size: 0.92rem;
@@ -822,18 +820,18 @@
   gap: 8px;
 }
 
-.ff-submit:hover:not(:disabled) { filter: brightness(1.08); }
-.ff-submit:active:not(:disabled) { transform: translateY(1px); }
+.ff-submit:hover:not(:disabled) { filter: none; }
+.ff-submit:active:not(:disabled) { transform: none; }
 .ff-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .ff-submit-next {
-  background: linear-gradient(180deg, #86efac, #4ade80);
+  background: #4ade80;
   border-color: #4ade80;
   color: #052e16;
 }
 
 .ff-submit-retry {
-  background: linear-gradient(180deg, #fda4af, #f87171);
+  background: #f87171;
   border-color: #f87171;
   color: #2a0a0d;
 }

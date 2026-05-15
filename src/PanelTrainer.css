@@ -88,7 +88,7 @@
 /* ── Card ─────────────────────────────────────────────────────────────── */
 
 .pt-card {
-  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-alt) 100%);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 12px 14px;
@@ -97,8 +97,8 @@
 }
 
 .pt-card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-card-hover);
+  transform: none;
+  box-shadow: var(--shadow-card);
 }
 
 .pt-card-header {
@@ -165,10 +165,10 @@
 }
 
 .pt-library-button:hover {
-  transform: translateY(-1px);
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.08);
+  transform: none;
+  border-color: var(--border);
+  background: var(--surface-soft);
+  box-shadow: none;
 }
 
 .pt-library-button:focus-visible {
@@ -273,7 +273,7 @@
 }
 
 .pt-circuit:hover {
-  border-color: var(--border-strong);
+  border-color: var(--border);
 }
 
 .pt-circuit.is-selected {
@@ -418,7 +418,7 @@
 }
 
 .pt-select:hover {
-  border-color: var(--border-strong);
+  border-color: var(--border);
 }
 
 .pt-select:focus {
@@ -456,7 +456,7 @@
 }
 
 .pt-amp-input:hover {
-  border-color: var(--border-strong);
+  border-color: var(--border);
 }
 
 .pt-amp-input:focus {
@@ -585,9 +585,9 @@
 }
 
 .pt-icon-btn:hover {
-  border-color: var(--border-strong);
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border);
+  color: var(--muted-strong);
+  background: transparent;
 }
 
 .pt-icon-btn:focus-visible {
@@ -597,15 +597,15 @@
 }
 
 .pt-icon-btn.is-danger:hover {
-  border-color: var(--danger);
-  color: var(--danger);
-  background: rgba(239, 83, 80, 0.08);
+  border-color: var(--border);
+  color: var(--muted-strong);
+  background: transparent;
 }
 
 .pt-icon-btn.is-trip:hover {
-  border-color: var(--accent);
-  color: var(--accent-strong);
-  background: var(--accent-soft);
+  border-color: var(--border);
+  color: var(--muted-strong);
+  background: transparent;
 }
 
 /* Warning chips */
@@ -788,9 +788,9 @@
 }
 
 .pt-ghost-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent-strong);
-  background: var(--accent-soft);
+  border-color: var(--border);
+  color: var(--muted-strong);
+  background: transparent;
 }
 
 .pt-ghost-btn:focus-visible {
