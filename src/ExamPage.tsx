@@ -41,6 +41,45 @@ const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
 const EXAM_VARIANT_STORAGE_PREFIX = `exam-variant-${EXAM_STORAGE_VERSION}-`;
 const EXAM_UPDATED_STORAGE_PREFIX = `exam-updated-${EXAM_STORAGE_VERSION}-`;
 
+type CopyState = "idle" | "copied" | "failed";
+
+function getQuestionClipboardText(question: ExamQuestion): string {
+  const optionLines = LETTERS.map((letter) => `${letter}. ${question.options[letter]}`);
+  return [`Q${question.number}`, question.prompt, "", ...optionLines].join("\n");
+}
+
+async function writeClipboardText(text: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  const selection = document.getSelection();
+  const selectedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+
+  try {
+    if (!document.execCommand("copy")) {
+      throw new Error("Copy command failed");
+    }
+  } finally {
+    document.body.removeChild(textarea);
+    if (selection && selectedRange) {
+      selection.removeAllRanges();
+      selection.addRange(selectedRange);
+    }
+  }
+}
+
 function isExamChoice(value: unknown): value is ExamChoice {
   return typeof value === "string" && (LETTERS as string[]).includes(value);
 }
@@ -661,6 +700,44 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
   const isCorrect = submitted && selected === correct;
   const isIncorrect = submitted && selected !== undefined && selected !== correct;
   const isUnanswered = submitted && selected === undefined;
+  const [copyState, setCopyState] = useState<CopyState>("idle");
+  const copyTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current !== null) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  async function copyQuestion() {
+    if (copyTimeoutRef.current !== null) {
+      window.clearTimeout(copyTimeoutRef.current);
+    }
+
+    try {
+      await writeClipboardText(getQuestionClipboardText(question));
+      setCopyState("copied");
+      copyTimeoutRef.current = window.setTimeout(() => {
+        setCopyState("idle");
+        copyTimeoutRef.current = null;
+      }, 1400);
+    } catch {
+      setCopyState("failed");
+      copyTimeoutRef.current = window.setTimeout(() => {
+        setCopyState("idle");
+        copyTimeoutRef.current = null;
+      }, 2000);
+    }
+  }
+
+  const copyLabel =
+    copyState === "copied"
+      ? `Copied question ${question.number}`
+      : copyState === "failed"
+        ? `Copy failed for question ${question.number}`
+        : `Copy question ${question.number} with options`;
 
   return (
     <div
@@ -676,11 +753,38 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
     >
       <div className="exam-question-head">
         <span className="exam-q-number">Q{question.number}</span>
-        {submitted ? (
-          <span className={`exam-q-badge exam-q-badge--${isCorrect ? "ok" : "bad"}`}>
-            {isCorrect ? "Correct" : isUnanswered ? "Not answered" : "Incorrect"}
-          </span>
-        ) : null}
+        <div className="exam-question-actions">
+          <button
+            type="button"
+            className={`exam-copy-btn exam-copy-btn--${copyState}`}
+            onClick={copyQuestion}
+            aria-label={copyLabel}
+            title={copyLabel}
+          >
+            <span className="sr-only" aria-live="polite">{copyLabel}</span>
+            <span className="exam-copy-icon" aria-hidden="true">
+              {copyState === "copied" ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12.5l4.4 4.4L19 7.3" />
+                </svg>
+              ) : copyState === "failed" ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 7l10 10M17 7L7 17" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="10" height="10" rx="2" />
+                  <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+                </svg>
+              )}
+            </span>
+          </button>
+          {submitted ? (
+            <span className={`exam-q-badge exam-q-badge--${isCorrect ? "ok" : "bad"}`}>
+              {isCorrect ? "Correct" : isUnanswered ? "Not answered" : "Incorrect"}
+            </span>
+          ) : null}
+        </div>
       </div>
       <p className="exam-q-prompt">{question.prompt}</p>
       <div className="exam-options" role="radiogroup" aria-label={`Question ${question.number}`}>

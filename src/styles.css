@@ -2627,12 +2627,95 @@ input:disabled {
   gap: 10px;
 }
 
+.exam-question-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
 .exam-q-number {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.exam-copy-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--muted-strong);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    color 160ms var(--ease),
+    border-color 160ms var(--ease),
+    background 160ms var(--ease),
+    box-shadow 160ms var(--ease),
+    transform 160ms var(--ease);
+}
+
+.exam-copy-btn:hover,
+.exam-copy-btn:focus-visible {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.05);
+}
+
+.exam-copy-btn:hover {
+  transform: translateY(-0.5px);
+}
+
+.exam-copy-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.exam-copy-btn--copied {
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.08);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.06);
+}
+
+.exam-copy-btn--copied .exam-copy-icon {
+  animation: exam-copy-icon-pop 260ms var(--ease);
+}
+
+.exam-copy-btn--failed {
+  color: #f87171;
+  border-color: rgba(239, 83, 80, 0.45);
+  background: rgba(239, 83, 80, 0.1);
+}
+
+.exam-copy-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 160ms var(--ease);
+}
+
+@keyframes exam-copy-icon-pop {
+  0% {
+    transform: scale(0.92);
+  }
+  64% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .exam-q-badge {
@@ -3301,6 +3384,15 @@ input:disabled {
     min-width: 0;
   }
 
+  .exam-question-actions {
+    gap: 8px;
+  }
+
+  .exam-copy-btn {
+    width: 34px;
+    height: 34px;
+  }
+
   .exam-q-prompt,
   .exam-explanation p,
   .exam-scoring-list strong,
@@ -3402,6 +3494,28 @@ input:disabled {
   background: rgba(220, 38, 38, 0.1);
   color: #dc2626;
   border-color: rgba(220, 38, 38, 0.3);
+}
+
+[data-theme="light"] .exam-copy-btn {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .exam-copy-btn:hover,
+[data-theme="light"] .exam-copy-btn:focus-visible {
+  background: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .exam-copy-btn--copied {
+  color: #16a34a;
+  border-color: rgba(22, 163, 74, 0.4);
+  background: rgba(22, 163, 74, 0.08);
+}
+
+[data-theme="light"] .exam-copy-btn--failed {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.4);
+  background: rgba(220, 38, 38, 0.08);
 }
 
 [data-theme="light"] .exam-option.is-answer {
