@@ -45,7 +45,7 @@ type PageId = "home" | "cheatsheet" | "exams" | "tutorials" | "interactive";
 
 type LegendItem = {
   label: string;
-  swatch?: string;
+  swatch?: string | string[];
   swatchStyle?: "solid" | "stripe" | "ladder" | "x" | "outline" | "box";
   swatchExtra?: string;
 };
@@ -213,13 +213,13 @@ const cheatSheetSections: CheatSheetSection[] = [
       { label: "Fire Alarm Basket", swatch: "#cc2222", swatchStyle: "solid" },
       { label: "HV Ladder", swatch: "#663322", swatchStyle: "ladder" },
       { label: "LV Ladder", swatch: "#888822", swatchStyle: "ladder" },
-      { label: "LV Tray", swatch: "linear-gradient(90deg, #22aa22 0%, #22aa22 30%, #cccc00 30%, #cccc00 70%, #22aa22 70%)", swatchStyle: "stripe" },
-      { label: "Lighting & Small Power Trunking", swatch: "linear-gradient(90deg, #cc2299 50%, #aa22cc 50%)", swatchStyle: "stripe" },
-      { label: "PV Tray", swatch: "repeating-linear-gradient(90deg, #88bbdd 0px, #88bbdd 6px, transparent 6px, transparent 10px)", swatchStyle: "stripe" },
-      { label: "Busbar", swatch: "linear-gradient(90deg, #aaaa22 0%, #aaaa22 40%, #88aa22 40%, #88aa22 60%, #aaaa22 60%)", swatchStyle: "stripe" },
+      { label: "LV Tray", swatch: ["#22aa22", "#cccc00", "#cccc00", "#22aa22"], swatchStyle: "stripe" },
+      { label: "Lighting & Small Power Trunking", swatch: ["#cc2299", "#aa22cc"], swatchStyle: "stripe" },
+      { label: "PV Tray", swatch: ["#88bbdd", "transparent", "#88bbdd", "transparent"], swatchStyle: "stripe" },
+      { label: "Busbar", swatch: ["#aaaa22", "#aaaa22", "#88aa22", "#aaaa22", "#aaaa22"], swatchStyle: "stripe" },
       { label: "Diesel Fuel Dump Pipework", swatch: "#886622", swatchStyle: "solid" },
       { label: "Diesel Fuel Fill Pipework", swatch: "#662222", swatchStyle: "solid" },
-      { label: "Secondary Dedicated Life Safety Tray", swatch: "linear-gradient(90deg, #cc2299 0%, #cc2299 20%, #22aa22 20%, #22aa22 40%, #cccc00 40%, #cccc00 60%, #3366cc 60%, #3366cc 80%, #cc2222 80%)", swatchStyle: "stripe" },
+      { label: "Secondary Dedicated Life Safety Tray", swatch: ["#cc2299", "#22aa22", "#cccc00", "#3366cc", "#cc2222"], swatchStyle: "stripe" },
       { label: "ATS", swatch: "#f8e0e8", swatchStyle: "box", swatchExtra: "#cc3366" },
       { label: "2 Hr Fire Rated Enclosure", swatch: "#cc2222", swatchStyle: "outline" }
     ]
@@ -251,7 +251,7 @@ const cheatSheetSections: CheatSheetSection[] = [
       { label: "Dark maroon / brown — Diesel Fuel Fill Pipework", swatch: "#662222", swatchStyle: "solid" },
       { label: "Ladder pattern (brown) — HV Ladder", swatch: "#886644", swatchStyle: "ladder" },
       { label: "Ladder pattern (olive) — LV Ladder", swatch: "#999944", swatchStyle: "ladder" },
-      { label: "Multicoloured stripe — Life Safety Tray", swatch: "linear-gradient(90deg, #cc2299 0%, #cc2299 20%, #22aa22 20%, #22aa22 40%, #cccc00 40%, #cccc00 60%, #3366cc 60%, #3366cc 80%, #cc2222 80%)", swatchStyle: "stripe" },
+      { label: "Multicoloured stripe — Life Safety Tray", swatch: ["#cc2299", "#22aa22", "#cccc00", "#3366cc", "#cc2222"], swatchStyle: "stripe" },
       { label: "Blue square with X — SP&N Distribution Board", swatch: "#3366cc", swatchStyle: "x" },
       { label: "Red outlined rectangle — Fire Rated Enclosure", swatch: "#cc2222", swatchStyle: "outline" }
     ]
@@ -3537,23 +3537,34 @@ export default function App() {
                           className={`legend-swatch legend-swatch--${entry.swatchStyle || "solid"}`}
                           style={
                             entry.swatchStyle === "stripe"
-                              ? { background: entry.swatch }
+                              ? undefined
                               : entry.swatchStyle === "ladder"
                                 ? {
-                                    background: `repeating-linear-gradient(90deg, ${entry.swatch} 0px, ${entry.swatch} 5px, transparent 5px, transparent 8px)`,
-                                    borderTop: `2.5px solid ${entry.swatch}`,
-                                    borderBottom: `2.5px solid ${entry.swatch}`
+                                    borderTop: `2.5px solid ${entry.swatch as string}`,
+                                    borderBottom: `2.5px solid ${entry.swatch as string}`
                                   }
                                 : entry.swatchStyle === "x"
-                                  ? { background: entry.swatch }
+                                  ? { background: entry.swatch as string }
                                   : entry.swatchStyle === "outline"
-                                    ? { background: "transparent", border: `2.5px solid ${entry.swatch}` }
+                                    ? { background: "transparent", border: `2.5px solid ${entry.swatch as string}` }
                                     : entry.swatchStyle === "box"
-                                      ? { background: entry.swatch, color: entry.swatchExtra }
-                                      : { background: entry.swatch }
+                                      ? { background: entry.swatch as string, color: entry.swatchExtra }
+                                      : { background: entry.swatch as string }
                           }
                         >
-                          {entry.swatchStyle === "x" ? (
+                          {entry.swatchStyle === "stripe" ? (
+                            <span className="legend-stripe-bars" aria-hidden="true">
+                              {(Array.isArray(entry.swatch) ? entry.swatch : [entry.swatch]).filter(Boolean).map((color, index) => (
+                                <span key={`${entry.label}-${color}-${index}`} style={{ background: color }} />
+                              ))}
+                            </span>
+                          ) : entry.swatchStyle === "ladder" ? (
+                            <span className="legend-ladder-rungs" aria-hidden="true">
+                              {[0, 1, 2, 3].map((index) => (
+                                <span key={`${entry.label}-rung-${index}`} style={{ background: entry.swatch as string }} />
+                              ))}
+                            </span>
+                          ) : entry.swatchStyle === "x" ? (
                             <svg viewBox="0 0 56 22" className="legend-x"><line x1="4" y1="2" x2="52" y2="20" stroke="#fff" strokeWidth="2"/><line x1="4" y1="20" x2="52" y2="2" stroke="#fff" strokeWidth="2"/></svg>
                           ) : entry.swatchStyle === "box" ? (
                             <span className="legend-box-text">ATS</span>
