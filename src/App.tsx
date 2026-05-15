@@ -1980,17 +1980,25 @@ export default function App() {
           <strong>Sparky</strong>
         </a>
 
-        <nav className="primary-nav" aria-label="Primary">
-          <a
-            href={getPageHref("home")}
-            className={page === "home" ? "is-active" : undefined}
-            onClick={(event) => {
-              event.preventDefault();
-              navigateTo("home");
-            }}
+        <div className="topbar-actions">
+          <button type="button" className="topbar-icon-button" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </button>
+          <button
+            type="button"
+            className="search-field"
+            aria-label="Open command palette"
+            aria-haspopup="dialog"
+            aria-expanded={paletteOpen}
+            onClick={openCommandPalette}
           >
-            Home
-          </a>
+            <svg className="search-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none">
+              <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M12.7 12.7 17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+            <span className="search-placeholder">Search</span>
+            <span className="search-hint">⌘ K</span>
+          </button>
           <div className="nav-menu-wrap">
             <button
               type="button"
@@ -1999,7 +2007,7 @@ export default function App() {
               aria-label="Open navigation menu"
               aria-haspopup="menu"
               aria-expanded={navMenuOpen}
-              aria-controls="primary-nav-menu"
+              aria-controls="page-nav-menu"
               onClick={() => setNavMenuOpen((open) => !open)}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -2010,7 +2018,7 @@ export default function App() {
             </button>
             {navMenuOpen ? (
               <div
-                id="primary-nav-menu"
+                id="page-nav-menu"
                 ref={navMenuRef}
                 className="nav-menu"
                 role="menu"
@@ -2075,35 +2083,6 @@ export default function App() {
               </div>
             ) : null}
           </div>
-        </nav>
-
-        <div className="topbar-actions">
-          <button type="button" className="topbar-icon-button" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </button>
-          <button
-            type="button"
-            className="search-field"
-            aria-label="Open command palette"
-            aria-haspopup="dialog"
-            aria-expanded={paletteOpen}
-            onClick={openCommandPalette}
-          >
-            <svg className="search-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none">
-              <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
-              <path d="M12.7 12.7 17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-            <span className="search-placeholder">Search</span>
-            <span className="search-hint">⌘ K</span>
-          </button>
-          {user ? (
-            <div className="account-chip">
-              <span className="account-avatar">{(user.email[0] ?? "?").toUpperCase()}</span>
-              <button type="button" className="ghost-button account-logout" onClick={logout}>Log out</button>
-            </div>
-          ) : (
-            <button type="button" className="ghost-button account-login-btn" onClick={() => setAuthOpen(true)}>Log in</button>
-          )}
         </div>
       </header>
 
