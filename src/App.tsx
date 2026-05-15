@@ -25,7 +25,6 @@ import {
 } from "./calculators";
 import { usePersistedState } from "./usePersistedState";
 import { useHistory } from "./useHistory";
-import { useTheme } from "./useTheme";
 import { useFocusTrap } from "./useFocusTrap";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
@@ -1172,7 +1171,6 @@ function getPageHref(page: PageId): string {
 }
 
 export default function App() {
-  const { theme, toggleTheme } = useTheme();
   const { entries: historyEntries, addEntry: addHistoryEntry, clearHistory } = useHistory();
   const [historyOpen, setHistoryOpen] = useState(false);
   const { user, logout } = useAuth();
@@ -1190,9 +1188,6 @@ export default function App() {
   useEffect(() => {
     setVisitedPages((prev) => (prev.has(page) ? prev : new Set(prev).add(page)));
   }, [page]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const searchQueryRef = useRef(searchQuery);
-  searchQueryRef.current = searchQuery;
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteQuery, setPaletteQuery] = useState("");
   const [activePaletteIndex, setActivePaletteIndex] = useState(0);
@@ -1349,6 +1344,11 @@ export default function App() {
     const nextIndex = Math.min(Math.max(index, 0), maxIndex);
     setActiveToolIndex((current) => (current === nextIndex ? current : nextIndex));
     grid.scrollTo({ left: grid.clientWidth * nextIndex, behavior: "smooth" });
+  }
+
+  function openCommandPalette() {
+    setPaletteQuery("");
+    setPaletteOpen(true);
   }
 
   function clearContainmentRod() {
@@ -1630,58 +1630,13 @@ export default function App() {
     [structureJoist, structureWall]
   );
 
-  const filteredApplets = useMemo(
-    () =>
-      applets.filter((applet) =>
-        matchesQuery(`${applet.title} ${applet.subtitle} ${applet.keywords}`, searchQuery)
-      ),
-    [searchQuery]
-  );
+  const filteredApplets = applets;
   const filteredAppletIds = useMemo(
     () => filteredApplets.map((applet) => applet.id).join("|"),
     [filteredApplets]
   );
 
-  const filteredCheatSections = useMemo(
-    () =>
-      cheatSheetSections
-        .map((section) => {
-          const legendLabels = section.legend ? section.legend.map((l) => l.label) : [];
-          const tableTexts = section.tables ? section.tables.map(referenceTableText) : [];
-          const allText = [section.title, section.summary, ...section.items, ...legendLabels, ...tableTexts].join(" ");
-          if (!searchQuery) return section;
-
-          const matchingItems = section.items.filter((item) =>
-            matchesQuery(`${section.title} ${item}`, searchQuery)
-          );
-          const matchingLegend = section.legend?.filter((l) =>
-            matchesQuery(`${section.title} ${l.label}`, searchQuery)
-          );
-          const matchingTables = section.tables?.filter((table) =>
-            matchesQuery(`${section.title} ${referenceTableText(table)}`, searchQuery)
-          );
-
-          if (matchesQuery(allText, searchQuery)) {
-            return {
-              ...section,
-              items: matchingItems.length ? matchingItems : section.items,
-              legend: matchingLegend?.length ? matchingLegend : section.legend,
-              tables: matchingTables?.length ? matchingTables : section.tables
-            };
-          }
-
-          if (!matchingItems.length && !matchingLegend?.length && !matchingTables?.length) return null;
-
-          return {
-            ...section,
-            items: matchingItems,
-            legend: matchingLegend?.length ? matchingLegend : undefined,
-            tables: matchingTables?.length ? matchingTables : undefined
-          };
-        })
-        .filter((section): section is CheatSheetSection => section !== null),
-    [searchQuery]
-  );
+  const filteredCheatSections = cheatSheetSections;
 
   const paletteItems = useMemo(() => {
     const baseItems: PaletteItem[] = [
@@ -1782,6 +1737,12 @@ export default function App() {
   }, [page]);
 
   useEffect(() => {
+    try {
+      localStorage.removeItem("sparky-theme");
+    } catch {}
+  }, []);
+
+  useEffect(() => {
     if (!paletteOpen) return;
     setActivePaletteIndex(0);
     window.setTimeout(() => {
@@ -1795,8 +1756,7 @@ export default function App() {
 
       if (commandKey && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setPaletteQuery(searchQueryRef.current);
-        setPaletteOpen(true);
+        openCommandPalette();
       }
 
       if (commandKey && event.key === "/") {
@@ -2118,31 +2078,24 @@ export default function App() {
         </nav>
 
         <div className="topbar-actions">
-          <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}>
-            {theme === "dark" ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            )}
-          </button>
-          <button type="button" className="theme-toggle" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
+          <button type="button" className="topbar-icon-button" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </button>
-          <label className="search-field" htmlFor="site-search">
+          <button
+            type="button"
+            className="search-field"
+            aria-label="Open command palette"
+            aria-haspopup="dialog"
+            aria-expanded={paletteOpen}
+            onClick={openCommandPalette}
+          >
             <svg className="search-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none">
               <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
               <path d="M12.7 12.7 17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
-            <input
-              id="site-search"
-              type="search"
-              placeholder="Search"
-              autoComplete="off"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-            />
+            <span className="search-placeholder">Search</span>
             <span className="search-hint">⌘ K</span>
-          </label>
+          </button>
           {user ? (
             <div className="account-chip">
               <span className="account-avatar">{(user.email[0] ?? "?").toUpperCase()}</span>
