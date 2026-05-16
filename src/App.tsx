@@ -28,6 +28,10 @@ import { useHistory } from "./useHistory";
 import { useFocusTrap } from "./useFocusTrap";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
+import {
+  CONTAINMENT_ROD_STORAGE_KEYS,
+  clearLegacyContainmentRodStorage
+} from "./calculatorStorage";
 import type { ExamId } from "./examRegistry";
 // Lazy-load heavy pages so the home/cheat-sheet bundle stays small. The
 // chunks are fetched the first time the user navigates to each page and the
@@ -1202,19 +1206,19 @@ export default function App() {
 
   // ── Persisted calculator state ──
   const [containmentRodOverallHeight, setContainmentRodOverallHeight] = usePersistedState<string>(
-    "cr-height",
+    CONTAINMENT_ROD_STORAGE_KEYS.overallHeight,
     DEFAULT_CONTAINMENT_ROD_VALUES.overallHeight
   );
   const [containmentRodTopOfUnistrut, setContainmentRodTopOfUnistrut] = usePersistedState<string>(
-    "cr-top",
+    CONTAINMENT_ROD_STORAGE_KEYS.topOfUnistrut,
     DEFAULT_CONTAINMENT_ROD_VALUES.topOfUnistrut
   );
   const [containmentRodBuffer, setContainmentRodBuffer] = usePersistedState<string>(
-    "cr-buffer",
+    CONTAINMENT_ROD_STORAGE_KEYS.buffer,
     DEFAULT_CONTAINMENT_ROD_VALUES.buffer
   );
   const [containmentRodUnistrutDepth, setContainmentRodUnistrutDepth] = usePersistedState<string>(
-    "cr-depth",
+    CONTAINMENT_ROD_STORAGE_KEYS.unistrutDepth,
     DEFAULT_CONTAINMENT_ROD_VALUES.unistrutDepth
   );
   const [unistrutContainments, setUnistrutContainments] = usePersistedState<UnistrutContainmentRow[]>(
@@ -1312,6 +1316,10 @@ export default function App() {
     Math.max(...unistrutContainments.map((c) => c.id), 0) + 1
   );
   const copiedSectionTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    clearLegacyContainmentRodStorage();
+  }, []);
 
   // Sync count input when containments change (e.g. from localStorage load)
   useEffect(() => {
