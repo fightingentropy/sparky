@@ -1138,8 +1138,8 @@ export const eighteenthEditionExam: Exam = {
                 C: "Cream",
                 D: "Pink"
               },
-              answer: "C",
-              explanation: "Reg 514.4.5 — functional earthing (clean earth) conductors are identified cream, separate from the green/yellow used for protective earthing conductors."
+              answer: "D",
+              explanation: "Table 51 / Reg 514 — a conductor whose sole purpose is functional earthing is identified pink, with the alphanumeric designation FE. Cream was the older colour and is no longer the current answer."
             },
             {
               number: 13,
@@ -1377,8 +1377,8 @@ export const eighteenthEditionExam: Exam = {
                 C: "2.5 m",
                 D: "3 m"
               },
-              answer: "D",
-              explanation: "Reg 701.512.3 — standard 13 A sockets must be at least 3 m horizontally from the boundary of Zone 1. Within 3 m, only SELV sockets or shaver supply units (BS EN 61558-2-5) are permitted."
+              answer: "C",
+              explanation: "Reg 701.512.3 — low-voltage socket-outlets in a location containing a bath or shower must be sited at least 2.5 m horizontally from the boundary of Zone 1. The older 3 m distance was reduced by Amendment 2."
             },
             {
               number: 12,
@@ -3983,8 +3983,8 @@ export const eighteenthEditionExam: Exam = {
                 C: "It cannot be installed under any circumstance",
                 D: "3 m from the boundary of Zone 1"
               },
-              answer: "D",
-              explanation: "Section 701 — a standard socket outlet may be installed in a bath/shower room provided it is no closer than 3 m horizontally from the boundary of Zone 1. Within 3 m, only SELV or shaver-supply sockets are permitted."
+              answer: "A",
+              explanation: "Section 701 — a standard socket outlet may be installed in a bath/shower room provided it is no closer than 2.5 m horizontally from the boundary of Zone 1. This replaced the older 3 m exam answer."
             },
             {
               number: 24,
@@ -4043,8 +4043,8 @@ export const eighteenthEditionExam: Exam = {
                 C: "Be the same CSA as the line conductor",
                 D: "Be at least half the CSA of the line"
               },
-              answer: "C",
-              explanation: "Reg 524 — for single-phase two-wire circuits, the neutral must be the same CSA as the line. The 'half-size neutral' rule applies only to balanced 3-phase circuits with line CSA > 16 mm² Cu and only with no significant harmonics."
+              answer: "B",
+              explanation: "Reg 524.2.1 — in single-phase two-wire circuits, the neutral conductor must have a cross-sectional area not less than that of the line conductor, whatever the line conductor CSA."
             },
             {
               number: 29,
@@ -4168,8 +4168,8 @@ export const eighteenthEditionExam: Exam = {
                 C: "Pink",
                 D: "Green and yellow"
               },
-              answer: "A",
-              explanation: "Reg 514.4.5 — functional earthing conductors (clean earths for IT/instrumentation) are identified with cream insulation to distinguish them from green/yellow protective earthing. Mixing the two defeats the segregation."
+              answer: "C",
+              explanation: "Table 51 / Reg 514 — functional earthing conductors are identified pink and designated FE. Green/yellow remains reserved for protective conductors."
             },
             {
               number: 9,
@@ -4288,8 +4288,8 @@ export const eighteenthEditionExam: Exam = {
                 C: "1 s",
                 D: "0.2 s"
               },
-              answer: "B",
-              explanation: "Table 41.1 — TN system final circuits not exceeding 63 A with one or more socket outlets, or 32 A supplying only fixed connected current-using equipment, at 230 V: 0.4 s. A 40 A circuit falls in this category."
+              answer: "A",
+              explanation: "Reg 411.3.2 — on a 230 V TN system, 0.4 s applies to final circuits up to 63 A with socket-outlets, or up to 32 A for fixed equipment only. A 40 A final circuit with no socket-outlet stated is treated as a final circuit exceeding 32 A, so the maximum disconnection time is 5 s."
             },
             {
               number: 19,
@@ -8610,4 +8610,3 @@ export const eighteenthEditionExam: Exam = {
     "EV on PME (722.411.4.1): use an open-PEN protective device, a separating transformer, or a local earth electrode at the installation."
   ]
 };
-
