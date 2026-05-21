@@ -492,14 +492,11 @@ kbd {
   background: rgba(255, 255, 255, 0.05);
   border-color: var(--border-strong);
   color: var(--text);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
 .ghost-button:active,
 .switch-chip:active {
-  transform: translateY(0);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .switch-chip {
@@ -620,10 +617,7 @@ kbd {
   scroll-snap-stop: always;
   box-sizing: border-box;
   min-width: 0;
-  transition:
-    border-color 220ms var(--ease),
-    box-shadow 220ms var(--ease),
-    transform 220ms var(--ease);
+  transition: border-color 220ms var(--ease);
 }
 
 .tool-panel::before {
@@ -641,14 +635,10 @@ kbd {
 
 .tool-panel:hover {
   border-color: var(--border-strong);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 22px 56px rgba(0, 0, 0, 0.34);
-  transform: translateY(-1px);
 }
 
 .tool-panel:hover::before {
-  opacity: 0.85;
+  opacity: 0.6;
 }
 
 .sheet-card {
@@ -659,18 +649,11 @@ kbd {
   box-shadow: var(--shadow-card);
   display: grid;
   gap: 12px;
-  transition:
-    border-color 200ms var(--ease),
-    box-shadow 200ms var(--ease),
-    transform 200ms var(--ease);
+  transition: border-color 200ms var(--ease);
 }
 
 .sheet-card:hover {
   border-color: var(--border-strong);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 20px 48px rgba(0, 0, 0, 0.3);
-  transform: translateY(-1px);
 }
 
 .preset-row {
@@ -812,18 +795,11 @@ kbd {
   background: var(--surface);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-  transition:
-    border-color 200ms var(--ease),
-    box-shadow 200ms var(--ease),
-    transform 200ms var(--ease);
+  transition: border-color 200ms var(--ease);
 }
 
 .tutorial-card:hover {
   border-color: var(--border-strong);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 22px 52px rgba(0, 0, 0, 0.32);
-  transform: translateY(-2px);
 }
 
 .tutorial-card-body {
@@ -2754,11 +2730,6 @@ input:disabled {
   color: var(--text);
   border-color: var(--border-strong);
   background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
-}
-
-.exam-copy-btn:hover {
-  transform: translateY(-1px);
 }
 
 .exam-copy-btn:focus-visible {
@@ -2856,7 +2827,6 @@ input:disabled {
 .exam-option:hover:not(:disabled) {
   border-color: var(--border-strong);
   background: rgba(255, 255, 255, 0.04);
-  transform: translateY(-1px);
 }
 
 .exam-option:disabled {
@@ -4356,8 +4326,6 @@ body[data-page="interactive"] .ix-3d-wrap {
 
 .auth-submit:hover {
   background: var(--accent-strong);
-  box-shadow: var(--shadow-glow);
-  transform: translateY(-1px);
 }
 
 .auth-submit:disabled {
