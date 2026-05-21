@@ -91,6 +91,14 @@ type PracticeLink = {
 type AngleUnit = "mm" | "cm" | "m";
 
 const DEFAULT_PAGE: PageId = "home";
+
+const PAGE_NAV_ITEMS: { id: PageId; label: string }[] = [
+  { id: "home", label: "Tools" },
+  { id: "cheatsheet", label: "Notes" },
+  { id: "exams", label: "Exams" },
+  { id: "tutorials", label: "Tutorials" },
+  { id: "interactive", label: "Interactive" }
+];
 const ANGLE_UNITS: readonly AngleUnit[] = ["mm", "cm", "m"];
 const CONTAINMENT_BEND_DIRECTIONS: readonly ContainmentBendDirection[] = ["out", "in"];
 const POWER_TARGETS: readonly PowerTarget[] = ["power", "current", "voltage"];
@@ -1988,6 +1996,23 @@ export default function App() {
           <strong>Sparky</strong>
         </a>
 
+        <nav className="topbar-nav" aria-label="Main">
+          {PAGE_NAV_ITEMS.map((item) => (
+            <a
+              key={item.id}
+              href={getPageHref(item.id)}
+              className={`topbar-nav-link${page === item.id ? " is-active" : ""}`}
+              aria-current={page === item.id ? "page" : undefined}
+              onClick={(event) => {
+                event.preventDefault();
+                navigateTo(item.id);
+              }}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
         <div className="topbar-actions">
           <button type="button" className="topbar-icon-button" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -2008,6 +2033,28 @@ export default function App() {
             <span className="search-hint">⌘ K</span>
           </button>
           <div className="nav-menu-wrap">
+            <button
+              type="button"
+              className="topbar-account-btn"
+              aria-label={user ? `Account menu for ${user.email}` : "Log in"}
+              aria-haspopup={user ? "menu" : undefined}
+              aria-expanded={user ? navMenuOpen : undefined}
+              aria-controls={user ? "page-nav-menu" : undefined}
+              onClick={() => {
+                if (user) {
+                  setNavMenuOpen((open) => !open);
+                  return;
+                }
+                setAuthOpen(true);
+                setNavMenuOpen(false);
+              }}
+            >
+              {user ? (
+                <span className="account-avatar">{(user.email[0] ?? "?").toUpperCase()}</span>
+              ) : (
+                <span className="topbar-sign-in-label">Log in</span>
+              )}
+            </button>
             <button
               type="button"
               ref={navMenuButtonRef}
@@ -2032,29 +2079,24 @@ export default function App() {
                 role="menu"
                 aria-label="Pages"
               >
-                {(
-                  [
-                    { id: "cheatsheet", label: "Notes" },
-                    { id: "exams", label: "Exams" },
-                    { id: "tutorials", label: "Tutorials" },
-                    { id: "interactive", label: "Interactive" }
-                  ] as const
-                ).map((item) => (
-                  <a
-                    key={item.id}
-                    role="menuitem"
-                    href={getPageHref(item.id)}
-                    className={`nav-menu-item${page === item.id ? " is-active" : ""}`}
-                    aria-current={page === item.id ? "page" : undefined}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      navigateTo(item.id);
-                      setNavMenuOpen(false);
-                    }}
-                  >
-                    {item.label}
-                  </a>
-                ))}
+                <div className="nav-menu-pages" role="none">
+                  {PAGE_NAV_ITEMS.map((item) => (
+                    <a
+                      key={item.id}
+                      role="menuitem"
+                      href={getPageHref(item.id)}
+                      className={`nav-menu-item${page === item.id ? " is-active" : ""}`}
+                      aria-current={page === item.id ? "page" : undefined}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        navigateTo(item.id);
+                        setNavMenuOpen(false);
+                      }}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
                 <div className="nav-menu-account" role="none">
                   {user ? (
                     <>
