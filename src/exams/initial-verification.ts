@@ -1,14 +1,15 @@
 import type { Exam } from "./types";
+import { inspectionTesting2391Section } from "./2391-mock";
 
 export const initialVerificationExam: Exam = {
   id: "initial-verification",
   title: "Initial Verification",
   subtitle: "Combined topic drill + Access Training homework practice bank",
   description:
-    "A focused exam built around Webinar 5 — Initial Verification. Covers Part 6 of BS 7671, the inspection schedule, the dead-test sequence (continuity, ring final, IR, polarity), the live-test sequence (Ze, PFC, Zs, RCD), acceptance criteria, and the documentation issued for new work. Combines the Access Training Initial Verification homework practice bank with additional tricky questions on dead-test logic, voltage-sensitive equipment, RCD test points and live-polarity faults. Added merged inspection sequence, Ze/Zs/PFC, polarity, IR and test-instrument questions from the removed mixed-topic bank.",
+    "A focused exam built around Webinar 5 — Initial Verification. Covers Part 6 of BS 7671, the inspection schedule, the dead-test sequence (continuity, ring final, IR, polarity), the live-test sequence (Ze, PFC, Zs, RCD), acceptance criteria, and the documentation issued for new work. The fifth attempt serves the copied 40-question ElectricianTraining 2391 inspection-and-testing mock.",
   format:
-    "Each attempt = 190 multiple-choice questions across all sections. Pass at 70%+. The bank rotates through 5 distinct variants per section so retries draw fresh material.",
-  passPercent: 0.7,
+    "Each served attempt = 40 multiple-choice questions. Pass at 75%+. The first four attempts use topic drills; the fifth serves the copied 2391 mock.",
+  passPercent: 0.75,
   sections: [
     {
       id: "section-1",
@@ -7157,11 +7158,12 @@ export const initialVerificationExam: Exam = {
           ]
         }
       ]
-    }
+    },
+    inspectionTesting2391Section
   ],
   scoring: [
     { threshold: 0.9, label: "Strong — exam-ready on initial verification dead and live tests" },
-    { threshold: 0.7, label: "Solid — review test sequence, RCD acceptance, or instrument requirements" },
+    { threshold: 0.75, label: "Pass — review test sequence, RCD acceptance, or instrument requirements" },
     { threshold: 0.5, label: "Needs targeted revision — re-read GN3 and the on-site guide" },
     { threshold: 0, label: "Major gaps — return to GN3 fundamentals before retrying" }
   ],

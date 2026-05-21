@@ -35,11 +35,20 @@ const REVIEW_FILTER_LABELS: Record<ReviewFilter, string> = {
   unanswered: "Unanswered",
   correct: "Correct"
 };
-const EXAM_STORAGE_VERSION = "2026-05-rotating-variants";
+const EXAM_STORAGE_VERSION = "2026-05-licensed-source-mocks";
 const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
 const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
 const EXAM_VARIANT_STORAGE_PREFIX = `exam-variant-${EXAM_STORAGE_VERSION}-`;
 const EXAM_UPDATED_STORAGE_PREFIX = `exam-updated-${EXAM_STORAGE_VERSION}-`;
+const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
+  "building-regulations": Date.UTC(2026, 4, 21, 21, 44),
+  "18th-edition": Date.UTC(2026, 4, 21, 21, 44),
+  "pat-testing": Date.UTC(2026, 4, 21, 21, 44),
+  "initial-verification": Date.UTC(2026, 4, 21, 21, 44),
+  "periodic-inspection": Date.UTC(2026, 4, 21, 21, 44),
+  "condition-reporting": Date.UTC(2026, 4, 21, 21, 44),
+  "am2-installation-assessment": Date.UTC(2026, 4, 21, 21, 44)
+};
 
 type CopyState = "idle" | "copied" | "failed";
 
@@ -145,6 +154,11 @@ function clearStaleExamProgress() {
   } catch {}
 }
 
+function parseServerUpdatedAt(value: string): number {
+  const normalized = value.includes("T") ? value : `${value.replace(" ", "T")}Z`;
+  return Date.parse(normalized) || 0;
+}
+
 type Props = {
   isActive: boolean;
   practiceTarget?: {
@@ -244,7 +258,9 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
             } catch {}
             const hasLocal = Object.keys(localAnswers).length > 0;
             const localUpdatedAt = Number(localStorage.getItem(localUpdatedKey)) || 0;
-            const serverUpdatedAt = Date.parse(data.updatedAt) || 0;
+            const serverUpdatedAt = parseServerUpdatedAt(data.updatedAt);
+            const remoteResetAt = EXAM_REMOTE_PROGRESS_RESET_AT[examId] ?? 0;
+            if (remoteResetAt > 0 && serverUpdatedAt < remoteResetAt) continue;
             // Use the server copy if there's nothing local, or if the server is strictly newer.
             if (!hasLocal || serverUpdatedAt > localUpdatedAt) {
               localStorage.setItem(answersKey, JSON.stringify(data.answers));

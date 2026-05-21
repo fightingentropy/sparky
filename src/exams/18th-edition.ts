@@ -1,14 +1,15 @@
 import type { Exam } from "./types";
+import { electricianTraining18thEditionSourceSection } from "./electrician-training-source";
 
 export const eighteenthEditionExam: Exam = {
   id: "18th-edition",
   title: "18th Edition (BS 7671)",
-  subtitle: "Combined topic drill + Access Training homework practice bank",
+  subtitle: "Combined topic drill + copied ElectricianTraining 18th Edition mock",
   description:
-    "A focused exam built around Webinar 3 — 18th Edition of the Wiring Regulations. Drills the structure of BS 7671:2018 + A2:2022 + A3:2024, the key part numbers, the major tables electricians look up daily, and the headline provisions introduced or revised by the recent amendments (AFDDs, SPDs, EV charging, prosumer installations). Five distinct variants per section so retries always draw fresh material covering the full breadth of Parts 1–7.",
+    "A focused exam built around Webinar 3 — 18th Edition of the Wiring Regulations. Drills the structure of BS 7671:2018 + A2:2022 + A3:2024, the key part numbers, the major tables electricians look up daily, and the headline provisions introduced or revised by the recent amendments (AFDDs, SPDs, EV charging, prosumer installations). The fifth attempt serves the copied 60-question ElectricianTraining 18th Edition mock.",
   format:
-    "Each attempt = 140 multiple-choice questions across all sections. Pass at 70%+. The bank rotates through 5 distinct variants per section so retries draw fresh material.",
-  passPercent: 0.7,
+    "Each served attempt = 60 multiple-choice questions. Pass at 60%+. The first four attempts use topic drills; the fifth serves the copied 18th Edition mock.",
+  passPercent: 0.6,
   sections: [
     {
       id: "section-1",
@@ -8595,12 +8596,13 @@ export const eighteenthEditionExam: Exam = {
           ]
         }
       ]
-    }
+    },
+    electricianTraining18thEditionSourceSection
   ],
   scoring: [
     { threshold: 0.9, label: "Strong — exam-ready across BS 7671 structure, special locations, and amendments" },
-    { threshold: 0.7, label: "Solid — review the priority topics flagged below" },
-    { threshold: 0.5, label: "Needs targeted revision — re-read the relevant Parts/Sections of BS 7671" },
+    { threshold: 0.6, label: "Pass — review the priority topics flagged below" },
+    { threshold: 0.45, label: "Near miss — re-read the relevant Parts/Sections of BS 7671" },
     { threshold: 0, label: "Major gaps — return to GN3 and the on-site guide before retrying" }
   ],
   priorities: [

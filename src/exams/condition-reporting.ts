@@ -7,8 +7,8 @@ export const conditionReportingExam: Exam = {
   description:
     "A focused exam built around Webinar 7 — Condition Reporting. Covers the EICR document set, the C1 / C2 / C3 / FI classification codes, what makes a report Satisfactory or Unsatisfactory, the inspector's on-site obligations when danger is found, and the landlord/duty-holder duties under the ESS PRS Regulations 2020. Added merged conductor identification, bathroom zoning, socket, bonding, test-lead and electrical-heating questions that support EICR observation judgement.",
   format:
-    "Each attempt = 110 multiple-choice questions across all sections. Pass at 70%+. The bank rotates through 5 distinct variants per section so retries draw fresh material.",
-  passPercent: 0.7,
+    "Each served attempt = 40 multiple-choice questions across all sections. Pass at 75%+. The bank rotates through 5 distinct variants per section so retries draw fresh material.",
+  passPercent: 0.75,
   sections: [
     {
       id: "section-1",
@@ -6768,7 +6768,7 @@ export const conditionReportingExam: Exam = {
   ],
   scoring: [
     { threshold: 0.9, label: "Strong — confident with EICR coding and observations" },
-    { threshold: 0.7, label: "Solid — minor coding miscalls" },
+    { threshold: 0.75, label: "Pass — minor coding miscalls" },
     { threshold: 0.5, label: "Needs targeted revision — re-read Best Practice Guide 4 (BPG4)" },
     { threshold: 0, label: "Major gaps — return to fundamentals before retrying" }
   ],
