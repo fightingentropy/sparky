@@ -7,8 +7,8 @@ export const periodicInspectionExam: Exam = {
   description:
     "A focused exam built around Webinar 6 – Periodic Inspection and Testing. Covers the purpose of PIT, recommended intervals, sampling, limitations, the dead/live test approach for an in-service installation, and the legal drivers behind periodic verification. Combines the Access Training Periodic Inspection homework practice bank with additional tricky questions on EICR coding, sampling escalation, limitations, and diagnostic interpretation of common test results. Added merged EICR documentation, earthing, Zs comparison and conductor-resistance questions that fit periodic inspection work.",
   format:
-    "Each attempt = 115 multiple-choice questions across all sections. Pass at 70%+. The bank rotates through 5 distinct variants per section so retries draw fresh material.",
-  passPercent: 0.7,
+    "Each served attempt = 40 multiple-choice questions across all sections. Pass at 75%+. The bank rotates through 5 distinct variants per section so retries draw fresh material.",
+  passPercent: 0.75,
   sections: [
     {
       id: "section-1",
@@ -7391,7 +7391,7 @@ export const periodicInspectionExam: Exam = {
       threshold: 0.9,
       label: "Strong — exam-ready on intervals, sampling, EICR outputs and the legal driver"
     },
-    { threshold: 0.7, label: "Solid — review intervals or sampling rules" },
+    { threshold: 0.75, label: "Pass — review intervals, sampling rules, or EICR evidence" },
     {
       threshold: 0.5,
       label: "Needs targeted revision — re-read GN3 and BS 7671 Chapter 65"

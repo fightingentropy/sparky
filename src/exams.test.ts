@@ -57,11 +57,9 @@ describe("exam data", () => {
       // Each variant attempt should have unique prompts within itself
       for (let v = 0; v < variantCount; v += 1) {
         const prompts = new Set<string>();
-        for (const section of exam.sections) {
-          for (const q of section.variants[v].questions) {
-            expect(prompts.has(q.prompt)).toBe(false);
-            prompts.add(q.prompt);
-          }
+        for (const question of getQuestionsForVariant(exam, v)) {
+          expect(prompts.has(question.prompt)).toBe(false);
+          prompts.add(question.prompt);
         }
       }
 
@@ -75,18 +73,17 @@ describe("exam data", () => {
   });
 
   it("keeps each exam at the configured per-attempt question count", () => {
-    // Per-attempt totals after the SECTION_QUESTION_LIMITS trim that keeps
-    // only the hardest questions per variant. The full underlying banks are
-    // still 5 × the pre-trim variant size and live in the per-exam files.
+    // Per-attempt totals after any SECTION_QUESTION_LIMITS trim that keeps
+    // only the hardest questions per variant for the larger generated banks.
     const expectedPerAttempt: Record<string, number> = {
       "electrics": 40,
       "building-regulations": 20,
-      "18th-edition": 56,
-      "pat-testing": 35,
-      "initial-verification": 43,
-      "periodic-inspection": 23,
-      "condition-reporting": 23,
-      "am2-installation-assessment": 50
+      "18th-edition": 60,
+      "pat-testing": 50,
+      "initial-verification": 40,
+      "periodic-inspection": 40,
+      "condition-reporting": 40,
+      "am2-installation-assessment": 30
     };
 
     for (const exam of EXAMS) {
@@ -124,17 +121,15 @@ describe("exam data", () => {
     }
   });
 
-  it("uses the official PAT homework set as the fifth PAT variation", () => {
+  it("uses the 50-question PAT mock as the fifth PAT variation", () => {
     const exam = EXAMS.find((e) => e.id === "pat-testing");
     expect(exam).toBeDefined();
 
-    const officialAttempt = getQuestionsForVariant(exam!, 4);
-    expect(officialAttempt).toHaveLength(35);
-    expect(officialAttempt[0].prompt).toBe(
-      "Which of these does not describe a category of inspection and testing, referred to in the Code of Practice?"
-    );
-    expect(officialAttempt[34].prompt).toBe(
-      "Which regulations place a legal requirement on a landlord, who provides electrical equipment as part of a tenancy, to ensure that it is safe when first supplied?"
+    const mockAttempt = getQuestionsForVariant(exam!, 4);
+    expect(mockAttempt).toHaveLength(50);
+    expect(mockAttempt[0].prompt).toBe("Class I equipment:");
+    expect(mockAttempt[49].prompt).toBe(
+      "The test current applied to an electric kettle fitted with a 13A fuse during an earth continuity test would normally be:"
     );
   });
 
@@ -152,11 +147,127 @@ describe("exam data", () => {
     ]);
   });
 
-  it("computes pass marks at 70% by default", () => {
+  it("computes pass marks from each exam's configured percentage", () => {
     for (const exam of EXAMS) {
-      expect(exam.passPercent).toBe(0.7);
       const total = countQuestions(exam);
-      expect(getPassMark(exam, total)).toBe(Math.ceil(0.7 * total));
+      expect(getPassMark(exam, total)).toBe(Math.ceil(exam.passPercent * total));
+    }
+  });
+
+  it("includes the 2391 mock drill inside the initial-verification exam", () => {
+    const exam = EXAMS.find((e) => e.id === "initial-verification");
+    expect(exam).toBeDefined();
+    expect(exam!.sections.map((section) => section.id)).toContain("section-8-2391-mock");
+    const mockAttempt = getQuestionsForVariant(exam!, 4);
+    expect(mockAttempt).toHaveLength(40);
+    expect(mockAttempt[0].prompt).toBe("What is the main purpose of an Initial Verification?");
+    expect(mockAttempt[39].prompt).toBe("What is the purpose of the phase-sequence test?");
+  });
+
+  it("serves copied ElectricianTraining mocks as fifth attempts in matching categories", () => {
+    const expected: Record<string, { length: number; firstPrompt: string }> = {
+      "building-regulations": {
+        length: 20,
+        firstPrompt: "Part 'A' of the building, states that horizontal chases should not be deeper than:"
+      },
+      "18th-edition": {
+        length: 60,
+        firstPrompt: "BS 7671:2018 applies to electrical installations in"
+      },
+      "am2-installation-assessment": {
+        length: 30,
+        firstPrompt:
+          "Which statutory regulations lay down the measures which must be taken to ensure the safe installation and use of electrical equipment:"
+      }
+    };
+
+    for (const [examId, sourceMock] of Object.entries(expected)) {
+      const exam = EXAMS.find((e) => e.id === examId);
+      expect(exam).toBeDefined();
+      const mockAttempt = getQuestionsForVariant(exam!, 4);
+      expect(mockAttempt).toHaveLength(sourceMock.length);
+      expect(mockAttempt[0].prompt).toBe(sourceMock.firstPrompt);
+    }
+  });
+
+  it("keeps inspection and testing exams at the stricter pass threshold", () => {
+    for (const examId of ["initial-verification", "periodic-inspection", "condition-reporting"]) {
+      const exam = EXAMS.find((e) => e.id === examId);
+      expect(exam).toBeDefined();
+      expect(exam!.passPercent).toBe(0.75);
+    }
+  });
+
+  it("aligns direct public mock categories to their current served pass thresholds", () => {
+    const expectedPassPercent: Record<string, number> = {
+      "building-regulations": 0.6,
+      "18th-edition": 0.6,
+      "pat-testing": 0.8,
+      "am2-installation-assessment": 0.6
+    };
+
+    for (const [examId, passPercent] of Object.entries(expectedPassPercent)) {
+      const exam = EXAMS.find((e) => e.id === examId);
+      expect(exam).toBeDefined();
+      expect(exam!.passPercent).toBe(passPercent);
+    }
+  });
+
+  it("keeps served distractors plausible in hardened mock categories", () => {
+    const weakDistractorPattern =
+      /\b(only|always|never|verbal|customer invoice|lunch|DNO|skip|assume|trust|no further action|nothing|no paperwork|satisfactory only|FI only|C3 only|all good)\b/i;
+
+    for (const examId of [
+      "building-regulations",
+      "18th-edition",
+      "pat-testing",
+      "initial-verification",
+      "periodic-inspection",
+      "condition-reporting",
+      "am2-installation-assessment"
+    ]) {
+      const exam = EXAMS.find((e) => e.id === examId);
+      expect(exam).toBeDefined();
+      for (let v = 0; v < 5; v += 1) {
+        if (
+          v === 4 &&
+          [
+            "building-regulations",
+            "18th-edition",
+            "pat-testing",
+            "initial-verification",
+            "am2-installation-assessment"
+          ].includes(examId)
+        ) {
+          continue;
+        }
+        for (const question of getQuestionsForVariant(exam!, v)) {
+          for (const [letter, option] of Object.entries(question.options)) {
+            if (letter === question.answer) continue;
+            expect(option).not.toMatch(weakDistractorPattern);
+          }
+        }
+      }
+    }
+  });
+
+  it("balances served answer letters in inspection and testing exams", () => {
+    for (const examId of ["initial-verification", "periodic-inspection", "condition-reporting"]) {
+      const exam = EXAMS.find((e) => e.id === examId);
+      expect(exam).toBeDefined();
+      const counts: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
+      let total = 0;
+      for (let v = 0; v < 5; v += 1) {
+        for (const question of getQuestionsForVariant(exam!, v)) {
+          counts[question.answer] += 1;
+          total += 1;
+        }
+      }
+
+      for (const count of Object.values(counts)) {
+        expect(count / total).toBeGreaterThan(0.12);
+        expect(count / total).toBeLessThan(0.4);
+      }
     }
   });
 
@@ -176,19 +287,19 @@ describe("exam data", () => {
     const exam = EXAMS.find((e) => e.id === "condition-reporting");
     expect(exam).toBeDefined();
     const total = countQuestions(exam!);
-    expect(total).toBe(23);
+    expect(total).toBe(40);
 
-    // 90% threshold = ceil(0.9 * 23) = 21
-    expect(getScoringBand(exam!, 21, total).minScore).toBe(21);
-    expect(getScoringBand(exam!, 23, total).minScore).toBe(21);
-    // 70% threshold = ceil(0.7 * 23) = 17
-    expect(getScoringBand(exam!, 17, total).minScore).toBe(17);
-    expect(getScoringBand(exam!, 20, total).minScore).toBe(17);
-    // 50% threshold = ceil(0.5 * 23) = 12
-    expect(getScoringBand(exam!, 12, total).minScore).toBe(12);
-    expect(getScoringBand(exam!, 16, total).minScore).toBe(12);
+    // 90% threshold = ceil(0.9 * 40) = 36
+    expect(getScoringBand(exam!, 36, total).minScore).toBe(36);
+    expect(getScoringBand(exam!, 40, total).minScore).toBe(36);
+    // 75% threshold = ceil(0.75 * 40) = 30
+    expect(getScoringBand(exam!, 30, total).minScore).toBe(30);
+    expect(getScoringBand(exam!, 35, total).minScore).toBe(30);
+    // 50% threshold = ceil(0.5 * 40) = 20
+    expect(getScoringBand(exam!, 20, total).minScore).toBe(20);
+    expect(getScoringBand(exam!, 29, total).minScore).toBe(20);
     // 0% (bottom band)
     expect(getScoringBand(exam!, 0, total).minScore).toBe(0);
-    expect(getScoringBand(exam!, 11, total).minScore).toBe(0);
+    expect(getScoringBand(exam!, 19, total).minScore).toBe(0);
   });
 });

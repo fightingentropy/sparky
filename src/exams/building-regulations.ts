@@ -1,12 +1,13 @@
 import type { Exam } from "./types";
+import { electricianTrainingPartPSourceSection } from "./electrician-training-source";
 
 export const buildingRegulationsExam: Exam = {
   id: "building-regulations",
   title: "Building Regulations & Part P",
-  subtitle: "Topic drill + Access Training homework practice bank — 5 rotating variants per section",
-  description: "A focused exam built around Webinar 2 — Building Regulations & Part P, with the emphasis on the Building Regulations side. Covers Part P scope, notifiable work, the relevant Approved Documents, the routes to compliance for an electrician, and how BS 7671 sits inside the regulatory framework in England. Combines the Access Training Building Regulations homework practice bank with additional tricky scenario questions on Approved Documents A, B, C, E, F, L, M and P, plus practical install detail such as notch and chase depths, gas/electricity spacing, EV charge-point provisions and Part P scope traps. Added merged Part P, Approved Document, certification and health-and-safety regulation questions from the removed mixed-topic bank.",
-  format: "Each attempt = 115 multiple-choice questions across all sections. Pass at 70%+. The bank rotates through 5 distinct variants per section so retries draw fresh material.",
-  passPercent: 0.7,
+  subtitle: "Topic drill + copied ElectricianTraining Part P mock",
+  description: "A focused exam built around Webinar 2 — Building Regulations & Part P, with the emphasis on the Building Regulations side. Covers Part P scope, notifiable work, the relevant Approved Documents, the routes to compliance for an electrician, and how BS 7671 sits inside the regulatory framework in England. The fifth attempt serves the copied 20-question ElectricianTraining Part P mock.",
+  format: "Each served attempt = 20 multiple-choice questions. Pass at 60%+. The first four attempts use topic drills; the fifth serves the copied Part P mock.",
+  passPercent: 0.6,
   sections: [
     {
       id: "section-1",
@@ -737,12 +738,13 @@ export const buildingRegulationsExam: Exam = {
           ]
         }
       ]
-    }
+    },
+    electricianTrainingPartPSourceSection
   ],
   scoring: [
     { threshold: 0.9, label: "Strong — exam-ready, especially on Approved Documents and Part P scope" },
-    { threshold: 0.7, label: "Solid — minor gaps; review the topics flagged below" },
-    { threshold: 0.5, label: "Needs targeted revision — re-read Part P and the Approved Documents" },
+    { threshold: 0.6, label: "Pass — minor gaps; review the topics flagged below" },
+    { threshold: 0.45, label: "Near miss — re-read Part P and the Approved Documents" },
     { threshold: 0, label: "Major gaps — work through the legacy content thoroughly before retrying" }
   ],
   priorities: [

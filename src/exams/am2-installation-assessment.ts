@@ -1,14 +1,15 @@
 import type { Exam } from "./types";
+import { electricianTrainingAm2SourceSection } from "./electrician-training-source";
 
 export const am2Exam: Exam = {
   id: "am2-installation-assessment",
   title: "AM2 / AM2E — Installation Electrician EPA",
-  subtitle: "End-point assessment knowledge bank — full-section drill",
+  subtitle: "End-point assessment knowledge bank + copied ElectricianTraining AM2 mock",
   description:
-    "Representative of the underpinning knowledge for the AM2 / AM2E end-point assessment for the Installation & Maintenance Electrician apprenticeship standard, delivered by NET. The hands-on practical assessment covers safe isolation, installation, inspection & testing, fault diagnosis and commissioning — this exam drills the technical foundations behind every task. Built against BS 7671 (18th Edition, A2:2022 + A3:2024), HSG85, GS38 and Guidance Note 3. Variants rotate across containment, terminations, fault-find logic, three-phase commissioning and full handover documentation.",
+    "Representative of the underpinning knowledge for the AM2 / AM2E end-point assessment for the Installation & Maintenance Electrician apprenticeship standard, delivered by NET. The hands-on practical assessment covers safe isolation, installation, inspection & testing, fault diagnosis and commissioning — this exam drills the technical foundations behind every task. The fifth attempt serves the copied 30-question ElectricianTraining AM2 mock.",
   format:
-    "Each attempt = 145 multiple-choice questions across all sections. Pass at 70%+. The bank rotates through 5 distinct variants per section so retries draw fresh material.",
-  passPercent: 0.7,
+    "Each served attempt = 30 multiple-choice questions. Pass at 60%+. The first four attempts use topic drills; the fifth serves the copied AM2 mock.",
+  passPercent: 0.6,
   sections: [
     {
       id: "section-1",
@@ -8926,12 +8927,13 @@ export const am2Exam: Exam = {
           ]
         }
       ]
-    }
+    },
+    electricianTrainingAm2SourceSection
   ],
   scoring: [
     { threshold: 0.9, label: "Strong — exam-ready on AM2 practical disciplines" },
-    { threshold: 0.7, label: "Solid — review safe isolation, GS38, or fault-find logic" },
-    { threshold: 0.5, label: "Needs targeted revision — re-rehearse the AM2 sequence" },
+    { threshold: 0.6, label: "Pass — review safe isolation, GS38, or fault-find logic" },
+    { threshold: 0.45, label: "Near miss — re-rehearse the AM2 sequence" },
     { threshold: 0, label: "Major gaps — return to fundamentals before sitting AM2" }
   ],
   priorities: [
