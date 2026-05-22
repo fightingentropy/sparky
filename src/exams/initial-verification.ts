@@ -1,5 +1,5 @@
 import type { Exam } from "./types";
-import { inspectionTesting2391Section } from "./2391-mock";
+import { electricianTraining2391SourceSection } from "./electrician-training-source";
 
 export const initialVerificationExam: Exam = {
   id: "initial-verification",
@@ -10,7 +10,7 @@ export const initialVerificationExam: Exam = {
   format:
     "Eight rotating attempts: four 40-question mocks, one 60-question mock, one 90-question mock, and two 30-question mocks. Pass at 60%+ to match the source.",
   passPercent: 0.6,
-  sections: [inspectionTesting2391Section],
+  sections: [electricianTraining2391SourceSection],
   scoring: [
     { threshold: 0.9, label: "Strong — exam-ready across the 2391 inspection-and-testing mocks" },
     { threshold: 0.6, label: "Pass — review the questions missed before moving to the next mock" },

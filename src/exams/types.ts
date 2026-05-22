@@ -3,7 +3,9 @@ export type ExamChoice = "A" | "B" | "C" | "D";
 export type ExamQuestion = {
   number: number;
   prompt: string;
+  imageUrls?: string[];
   options: Record<ExamChoice, string>;
+  optionImageUrls?: Partial<Record<ExamChoice, string>>;
   answer: ExamChoice;
   explanation: string;
 };

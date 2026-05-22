@@ -5,28 +5,6 @@ import type { Exam, ExamChoice, ExamQuestion, ExamSection } from "./exams/types"
 // the final N scenario/application questions while the full bank remains in
 // the per-exam modules.
 const SECTION_QUESTION_LIMITS: Record<string, Record<string, number>> = {
-  "building-regulations": {
-    "section-1": 4,
-    "section-2": 4,
-    "section-3": 4,
-    "section-4": 4,
-    "section-5-merged-regulation-safety": 4,
-  },
-  "18th-edition": {
-    "section-1": 10,
-    "section-2": 10,
-    "section-3": 10,
-    "section-4-practice": 10,
-    "section-5": 10,
-    "section-6-merged-design-rules": 10,
-  },
-  "pat-testing": {
-    "section-1": 10,
-    "section-2": 10,
-    "section-3": 10,
-    "section-4": 10,
-    "section-5-merged-pat-fundamentals": 10,
-  },
   "periodic-inspection": {
     "section-1": 8,
     "section-2": 8,
@@ -40,39 +18,27 @@ const SECTION_QUESTION_LIMITS: Record<string, Record<string, number>> = {
     "section-3": 8,
     "section-4": 8,
     "section-5-merged-observation-scenarios": 8,
-  },
-  "am2-installation-assessment": {
-    "section-1": 4,
-    "section-2": 4,
-    "section-3": 4,
-    "section-4": 4,
-    "section-5": 4,
-    "section-6": 5,
-    "section-7-merged-practical-foundations": 5,
-  },
+  }
 };
 
 const HARDENED_EXAM_IDS = new Set([
-  "building-regulations",
-  "18th-edition",
-  "pat-testing",
-  "initial-verification",
   "periodic-inspection",
   "condition-reporting",
-  "am2-installation-assessment",
 ]);
 
 const CHOICES: ExamChoice[] = ["A", "B", "C", "D"];
-const SOURCE_MOCK_VARIANT_INDEX = 4;
-const SOURCE_MOCK_SECTION_BY_EXAM: Record<string, string> = {
-  "building-regulations": "section-6-electrician-training-part-p-mock",
-  "18th-edition": "section-7-electrician-training-18th-mock",
-  "pat-testing": "section-6-electrician-training-pat-mock",
-  "am2-installation-assessment": "section-8-electrician-training-am2-mock",
-};
 const SOURCE_MOCK_SECTION_IDS = new Set([
-  ...Object.values(SOURCE_MOCK_SECTION_BY_EXAM),
-  "section-8-2391-mock",
+  "source-electrician-training-17th-edition",
+  "source-electrician-training-18th-edition",
+  "source-electrician-training-part-p",
+  "source-electrician-training-pat",
+  "source-electrician-training-am2",
+  "source-electrician-training-2391",
+  "source-electrician-training-2396",
+  "source-electrician-training-ecs-health-safety",
+  "source-electrician-training-level-2-electrical-installation",
+  "source-electrician-training-level-3-electrical-installation",
+  "source-electrician-training-special-locations",
 ]);
 
 const DISTRACTOR_REPLACEMENTS: Record<string, string> = {
@@ -293,16 +259,8 @@ function selectHardestQuestions(
   return questions.slice(-limit);
 }
 
-function getServedSections(exam: Exam, variantIndex: number): ExamSection[] {
-  const sourceSectionId = SOURCE_MOCK_SECTION_BY_EXAM[exam.id];
-  if (!sourceSectionId) return exam.sections;
-
-  const variantCount = getVariantCount(exam);
-  const activeVariantIndex = variantCount > 0 ? variantIndex % variantCount : 0;
-  const shouldServeSourceMock = activeVariantIndex === SOURCE_MOCK_VARIANT_INDEX;
-  return exam.sections.filter((section) =>
-    shouldServeSourceMock ? section.id === sourceSectionId : section.id !== sourceSectionId
-  );
+function getServedSections(exam: Exam): ExamSection[] {
+  return exam.sections;
 }
 
 export function getActiveVariantIndex(attemptCount: number, exam: Exam): number {
@@ -314,7 +272,7 @@ export function getActiveVariantIndex(attemptCount: number, exam: Exam): number 
 export function getQuestionsForVariant(exam: Exam, variantIndex: number): ExamQuestion[] {
   const result: ExamQuestion[] = [];
   let n = 1;
-  for (const section of getServedSections(exam, variantIndex)) {
+  for (const section of getServedSections(exam)) {
     const variant = section.variants[variantIndex % section.variants.length];
     if (!variant) continue;
     for (const q of selectHardestQuestions(exam.id, section.id, variant.questions)) {
@@ -331,7 +289,7 @@ export function getSectionQuestionsForVariant(
 ): Array<{ section: ExamSection; questions: ExamQuestion[] }> {
   const result: Array<{ section: ExamSection; questions: ExamQuestion[] }> = [];
   let n = 1;
-  for (const section of getServedSections(exam, variantIndex)) {
+  for (const section of getServedSections(exam)) {
     const variant = section.variants[variantIndex % section.variants.length];
     if (!variant) continue;
     const selected = selectHardestQuestions(exam.id, section.id, variant.questions);
@@ -349,7 +307,7 @@ export function getSectionQuestionsForVariant(
 }
 
 export function countQuestionsForVariant(exam: Exam, variantIndex: number): number {
-  return getServedSections(exam, variantIndex).reduce((sum, section) => {
+  return getServedSections(exam).reduce((sum, section) => {
     const v = section.variants[variantIndex % section.variants.length];
     if (!v) return sum;
     return sum + selectHardestQuestions(exam.id, section.id, v.questions).length;

@@ -13,14 +13,34 @@ export const EXAM_REGISTRY = [
     load: () => import("./exams/electrics").then((m) => m.electricsExam)
   },
   {
+    id: "level-2-electrical-installation",
+    title: "Level 2 Electrical Installation",
+    load: () => import("./exams/level-2-electrical-installation").then((m) => m.level2ElectricalInstallationExam)
+  },
+  {
+    id: "level-3-electrical-installation",
+    title: "Level 3 Electrical Installation",
+    load: () => import("./exams/level-3-electrical-installation").then((m) => m.level3ElectricalInstallationExam)
+  },
+  {
     id: "building-regulations",
     title: "Building Regulations & Part P",
     load: () => import("./exams/building-regulations").then((m) => m.buildingRegulationsExam)
   },
   {
+    id: "17th-edition",
+    title: "17th Edition (BS 7671)",
+    load: () => import("./exams/17th-edition").then((m) => m.seventeenthEditionExam)
+  },
+  {
     id: "18th-edition",
     title: "18th Edition (BS 7671)",
     load: () => import("./exams/18th-edition").then((m) => m.eighteenthEditionExam)
+  },
+  {
+    id: "special-locations",
+    title: "Special Locations",
+    load: () => import("./exams/special-locations").then((m) => m.specialLocationsExam)
   },
   {
     id: "pat-testing",
@@ -31,6 +51,11 @@ export const EXAM_REGISTRY = [
     id: "initial-verification",
     title: "Initial Verification",
     load: () => import("./exams/initial-verification").then((m) => m.initialVerificationExam)
+  },
+  {
+    id: "inspection-design-2396",
+    title: "Inspection & Design 2396",
+    load: () => import("./exams/inspection-design-2396").then((m) => m.inspectionDesign2396Exam)
   },
   {
     id: "periodic-inspection",
@@ -46,6 +71,11 @@ export const EXAM_REGISTRY = [
     id: "am2-installation-assessment",
     title: "AM2 / AM2E — Installation Electrician EPA",
     load: () => import("./exams/am2-installation-assessment").then((m) => m.am2Exam)
+  },
+  {
+    id: "ecs-health-safety",
+    title: "ECS Health & Safety",
+    load: () => import("./exams/ecs-health-safety").then((m) => m.ecsHealthSafetyExam)
   }
 ] as const satisfies readonly ExamRegistryEntry[];
 

@@ -2802,6 +2802,26 @@ input:disabled {
   font-weight: 500;
 }
 
+.exam-question-media {
+  display: grid;
+  gap: 10px;
+}
+
+.exam-question-media img,
+.exam-option-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.exam-question-media img {
+  max-height: 360px;
+  object-fit: contain;
+}
+
 .exam-options {
   display: grid;
   gap: 8px;
@@ -2880,9 +2900,16 @@ input:disabled {
 }
 
 .exam-option-text {
+  display: grid;
+  gap: 8px;
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.exam-option-image {
+  max-height: 120px;
+  object-fit: contain;
 }
 
 .exam-option-mark {
