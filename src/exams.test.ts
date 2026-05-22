@@ -14,35 +14,29 @@ import {
 const repeat = (count: number, length: number) => Array.from({ length }, () => count);
 
 const expectedExamOrder = [
-  "electrics",
   "level-2-electrical-installation",
   "level-3-electrical-installation",
   "building-regulations",
-  "17th-edition",
   "18th-edition",
   "special-locations",
   "pat-testing",
   "initial-verification",
   "inspection-design-2396",
   "periodic-inspection",
-  "condition-reporting",
   "am2-installation-assessment",
   "ecs-health-safety"
 ] as const;
 
 const expectedPerAttempt: Record<string, number[]> = {
-  electrics: repeat(40, 5),
   "level-2-electrical-installation": repeat(30, 5),
   "level-3-electrical-installation": repeat(30, 5),
   "building-regulations": repeat(20, 7),
-  "17th-edition": [60],
   "18th-edition": repeat(60, 5),
   "special-locations": [30],
   "pat-testing": [50, 50, 50, 30],
   "initial-verification": [40, 40, 40, 40, 60, 90, 30, 30],
   "inspection-design-2396": [...repeat(30, 13), 18],
-  "periodic-inspection": repeat(40, 5),
-  "condition-reporting": repeat(40, 5),
+  "periodic-inspection": repeat(80, 5),
   "am2-installation-assessment": repeat(30, 2),
   "ecs-health-safety": [50, 50, 50, 49, 36, 16, 24, 28, 38, 27, 28, 32, 27, 40, 21]
 };
@@ -51,7 +45,6 @@ const sourceExamIds = new Set([
   "level-2-electrical-installation",
   "level-3-electrical-installation",
   "building-regulations",
-  "17th-edition",
   "18th-edition",
   "special-locations",
   "pat-testing",
@@ -156,7 +149,6 @@ describe("exam data", () => {
       "level-2-electrical-installation": "source-electrician-training-level-2-electrical-installation",
       "level-3-electrical-installation": "source-electrician-training-level-3-electrical-installation",
       "building-regulations": "source-electrician-training-part-p",
-      "17th-edition": "source-electrician-training-17th-edition",
       "18th-edition": "source-electrician-training-18th-edition",
       "special-locations": "source-electrician-training-special-locations",
       "pat-testing": "source-electrician-training-pat",
@@ -256,18 +248,15 @@ describe("exam data", () => {
 
   it("computes pass marks from each exam's configured percentage", () => {
     const expectedPassPercent: Record<string, number> = {
-      electrics: 0.7,
       "level-2-electrical-installation": 0.6,
       "level-3-electrical-installation": 0.6,
       "building-regulations": 0.6,
-      "17th-edition": 0.6,
       "18th-edition": 0.6,
       "special-locations": 0.6,
       "pat-testing": 0.8,
       "initial-verification": 0.6,
       "inspection-design-2396": 0.6,
       "periodic-inspection": 0.75,
-      "condition-reporting": 0.75,
       "am2-installation-assessment": 0.6,
       "ecs-health-safety": 0.86
     };
@@ -285,37 +274,33 @@ describe("exam data", () => {
     const weakDistractorPattern =
       /\b(only|always|never|verbal|customer invoice|lunch|DNO|skip|assume|trust|no further action|nothing|no paperwork|satisfactory only|FI only|C3 only|all good)\b/i;
 
-    for (const examId of ["periodic-inspection", "condition-reporting"]) {
-      const exam = EXAMS.find((entry) => entry.id === examId);
-      expect(exam).toBeDefined();
-      for (let v = 0; v < getVariantCount(exam!); v += 1) {
-        for (const question of getQuestionsForVariant(exam!, v)) {
-          for (const [letter, option] of Object.entries(question.options)) {
-            if (letter === question.answer) continue;
-            expect(option).not.toMatch(weakDistractorPattern);
-          }
+    const exam = EXAMS.find((entry) => entry.id === "periodic-inspection");
+    expect(exam).toBeDefined();
+    for (let v = 0; v < getVariantCount(exam!); v += 1) {
+      for (const question of getQuestionsForVariant(exam!, v)) {
+        for (const [letter, option] of Object.entries(question.options)) {
+          if (letter === question.answer) continue;
+          expect(option).not.toMatch(weakDistractorPattern);
         }
       }
     }
   });
 
   it("balances served answer letters in generated inspection categories", () => {
-    for (const examId of ["periodic-inspection", "condition-reporting"]) {
-      const exam = EXAMS.find((entry) => entry.id === examId);
-      expect(exam).toBeDefined();
-      const counts: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
-      let total = 0;
-      for (let v = 0; v < getVariantCount(exam!); v += 1) {
-        for (const question of getQuestionsForVariant(exam!, v)) {
-          counts[question.answer] += 1;
-          total += 1;
-        }
+    const exam = EXAMS.find((entry) => entry.id === "periodic-inspection");
+    expect(exam).toBeDefined();
+    const counts: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
+    let total = 0;
+    for (let v = 0; v < getVariantCount(exam!); v += 1) {
+      for (const question of getQuestionsForVariant(exam!, v)) {
+        counts[question.answer] += 1;
+        total += 1;
       }
+    }
 
-      for (const count of Object.values(counts)) {
-        expect(count / total).toBeGreaterThan(0.12);
-        expect(count / total).toBeLessThan(0.4);
-      }
+    for (const count of Object.values(counts)) {
+      expect(count / total).toBeGreaterThan(0.12);
+      expect(count / total).toBeLessThan(0.4);
     }
   });
 
@@ -330,18 +315,18 @@ describe("exam data", () => {
   });
 
   it("scores correct counts into descending bands", () => {
-    const exam = EXAMS.find((entry) => entry.id === "condition-reporting");
+    const exam = EXAMS.find((entry) => entry.id === "periodic-inspection");
     expect(exam).toBeDefined();
     const total = countQuestions(exam!);
-    expect(total).toBe(40);
+    expect(total).toBe(80);
 
-    expect(getScoringBand(exam!, 36, total).minScore).toBe(36);
-    expect(getScoringBand(exam!, 40, total).minScore).toBe(36);
-    expect(getScoringBand(exam!, 30, total).minScore).toBe(30);
-    expect(getScoringBand(exam!, 35, total).minScore).toBe(30);
-    expect(getScoringBand(exam!, 20, total).minScore).toBe(20);
-    expect(getScoringBand(exam!, 29, total).minScore).toBe(20);
+    expect(getScoringBand(exam!, 72, total).minScore).toBe(72);
+    expect(getScoringBand(exam!, 80, total).minScore).toBe(72);
+    expect(getScoringBand(exam!, 60, total).minScore).toBe(60);
+    expect(getScoringBand(exam!, 71, total).minScore).toBe(60);
+    expect(getScoringBand(exam!, 44, total).minScore).toBe(44);
+    expect(getScoringBand(exam!, 59, total).minScore).toBe(44);
     expect(getScoringBand(exam!, 0, total).minScore).toBe(0);
-    expect(getScoringBand(exam!, 19, total).minScore).toBe(0);
+    expect(getScoringBand(exam!, 43, total).minScore).toBe(0);
   });
 });

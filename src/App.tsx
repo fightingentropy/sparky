@@ -909,10 +909,10 @@ const cheatSheetSections: CheatSheetSection[] = [
 ];
 
 const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
-  "cheat-core-formulas": [{ examId: "electrics", label: "Basic electrics" }],
-  "cheat-key-definitions": [{ examId: "electrics", label: "Basic electrics" }],
+  "cheat-core-formulas": [{ examId: "level-2-electrical-installation", label: "Level 2" }],
+  "cheat-key-definitions": [{ examId: "level-2-electrical-installation", label: "Level 2" }],
   "cheat-protection-devices": [
-    { examId: "electrics", label: "Basic electrics" },
+    { examId: "level-2-electrical-installation", label: "Level 2" },
     { examId: "18th-edition", label: "18th Edition" }
   ],
   "cheat-regulations": [
@@ -924,7 +924,7 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
     { examId: "18th-edition", label: "18th Edition" }
   ],
   "cheat-structural-limits": [{ examId: "building-regulations", label: "Building regs" }],
-  "cheat-site-math": [{ examId: "electrics", label: "Basic electrics" }],
+  "cheat-site-math": [{ examId: "level-2-electrical-installation", label: "Level 2" }],
   "cheat-course-earthing-systems": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-earthing-bonding-sizing": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-supplementary-bonding": [{ examId: "18th-edition", label: "18th Edition" }],
@@ -937,7 +937,7 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
   "cheat-course-correction-factors": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-cable-resistance": [
     { examId: "initial-verification", label: "Initial verification" },
-    { examId: "electrics", label: "Basic electrics" }
+    { examId: "level-2-electrical-installation", label: "Level 2" }
   ],
   "cheat-course-volt-drop": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-final-circuit-specs": [{ examId: "18th-edition", label: "18th Edition" }],
@@ -945,11 +945,8 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
   "cheat-course-test-methods": [{ examId: "initial-verification", label: "Initial verification" }],
   "cheat-course-ir-detail": [{ examId: "initial-verification", label: "Initial verification" }],
   "cheat-course-pat-testing": [{ examId: "pat-testing", label: "PAT testing" }],
-  "cheat-course-eicr-codes": [{ examId: "condition-reporting", label: "Condition reporting" }],
-  "cheat-course-eicr-procedure": [
-    { examId: "periodic-inspection", label: "Periodic inspection" },
-    { examId: "condition-reporting", label: "Condition reporting" }
-  ],
+  "cheat-course-eicr-codes": [{ examId: "periodic-inspection", label: "Periodic / EICR" }],
+  "cheat-course-eicr-procedure": [{ examId: "periodic-inspection", label: "Periodic / EICR" }],
   "cheat-course-bathroom-zones": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-iv-inspection-checklist": [{ examId: "initial-verification", label: "Initial verification" }],
   "cheat-course-safe-isolation": [
@@ -967,7 +964,7 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
   "cheat-course-diversity": [{ examId: "18th-edition", label: "18th Edition" }],
   "cheat-course-eic-paperwork": [
     { examId: "initial-verification", label: "Initial verification" },
-    { examId: "periodic-inspection", label: "Periodic inspection" }
+    { examId: "periodic-inspection", label: "Periodic / EICR" }
   ],
   "cheat-course-protective-measures": [{ examId: "18th-edition", label: "18th Edition" }]
 };
