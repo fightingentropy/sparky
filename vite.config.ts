@@ -31,7 +31,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,svg,png,ico,webmanifest}"],
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,webmanifest,json}"],
         navigateFallback: "/index.html",
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024
@@ -53,5 +53,33 @@ export default defineConfig({
   preview: {
     host: true,
     port: 4173
+  },
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: "react-three",
+              test: /node_modules[\\/]@react-three[\\/]/,
+              maxSize: 260 * 1024,
+              priority: 3
+            },
+            {
+              name: "three-examples",
+              test: /node_modules[\\/]three[\\/]examples[\\/]/,
+              maxSize: 260 * 1024,
+              priority: 2
+            },
+            {
+              name: "three-core",
+              test: /node_modules[\\/]three[\\/]/,
+              maxSize: 260 * 1024,
+              priority: 1
+            }
+          ]
+        }
+      }
+    }
   }
 });

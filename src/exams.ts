@@ -1,15 +1,15 @@
 import type { Exam } from "./exams/types";
-import { level2ElectricalInstallationExam } from "./exams/level-2-electrical-installation";
-import { level3ElectricalInstallationExam } from "./exams/level-3-electrical-installation";
-import { buildingRegulationsExam } from "./exams/building-regulations";
-import { eighteenthEditionExam } from "./exams/18th-edition";
-import { specialLocationsExam } from "./exams/special-locations";
-import { patTestingExam } from "./exams/pat-testing";
-import { initialVerificationExam } from "./exams/initial-verification";
-import { inspectionDesign2396Exam } from "./exams/inspection-design-2396";
-import { periodicInspectionExam } from "./exams/periodic-inspection";
-import { am2Exam } from "./exams/am2-installation-assessment";
-import { ecsHealthSafetyExam } from "./exams/ecs-health-safety";
+import eighteenthEditionExam from "./exam-data/18th-edition.json";
+import am2Exam from "./exam-data/am2-installation-assessment.json";
+import buildingRegulationsExam from "./exam-data/building-regulations.json";
+import ecsHealthSafetyExam from "./exam-data/ecs-health-safety.json";
+import initialVerificationExam from "./exam-data/initial-verification.json";
+import inspectionDesign2396Exam from "./exam-data/inspection-design-2396.json";
+import level2ElectricalInstallationExam from "./exam-data/level-2-electrical-installation.json";
+import level3ElectricalInstallationExam from "./exam-data/level-3-electrical-installation.json";
+import patTestingExam from "./exam-data/pat-testing.json";
+import periodicInspectionExam from "./exam-data/periodic-inspection.json";
+import specialLocationsExam from "./exam-data/special-locations.json";
 
 export type {
   ExamChoice,
@@ -46,4 +46,4 @@ export const EXAMS: Exam[] = [
   periodicInspectionExam,
   am2Exam,
   ecsHealthSafetyExam
-];
+] as unknown as Exam[];
