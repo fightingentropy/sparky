@@ -35,26 +35,40 @@ const REVIEW_FILTER_LABELS: Record<ReviewFilter, string> = {
   unanswered: "Unanswered",
   correct: "Correct"
 };
-const EXAM_STORAGE_VERSION = "2026-05-2391-eight-source-mocks";
+const EXAM_STORAGE_VERSION = "2026-05-full-electriciantraining-source-mocks";
 const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
 const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
 const EXAM_VARIANT_STORAGE_PREFIX = `exam-variant-${EXAM_STORAGE_VERSION}-`;
 const EXAM_UPDATED_STORAGE_PREFIX = `exam-updated-${EXAM_STORAGE_VERSION}-`;
 const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
-  "building-regulations": Date.UTC(2026, 4, 21, 21, 44),
-  "18th-edition": Date.UTC(2026, 4, 21, 21, 44),
-  "pat-testing": Date.UTC(2026, 4, 21, 21, 44),
-  "initial-verification": Date.UTC(2026, 4, 22, 19, 12),
+  "level-2-electrical-installation": Date.UTC(2026, 4, 22, 19, 36),
+  "level-3-electrical-installation": Date.UTC(2026, 4, 22, 19, 36),
+  "building-regulations": Date.UTC(2026, 4, 22, 19, 36),
+  "17th-edition": Date.UTC(2026, 4, 22, 19, 36),
+  "18th-edition": Date.UTC(2026, 4, 22, 19, 36),
+  "special-locations": Date.UTC(2026, 4, 22, 19, 36),
+  "pat-testing": Date.UTC(2026, 4, 22, 19, 36),
+  "initial-verification": Date.UTC(2026, 4, 22, 19, 36),
+  "inspection-design-2396": Date.UTC(2026, 4, 22, 19, 36),
   "periodic-inspection": Date.UTC(2026, 4, 21, 21, 44),
   "condition-reporting": Date.UTC(2026, 4, 21, 21, 44),
-  "am2-installation-assessment": Date.UTC(2026, 4, 21, 21, 44)
+  "am2-installation-assessment": Date.UTC(2026, 4, 22, 19, 36),
+  "ecs-health-safety": Date.UTC(2026, 4, 22, 19, 36)
 };
 
 type CopyState = "idle" | "copied" | "failed";
 
 function getQuestionClipboardText(question: ExamQuestion): string {
-  const optionLines = LETTERS.map((letter) => `${letter}. ${question.options[letter]}`);
-  return [`Q${question.number}`, question.prompt, "", ...optionLines].join("\n");
+  const imageLines = question.imageUrls?.length
+    ? ["", ...question.imageUrls.map((url) => `Image: ${url}`)]
+    : [];
+  const optionLines = LETTERS.map((letter) => {
+    const imageUrl = question.optionImageUrls?.[letter];
+    return imageUrl
+      ? `${letter}. ${question.options[letter]} (${imageUrl})`
+      : `${letter}. ${question.options[letter]}`;
+  });
+  return [`Q${question.number}`, question.prompt, ...imageLines, "", ...optionLines].join("\n");
 }
 
 async function writeClipboardText(text: string): Promise<void> {
@@ -803,6 +817,13 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
         </div>
       </div>
       <p className="exam-q-prompt">{question.prompt}</p>
+      {question.imageUrls?.length ? (
+        <div className="exam-question-media">
+          {question.imageUrls.map((url) => (
+            <img key={url} src={url} alt={`Question ${question.number} reference`} loading="lazy" />
+          ))}
+        </div>
+      ) : null}
       <div className="exam-options" role="radiogroup" aria-label={`Question ${question.number}`}>
         {LETTERS.map((letter) => {
           const isSelected = selected === letter;
@@ -828,7 +849,17 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
               onClick={() => onSelect(letter)}
             >
               <span className="exam-option-letter">{letter}</span>
-              <span className="exam-option-text">{question.options[letter]}</span>
+              <span className="exam-option-text">
+                <span>{question.options[letter]}</span>
+                {question.optionImageUrls?.[letter] ? (
+                  <img
+                    className="exam-option-image"
+                    src={question.optionImageUrls[letter]}
+                    alt={`Option ${letter} reference`}
+                    loading="lazy"
+                  />
+                ) : null}
+              </span>
               {submitted && isAnswer ? (
                 <span className="exam-option-mark" aria-hidden="true">✓</span>
               ) : null}

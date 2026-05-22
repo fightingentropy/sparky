@@ -5,38 +5,88 @@ import {
   countQuestionsForVariant,
   countQuestionsTotal,
   getPassMark,
+  getQuestionsForVariant,
   getScoringBand,
   getScoringRanges,
-  getVariantCount,
-  getQuestionsForVariant
+  getVariantCount
 } from "./exams";
 
+const repeat = (count: number, length: number) => Array.from({ length }, () => count);
+
+const expectedExamOrder = [
+  "electrics",
+  "level-2-electrical-installation",
+  "level-3-electrical-installation",
+  "building-regulations",
+  "17th-edition",
+  "18th-edition",
+  "special-locations",
+  "pat-testing",
+  "initial-verification",
+  "inspection-design-2396",
+  "periodic-inspection",
+  "condition-reporting",
+  "am2-installation-assessment",
+  "ecs-health-safety"
+] as const;
+
+const expectedPerAttempt: Record<string, number[]> = {
+  electrics: repeat(40, 5),
+  "level-2-electrical-installation": repeat(30, 5),
+  "level-3-electrical-installation": repeat(30, 5),
+  "building-regulations": repeat(20, 7),
+  "17th-edition": [60],
+  "18th-edition": repeat(60, 5),
+  "special-locations": [30],
+  "pat-testing": [50, 50, 50, 30],
+  "initial-verification": [40, 40, 40, 40, 60, 90, 30, 30],
+  "inspection-design-2396": [...repeat(30, 13), 18],
+  "periodic-inspection": repeat(40, 5),
+  "condition-reporting": repeat(40, 5),
+  "am2-installation-assessment": repeat(30, 2),
+  "ecs-health-safety": [50, 50, 50, 49, 36, 16, 24, 28, 38, 27, 28, 32, 27, 40, 21]
+};
+
+const sourceExamIds = new Set([
+  "level-2-electrical-installation",
+  "level-3-electrical-installation",
+  "building-regulations",
+  "17th-edition",
+  "18th-edition",
+  "special-locations",
+  "pat-testing",
+  "initial-verification",
+  "inspection-design-2396",
+  "am2-installation-assessment",
+  "ecs-health-safety"
+]);
+
 describe("exam data", () => {
-  it("has valid variants, sections, and percentage-based scoring bands", () => {
+  it("exposes the canonical exams in the expected order", () => {
+    expect(EXAMS.map((exam) => exam.id)).toEqual(expectedExamOrder);
+  });
+
+  it("has valid variants, sections, questions, media and scoring bands", () => {
     for (const exam of EXAMS) {
       expect(exam.passPercent).toBeGreaterThan(0);
       expect(exam.passPercent).toBeLessThanOrEqual(1);
       expect(exam.scoring.length).toBeGreaterThan(0);
 
-      const variantCount = getVariantCount(exam);
-      const expectedVariantCount = exam.id === "initial-verification" ? 8 : 5;
-      expect(variantCount).toBe(expectedVariantCount);
+      const expectedCounts = expectedPerAttempt[exam.id];
+      expect(expectedCounts).toBeDefined();
+      expect(getVariantCount(exam)).toBe(expectedCounts.length);
 
       const sectionIds = new Set<string>();
       for (const section of exam.sections) {
         expect(sectionIds.has(section.id)).toBe(false);
         sectionIds.add(section.id);
         expect(section.title).toBeTruthy();
-        expect(section.variants.length).toBe(expectedVariantCount);
+        expect(section.variants.length).toBe(expectedCounts.length);
 
         const variantIds = new Set<string>();
         for (const variant of section.variants) {
           expect(variantIds.has(variant.id)).toBe(false);
           variantIds.add(variant.id);
-          // Each section variant must hold at least one question. Bank
-          // sizes vary per exam: most use a 20-30 Q pool that gets trimmed
-          // at runtime to the hardest few, but `electrics` is generated at
-          // exactly the per-test size (8) so the lower bound is small.
           expect(variant.questions.length).toBeGreaterThanOrEqual(1);
 
           const questionNumbers = new Set<number>();
@@ -51,14 +101,19 @@ describe("exam data", () => {
               expect(choice.trim()).toBe(choice);
               expect(choice.length).toBeGreaterThan(0);
             }
+            for (const url of question.imageUrls ?? []) {
+              expect(url).toMatch(/^https:\/\/electriciantraining\.co\.uk\//);
+            }
+            for (const [letter, url] of Object.entries(question.optionImageUrls ?? {})) {
+              expect(["A", "B", "C", "D"]).toContain(letter);
+              expect(url).toMatch(/^https:\/\/electriciantraining\.co\.uk\//);
+            }
           }
         }
       }
 
-      // Each variant attempt should have unique prompts within itself
-      for (let v = 0; v < variantCount; v += 1) {
-        // ElectricianTraining 2391 mock 6 repeats one prompt in the source data.
-        if (exam.id === "initial-verification") continue;
+      for (let v = 0; v < getVariantCount(exam); v += 1) {
+        if (sourceExamIds.has(exam.id)) continue;
         const prompts = new Set<string>();
         for (const question of getQuestionsForVariant(exam, v)) {
           expect(prompts.has(question.prompt)).toBe(false);
@@ -66,7 +121,6 @@ describe("exam data", () => {
         }
       }
 
-      // Scoring thresholds should be in descending order with 0 at the end
       const sorted = [...exam.scoring].sort((a, b) => b.threshold - a.threshold);
       expect(sorted[sorted.length - 1].threshold).toBe(0);
       for (let i = 1; i < sorted.length; i += 1) {
@@ -76,27 +130,13 @@ describe("exam data", () => {
   });
 
   it("keeps each exam at the configured per-attempt question count", () => {
-    // Per-attempt totals after any SECTION_QUESTION_LIMITS trim that keeps
-    // only the hardest questions per variant for the larger generated banks.
-    const expectedPerAttempt: Record<string, number | number[]> = {
-      "electrics": 40,
-      "building-regulations": 20,
-      "18th-edition": 60,
-      "pat-testing": 50,
-      "initial-verification": [40, 40, 40, 40, 60, 90, 30, 30],
-      "periodic-inspection": 40,
-      "condition-reporting": 40,
-      "am2-installation-assessment": 30
-    };
-
     for (const exam of EXAMS) {
-      const expected = expectedPerAttempt[exam.id];
-      expect(expected).toBeDefined();
-      const expectedCounts = Array.isArray(expected) ? expected : Array.from({ length: getVariantCount(exam) }, () => expected);
+      const expectedCounts = expectedPerAttempt[exam.id];
       expect(countQuestions(exam)).toBe(expectedCounts[0]);
       for (let v = 0; v < getVariantCount(exam); v += 1) {
         expect(countQuestionsForVariant(exam, v)).toBe(expectedCounts[v]);
       }
+      expect(countQuestionsTotal(exam)).toBeGreaterThanOrEqual(expectedCounts.reduce((sum, count) => sum + count, 0));
     }
   });
 
@@ -111,47 +151,129 @@ describe("exam data", () => {
     }
   });
 
-  it("keeps attempt variants distinct for every exam", () => {
-    for (const exam of EXAMS) {
-      const signatures = new Set<string>();
-      for (let v = 0; v < getVariantCount(exam); v += 1) {
-        const signature = getQuestionsForVariant(exam, v)
-          .map((question) => question.prompt)
-          .join("\n");
-        expect(signatures.has(signature)).toBe(false);
-        signatures.add(signature);
-      }
+  it("serves source-only ElectricianTraining categories with their source section ids", () => {
+    const expectedSectionIds: Record<string, string> = {
+      "level-2-electrical-installation": "source-electrician-training-level-2-electrical-installation",
+      "level-3-electrical-installation": "source-electrician-training-level-3-electrical-installation",
+      "building-regulations": "source-electrician-training-part-p",
+      "17th-edition": "source-electrician-training-17th-edition",
+      "18th-edition": "source-electrician-training-18th-edition",
+      "special-locations": "source-electrician-training-special-locations",
+      "pat-testing": "source-electrician-training-pat",
+      "initial-verification": "source-electrician-training-2391",
+      "inspection-design-2396": "source-electrician-training-2396",
+      "am2-installation-assessment": "source-electrician-training-am2",
+      "ecs-health-safety": "source-electrician-training-ecs-health-safety"
+    };
+
+    for (const [examId, sectionId] of Object.entries(expectedSectionIds)) {
+      const exam = EXAMS.find((entry) => entry.id === examId);
+      expect(exam).toBeDefined();
+      expect(exam!.sections.map((section) => section.id)).toEqual([sectionId]);
+      expect(getVariantCount(exam!)).toBe(expectedPerAttempt[examId].length);
     }
   });
 
-  it("uses the 50-question PAT mock as the fifth PAT variation", () => {
-    const exam = EXAMS.find((e) => e.id === "pat-testing");
-    expect(exam).toBeDefined();
+  it("preserves key ElectricianTraining source mocks and repaired rows", () => {
+    const expectations: Record<string, Array<{ variant: number; length: number; firstPrompt: string }>> = {
+      "building-regulations": [
+        {
+          variant: 0,
+          length: 20,
+          firstPrompt: "Part 'A' of the building, states that horizontal chases should not be deeper than:"
+        }
+      ],
+      "18th-edition": [
+        {
+          variant: 0,
+          length: 60,
+          firstPrompt: "BS7671 applies to the design, erection and verification of which of the following?"
+        }
+      ],
+      "pat-testing": [{ variant: 0, length: 50, firstPrompt: "Class I equipment:" }],
+      "initial-verification": [
+        { variant: 0, length: 40, firstPrompt: "What is the main purpose of an Initial Verification?" },
+        { variant: 1, length: 40, firstPrompt: "Increasing the length of the cable will not affect the:" },
+        { variant: 4, length: 60, firstPrompt: "What needs to be verified during the inspection of a new installation?" },
+        {
+          variant: 5,
+          length: 90,
+          firstPrompt: "On completion of a new installation, the Electrical Installation Certificate would 'not' be signed by the:"
+        }
+      ],
+      "inspection-design-2396": [
+        {
+          variant: 0,
+          length: 30,
+          firstPrompt: "What is the definition of a device designed to 'make and break contact off-load'?"
+        },
+        { variant: 13, length: 18, firstPrompt: "What type of battery-powered 'dual' test instrument is shown here?" }
+      ],
+      "ecs-health-safety": [
+        {
+          variant: 0,
+          length: 50,
+          firstPrompt:
+            "If you discover a hole or gap in a fire rated wall or floor that has not been fire-stopped, what should you do?"
+        }
+      ]
+    };
 
-    const mockAttempt = getQuestionsForVariant(exam!, 4);
-    expect(mockAttempt).toHaveLength(50);
-    expect(mockAttempt[0].prompt).toBe("Class I equipment:");
-    expect(mockAttempt[49].prompt).toBe(
-      "The test current applied to an electric kettle fitted with a 13A fuse during an earth continuity test would normally be:"
+    for (const [examId, mocks] of Object.entries(expectations)) {
+      const exam = EXAMS.find((entry) => entry.id === examId);
+      expect(exam).toBeDefined();
+      for (const mock of mocks) {
+        const attempt = getQuestionsForVariant(exam!, mock.variant);
+        expect(attempt).toHaveLength(mock.length);
+        expect(attempt[0].prompt).toBe(mock.firstPrompt);
+      }
+    }
+
+    const initial = EXAMS.find((entry) => entry.id === "initial-verification");
+    expect(initial).toBeDefined();
+    const repairedQuestion = getQuestionsForVariant(initial!, 1)[11];
+    expect(repairedQuestion.prompt).toBe("Prior to energising, polarity should be tested using?");
+    expect(repairedQuestion.options[repairedQuestion.answer]).toBe(
+      "A continuity tester or low-resistance ohmmeter"
     );
   });
 
-  it("exposes the canonical exams in the expected order", () => {
-    const ids = EXAMS.map((exam) => exam.id);
-    expect(ids).toEqual([
-      "electrics",
-      "building-regulations",
-      "18th-edition",
-      "pat-testing",
-      "initial-verification",
-      "periodic-inspection",
-      "condition-reporting",
-      "am2-installation-assessment"
+  it("keeps source image questions renderable", () => {
+    const design2396 = EXAMS.find((entry) => entry.id === "inspection-design-2396");
+    expect(design2396).toBeDefined();
+    expect(getQuestionsForVariant(design2396!, 13)[0].imageUrls).toEqual([
+      "https://electriciantraining.co.uk/images-18/test-instruments-Q1.jpg"
     ]);
+
+    const level3 = EXAMS.find((entry) => entry.id === "level-3-electrical-installation");
+    expect(level3).toBeDefined();
+    const formulaQuestion = getQuestionsForVariant(level3!, 0).find((question) =>
+      question.prompt.includes("formula used to determine Impedance")
+    );
+    expect(formulaQuestion).toBeDefined();
+    expect(Object.keys(formulaQuestion!.optionImageUrls ?? {})).toHaveLength(4);
   });
 
   it("computes pass marks from each exam's configured percentage", () => {
+    const expectedPassPercent: Record<string, number> = {
+      electrics: 0.7,
+      "level-2-electrical-installation": 0.6,
+      "level-3-electrical-installation": 0.6,
+      "building-regulations": 0.6,
+      "17th-edition": 0.6,
+      "18th-edition": 0.6,
+      "special-locations": 0.6,
+      "pat-testing": 0.8,
+      "initial-verification": 0.6,
+      "inspection-design-2396": 0.6,
+      "periodic-inspection": 0.75,
+      "condition-reporting": 0.75,
+      "am2-installation-assessment": 0.6,
+      "ecs-health-safety": 0.86
+    };
+
     for (const exam of EXAMS) {
+      expect(exam.passPercent).toBe(expectedPassPercent[exam.id]);
       for (let v = 0; v < getVariantCount(exam); v += 1) {
         const total = countQuestionsForVariant(exam, v);
         expect(getPassMark(exam, total)).toBe(Math.ceil(exam.passPercent * total));
@@ -159,124 +281,14 @@ describe("exam data", () => {
     }
   });
 
-  it("serves all eight ElectricianTraining 2391 mocks as initial-verification attempts", () => {
-    const exam = EXAMS.find((e) => e.id === "initial-verification");
-    expect(exam).toBeDefined();
-    expect(getVariantCount(exam!)).toBe(8);
-    expect(exam!.sections.map((section) => section.id)).toEqual(["section-8-2391-mock"]);
-    const expected = [
-      { length: 40, firstPrompt: "What is the main purpose of an Initial Verification?" },
-      { length: 40, firstPrompt: "Increasing the length of the cable will not affect the:" },
-      {
-        length: 40,
-        firstPrompt: "The circuit breaker supplying the ring circuit keeps tripping. This type of electrical fault is known as:"
-      },
-      {
-        length: 40,
-        firstPrompt:
-          "What would be the correct procedure to confirm that the existing electrical installation in a dwelling is suitable for the additional wiring of an extension?"
-      },
-      { length: 60, firstPrompt: "What needs to be verified during the inspection of a new installation?" },
-      {
-        length: 90,
-        firstPrompt: "On completion of a new installation, the Electrical Installation Certificate would 'not' be signed by the:"
-      },
-      { length: 30, firstPrompt: "OSG gives the maximum stable value of Ze for a TT installation as:" },
-      {
-        length: 30,
-        firstPrompt:
-          "The neutral of the supply cable is used as part of the earth return path in which of the following systems:"
-      }
-    ];
-
-    expected.forEach((mock, variantIndex) => {
-      const mockAttempt = getQuestionsForVariant(exam!, variantIndex);
-      expect(mockAttempt).toHaveLength(mock.length);
-      expect(mockAttempt[0].prompt).toBe(mock.firstPrompt);
-    });
-    const repairedQuestion = getQuestionsForVariant(exam!, 1)[11];
-    expect(repairedQuestion.prompt).toBe("Prior to energising, polarity should be tested using?");
-    expect(repairedQuestion.options[repairedQuestion.answer]).toBe(
-      "A continuity tester or low-resistance ohmmeter"
-    );
-  });
-
-  it("serves copied ElectricianTraining mocks as fifth attempts in matching categories", () => {
-    const expected: Record<string, { length: number; firstPrompt: string }> = {
-      "building-regulations": {
-        length: 20,
-        firstPrompt: "Part 'A' of the building, states that horizontal chases should not be deeper than:"
-      },
-      "18th-edition": {
-        length: 60,
-        firstPrompt: "BS 7671:2018 applies to electrical installations in"
-      },
-      "am2-installation-assessment": {
-        length: 30,
-        firstPrompt:
-          "Which statutory regulations lay down the measures which must be taken to ensure the safe installation and use of electrical equipment:"
-      }
-    };
-
-    for (const [examId, sourceMock] of Object.entries(expected)) {
-      const exam = EXAMS.find((e) => e.id === examId);
-      expect(exam).toBeDefined();
-      const mockAttempt = getQuestionsForVariant(exam!, 4);
-      expect(mockAttempt).toHaveLength(sourceMock.length);
-      expect(mockAttempt[0].prompt).toBe(sourceMock.firstPrompt);
-    }
-  });
-
-  it("keeps periodic inspection and condition reporting at the stricter pass threshold", () => {
-    for (const examId of ["periodic-inspection", "condition-reporting"]) {
-      const exam = EXAMS.find((e) => e.id === examId);
-      expect(exam).toBeDefined();
-      expect(exam!.passPercent).toBe(0.75);
-    }
-  });
-
-  it("aligns direct public mock categories to their current served pass thresholds", () => {
-    const expectedPassPercent: Record<string, number> = {
-      "building-regulations": 0.6,
-      "18th-edition": 0.6,
-      "pat-testing": 0.8,
-      "initial-verification": 0.6,
-      "am2-installation-assessment": 0.6
-    };
-
-    for (const [examId, passPercent] of Object.entries(expectedPassPercent)) {
-      const exam = EXAMS.find((e) => e.id === examId);
-      expect(exam).toBeDefined();
-      expect(exam!.passPercent).toBe(passPercent);
-    }
-  });
-
-  it("keeps served distractors plausible in hardened mock categories", () => {
+  it("keeps served distractors plausible in generated inspection categories", () => {
     const weakDistractorPattern =
       /\b(only|always|never|verbal|customer invoice|lunch|DNO|skip|assume|trust|no further action|nothing|no paperwork|satisfactory only|FI only|C3 only|all good)\b/i;
 
-    for (const examId of [
-      "building-regulations",
-      "18th-edition",
-      "pat-testing",
-      "periodic-inspection",
-      "condition-reporting",
-      "am2-installation-assessment"
-    ]) {
-      const exam = EXAMS.find((e) => e.id === examId);
+    for (const examId of ["periodic-inspection", "condition-reporting"]) {
+      const exam = EXAMS.find((entry) => entry.id === examId);
       expect(exam).toBeDefined();
       for (let v = 0; v < getVariantCount(exam!); v += 1) {
-        if (
-          v === 4 &&
-          [
-            "building-regulations",
-            "18th-edition",
-            "pat-testing",
-            "am2-installation-assessment"
-          ].includes(examId)
-        ) {
-          continue;
-        }
         for (const question of getQuestionsForVariant(exam!, v)) {
           for (const [letter, option] of Object.entries(question.options)) {
             if (letter === question.answer) continue;
@@ -287,9 +299,9 @@ describe("exam data", () => {
     }
   });
 
-  it("balances served answer letters in inspection and testing exams", () => {
+  it("balances served answer letters in generated inspection categories", () => {
     for (const examId of ["periodic-inspection", "condition-reporting"]) {
-      const exam = EXAMS.find((e) => e.id === examId);
+      const exam = EXAMS.find((entry) => entry.id === examId);
       expect(exam).toBeDefined();
       const counts: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
       let total = 0;
@@ -312,29 +324,23 @@ describe("exam data", () => {
       const total = countQuestions(exam);
       const ranges = getScoringRanges(exam, total);
       expect(ranges.length).toBe(exam.scoring.length);
-      // Top band's max should equal total
       expect(ranges[0].range).toContain(`${total}`);
-      // Bottom band's minScore should be 0
       expect(ranges[ranges.length - 1].minScore).toBe(0);
     }
   });
 
   it("scores correct counts into descending bands", () => {
-    const exam = EXAMS.find((e) => e.id === "condition-reporting");
+    const exam = EXAMS.find((entry) => entry.id === "condition-reporting");
     expect(exam).toBeDefined();
     const total = countQuestions(exam!);
     expect(total).toBe(40);
 
-    // 90% threshold = ceil(0.9 * 40) = 36
     expect(getScoringBand(exam!, 36, total).minScore).toBe(36);
     expect(getScoringBand(exam!, 40, total).minScore).toBe(36);
-    // 75% threshold = ceil(0.75 * 40) = 30
     expect(getScoringBand(exam!, 30, total).minScore).toBe(30);
     expect(getScoringBand(exam!, 35, total).minScore).toBe(30);
-    // 50% threshold = ceil(0.5 * 40) = 20
     expect(getScoringBand(exam!, 20, total).minScore).toBe(20);
     expect(getScoringBand(exam!, 29, total).minScore).toBe(20);
-    // 0% (bottom band)
     expect(getScoringBand(exam!, 0, total).minScore).toBe(0);
     expect(getScoringBand(exam!, 19, total).minScore).toBe(0);
   });

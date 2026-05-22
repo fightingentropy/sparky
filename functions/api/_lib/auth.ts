@@ -34,13 +34,19 @@ export function isValidPassword(password: string): boolean {
 // can reject unknown examIds without importing client code.
 export const VALID_EXAM_IDS = new Set([
   "electrics",
+  "level-2-electrical-installation",
+  "level-3-electrical-installation",
   "building-regulations",
+  "17th-edition",
   "18th-edition",
+  "special-locations",
   "pat-testing",
   "initial-verification",
+  "inspection-design-2396",
   "periodic-inspection",
   "condition-reporting",
   "am2-installation-assessment",
+  "ecs-health-safety",
 ]);
 
 const VALID_CHOICES = new Set(["A", "B", "C", "D"]);
