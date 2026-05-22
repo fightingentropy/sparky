@@ -38,13 +38,15 @@ import type { ExamId } from "./examRegistry";
 // component stays mounted thereafter (so per-page state is preserved across
 // navigation, same as before the split).
 const ExamPage = lazy(() => import("./ExamPage").then((m) => ({ default: m.ExamPage })));
+const LearningPage = lazy(() => import("./LearningPage").then((m) => ({ default: m.LearningPage })));
 const TutorialsPage = lazy(() => import("./TutorialsPage").then((m) => ({ default: m.TutorialsPage })));
 const InteractivePage = lazy(() => import("./InteractivePage").then((m) => ({ default: m.InteractivePage })));
 import { TUTORIALS } from "./tutorials";
+import { COURSE_GUIDES, GUIDE_CATEGORY_LABELS } from "./courseGuides";
 import { useAuth } from "./AuthContext";
 import { AuthModal } from "./AuthModal";
 
-type PageId = "home" | "cheatsheet" | "exams" | "tutorials" | "interactive";
+type PageId = "home" | "cheatsheet" | "learn" | "exams" | "tutorials" | "interactive";
 
 type LegendItem = {
   label: string;
@@ -95,6 +97,7 @@ const DEFAULT_PAGE: PageId = "home";
 const PAGE_NAV_ITEMS: { id: PageId; label: string }[] = [
   { id: "home", label: "Tools" },
   { id: "cheatsheet", label: "Notes" },
+  { id: "learn", label: "Learn" },
   { id: "exams", label: "Exams" },
   { id: "tutorials", label: "Tutorials" },
   { id: "interactive", label: "Interactive" }
@@ -1158,6 +1161,7 @@ function PresetButtons({
 function getPageFromLocation(): PageId {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   if (path === "/notes" || path === "/cheatsheet") return "cheatsheet";
+  if (path === "/learn" || path === "/guides") return "learn";
   if (path === "/exams") return "exams";
   if (path === "/tutorials") return "tutorials";
   if (path === "/interactive") return "interactive";
@@ -1170,6 +1174,8 @@ function getPageHref(page: PageId): string {
       return "/";
     case "cheatsheet":
       return "/notes";
+    case "learn":
+      return "/learn";
     case "exams":
       return "/exams";
     case "tutorials":
@@ -1675,6 +1681,13 @@ export default function App() {
         action: () => navigateTo("exams")
       },
       {
+        title: "Learn",
+        subtitle: "Course routes, assessment checklists, and category guides.",
+        tag: "Page",
+        keywords: "learn guides course route pathway assessment checklist qualification 2391 2396 pat am2 ecs part p 18th edition",
+        action: () => navigateTo("learn")
+      },
+      {
         title: "Tutorials",
         subtitle: "Workplace videos and demonstrations.",
         tag: "Page",
@@ -1725,6 +1738,13 @@ export default function App() {
           action: () => navigateTo("cheatsheet", section.id)
         }))
       ]),
+      ...COURSE_GUIDES.map((guide) => ({
+        title: guide.title,
+        subtitle: guide.summary,
+        tag: "Guide",
+        keywords: `${guide.title} ${guide.kicker} ${GUIDE_CATEGORY_LABELS[guide.category]} ${guide.summary} ${guide.facts.map((fact) => `${fact.label} ${fact.value}`).join(" ")} ${guide.sections.flatMap((section) => [section.title, ...section.items]).join(" ")} ${guide.pitfalls.join(" ")} ${guide.nextActions.join(" ")}`,
+        action: () => navigateTo("learn", guide.id)
+      })),
       ...TUTORIALS.map((tutorial) => ({
         title: tutorial.title,
         subtitle: tutorial.workplaceUse,
@@ -3564,6 +3584,13 @@ export default function App() {
         </section>
 
         <Suspense fallback={null}>
+          {visitedPages.has("learn") ? (
+            <LearningPage
+              isActive={page === "learn"}
+              onOpenExam={openPracticeExam}
+              onOpenNote={(noteId) => navigateTo("cheatsheet", noteId)}
+            />
+          ) : null}
           {visitedPages.has("exams") ? <ExamPage isActive={page === "exams"} practiceTarget={examPracticeTarget} /> : null}
           {visitedPages.has("tutorials") ? <TutorialsPage isActive={page === "tutorials"} /> : null}
           {visitedPages.has("interactive") ? <InteractivePage isActive={page === "interactive"} /> : null}
@@ -3584,7 +3611,7 @@ export default function App() {
             <div className="modal-header">
               <div>
                 <h2>Command palette</h2>
-                <p className="page-copy">Search pages, tools, and notes.</p>
+                <p className="page-copy">Search pages, tools, notes, and guides.</p>
               </div>
               <button className="ghost-button" type="button" onClick={() => setPaletteOpen(false)}>
                 Close
@@ -3597,7 +3624,7 @@ export default function App() {
                 ref={paletteInputRef}
                 id="palette-input"
                 type="search"
-                placeholder="Go to tools, notes, help"
+                placeholder="Go to tools, notes, guides"
                 autoComplete="off"
                 value={paletteQuery}
                 onChange={(e) => setPaletteQuery(e.target.value)}
