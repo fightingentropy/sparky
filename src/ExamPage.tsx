@@ -181,10 +181,35 @@ type Props = {
 
 export function ExamPage({ isActive, practiceTarget }: Props) {
   const { user } = useAuth();
+  const [examMenuOpen, setExamMenuOpen] = useState(false);
+  const examMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     clearStaleExamProgress();
   }, []);
+
+  useEffect(() => {
+    if (!examMenuOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!examMenuRef.current?.contains(event.target as Node)) {
+        setExamMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setExamMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [examMenuOpen]);
 
   const [selectedExamId, setSelectedExamId] = usePersistedState<string>(
     "exam-selected",
@@ -491,22 +516,58 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
       <div className="exam-shell">
         <header className="exam-hero">
           <div className="exam-hero-text">
-            <div className="exam-title-wrap">
+            <div className="exam-title-wrap" ref={examMenuRef}>
               {EXAM_REGISTRY.length > 1 ? (
-                <select
-                  className="exam-title-select"
-                  aria-label="Mock exam"
-                  value={selectedExamEntry.id}
-                  onChange={(event) => {
-                    setSelectedExamId(event.target.value);
-                  }}
-                >
-                  {EXAM_REGISTRY.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.title}
-                    </option>
-                  ))}
-                </select>
+                <div className="exam-title-menu-wrap">
+                  <button
+                    type="button"
+                    className="exam-title-button"
+                    aria-haspopup="listbox"
+                    aria-expanded={examMenuOpen}
+                    aria-controls="exam-title-menu"
+                    onClick={() => setExamMenuOpen((open) => !open)}
+                  >
+                    <span>{selectedExamEntry.title}</span>
+                    <svg
+                      className="exam-title-chevron"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="m5 7.5 5 5 5-5"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  {examMenuOpen ? (
+                    <div
+                      id="exam-title-menu"
+                      className="exam-title-menu"
+                      role="listbox"
+                      aria-label="Mock exam"
+                    >
+                      {EXAM_REGISTRY.map((entry) => (
+                        <button
+                          key={entry.id}
+                          type="button"
+                          role="option"
+                          aria-selected={entry.id === selectedExamEntry.id}
+                          className={`exam-title-option${entry.id === selectedExamEntry.id ? " is-active" : ""}`}
+                          onClick={() => {
+                            setSelectedExamId(entry.id);
+                            setExamMenuOpen(false);
+                          }}
+                        >
+                          {entry.title}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               ) : (
                 <h2>{selectedExamEntry.title}</h2>
               )}

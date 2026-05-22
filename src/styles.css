@@ -2717,7 +2717,8 @@ input:disabled {
 
 .exam-title-wrap {
   position: relative;
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: minmax(0, auto) auto;
   align-items: center;
   gap: 8px;
   width: max-content;
@@ -2801,32 +2802,95 @@ input:disabled {
   font-weight: 500;
 }
 
-.exam-title-select {
-  width: auto;
+.exam-title-menu-wrap {
+  position: relative;
+  min-width: 0;
   max-width: 100%;
-  min-height: 0;
-  padding: 2px 28px 2px 0;
+}
+
+.exam-title-button {
+  display: grid;
+  grid-template-columns: minmax(0, auto) auto;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 2px 0;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   color: var(--text);
+  font-family: var(--font-heading);
   font-size: 1.35rem;
-  font-weight: 700;
-  line-height: 1.25;
+  font-weight: 400;
+  line-height: 1;
+  text-align: left;
   cursor: pointer;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='none' stroke='%2397a0ab' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 L6 6.5 L11 1.5'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 4px center;
   transition: color 0.15s;
 }
 
-.exam-title-select:hover,
-.exam-title-select:focus {
+.exam-title-button:hover,
+.exam-title-button:focus-visible {
   color: var(--accent-strong);
   border: 0;
   box-shadow: none;
   outline: none;
+}
+
+.exam-title-button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exam-title-chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--muted-strong);
+}
+
+.exam-title-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 35;
+  display: grid;
+  gap: 2px;
+  width: min(520px, calc(100vw - 48px));
+  max-height: min(420px, calc(100vh - 220px));
+  overflow: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: rgba(17, 17, 17, 0.98);
+  box-shadow: none;
+}
+
+.exam-title-option {
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted-strong);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+}
+
+.exam-title-option:hover,
+.exam-title-option:focus-visible {
+  background: var(--surface-soft);
+  color: var(--text);
+  outline: none;
+}
+
+.exam-title-option.is-active {
+  background: var(--text);
+  color: var(--bg);
 }
 
 .exam-hero-stats {
@@ -3643,20 +3707,29 @@ input:disabled {
   }
 
   .exam-hero-text h2,
-  .exam-title-select {
+  .exam-title-button {
     font-size: 0.98rem;
   }
 
-  .exam-title-select {
+  .exam-title-button,
+  .exam-title-menu-wrap {
     width: 100%;
     min-width: 0;
-    padding-right: 24px;
+  }
+
+  .exam-title-button {
+    grid-template-columns: minmax(0, 1fr) auto;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  .exam-title-menu {
+    width: min(100%, calc(100vw - 32px));
+    max-height: 320px;
+  }
+
   .exam-title-info {
-    flex: 0 0 18px;
+    justify-self: end;
   }
 
   .exam-tooltip {
@@ -4837,7 +4910,7 @@ kbd {
 .page-header h2,
 .modal-header h2,
 .exam-hero-text h2,
-.exam-title-select {
+.exam-title-button {
   font-family: var(--font-heading);
   font-weight: 400;
   line-height: 0.98;
@@ -5089,14 +5162,14 @@ select:focus,
   color: var(--text);
 }
 
-.exam-title-select {
-  font-size: clamp(2rem, 5vw, 4.2rem);
+.exam-title-button {
+  font-size: clamp(1.85rem, 4.4vw, 3.7rem);
   font-weight: 400;
   color: var(--text);
 }
 
-.exam-title-select:hover,
-.exam-title-select:focus {
+.exam-title-button:hover,
+.exam-title-button:focus-visible {
   color: var(--text);
 }
 
@@ -5110,8 +5183,14 @@ select:focus,
   width: 100%;
 }
 
-.exam-title-select {
+.exam-title-button,
+.exam-title-menu-wrap {
   width: 100%;
+  min-width: 0;
+}
+
+.exam-title-button {
+  grid-template-columns: minmax(0, 1fr) auto;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -5236,9 +5315,14 @@ select:focus,
   .page-header h2,
   .modal-header h2,
   .exam-hero-text h2,
-  .exam-title-select {
+  .exam-title-button {
     font-size: 1.35rem;
     line-height: 1.08;
+  }
+
+  .exam-title-menu {
+    width: min(100%, calc(100vw - 20px));
+    max-height: 320px;
   }
 
   .tool-panel,
