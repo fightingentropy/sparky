@@ -19,14 +19,15 @@ describe("exam data", () => {
       expect(exam.scoring.length).toBeGreaterThan(0);
 
       const variantCount = getVariantCount(exam);
-      expect(variantCount).toBe(5);
+      const expectedVariantCount = exam.id === "initial-verification" ? 8 : 5;
+      expect(variantCount).toBe(expectedVariantCount);
 
       const sectionIds = new Set<string>();
       for (const section of exam.sections) {
         expect(sectionIds.has(section.id)).toBe(false);
         sectionIds.add(section.id);
         expect(section.title).toBeTruthy();
-        expect(section.variants.length).toBe(5);
+        expect(section.variants.length).toBe(expectedVariantCount);
 
         const variantIds = new Set<string>();
         for (const variant of section.variants) {
@@ -56,6 +57,8 @@ describe("exam data", () => {
 
       // Each variant attempt should have unique prompts within itself
       for (let v = 0; v < variantCount; v += 1) {
+        // ElectricianTraining 2391 mock 6 repeats one prompt in the source data.
+        if (exam.id === "initial-verification") continue;
         const prompts = new Set<string>();
         for (const question of getQuestionsForVariant(exam, v)) {
           expect(prompts.has(question.prompt)).toBe(false);
@@ -75,12 +78,12 @@ describe("exam data", () => {
   it("keeps each exam at the configured per-attempt question count", () => {
     // Per-attempt totals after any SECTION_QUESTION_LIMITS trim that keeps
     // only the hardest questions per variant for the larger generated banks.
-    const expectedPerAttempt: Record<string, number> = {
+    const expectedPerAttempt: Record<string, number | number[]> = {
       "electrics": 40,
       "building-regulations": 20,
       "18th-edition": 60,
       "pat-testing": 50,
-      "initial-verification": 40,
+      "initial-verification": [40, 40, 40, 40, 60, 90, 30, 30],
       "periodic-inspection": 40,
       "condition-reporting": 40,
       "am2-installation-assessment": 30
@@ -89,17 +92,17 @@ describe("exam data", () => {
     for (const exam of EXAMS) {
       const expected = expectedPerAttempt[exam.id];
       expect(expected).toBeDefined();
-      expect(countQuestions(exam)).toBe(expected);
-      // All 5 variants should have the same per-attempt total
-      for (let v = 0; v < 5; v += 1) {
-        expect(countQuestionsForVariant(exam, v)).toBe(expected);
+      const expectedCounts = Array.isArray(expected) ? expected : Array.from({ length: getVariantCount(exam) }, () => expected);
+      expect(countQuestions(exam)).toBe(expectedCounts[0]);
+      for (let v = 0; v < getVariantCount(exam); v += 1) {
+        expect(countQuestionsForVariant(exam, v)).toBe(expectedCounts[v]);
       }
     }
   });
 
   it("renumbers questions sequentially across sections in each variant", () => {
     for (const exam of EXAMS) {
-      for (let v = 0; v < 5; v += 1) {
+      for (let v = 0; v < getVariantCount(exam); v += 1) {
         const questions = getQuestionsForVariant(exam, v);
         for (let i = 0; i < questions.length; i += 1) {
           expect(questions[i].number).toBe(i + 1);
@@ -108,10 +111,10 @@ describe("exam data", () => {
     }
   });
 
-  it("keeps the five attempt variants distinct for every exam", () => {
+  it("keeps attempt variants distinct for every exam", () => {
     for (const exam of EXAMS) {
       const signatures = new Set<string>();
-      for (let v = 0; v < 5; v += 1) {
+      for (let v = 0; v < getVariantCount(exam); v += 1) {
         const signature = getQuestionsForVariant(exam, v)
           .map((question) => question.prompt)
           .join("\n");
@@ -149,19 +152,53 @@ describe("exam data", () => {
 
   it("computes pass marks from each exam's configured percentage", () => {
     for (const exam of EXAMS) {
-      const total = countQuestions(exam);
-      expect(getPassMark(exam, total)).toBe(Math.ceil(exam.passPercent * total));
+      for (let v = 0; v < getVariantCount(exam); v += 1) {
+        const total = countQuestionsForVariant(exam, v);
+        expect(getPassMark(exam, total)).toBe(Math.ceil(exam.passPercent * total));
+      }
     }
   });
 
-  it("includes the 2391 mock drill inside the initial-verification exam", () => {
+  it("serves all eight ElectricianTraining 2391 mocks as initial-verification attempts", () => {
     const exam = EXAMS.find((e) => e.id === "initial-verification");
     expect(exam).toBeDefined();
-    expect(exam!.sections.map((section) => section.id)).toContain("section-8-2391-mock");
-    const mockAttempt = getQuestionsForVariant(exam!, 4);
-    expect(mockAttempt).toHaveLength(40);
-    expect(mockAttempt[0].prompt).toBe("What is the main purpose of an Initial Verification?");
-    expect(mockAttempt[39].prompt).toBe("What is the purpose of the phase-sequence test?");
+    expect(getVariantCount(exam!)).toBe(8);
+    expect(exam!.sections.map((section) => section.id)).toEqual(["section-8-2391-mock"]);
+    const expected = [
+      { length: 40, firstPrompt: "What is the main purpose of an Initial Verification?" },
+      { length: 40, firstPrompt: "Increasing the length of the cable will not affect the:" },
+      {
+        length: 40,
+        firstPrompt: "The circuit breaker supplying the ring circuit keeps tripping. This type of electrical fault is known as:"
+      },
+      {
+        length: 40,
+        firstPrompt:
+          "What would be the correct procedure to confirm that the existing electrical installation in a dwelling is suitable for the additional wiring of an extension?"
+      },
+      { length: 60, firstPrompt: "What needs to be verified during the inspection of a new installation?" },
+      {
+        length: 90,
+        firstPrompt: "On completion of a new installation, the Electrical Installation Certificate would 'not' be signed by the:"
+      },
+      { length: 30, firstPrompt: "OSG gives the maximum stable value of Ze for a TT installation as:" },
+      {
+        length: 30,
+        firstPrompt:
+          "The neutral of the supply cable is used as part of the earth return path in which of the following systems:"
+      }
+    ];
+
+    expected.forEach((mock, variantIndex) => {
+      const mockAttempt = getQuestionsForVariant(exam!, variantIndex);
+      expect(mockAttempt).toHaveLength(mock.length);
+      expect(mockAttempt[0].prompt).toBe(mock.firstPrompt);
+    });
+    const repairedQuestion = getQuestionsForVariant(exam!, 1)[11];
+    expect(repairedQuestion.prompt).toBe("Prior to energising, polarity should be tested using?");
+    expect(repairedQuestion.options[repairedQuestion.answer]).toBe(
+      "A continuity tester or low-resistance ohmmeter"
+    );
   });
 
   it("serves copied ElectricianTraining mocks as fifth attempts in matching categories", () => {
@@ -190,8 +227,8 @@ describe("exam data", () => {
     }
   });
 
-  it("keeps inspection and testing exams at the stricter pass threshold", () => {
-    for (const examId of ["initial-verification", "periodic-inspection", "condition-reporting"]) {
+  it("keeps periodic inspection and condition reporting at the stricter pass threshold", () => {
+    for (const examId of ["periodic-inspection", "condition-reporting"]) {
       const exam = EXAMS.find((e) => e.id === examId);
       expect(exam).toBeDefined();
       expect(exam!.passPercent).toBe(0.75);
@@ -203,6 +240,7 @@ describe("exam data", () => {
       "building-regulations": 0.6,
       "18th-edition": 0.6,
       "pat-testing": 0.8,
+      "initial-verification": 0.6,
       "am2-installation-assessment": 0.6
     };
 
@@ -221,21 +259,19 @@ describe("exam data", () => {
       "building-regulations",
       "18th-edition",
       "pat-testing",
-      "initial-verification",
       "periodic-inspection",
       "condition-reporting",
       "am2-installation-assessment"
     ]) {
       const exam = EXAMS.find((e) => e.id === examId);
       expect(exam).toBeDefined();
-      for (let v = 0; v < 5; v += 1) {
+      for (let v = 0; v < getVariantCount(exam!); v += 1) {
         if (
           v === 4 &&
           [
             "building-regulations",
             "18th-edition",
             "pat-testing",
-            "initial-verification",
             "am2-installation-assessment"
           ].includes(examId)
         ) {
@@ -252,12 +288,12 @@ describe("exam data", () => {
   });
 
   it("balances served answer letters in inspection and testing exams", () => {
-    for (const examId of ["initial-verification", "periodic-inspection", "condition-reporting"]) {
+    for (const examId of ["periodic-inspection", "condition-reporting"]) {
       const exam = EXAMS.find((e) => e.id === examId);
       expect(exam).toBeDefined();
       const counts: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
       let total = 0;
-      for (let v = 0; v < 5; v += 1) {
+      for (let v = 0; v < getVariantCount(exam!); v += 1) {
         for (const question of getQuestionsForVariant(exam!, v)) {
           counts[question.answer] += 1;
           total += 1;
