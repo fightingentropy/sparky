@@ -35,7 +35,7 @@ const REVIEW_FILTER_LABELS: Record<ReviewFilter, string> = {
   unanswered: "Unanswered",
   correct: "Correct"
 };
-const EXAM_STORAGE_VERSION = "2026-05-full-electriciantraining-source-mocks";
+const EXAM_STORAGE_VERSION = "2026-05-trimmed-merged-inspection-exams";
 const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
 const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
 const EXAM_VARIANT_STORAGE_PREFIX = `exam-variant-${EXAM_STORAGE_VERSION}-`;
@@ -44,14 +44,12 @@ const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
   "level-2-electrical-installation": Date.UTC(2026, 4, 22, 19, 36),
   "level-3-electrical-installation": Date.UTC(2026, 4, 22, 19, 36),
   "building-regulations": Date.UTC(2026, 4, 22, 19, 36),
-  "17th-edition": Date.UTC(2026, 4, 22, 19, 36),
   "18th-edition": Date.UTC(2026, 4, 22, 19, 36),
   "special-locations": Date.UTC(2026, 4, 22, 19, 36),
   "pat-testing": Date.UTC(2026, 4, 22, 19, 36),
   "initial-verification": Date.UTC(2026, 4, 22, 19, 36),
   "inspection-design-2396": Date.UTC(2026, 4, 22, 19, 36),
-  "periodic-inspection": Date.UTC(2026, 4, 21, 21, 44),
-  "condition-reporting": Date.UTC(2026, 4, 21, 21, 44),
+  "periodic-inspection": Date.UTC(2026, 4, 22, 19, 49),
   "am2-installation-assessment": Date.UTC(2026, 4, 22, 19, 36),
   "ecs-health-safety": Date.UTC(2026, 4, 22, 19, 36)
 };

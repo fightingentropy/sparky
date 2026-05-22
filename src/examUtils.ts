@@ -11,24 +11,20 @@ const SECTION_QUESTION_LIMITS: Record<string, Record<string, number>> = {
     "section-3": 8,
     "section-4": 8,
     "section-5-merged-periodic-earthing": 8,
-  },
-  "condition-reporting": {
-    "section-1": 8,
-    "section-2": 8,
-    "section-3": 8,
-    "section-4": 8,
-    "section-5-merged-observation-scenarios": 8,
+    "eicr-section-1": 8,
+    "eicr-section-2": 8,
+    "eicr-section-3": 8,
+    "eicr-section-4": 8,
+    "eicr-section-5-merged-observation-scenarios": 8,
   }
 };
 
 const HARDENED_EXAM_IDS = new Set([
   "periodic-inspection",
-  "condition-reporting",
 ]);
 
 const CHOICES: ExamChoice[] = ["A", "B", "C", "D"];
 const SOURCE_MOCK_SECTION_IDS = new Set([
-  "source-electrician-training-17th-edition",
   "source-electrician-training-18th-edition",
   "source-electrician-training-part-p",
   "source-electrician-training-pat",

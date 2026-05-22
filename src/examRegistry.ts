@@ -8,11 +8,6 @@ type ExamRegistryEntry = {
 
 export const EXAM_REGISTRY = [
   {
-    id: "electrics",
-    title: "Basic Electrics",
-    load: () => import("./exams/electrics").then((m) => m.electricsExam)
-  },
-  {
     id: "level-2-electrical-installation",
     title: "Level 2 Electrical Installation",
     load: () => import("./exams/level-2-electrical-installation").then((m) => m.level2ElectricalInstallationExam)
@@ -26,11 +21,6 @@ export const EXAM_REGISTRY = [
     id: "building-regulations",
     title: "Building Regulations & Part P",
     load: () => import("./exams/building-regulations").then((m) => m.buildingRegulationsExam)
-  },
-  {
-    id: "17th-edition",
-    title: "17th Edition (BS 7671)",
-    load: () => import("./exams/17th-edition").then((m) => m.seventeenthEditionExam)
   },
   {
     id: "18th-edition",
@@ -59,13 +49,8 @@ export const EXAM_REGISTRY = [
   },
   {
     id: "periodic-inspection",
-    title: "Periodic Inspection & Testing",
+    title: "Periodic Inspection & Condition Reporting",
     load: () => import("./exams/periodic-inspection").then((m) => m.periodicInspectionExam)
-  },
-  {
-    id: "condition-reporting",
-    title: "Condition Reporting (EICR)",
-    load: () => import("./exams/condition-reporting").then((m) => m.conditionReportingExam)
   },
   {
     id: "am2-installation-assessment",
