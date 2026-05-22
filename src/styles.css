@@ -3705,6 +3705,7 @@ input:disabled {
   .exam-title-wrap {
     width: 100%;
     min-width: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .exam-hero-text h2,
@@ -5181,7 +5182,8 @@ select:focus,
 }
 
 .exam-title-wrap {
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
 }
 
 .exam-title-button,
@@ -5345,6 +5347,13 @@ select:focus,
   .mobile-indicator,
   .exam-footer {
     background: rgba(12, 12, 12, 0.96);
+  }
+}
+
+@media (min-width: 981px) {
+  .nav-menu-toggle,
+  .nav-menu-pages {
+    display: none;
   }
 }
 
