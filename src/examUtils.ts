@@ -27,17 +27,6 @@ const SECTION_QUESTION_LIMITS: Record<string, Record<string, number>> = {
     "section-4": 10,
     "section-5-merged-pat-fundamentals": 10,
   },
-  "initial-verification": {
-    "section-1": 5,
-    "section-2": 5,
-    "section-3": 5,
-    "section-4-practice": 5,
-    "section-4": 5,
-    "section-5": 5,
-    "section-6": 5,
-    "section-7-merged-testing-calculations": 5,
-    "section-8-2391-mock": 40,
-  },
   "periodic-inspection": {
     "section-1": 8,
     "section-2": 8,
@@ -79,10 +68,12 @@ const SOURCE_MOCK_SECTION_BY_EXAM: Record<string, string> = {
   "building-regulations": "section-6-electrician-training-part-p-mock",
   "18th-edition": "section-7-electrician-training-18th-mock",
   "pat-testing": "section-6-electrician-training-pat-mock",
-  "initial-verification": "section-8-2391-mock",
   "am2-installation-assessment": "section-8-electrician-training-am2-mock",
 };
-const SOURCE_MOCK_SECTION_IDS = new Set(Object.values(SOURCE_MOCK_SECTION_BY_EXAM));
+const SOURCE_MOCK_SECTION_IDS = new Set([
+  ...Object.values(SOURCE_MOCK_SECTION_BY_EXAM),
+  "section-8-2391-mock",
+]);
 
 const DISTRACTOR_REPLACEMENTS: Record<string, string> = {
   "A customer invoice and photographs only": "A commissioning checklist with photographs but no test schedule",
@@ -314,10 +305,6 @@ function getServedSections(exam: Exam, variantIndex: number): ExamSection[] {
   );
 }
 
-function getEffectiveVariantIndex(sectionId: string, variantIndex: number): number {
-  return SOURCE_MOCK_SECTION_IDS.has(sectionId) ? 0 : variantIndex;
-}
-
 export function getActiveVariantIndex(attemptCount: number, exam: Exam): number {
   const variantCount = exam.sections[0]?.variants.length ?? 1;
   if (variantCount <= 0) return 0;
@@ -328,8 +315,7 @@ export function getQuestionsForVariant(exam: Exam, variantIndex: number): ExamQu
   const result: ExamQuestion[] = [];
   let n = 1;
   for (const section of getServedSections(exam, variantIndex)) {
-    const effectiveVariantIndex = getEffectiveVariantIndex(section.id, variantIndex);
-    const variant = section.variants[effectiveVariantIndex % section.variants.length];
+    const variant = section.variants[variantIndex % section.variants.length];
     if (!variant) continue;
     for (const q of selectHardestQuestions(exam.id, section.id, variant.questions)) {
       result.push({ ...prepareQuestionForDelivery(exam.id, section.id, variantIndex, q), number: n });
@@ -346,8 +332,7 @@ export function getSectionQuestionsForVariant(
   const result: Array<{ section: ExamSection; questions: ExamQuestion[] }> = [];
   let n = 1;
   for (const section of getServedSections(exam, variantIndex)) {
-    const effectiveVariantIndex = getEffectiveVariantIndex(section.id, variantIndex);
-    const variant = section.variants[effectiveVariantIndex % section.variants.length];
+    const variant = section.variants[variantIndex % section.variants.length];
     if (!variant) continue;
     const selected = selectHardestQuestions(exam.id, section.id, variant.questions);
     const numbered = selected.map((q) => {
@@ -365,8 +350,7 @@ export function getSectionQuestionsForVariant(
 
 export function countQuestionsForVariant(exam: Exam, variantIndex: number): number {
   return getServedSections(exam, variantIndex).reduce((sum, section) => {
-    const effectiveVariantIndex = getEffectiveVariantIndex(section.id, variantIndex);
-    const v = section.variants[effectiveVariantIndex % section.variants.length];
+    const v = section.variants[variantIndex % section.variants.length];
     if (!v) return sum;
     return sum + selectHardestQuestions(exam.id, section.id, v.questions).length;
   }, 0);
