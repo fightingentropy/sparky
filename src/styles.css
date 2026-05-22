@@ -24,8 +24,8 @@
   --radius-md: 0;
   --radius-sm: 0;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --font-ui: "Hedvig Letters Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-  --font-heading: "Hedvig Letters Serif", Georgia, "Times New Roman", serif;
+  --font-ui: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --font-heading: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
 }
 
 * {
@@ -47,6 +47,7 @@ body {
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
 }
 
 a,
@@ -162,7 +163,7 @@ a {
 h1, h2, h3 {
   margin: 0;
   font-family: var(--font-heading);
-  font-weight: 650;
+  font-weight: 620;
   letter-spacing: 0;
 }
 
