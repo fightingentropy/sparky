@@ -64,17 +64,17 @@ function makeExamEntry<T extends ExamAssetId>(id: T, title: string): ExamRegistr
 }
 
 export const EXAM_REGISTRY = [
+  makeExamEntry("ecs-health-safety", "ECS Health & Safety"),
   makeExamEntry("level-2-electrical-installation", "Level 2 Electrical Installation"),
   makeExamEntry("level-3-electrical-installation", "Level 3 Electrical Installation"),
-  makeExamEntry("building-regulations", "Building Regulations & Part P"),
   makeExamEntry("18th-edition", "18th Edition (BS 7671)"),
-  makeExamEntry("special-locations", "Special Locations"),
+  makeExamEntry("building-regulations", "Building Regulations & Part P"),
   makeExamEntry("pat-testing", "Pat Testing"),
-  makeExamEntry("initial-verification", "Initial Verification"),
-  makeExamEntry("inspection-design-2396", "Inspection & Design 2396"),
-  makeExamEntry("periodic-inspection", "Periodic Inspection & Condition Reporting"),
+  makeExamEntry("special-locations", "Special Locations"),
   makeExamEntry("am2-installation-assessment", "AM2 / AM2E — Installation Electrician EPA"),
-  makeExamEntry("ecs-health-safety", "ECS Health & Safety")
+  makeExamEntry("initial-verification", "Initial Verification"),
+  makeExamEntry("periodic-inspection", "Periodic Inspection & Condition Reporting"),
+  makeExamEntry("inspection-design-2396", "Inspection & Design 2396")
 ] as const satisfies readonly ExamRegistryEntry[];
 
 export const DEFAULT_EXAM_ID = EXAM_REGISTRY[0].id;
