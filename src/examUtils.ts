@@ -6,16 +6,16 @@ import type { Exam, ExamChoice, ExamQuestion, ExamSection } from "./exams/types"
 // the per-exam modules.
 const SECTION_QUESTION_LIMITS: Record<string, Record<string, number>> = {
   "periodic-inspection": {
-    "section-1": 8,
-    "section-2": 8,
-    "section-3": 8,
-    "section-4": 8,
-    "section-5-merged-periodic-earthing": 8,
-    "eicr-section-1": 8,
-    "eicr-section-2": 8,
-    "eicr-section-3": 8,
-    "eicr-section-4": 8,
-    "eicr-section-5-merged-observation-scenarios": 8,
+    "section-1": 4,
+    "section-2": 4,
+    "section-3": 4,
+    "section-4": 4,
+    "section-5-merged-periodic-earthing": 4,
+    "eicr-section-1": 4,
+    "eicr-section-2": 4,
+    "eicr-section-3": 4,
+    "eicr-section-4": 4,
+    "eicr-section-5-merged-observation-scenarios": 4,
   }
 };
 

@@ -36,7 +36,7 @@ const expectedPerAttempt: Record<string, number[]> = {
   "pat-testing": [50, 50, 50, 30],
   "initial-verification": [40, 40, 40, 40, 60, 90, 30, 30],
   "inspection-design-2396": [...repeat(30, 13), 18],
-  "periodic-inspection": repeat(80, 5),
+  "periodic-inspection": repeat(40, 5),
   "am2-installation-assessment": repeat(30, 2),
   "ecs-health-safety": [50, 50, 50, 49, 36, 16, 24, 28, 38, 27, 28, 32, 27, 40, 21]
 };
@@ -318,15 +318,15 @@ describe("exam data", () => {
     const exam = EXAMS.find((entry) => entry.id === "periodic-inspection");
     expect(exam).toBeDefined();
     const total = countQuestions(exam!);
-    expect(total).toBe(80);
+    expect(total).toBe(40);
 
-    expect(getScoringBand(exam!, 72, total).minScore).toBe(72);
-    expect(getScoringBand(exam!, 80, total).minScore).toBe(72);
-    expect(getScoringBand(exam!, 60, total).minScore).toBe(60);
-    expect(getScoringBand(exam!, 71, total).minScore).toBe(60);
-    expect(getScoringBand(exam!, 44, total).minScore).toBe(44);
-    expect(getScoringBand(exam!, 59, total).minScore).toBe(44);
+    expect(getScoringBand(exam!, 36, total).minScore).toBe(36);
+    expect(getScoringBand(exam!, 40, total).minScore).toBe(36);
+    expect(getScoringBand(exam!, 30, total).minScore).toBe(30);
+    expect(getScoringBand(exam!, 35, total).minScore).toBe(30);
+    expect(getScoringBand(exam!, 22, total).minScore).toBe(22);
+    expect(getScoringBand(exam!, 29, total).minScore).toBe(22);
     expect(getScoringBand(exam!, 0, total).minScore).toBe(0);
-    expect(getScoringBand(exam!, 43, total).minScore).toBe(0);
+    expect(getScoringBand(exam!, 21, total).minScore).toBe(0);
   });
 });
