@@ -3093,6 +3093,39 @@ input:disabled {
   transition: transform 160ms var(--ease);
 }
 
+.exam-copy-full-btn {
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.exam-copy-full-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.exam-copy-full-btn--copied:not(:disabled) {
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.exam-copy-full-btn--copied .exam-copy-full-icon {
+  animation: exam-copy-icon-pop 260ms var(--ease);
+}
+
+.exam-copy-full-btn--failed:not(:disabled) {
+  color: #f87171;
+  border-color: rgba(239, 83, 80, 0.45);
+  background: rgba(239, 83, 80, 0.1);
+}
+
+.exam-copy-full-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
 @keyframes exam-copy-icon-pop {
   0% {
     transform: scale(0.92);
@@ -3896,6 +3929,16 @@ input:disabled {
     min-height: 32px;
     padding: 0 10px;
     font-size: 0.78rem;
+  }
+
+  .exam-copy-full-btn {
+    width: 32px;
+    min-width: 32px;
+    padding: 0;
+  }
+
+  .exam-copy-full-label {
+    display: none;
   }
 
   .exam-jump-btn {
