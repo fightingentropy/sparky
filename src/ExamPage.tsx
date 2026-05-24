@@ -56,7 +56,7 @@ const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
 
 type CopyState = "idle" | "copied" | "failed";
 
-function getQuestionClipboardText(question: ExamQuestion): string {
+function getQuestionClipboardText(question: ExamQuestion, includeAnswer = false): string {
   const imageLines = question.imageUrls?.length
     ? ["", ...question.imageUrls.map((url) => `Image: ${url}`)]
     : [];
@@ -66,7 +66,28 @@ function getQuestionClipboardText(question: ExamQuestion): string {
       ? `${letter}. ${question.options[letter]} (${imageUrl})`
       : `${letter}. ${question.options[letter]}`;
   });
-  return [`Q${question.number}`, question.prompt, ...imageLines, "", ...optionLines].join("\n");
+  const answerLines = includeAnswer
+    ? ["", `Answer: ${question.answer}. ${question.options[question.answer]}`]
+    : [];
+  return [`Q${question.number}`, question.prompt, ...imageLines, "", ...optionLines, ...answerLines].join("\n");
+}
+
+function getExamClipboardText(
+  exam: Exam,
+  sectionGroups: Array<{ section: Exam["sections"][number]; questions: ExamQuestion[] }>,
+  variantIndex: number
+): string {
+  const header = [
+    exam.title,
+    exam.subtitle,
+    `Format: ${exam.format}`,
+    `Test: ${variantIndex + 1}`
+  ];
+  const sectionBlocks = sectionGroups.map(({ section, questions }) =>
+    [section.title, ...questions.map((question) => getQuestionClipboardText(question, true))].join("\n\n")
+  );
+
+  return [...header, ...sectionBlocks].join("\n\n");
 }
 
 async function writeClipboardText(text: string): Promise<void> {
@@ -264,11 +285,26 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
   const [reviewSectionId, setReviewSectionId] = useState("all");
   const [retryQuestionNumbers, setRetryQuestionNumbers] = useState<number[] | null>(null);
+  const [examCopyState, setExamCopyState] = useState<CopyState>("idle");
+  const examCopyTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (examCopyTimeoutRef.current !== null) {
+        window.clearTimeout(examCopyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setReviewFilter("all");
     setReviewSectionId("all");
     setRetryQuestionNumbers(null);
+    setExamCopyState("idle");
+    if (examCopyTimeoutRef.current !== null) {
+      window.clearTimeout(examCopyTimeoutRef.current);
+      examCopyTimeoutRef.current = null;
+    }
   }, [selectedExamEntry.id, variantIndex]);
 
   const syncedForUserRef = useRef<string | null>(null);
@@ -511,6 +547,66 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     }
   }
 
+  async function copyFullExam() {
+    if (!exam) return;
+    if (examCopyTimeoutRef.current !== null) {
+      window.clearTimeout(examCopyTimeoutRef.current);
+    }
+
+    try {
+      await writeClipboardText(getExamClipboardText(exam, sectionGroups, variantIndex));
+      setExamCopyState("copied");
+      examCopyTimeoutRef.current = window.setTimeout(() => {
+        setExamCopyState("idle");
+        examCopyTimeoutRef.current = null;
+      }, 1400);
+    } catch {
+      setExamCopyState("failed");
+      examCopyTimeoutRef.current = window.setTimeout(() => {
+        setExamCopyState("idle");
+        examCopyTimeoutRef.current = null;
+      }, 2000);
+    }
+  }
+
+  const examCopyLabel =
+    examCopyState === "copied"
+      ? "Copied full exam"
+      : examCopyState === "failed"
+        ? "Copy full exam failed"
+        : "Copy full exam with answers";
+  const examCopyButtonText =
+    examCopyState === "copied" ? "Copied" : examCopyState === "failed" ? "Copy failed" : "Copy full exam";
+  const fullExamCopyButton = (
+    <button
+      type="button"
+      className={`ghost-button exam-copy-full-btn exam-copy-full-btn--${examCopyState}`}
+      onClick={copyFullExam}
+      disabled={!exam}
+      aria-label={examCopyLabel}
+      title={examCopyLabel}
+    >
+      <span className="sr-only" aria-live="polite">{examCopyLabel}</span>
+      <span className="exam-copy-full-icon" aria-hidden="true">
+        {examCopyState === "copied" ? (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12.5l4.4 4.4L19 7.3" />
+          </svg>
+        ) : examCopyState === "failed" ? (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 7l10 10M17 7L7 17" />
+          </svg>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="9" y="9" width="10" height="10" rx="2" />
+            <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+          </svg>
+        )}
+      </span>
+      <span className="exam-copy-full-label" aria-hidden="true">{examCopyButtonText}</span>
+    </button>
+  );
+
   return (
     <section className={`page page-exams ${isActive ? "is-active" : ""}`}>
       <div className="exam-shell">
@@ -735,19 +831,22 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                   </button>
                 )}
               </div>
-              {retryQuestionNumbers ? (
-                <button type="button" className="ghost-button" onClick={exitRetryMode}>
-                  Exit retry
+              <div className="exam-footer-actions">
+                {fullExamCopyButton}
+                {retryQuestionNumbers ? (
+                  <button type="button" className="ghost-button" onClick={exitRetryMode}>
+                    Exit retry
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className="exam-submit-btn"
+                  onClick={handleSubmit}
+                  disabled={!exam || answeredCount === 0}
+                >
+                  Submit exam
                 </button>
-              ) : null}
-              <button
-                type="button"
-                className="exam-submit-btn"
-                onClick={handleSubmit}
-                disabled={!exam || answeredCount === 0}
-              >
-                Submit exam
-              </button>
+              </div>
             </>
           ) : (
             <>
@@ -757,6 +856,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                 </span>
               </div>
               <div className="exam-footer-actions">
+                {fullExamCopyButton}
                 <button
                   type="button"
                   className="ghost-button"
