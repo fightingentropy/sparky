@@ -2130,7 +2130,7 @@ input:disabled {
     border-radius: 0;
     background: var(--bg);
     width: 100%;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 104px);
+    padding-bottom: calc(34px + max(env(safe-area-inset-bottom) - 18px, 8px));
   }
 
   .page-home.is-active .tool-panel .tool-output {
@@ -2144,11 +2144,11 @@ input:disabled {
     right: 0;
     bottom: 0;
     left: 0;
-    gap: 6px;
+    gap: 4px;
     padding:
-      6px
+      2px
       calc(env(safe-area-inset-right) + 10px)
-      max(env(safe-area-inset-bottom) - 22px, 6px)
+      max(env(safe-area-inset-bottom) - 18px, 8px)
       calc(env(safe-area-inset-left) + 10px);
     background: rgba(5, 5, 5, 0.94);
     backdrop-filter: blur(16px) saturate(1.3);
@@ -2157,8 +2157,19 @@ input:disabled {
     z-index: 30;
   }
 
+  .mobile-nav-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .mobile-nav-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
   .mobile-dots {
     flex: 1;
+    padding: 0;
   }
 
   /* Mobile topbar */
