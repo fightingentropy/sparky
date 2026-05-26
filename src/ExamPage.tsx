@@ -35,7 +35,7 @@ const REVIEW_FILTER_LABELS: Record<ReviewFilter, string> = {
   unanswered: "Unanswered",
   correct: "Correct"
 };
-const EXAM_STORAGE_VERSION = "2026-05-trimmed-merged-inspection-exams";
+const EXAM_STORAGE_VERSION = "2026-05-source-matched-2391-mocks";
 const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
 const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
 const EXAM_VARIANT_STORAGE_PREFIX = `exam-variant-${EXAM_STORAGE_VERSION}-`;
@@ -47,7 +47,7 @@ const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
   "18th-edition": Date.UTC(2026, 4, 22, 19, 36),
   "special-locations": Date.UTC(2026, 4, 22, 19, 36),
   "pat-testing": Date.UTC(2026, 4, 22, 19, 36),
-  "initial-verification": Date.UTC(2026, 4, 22, 19, 36),
+  "initial-verification": Date.UTC(2026, 4, 26, 20, 37),
   "inspection-design-2396": Date.UTC(2026, 4, 22, 19, 36),
   "periodic-inspection": Date.UTC(2026, 4, 22, 19, 49),
   "am2-installation-assessment": Date.UTC(2026, 4, 22, 19, 36),
