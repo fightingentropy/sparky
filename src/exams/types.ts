@@ -8,6 +8,7 @@ export type ExamQuestion = {
   optionImageUrls?: Partial<Record<ExamChoice, string>>;
   answer: ExamChoice;
   explanation: string;
+  preserveChoices?: boolean;
 };
 
 export type ExamVariant = {

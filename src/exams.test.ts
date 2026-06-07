@@ -270,6 +270,21 @@ describe("exam data", () => {
     }
   });
 
+  it("serves the curated periodic inspection condition reporting paper", () => {
+    const exam = EXAMS.find((entry) => entry.id === "periodic-inspection");
+    expect(exam).toBeDefined();
+    const questions = getQuestionsForVariant(exam!, 0);
+    expect(getVariantCount(exam!)).toBe(5);
+    expect(questions).toHaveLength(40);
+    expect(questions[0].prompt).toBe(
+      "If an EICR for a rented dwelling identifies a C1 or C2 item, or requires further investigation, the landlord under the 2020 private rented sector electrical safety duties must normally arrange the required remedial or investigative work within:"
+    );
+    expect(questions[39].prompt).toBe(
+      "In a block of flats, several consumer-unit and distribution-board cable entries pass through a fire-resisting wall into a common escape route. Gaps around trunking and cables are unsealed. No thermal damage is present. What is the best classification?"
+    );
+    expect(questions.map((question) => question.answer).join("")).toBe("CACBDBABCDCADCCACBCADBACDBCADCABDCABDCAB");
+  });
+
   it("keeps served distractors plausible in generated inspection categories", () => {
     const weakDistractorPattern =
       /\b(only|always|never|verbal|customer invoice|lunch|DNO|skip|assume|trust|no further action|nothing|no paperwork|satisfactory only|FI only|C3 only|all good)\b/i;
@@ -278,6 +293,7 @@ describe("exam data", () => {
     expect(exam).toBeDefined();
     for (let v = 0; v < getVariantCount(exam!); v += 1) {
       for (const question of getQuestionsForVariant(exam!, v)) {
+        if (question.preserveChoices) continue;
         for (const [letter, option] of Object.entries(question.options)) {
           if (letter === question.answer) continue;
           expect(option).not.toMatch(weakDistractorPattern);

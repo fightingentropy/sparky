@@ -40,6 +40,7 @@ const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
 const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
 const EXAM_VARIANT_STORAGE_PREFIX = `exam-variant-${EXAM_STORAGE_VERSION}-`;
 const EXAM_UPDATED_STORAGE_PREFIX = `exam-updated-${EXAM_STORAGE_VERSION}-`;
+const PERIODIC_INSPECTION_RESET_AT = Date.UTC(2026, 5, 7, 0, 0);
 const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
   "level-2-electrical-installation": Date.UTC(2026, 4, 26, 21, 1),
   "level-3-electrical-installation": Date.UTC(2026, 4, 26, 21, 1),
@@ -49,9 +50,12 @@ const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
   "pat-testing": Date.UTC(2026, 4, 26, 21, 1),
   "initial-verification": Date.UTC(2026, 4, 26, 21, 1),
   "inspection-design-2396": Date.UTC(2026, 4, 26, 21, 1),
-  "periodic-inspection": Date.UTC(2026, 4, 22, 19, 49),
+  "periodic-inspection": PERIODIC_INSPECTION_RESET_AT,
   "am2-installation-assessment": Date.UTC(2026, 4, 26, 21, 1),
   "ecs-health-safety": Date.UTC(2026, 4, 26, 21, 1)
+};
+const EXAM_LOCAL_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
+  "periodic-inspection": PERIODIC_INSPECTION_RESET_AT
 };
 
 type CopyState = "idle" | "copied" | "failed";
@@ -182,6 +186,22 @@ function clearStaleExamProgress() {
         key.startsWith("exam-updated-");
       if (isExamProgressKey && !validStorageKeys.has(key)) {
         localStorage.removeItem(key);
+      }
+    }
+
+    for (const [examId, resetAt] of Object.entries(EXAM_LOCAL_PROGRESS_RESET_AT)) {
+      if (!resetAt || !isKnownExamId(examId)) continue;
+      const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`;
+      const submittedKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`;
+      const variantKey = `${EXAM_VARIANT_STORAGE_PREFIX}${examId}`;
+      const updatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${examId}`;
+      const hasLocalProgress = localStorage.getItem(answersKey) !== null || localStorage.getItem(submittedKey) !== null;
+      const localUpdatedAt = Number(localStorage.getItem(updatedKey)) || 0;
+      if (hasLocalProgress && localUpdatedAt < resetAt) {
+        localStorage.removeItem(answersKey);
+        localStorage.removeItem(submittedKey);
+        localStorage.removeItem(variantKey);
+        localStorage.removeItem(updatedKey);
       }
     }
   } catch {}
@@ -378,12 +398,12 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   }, [user]);
   const syncToServer = useCallback(
     (nextAnswers: Answers, nextSubmitted: boolean) => {
-      if (!user) return;
-      pendingSaveRef.current = { examId: selectedExamEntry.id, answers: nextAnswers, submitted: nextSubmitted };
       try {
         const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${selectedExamEntry.id}`;
         localStorage.setItem(localUpdatedKey, String(Date.now()));
       } catch {}
+      if (!user) return;
+      pendingSaveRef.current = { examId: selectedExamEntry.id, answers: nextAnswers, submitted: nextSubmitted };
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(flushSave, 1000);
     },

@@ -224,6 +224,7 @@ function prepareQuestionForDelivery(
   question: ExamQuestion
 ): ExamQuestion {
   if (SOURCE_MOCK_SECTION_IDS.has(sectionId)) return question;
+  if (question.preserveChoices) return question;
   if (!HARDENED_EXAM_IDS.has(examId)) return question;
 
   const hardenedOptions = { ...question.options };
