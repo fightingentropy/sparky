@@ -1,6 +1,11 @@
 // ── Constants ──────────────────────────────────────────
 export const EPSILON = 1e-9;
-export const COPPER_RESISTIVITY = 0.0175;
+// Copper resistivity used for voltage drop, in Ω·mm²/m. BS 7671 tabulated
+// mV/A/m values are quoted at the conductor's 70 °C operating temperature
+// (not 20 °C), so we use ≈0.022 rather than the 20 °C figure of 0.0175. This
+// reproduces the tabulated single-phase mV/A/m the app's own cheat sheet shows
+// (1.0mm²≈44, 2.5mm²≈18, 10mm²≈4.4, …); 0.0175 understates drop by ~22%.
+export const COPPER_RESISTIVITY = 0.022;
 export const STANDARD_BREAKERS = [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100];
 
 export type ContainmentWidth = number | { nominal: number; actual: number };
@@ -179,7 +184,7 @@ export const formulas = {
   power:
     "Single-phase: P = V x I x PF\nThree-phase: P = sqrt(3) x V x I x PF",
   vdrop:
-    "Single-phase: Vd = 2 x I x L x rho / A\nThree-phase: Vd = sqrt(3) x I x L x rho / A\nrho = 0.0175 (copper)",
+    "Single-phase: Vd = 2 x I x L x rho / A\nThree-phase: Vd = sqrt(3) x I x L x rho / A\nrho = 0.022 (copper at 70°C operating temp, per BS 7671 mV/A/m)",
   breaker:
     "Design current rounded up to next standard breaker size\nSizes: 6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100 A",
   conduit:
@@ -634,7 +639,7 @@ export function calcBreaker(
     nextIndex === -1
       ? `Over ${breakerSize} A`
       : nextIndex > 0
-        ? `${lowerSize} A to ${breakerSize} A`
+        ? `Over ${lowerSize} A to ${breakerSize} A`
         : `Up to ${breakerSize} A`;
 
   return {

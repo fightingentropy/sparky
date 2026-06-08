@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Suspense, lazy, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   CONTAINMENT_OPTIONS,
   DEFAULT_CONTAINMENT_ROD_VALUES,
@@ -26,6 +26,8 @@ import {
 import { usePersistedState } from "./usePersistedState";
 import { useHistory } from "./useHistory";
 import { useFocusTrap } from "./useFocusTrap";
+import { writeClipboardText } from "./clipboard";
+import { isBoolean } from "./validators";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
 import {
@@ -37,10 +39,14 @@ import type { ExamId } from "./examRegistry";
 // chunks are fetched the first time the user navigates to each page and the
 // component stays mounted thereafter (so per-page state is preserved across
 // navigation, same as before the split).
-const ExamPage = lazy(() => import("./ExamPage").then((m) => ({ default: m.ExamPage })));
-const LearningPage = lazy(() => import("./LearningPage").then((m) => ({ default: m.LearningPage })));
-const TutorialsPage = lazy(() => import("./TutorialsPage").then((m) => ({ default: m.TutorialsPage })));
-const InteractivePage = lazy(() => import("./InteractivePage").then((m) => ({ default: m.InteractivePage })));
+// memo() so a calculator keystroke (which re-renders the big App component)
+// doesn't reconcile these heavy, already-mounted pages when their props are
+// unchanged. Their props are referentially stable across keystrokes (isActive
+// is a boolean; the navigation callbacks below are useCallback'd).
+const ExamPage = memo(lazy(() => import("./ExamPage").then((m) => ({ default: m.ExamPage }))));
+const LearningPage = memo(lazy(() => import("./LearningPage").then((m) => ({ default: m.LearningPage }))));
+const TutorialsPage = memo(lazy(() => import("./TutorialsPage").then((m) => ({ default: m.TutorialsPage }))));
+const InteractivePage = memo(lazy(() => import("./InteractivePage").then((m) => ({ default: m.InteractivePage }))));
 import { TUTORIALS } from "./tutorials";
 import { COURSE_GUIDES, GUIDE_CATEGORY_LABELS } from "./courseGuides";
 import { useAuth } from "./AuthContext";
@@ -1087,10 +1093,6 @@ function isOneOf<T extends string>(options: readonly T[], value: unknown): value
   return typeof value === "string" && options.includes(value as T);
 }
 
-function isBoolean(value: unknown): value is boolean {
-  return typeof value === "boolean";
-}
-
 function isAngleUnit(value: unknown): value is AngleUnit {
   return isOneOf(ANGLE_UNITS, value);
 }
@@ -1337,7 +1339,10 @@ export default function App() {
     setUnistrutCountInput(String(unistrutContainments.length));
   }, [unistrutContainments.length]);
 
-  function navigateTo(nextPage: PageId, targetId?: string) {
+  // useCallback so the page components below stay referentially stable as
+  // props and their React.memo wrappers can skip re-renders. Only stable
+  // setters / module-scope helpers are referenced, so the deps are empty.
+  const navigateTo = useCallback((nextPage: PageId, targetId?: string) => {
     window.history.pushState(null, "", getPageHref(nextPage));
     setPage(nextPage);
 
@@ -1349,12 +1354,17 @@ export default function App() {
         });
       }, 50);
     }
-  }
+  }, []);
 
-  function openPracticeExam(examId: ExamId) {
-    setExamPracticeTarget({ examId, nonce: Date.now() });
-    navigateTo("exams");
-  }
+  const openPracticeExam = useCallback(
+    (examId: ExamId) => {
+      setExamPracticeTarget({ examId, nonce: Date.now() });
+      navigateTo("exams");
+    },
+    [navigateTo]
+  );
+
+  const handleOpenNote = useCallback((noteId: string) => navigateTo("cheatsheet", noteId), [navigateTo]);
 
   function scrollToTool(index: number) {
     const grid = toolGridRef.current;
@@ -1945,7 +1955,7 @@ export default function App() {
     const text = [section.title, section.summary, ...section.items, ...legendLabels, ...tableBlocks].join("\n");
 
     try {
-      await navigator.clipboard.writeText(text);
+      await writeClipboardText(text);
       setCopiedSectionId(section.id);
       if (copiedSectionTimeoutRef.current !== null) {
         window.clearTimeout(copiedSectionTimeoutRef.current);
@@ -3588,7 +3598,7 @@ export default function App() {
             <LearningPage
               isActive={page === "learn"}
               onOpenExam={openPracticeExam}
-              onOpenNote={(noteId) => navigateTo("cheatsheet", noteId)}
+              onOpenNote={handleOpenNote}
             />
           ) : null}
           {visitedPages.has("exams") ? <ExamPage isActive={page === "exams"} practiceTarget={examPracticeTarget} /> : null}

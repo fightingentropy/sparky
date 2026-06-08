@@ -31,10 +31,44 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,svg,png,ico,webmanifest,json}"],
+        // Precache the app shell only. The heavy three.js chunks and per-exam
+        // JSON are deliberately lazy-loaded at runtime, so we exclude them from
+        // the install-time precache and cache them on first actual use via
+        // runtimeCaching below. Precaching everything (the old `json` glob plus
+        // the react-three chunks) inflated the install payload to ~3.3 MB and
+        // defeated the lazy-load architecture.
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,webmanifest}"],
+        globIgnores: [
+          "assets/react-three-*.js",
+          "assets/three-core-*.js",
+          "assets/three-examples-*.js",
+          // Build source for maskable-512.png — never referenced at runtime.
+          "icons/maskable.svg"
+        ],
         navigateFallback: "/index.html",
         cleanupOutdatedCaches: true,
-        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+        runtimeCaching: [
+          {
+            // Per-exam content fetched on demand (examRegistry.ts). Hashed
+            // filenames make CacheFirst safe — a new build is a new URL.
+            urlPattern: /\/assets\/.*\.json$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "exam-data",
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 60 }
+            }
+          },
+          {
+            // Heavy three.js / @react-three chunks for the 3D trainer pages.
+            urlPattern: /\/assets\/(react-three|three-core|three-examples)-.*\.js$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "three-chunks",
+              expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 60 }
+            }
+          }
+        ]
       },
       devOptions: {
         enabled: true,

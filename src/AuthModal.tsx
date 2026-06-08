@@ -54,7 +54,7 @@ export function AuthModal({ open, onClose }: Props) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="auth-modal" ref={trapRef} role="dialog" aria-modal="true" aria-label={mode === "login" ? "Log in" : "Create account"} onClick={(e) => e.stopPropagation()}>
+      <div className="auth-modal" ref={trapRef} role="dialog" aria-modal="true" aria-label={mode === "login" ? "Log in" : "Create account"} tabIndex={-1} onClick={(e) => e.stopPropagation()}>
         <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
         </button>
@@ -66,7 +66,7 @@ export function AuthModal({ open, onClose }: Props) {
           </label>
           <label className="auth-field">
             <span>Password</span>
-            <input type="password" required autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === "signup" ? "At least 6 characters" : ""} />
+            <input type="password" required autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === "signup" ? "At least 8 characters" : ""} />
           </label>
           {error ? <p className="auth-error">{error}</p> : null}
           <button type="submit" className="auth-submit" disabled={submitting}>

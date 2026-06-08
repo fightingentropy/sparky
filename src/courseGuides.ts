@@ -727,5 +727,3 @@ export const COURSE_GUIDES: CourseGuide[] = [
     ]
   }
 ];
-
-export const GUIDE_SOURCE_URLS = Array.from(new Set(COURSE_GUIDES.map((guide) => guide.sourceUrl)));

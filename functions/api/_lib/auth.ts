@@ -27,11 +27,11 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function isValidPassword(password: string): boolean {
-  return typeof password === "string" && password.length >= 6 && password.length <= 128;
+  return typeof password === "string" && password.length >= 8 && password.length <= 128;
 }
 
-// Allowed exam IDs. Mirror of EXAMS in src/exams.ts. Kept here so the server
-// can reject unknown examIds without importing client code.
+// Allowed exam IDs. Mirror of EXAM_REGISTRY in src/examRegistry.ts. Kept here
+// so the server can reject unknown examIds without importing client code.
 export const VALID_EXAM_IDS = new Set([
   "level-2-electrical-installation",
   "level-3-electrical-installation",

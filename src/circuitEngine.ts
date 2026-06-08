@@ -331,14 +331,13 @@ export function lampBrightness(current: number, ratedCurrent = 0.2): number {
   return Math.min(1, Math.sqrt(ratio));
 }
 
-export function terminalOffsetsFor(type: ComponentType): [{ x: number; y: number }, { x: number; y: number }] {
-  return [
-    { x: -32, y: 0 },
-    { x: 32, y: 0 }
-  ];
-}
+// All component types currently use the same horizontal ±32 terminal layout.
+const TERMINAL_OFFSETS: [{ x: number; y: number }, { x: number; y: number }] = [
+  { x: -32, y: 0 },
+  { x: 32, y: 0 }
+];
 
-export function rotatePoint(
+function rotatePoint(
   p: { x: number; y: number },
   rotation: 0 | 90 | 180 | 270
 ): { x: number; y: number } {
@@ -358,7 +357,7 @@ export function terminalWorldPosition(
   c: CircuitComponent,
   terminal: 0 | 1
 ): { x: number; y: number } {
-  const [t0, t1] = terminalOffsetsFor(c.type);
+  const [t0, t1] = TERMINAL_OFFSETS;
   const local = terminal === 0 ? t0 : t1;
   const rotated = rotatePoint(local, c.rotation);
   return { x: c.x + rotated.x, y: c.y + rotated.y };

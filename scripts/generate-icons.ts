@@ -19,9 +19,10 @@ async function render(svgPath: string, outPath: string, size: number) {
 const iconSvg = join(iconsDir, "icon.svg");
 const maskableSvg = join(iconsDir, "maskable.svg");
 
+// Only the variants actually referenced by index.html / the PWA manifest are
+// generated. icon.png (dup of icon-512) and maskable.png (dup of maskable-512)
+// were unreferenced and are no longer emitted.
 await render(iconSvg, join(iconsDir, "icon-192.png"), 192);
 await render(iconSvg, join(iconsDir, "icon-512.png"), 512);
-await render(iconSvg, join(iconsDir, "icon.png"), 512);
 await render(iconSvg, join(iconsDir, "apple-touch-icon.png"), 180);
 await render(maskableSvg, join(iconsDir, "maskable-512.png"), 512);
-await render(maskableSvg, join(iconsDir, "maskable.png"), 512);

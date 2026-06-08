@@ -7,21 +7,26 @@ export const onRequestPut: PagesFunction<Env> = async ({ request, env, params })
   const examId = Array.isArray(params.examId) ? params.examId[0] : params.examId;
   if (!examId || !VALID_EXAM_IDS.has(examId)) return json({ error: "Unknown exam" }, 400);
 
-  const body = await readJsonBody<{ answers?: unknown; submitted?: unknown }>(request);
+  const body = await readJsonBody<{ answers?: unknown; submitted?: unknown; attemptCount?: unknown }>(request);
   if (!body) return json({ error: "Invalid JSON body" }, 400);
 
   const validated = validateAnswers(body.answers);
   if (!validated.ok) return json({ error: validated.error }, 400);
   const submitted = body.submitted === true ? 1 : 0;
+  // Bound the attempt count to a sane integer range (older clients omit it).
+  const attemptCount =
+    typeof body.attemptCount === "number" && Number.isInteger(body.attemptCount) && body.attemptCount >= 0
+      ? Math.min(body.attemptCount, 1_000_000)
+      : 0;
 
   const answersJson = JSON.stringify(validated.value);
 
   await env.DB.prepare(
-    `INSERT INTO exam_progress (user_id, exam_id, answers, submitted, updated_at)
-     VALUES (?, ?, ?, ?, datetime('now'))
-     ON CONFLICT(user_id, exam_id) DO UPDATE SET answers = ?, submitted = ?, updated_at = datetime('now')`
+    `INSERT INTO exam_progress (user_id, exam_id, answers, submitted, attempt_count, updated_at)
+     VALUES (?, ?, ?, ?, ?, datetime('now'))
+     ON CONFLICT(user_id, exam_id) DO UPDATE SET answers = ?, submitted = ?, attempt_count = ?, updated_at = datetime('now')`
   )
-    .bind(user.id, examId, answersJson, submitted, answersJson, submitted)
+    .bind(user.id, examId, answersJson, submitted, attemptCount, answersJson, submitted, attemptCount)
     .run();
 
   return json({ ok: true });

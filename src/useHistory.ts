@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
 export type HistoryEntry = {
-  id: number;
+  id: string;
   tool: string;
   label: string;
   value: string;
@@ -11,16 +11,22 @@ export type HistoryEntry = {
 const MAX_ENTRIES = 30;
 const STORAGE_KEY = "sparky-history";
 
-let nextId = 1;
+// Globally-unique id, computed outside the setState updater so the updater
+// stays pure (a module-global `nextId++` inside it advanced twice under
+// StrictMode and could mint the same id in two tabs, producing duplicate React
+// keys). Falls back when crypto.randomUUID is unavailable (insecure context).
+function newEntryId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  }
+}
 
 function loadHistory(): HistoryEntry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    const entries = raw ? (JSON.parse(raw) as HistoryEntry[]) : [];
-    for (const e of entries) {
-      if (e.id >= nextId) nextId = e.id + 1;
-    }
-    return entries;
+    return raw ? (JSON.parse(raw) as HistoryEntry[]) : [];
   } catch {
     return [];
   }
@@ -39,8 +45,8 @@ export function useHistory() {
 
   const addEntry = useCallback((tool: string, label: string, value: string) => {
     if (value.startsWith("--")) return;
+    const entry: HistoryEntry = { id: newEntryId(), tool, label, value, timestamp: Date.now() };
     setEntries((prev) => {
-      const entry: HistoryEntry = { id: nextId++, tool, label, value, timestamp: Date.now() };
       const next = [entry, ...prev.filter((e) => !(e.tool === tool && e.label === label && e.value === value))].slice(0, MAX_ENTRIES);
       saveHistory(next);
       return next;

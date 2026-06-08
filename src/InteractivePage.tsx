@@ -43,7 +43,6 @@ type DragState = {
   componentId: string;
   pointerOffsetX: number;
   pointerOffsetY: number;
-  moved: boolean;
 } | null;
 
 type PendingWire = {
@@ -459,16 +458,19 @@ export function InteractivePage({ isActive }: Props) {
     dragRef.current = {
       componentId: c.id,
       pointerOffsetX: p.x - c.x,
-      pointerOffsetY: p.y - c.y,
-      moved: false
+      pointerOffsetY: p.y - c.y
     };
     (e.currentTarget as Element).setPointerCapture(e.pointerId);
   }
 
   function handlePointerMove(e: ReactPointerEvent) {
-    const p = svgPoint(e);
-    setPointerPos(p);
     const d = dragRef.current;
+    // pointerPos only drives the pending-wire rubber-band line. Skip the state
+    // update (and the resulting full SVG re-render) on idle mouse moves when
+    // nothing is being dragged and no wire is pending.
+    if (!d && !pendingWire) return;
+    const p = svgPoint(e);
+    if (pendingWire) setPointerPos(p);
     if (!d) return;
     setCircuit((c) => ({
       ...c,
@@ -478,9 +480,6 @@ export function InteractivePage({ isActive }: Props) {
           : cm
       )
     }));
-    if (Math.abs(p.x - d.pointerOffsetX) > 1 || Math.abs(p.y - d.pointerOffsetY) > 1) {
-      d.moved = true;
-    }
   }
 
   function handlePointerUp(e: ReactPointerEvent) {
@@ -589,7 +588,7 @@ export function InteractivePage({ isActive }: Props) {
       {tab === "panel" ? (
         <div className="ix-3d-wrap">
           <Suspense fallback={<div className="ix-panel-loading" role="status">Loading panel trainer...</div>}>
-            <PanelTrainer />
+            <PanelTrainer active={isActive} />
           </Suspense>
         </div>
       ) : null}

@@ -25,6 +25,14 @@ export function useFocusTrap<T extends HTMLElement>(isOpen: boolean): RefObject<
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
+    // Ensure the container is programmatically focusable for the whole time the
+    // trap is open. Calling .focus() on an element without a tabindex is a
+    // silent no-op, which would let focus escape the dialog when it has no
+    // focusable children (or they all become disabled). We add tabindex=-1 if
+    // the caller didn't, and remove it again on cleanup.
+    const hadTabIndex = container.hasAttribute("tabindex");
+    if (!hadTabIndex) container.tabIndex = -1;
+
     const focusables = getFocusable(container);
     const initial = focusables[0] ?? container;
     initial.focus();
@@ -58,6 +66,7 @@ export function useFocusTrap<T extends HTMLElement>(isOpen: boolean): RefObject<
 
     return () => {
       container.removeEventListener("keydown", onKeyDown);
+      if (!hadTabIndex) container.removeAttribute("tabindex");
       if (previouslyFocused && typeof previouslyFocused.focus === "function") {
         previouslyFocused.focus();
       }

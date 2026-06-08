@@ -23,6 +23,8 @@ import {
 import { usePersistedState } from "./usePersistedState";
 import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
+import { writeClipboardText } from "./clipboard";
+import { isBoolean } from "./validators";
 
 type Answers = Record<number, ExamChoice>;
 type ReviewFilter = "all" | "missed" | "wrong" | "unanswered" | "correct";
@@ -94,38 +96,6 @@ function getExamClipboardText(
   return [...header, ...sectionBlocks].join("\n\n");
 }
 
-async function writeClipboardText(text: string): Promise<void> {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const textarea = document.createElement("textarea");
-  const selection = document.getSelection();
-  const selectedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "fixed";
-  textarea.style.left = "-9999px";
-  textarea.style.top = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-  textarea.setSelectionRange(0, textarea.value.length);
-
-  try {
-    if (!document.execCommand("copy")) {
-      throw new Error("Copy command failed");
-    }
-  } finally {
-    document.body.removeChild(textarea);
-    if (selection && selectedRange) {
-      selection.removeAllRanges();
-      selection.addRange(selectedRange);
-    }
-  }
-}
-
 function isExamChoice(value: unknown): value is ExamChoice {
   return typeof value === "string" && (LETTERS as string[]).includes(value);
 }
@@ -136,14 +106,6 @@ function isAnswers(value: unknown): value is Answers {
   return Object.entries(value).every(
     ([questionNumber, answer]) => Number.isInteger(Number(questionNumber)) && isExamChoice(answer)
   );
-}
-
-function isExamId(value: unknown): value is string {
-  return isKnownExamId(value);
-}
-
-function isBoolean(value: unknown): value is boolean {
-  return typeof value === "boolean";
 }
 
 function isNonNegativeInt(value: unknown): value is number {
@@ -255,7 +217,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   const [selectedExamId, setSelectedExamId] = usePersistedState<string>(
     "exam-selected",
     DEFAULT_EXAM_ID,
-    isExamId
+    isKnownExamId
   );
 
   useEffect(() => {
@@ -291,6 +253,10 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   );
   const variantCount = exam ? getVariantCount(exam) : 0;
   const variantIndex = exam ? getActiveVariantIndex(attemptCount, exam) : 0;
+  // Always-current attemptCount for the debounced save path (syncToServer runs
+  // inside setState updaters where the closed-over value can be stale).
+  const attemptCountRef = useRef(attemptCount);
+  attemptCountRef.current = attemptCount;
 
   const [answers, setAnswers] = usePersistedState<Answers>(
     `${EXAM_ANSWERS_STORAGE_PREFIX}${selectedExamEntry.id}`,
@@ -340,6 +306,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
             if (!isAnswers(data.answers) || typeof data.submitted !== "boolean") continue;
             const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`;
             const submittedKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`;
+            const variantKey = `${EXAM_VARIANT_STORAGE_PREFIX}${examId}`;
             const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${examId}`;
             const localRaw = localStorage.getItem(answersKey);
             let localAnswers: Answers = {};
@@ -358,12 +325,27 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
             if (!hasLocal || serverUpdatedAt > localUpdatedAt) {
               localStorage.setItem(answersKey, JSON.stringify(data.answers));
               localStorage.setItem(submittedKey, JSON.stringify(data.submitted));
+              // Adopt the server's attempt count too: answers are keyed by
+              // question number, but which questions (and, for hardened exams,
+              // the choice order) a number maps to depends on the variant the
+              // attempt count selects. Restoring answers without it would grade
+              // them against a different variant's questions.
+              if (isNonNegativeInt(data.attemptCount)) {
+                localStorage.setItem(variantKey, JSON.stringify(data.attemptCount));
+              }
               localStorage.setItem(localUpdatedKey, String(serverUpdatedAt || Date.now()));
             }
           } catch {}
         }
         // Re-hydrate React state for the currently selected exam after the merge.
         const currentExamId = selectedExamIdRef.current;
+        try {
+          const variantStored = localStorage.getItem(`${EXAM_VARIANT_STORAGE_PREFIX}${currentExamId}`);
+          if (variantStored) {
+            const parsed = JSON.parse(variantStored);
+            if (isNonNegativeInt(parsed)) setAttemptCount(parsed);
+          }
+        } catch {}
         try {
           const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${currentExamId}`;
           const stored = localStorage.getItem(answersKey);
@@ -382,28 +364,36 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
         } catch {}
       })
       .catch(() => {});
-  }, [user, selectedExamEntry.id, setAnswers, setSubmitted]);
+  }, [user, selectedExamEntry.id, setAnswers, setSubmitted, setAttemptCount]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingSaveRef = useRef<{ examId: string; answers: Answers; submitted: boolean } | null>(null);
+  const pendingSaveRef = useRef<{ examId: string; answers: Answers; submitted: boolean; attemptCount: number } | null>(
+    null
+  );
   const flushSave = useCallback(() => {
     if (!user || !pendingSaveRef.current) return;
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = null;
     }
-    const { examId, answers: pendingAnswers, submitted: pendingSubmitted } = pendingSaveRef.current;
+    const { examId, answers: pendingAnswers, submitted: pendingSubmitted, attemptCount: pendingAttempt } =
+      pendingSaveRef.current;
     pendingSaveRef.current = null;
-    saveExamProgress(examId, pendingAnswers as Record<string, string>, pendingSubmitted).catch(() => {});
+    saveExamProgress(examId, pendingAnswers as Record<string, string>, pendingSubmitted, pendingAttempt).catch(() => {});
   }, [user]);
   const syncToServer = useCallback(
-    (nextAnswers: Answers, nextSubmitted: boolean) => {
+    (nextAnswers: Answers, nextSubmitted: boolean, nextAttemptCount: number = attemptCountRef.current) => {
       try {
         const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${selectedExamEntry.id}`;
         localStorage.setItem(localUpdatedKey, String(Date.now()));
       } catch {}
       if (!user) return;
-      pendingSaveRef.current = { examId: selectedExamEntry.id, answers: nextAnswers, submitted: nextSubmitted };
+      pendingSaveRef.current = {
+        examId: selectedExamEntry.id,
+        answers: nextAnswers,
+        submitted: nextSubmitted,
+        attemptCount: nextAttemptCount,
+      };
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(flushSave, 1000);
     },
@@ -525,7 +515,10 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     setSubmitted(false);
     setRetryQuestionNumbers(null);
     setAttemptCount((current) => current + 1);
-    syncToServer({} as Answers, false);
+    // Sync the incremented count explicitly — setAttemptCount hasn't flushed to
+    // attemptCountRef yet, so a fresh test on another device lands on the same
+    // variant the answers belong to.
+    syncToServer({} as Answers, false, attemptCount + 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -732,19 +725,21 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
           </div>
         </header>
 
-        <div
-          className="exam-progress"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={total}
-          aria-valuenow={answeredCount}
-          aria-label="Exam progress"
-        >
+        {total > 0 ? (
           <div
-            className="exam-progress-bar"
-            style={{ width: `${total ? (answeredCount / total) * 100 : 0}%` }}
-          />
-        </div>
+            className="exam-progress"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={total}
+            aria-valuenow={answeredCount}
+            aria-label="Exam progress"
+          >
+            <div
+              className="exam-progress-bar"
+              style={{ width: `${(answeredCount / total) * 100}%` }}
+            />
+          </div>
+        ) : null}
 
         {submitted && exam && scoringBand ? (
           <ExamResults
