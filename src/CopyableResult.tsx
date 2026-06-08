@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { writeClipboardText } from "./clipboard";
 
 type Props = {
   value: string;
@@ -29,7 +30,7 @@ export function CopyableResult({ value, onCopy }: Props) {
       window.clearTimeout(timeoutRef.current);
     }
     try {
-      await navigator.clipboard.writeText(value);
+      await writeClipboardText(value);
       setCopyState("copied");
       onCopy?.();
       timeoutRef.current = window.setTimeout(() => {

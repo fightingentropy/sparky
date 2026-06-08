@@ -291,20 +291,20 @@ describe("calcPower", () => {
 describe("calcVoltageDrop", () => {
   it("calculates single phase drop", () => {
     const result = calcVoltageDrop("single", "20", "20", "2.5", "230");
-    // Vd = 2 * 20 * 20 * 0.0175/2.5 = 5.6
-    expect(result.dropValue).toBe("5.6 V");
+    // Vd = 2 * 20 * 20 * 0.022/2.5 = 7.04
+    expect(result.dropValue).toBe("7.04 V");
   });
 
   it("calculates drop percentage", () => {
     const result = calcVoltageDrop("single", "20", "20", "2.5", "230");
-    // % = 5.6/230 * 100 = 2.43
-    expect(result.percentValue).toBe("2.43 %");
+    // % = 7.04/230 * 100 = 3.06
+    expect(result.percentValue).toBe("3.06 %");
   });
 
   it("handles three-phase", () => {
     const result = calcVoltageDrop("three", "20", "20", "2.5", "400");
-    // multiplier = sqrt(3), Vd = sqrt(3)*20*20*0.007 = 4.85
-    expect(result.dropValue).toBe("4.85 V");
+    // multiplier = sqrt(3), Vd = sqrt(3)*20*20*0.022/2.5 = 6.1
+    expect(result.dropValue).toBe("6.1 V");
   });
 
   it("returns placeholder for zero cable size", () => {

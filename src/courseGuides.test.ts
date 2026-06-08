@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COURSE_GUIDES, GUIDE_SOURCE_URLS } from "./courseGuides";
+import { COURSE_GUIDES } from "./courseGuides";
 import { isKnownExamId } from "./examRegistry";
 
 const expectedGuidedExamIds = [
@@ -58,8 +58,8 @@ describe("course guides", () => {
     expect([...guidedExamIds].sort()).toEqual([...expectedGuidedExamIds].sort());
   });
 
-  it("deduplicates source URLs for maintenance views", () => {
-    expect(GUIDE_SOURCE_URLS.length).toBe(new Set(GUIDE_SOURCE_URLS).size);
-    expect(GUIDE_SOURCE_URLS.length).toBeGreaterThan(1);
+  it("references multiple distinct source URLs", () => {
+    const distinctSourceUrls = new Set(COURSE_GUIDES.map((guide) => guide.sourceUrl));
+    expect(distinctSourceUrls.size).toBeGreaterThan(1);
   });
 });

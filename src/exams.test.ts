@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  EXAMS,
   countQuestions,
   countQuestionsForVariant,
   countQuestionsTotal,
@@ -9,7 +8,38 @@ import {
   getScoringBand,
   getScoringRanges,
   getVariantCount
-} from "./exams";
+} from "./examUtils";
+import type { Exam } from "./exams/types";
+// Static data fixture for the tests. The app loads exams lazily at runtime via
+// examRegistry.ts (fetch by ?url); these direct JSON imports exist only here so
+// the test bank stays out of production code. (There used to be a parallel
+// src/exams.ts that inlined all of this into an importable module — a 1.7 MB
+// footgun — which this replaces.)
+import eighteenthEditionExam from "./exam-data/18th-edition.json";
+import am2Exam from "./exam-data/am2-installation-assessment.json";
+import buildingRegulationsExam from "./exam-data/building-regulations.json";
+import ecsHealthSafetyExam from "./exam-data/ecs-health-safety.json";
+import initialVerificationExam from "./exam-data/initial-verification.json";
+import inspectionDesign2396Exam from "./exam-data/inspection-design-2396.json";
+import level2ElectricalInstallationExam from "./exam-data/level-2-electrical-installation.json";
+import level3ElectricalInstallationExam from "./exam-data/level-3-electrical-installation.json";
+import patTestingExam from "./exam-data/pat-testing.json";
+import periodicInspectionExam from "./exam-data/periodic-inspection.json";
+import specialLocationsExam from "./exam-data/special-locations.json";
+
+const EXAMS: Exam[] = [
+  level2ElectricalInstallationExam,
+  level3ElectricalInstallationExam,
+  buildingRegulationsExam,
+  eighteenthEditionExam,
+  specialLocationsExam,
+  patTestingExam,
+  initialVerificationExam,
+  inspectionDesign2396Exam,
+  periodicInspectionExam,
+  am2Exam,
+  ecsHealthSafetyExam
+] as unknown as Exam[];
 
 const repeat = (count: number, length: number) => Array.from({ length }, () => count);
 
@@ -34,8 +64,10 @@ const expectedPerAttempt: Record<string, number[]> = {
   "18th-edition": repeat(60, 5),
   "special-locations": [30],
   "pat-testing": [50, 50, 50, 30],
-  "initial-verification": [40, 40, 40, 40, 60, 90, 30, 30],
-  "inspection-design-2396": [...repeat(30, 13), 18],
+  // variant 5 dropped a duplicate question (90 -> 89).
+  "initial-verification": [40, 40, 40, 40, 60, 89, 30, 30],
+  // variant 3 dropped three duplicate questions (30 -> 27).
+  "inspection-design-2396": [30, 30, 30, 27, 30, 30, 30, 30, 30, 30, 30, 30, 30, 18],
   "periodic-inspection": repeat(40, 5),
   "am2-installation-assessment": repeat(30, 2),
   "ecs-health-safety": [50, 50, 50, 49, 36, 16, 24, 28, 38, 27, 28, 32, 27, 40, 21]
@@ -152,6 +184,40 @@ describe("exam data", () => {
     }
   });
 
+  it("gives every question four distinct options and no duplicate questions per variant", () => {
+    const CHOICES = ["A", "B", "C", "D"] as const;
+    const normalize = (value: string) => value.trim().toLowerCase().replace(/\s+/g, " ");
+
+    for (const exam of EXAMS) {
+      for (const section of exam.sections) {
+        for (const variant of section.variants) {
+          const questionSignatures = new Set<string>();
+          for (const question of variant.questions) {
+            const ctx = `${exam.id}/${variant.id}/Q${question.number}`;
+            const optionImages = question.optionImageUrls ?? {};
+            // Options that aren't differentiated by a per-option image must be
+            // mutually distinct — otherwise a question is degraded (or, if the
+            // duplicate is the keyed answer, ungradeable).
+            const textOptions = CHOICES.filter((letter) => !optionImages[letter]).map((letter) =>
+              normalize(question.options[letter])
+            );
+            expect(new Set(textOptions).size, `${ctx} has duplicate option text`).toBe(textOptions.length);
+
+            // No two questions in a variant may be identical.
+            const signature = JSON.stringify([
+              normalize(question.prompt),
+              CHOICES.map((letter) => normalize(question.options[letter])),
+              question.imageUrls ?? [],
+              optionImages
+            ]);
+            expect(questionSignatures.has(signature), `${ctx} duplicates another question in the variant`).toBe(false);
+            questionSignatures.add(signature);
+          }
+        }
+      }
+    }
+  });
+
   it("keeps each exam at the configured per-attempt question count", () => {
     for (const exam of EXAMS) {
       const expectedCounts = expectedPerAttempt[exam.id];
@@ -240,7 +306,7 @@ describe("exam data", () => {
         { variant: 4, length: 60, firstPrompt: "What needs to be verified during the inspection of a new installation?" },
         {
           variant: 5,
-          length: 90,
+          length: 89,
           firstPrompt: "On completion of a new installation, the Electrical Installation Certificate would 'not' be signed by the:"
         }
       ],

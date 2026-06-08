@@ -3,7 +3,10 @@ const API_BASE = "/api";
 type AuthResponse = { token: string; user: { id: string; email: string } };
 type MeResponse = { user: { id: string; email: string } };
 type ProgressResponse = {
-  progress: Record<string, { answers: Record<string, string>; submitted: boolean; updatedAt: string }>;
+  progress: Record<
+    string,
+    { answers: Record<string, string>; submitted: boolean; updatedAt: string; attemptCount: number }
+  >;
 };
 
 function getToken(): string | null {
@@ -83,9 +86,14 @@ export async function getExamProgress(): Promise<ProgressResponse> {
   return request<ProgressResponse>("/exams/progress");
 }
 
-export async function saveExamProgress(examId: string, answers: Record<string, string>, submitted: boolean): Promise<void> {
+export async function saveExamProgress(
+  examId: string,
+  answers: Record<string, string>,
+  submitted: boolean,
+  attemptCount: number
+): Promise<void> {
   await request(`/exams/progress/${examId}`, {
     method: "PUT",
-    body: JSON.stringify({ answers, submitted }),
+    body: JSON.stringify({ answers, submitted, attemptCount }),
   });
 }

@@ -867,7 +867,7 @@ function SummaryStat({
 
 // ---- main component ---------------------------------------------------------
 
-export function PanelTrainer() {
+export function PanelTrainer({ active = true }: { active?: boolean }) {
   const [breakers, setBreakers] = useState<Breaker[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoverSlot, setHoverSlot] = useState<number | null>(null);
@@ -950,7 +950,7 @@ export function PanelTrainer() {
   return (
     <div className="pt-shell">
       <div className="pt-scene">
-        <Canvas shadows camera={{ position: [0, 1.1, 1.45], fov: 32 }}>
+        <Canvas shadows frameloop={active ? "always" : "never"} camera={{ position: [0, 1.1, 1.45], fov: 32 }}>
           <color attach="background" args={["#0e1116"]} />
           <ambientLight intensity={0.45} />
           <directionalLight position={[2, 4, 3]} intensity={1.4} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
