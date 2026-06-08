@@ -261,6 +261,36 @@ describe("exam data", () => {
     }
   });
 
+  it("explains answers specifically, not with reused boilerplate templates", () => {
+    const bannedFiller = [
+      /matches the protective principle being tested/i,
+      /protection questions turn on whether/i,
+      /because the question is testing the protective measure/i,
+      /practical design or inspection outcome/i,
+      /the useful check is to identify the underlying/i,
+      /is the result selected by applying the stated formula/i,
+      /is the regulation, chapter, section or product standard/i,
+      /this type of 2396 question is mainly a navigation/i,
+      // "source" referring to the source document / answer key (not the
+      // electrical supply, which is legitimate, e.g. "earthed at the source").
+      /\bsource[- ](key|value|values|interval|diagram|figure|citation|references?|maximum|minimum|options?|wording|expects?|says?|stated|given|tables?|mock|questions?|rules?|answers?|column|row|list|text|marks|material)\b/i,
+      /\bin the source\b/i,
+      /\bsource-key\b/i
+    ];
+    for (const exam of EXAMS) {
+      for (const section of exam.sections) {
+        for (const variant of section.variants) {
+          for (const question of variant.questions) {
+            const ctx = `${exam.id}/${variant.id}/Q${question.number}`;
+            for (const pattern of bannedFiller) {
+              expect(pattern.test(question.explanation), `${ctx}: boilerplate explanation`).toBe(false);
+            }
+          }
+        }
+      }
+    }
+  });
+
   it("serves source-only ElectricianTraining categories with their source section ids", () => {
     const expectedSectionIds: Record<string, string> = {
       "level-2-electrical-installation": "source-electrician-training-level-2-electrical-installation",
