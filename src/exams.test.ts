@@ -54,6 +54,36 @@ const sourceExamIds = new Set([
   "ecs-health-safety"
 ]);
 
+function wordCount(value: string): number {
+  return value.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function normalizedWords(value: string): Set<string> {
+  const words = value.toLowerCase().match(/[a-z0-9]+/g) ?? [];
+  return new Set(words.filter((word) => word.length > 2));
+}
+
+function explanationRepeatsAnswer(explanation: string, answer: string): boolean {
+  const explanationWords = normalizedWords(explanation);
+  const answerWords = normalizedWords(answer);
+  if (answerWords.size === 0) return false;
+  let shared = 0;
+  for (const word of answerWords) {
+    if (explanationWords.has(word)) shared += 1;
+  }
+  return shared / answerWords.size > 0.85 && wordCount(explanation) < 18;
+}
+
+function isBareReference(value: string): boolean {
+  const trimmed = value.trim();
+  return (
+    trimmed.length <= 28 &&
+    /\d/.test(trimmed) &&
+    /^[A-Za-z0-9 .()/:-]+$/.test(trimmed) &&
+    !/\b(because|requires|means|covers|applies|protects|prevents|confirms)\b/i.test(trimmed)
+  );
+}
+
 describe("exam data", () => {
   it("exposes the canonical exams in the expected order", () => {
     expect(EXAMS.map((exam) => exam.id)).toEqual(expectedExamOrder);
@@ -139,6 +169,27 @@ describe("exam data", () => {
         const questions = getQuestionsForVariant(exam, v);
         for (let i = 0; i < questions.length; i += 1) {
           expect(questions[i].number).toBe(i + 1);
+        }
+      }
+    }
+  });
+
+  it("uses explanatory answer rationales instead of placeholders", () => {
+    const placeholderPattern = /ElectricianTraining source mock marks this answer as correct/i;
+
+    for (const exam of EXAMS) {
+      for (const section of exam.sections) {
+        for (const variant of section.variants) {
+          for (const question of variant.questions) {
+            const context = `${exam.id}/${section.id}/${variant.id}/Q${question.number}`;
+            expect(question.explanation, context).not.toMatch(placeholderPattern);
+            expect(isBareReference(question.explanation), context).toBe(false);
+            expect(wordCount(question.explanation), context).toBeGreaterThanOrEqual(12);
+            expect(
+              explanationRepeatsAnswer(question.explanation, question.options[question.answer]),
+              context
+            ).toBe(false);
+          }
         }
       }
     }
