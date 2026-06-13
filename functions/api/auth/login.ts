@@ -1,6 +1,6 @@
 import { verifyPassword, createJWT } from "../_lib/crypto";
 import { json, readJsonBody, type Env } from "../_lib/auth";
-import { rateLimit, clientIp } from "../_lib/rateLimit";
+import { rateLimit, clientIp, maybeCleanupRateLimits } from "../_lib/rateLimit";
 
 type UserRow = { id: string; email: string; password_hash: string };
 
@@ -15,7 +15,7 @@ const DUMMY_HASH =
   "00000000000000000000000000000000:" +
   "0000000000000000000000000000000000000000000000000000000000000000";
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUntil }) => {
   const body = await readJsonBody<{ email?: string; password?: string }>(request);
   if (!body) return json({ error: "Invalid JSON body" }, 400);
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
@@ -31,6 +31,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     rateLimit(env, `login:email:${email}`, 10, RATE_WINDOW_MS, now),
   ]);
   if (!ipOk || !emailOk) return json({ error: "Too many attempts. Try again later." }, 429);
+  waitUntil(maybeCleanupRateLimits(env, now));
 
   const row = await env.DB.prepare("SELECT id, email, password_hash FROM users WHERE email = ?")
     .bind(email)

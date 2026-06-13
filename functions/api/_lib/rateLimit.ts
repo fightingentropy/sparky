@@ -35,3 +35,18 @@ export async function rateLimit(
 export function clientIp(request: Request): string {
   return request.headers.get("CF-Connecting-IP") ?? "local";
 }
+
+const RATE_LIMIT_RETENTION_MS = 24 * 60 * 60 * 1000;
+
+// Opportunistically prune buckets whose window ended well over a day ago, so a
+// flood of distinct IP/email buckets can't grow the table without bound. Fires
+// on ~2% of calls (cheap amortised cleanup) and is best-effort — any failure is
+// ignored. Call via `waitUntil` so it never adds latency to the request.
+export async function maybeCleanupRateLimits(env: Env, now: number): Promise<void> {
+  if (crypto.getRandomValues(new Uint8Array(1))[0] >= 6) return; // ~2.3% (6/256)
+  try {
+    await env.DB.prepare("DELETE FROM rate_limits WHERE window_start < ?1")
+      .bind(now - RATE_LIMIT_RETENTION_MS)
+      .run();
+  } catch {}
+}

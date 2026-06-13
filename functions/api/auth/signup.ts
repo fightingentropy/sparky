@@ -1,10 +1,10 @@
 import { hashPassword, createJWT } from "../_lib/crypto";
 import { json, readJsonBody, isValidEmail, isValidPassword, type Env } from "../_lib/auth";
-import { rateLimit, clientIp } from "../_lib/rateLimit";
+import { rateLimit, clientIp, maybeCleanupRateLimits } from "../_lib/rateLimit";
 
 const TOKEN_TTL_SECONDS = 7 * 24 * 3600;
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUntil }) => {
   const body = await readJsonBody<{ email?: string; password?: string }>(request);
   if (!body) return json({ error: "Invalid JSON body" }, 400);
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
@@ -20,13 +20,22 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   if (!(await rateLimit(env, `signup:ip:${clientIp(request)}`, 10, 60 * 60 * 1000, now))) {
     return json({ error: "Too many attempts. Try again later." }, 429);
   }
+  waitUntil(maybeCleanupRateLimits(env, now));
 
   const existing = await env.DB.prepare("SELECT id FROM users WHERE email = ?").bind(email).first();
   if (existing) return json({ error: "Email already registered" }, 409);
 
   const id = crypto.randomUUID();
   const passwordHash = await hashPassword(password);
-  await env.DB.prepare("INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)").bind(id, email, passwordHash).run();
+  try {
+    await env.DB.prepare("INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)").bind(id, email, passwordHash).run();
+  } catch {
+    // The email's UNIQUE constraint is the only thing that can fail here, so a
+    // failure means another request registered the same address between our
+    // existence check above and this insert. Return the same 409 rather than a
+    // 500, closing the signup TOCTOU race.
+    return json({ error: "Email already registered" }, 409);
+  }
 
   const token = await createJWT(
     { sub: id, email, exp: Math.floor(now / 1000) + TOKEN_TTL_SECONDS },

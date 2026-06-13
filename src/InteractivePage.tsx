@@ -9,6 +9,7 @@ import {
   type ComponentType,
   type Wire
 } from "./circuitEngine";
+import { useFocusTrap } from "./useFocusTrap";
 
 const PanelTrainer = lazy(() => import("./PanelTrainer").then((m) => ({ default: m.PanelTrainer })));
 const FaultFinding = lazy(() => import("./FaultFinding").then((m) => ({ default: m.FaultFinding })));
@@ -146,6 +147,42 @@ function isCircuit(value: unknown): value is Circuit {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const circuit = value as Partial<Circuit>;
   return Array.isArray(circuit.components) && Array.isArray(circuit.wires);
+}
+
+const VALID_COMPONENT_TYPES: ComponentType[] = ["battery", "switch", "lamp", "resistor", "breaker"];
+
+function normalizeRotation(r: unknown): 0 | 90 | 180 | 270 {
+  return r === 90 || r === 180 || r === 270 ? r : 0;
+}
+
+// Rebuild a persisted circuit through makeComponent so every component carries
+// valid defaults — a tampered/older save with a bad `rotation` would otherwise
+// flow NaN coordinates through rotatePoint — and drop wires whose endpoints or
+// terminals don't resolve to a real component.
+function normalizeCircuit(circuit: Circuit): Circuit {
+  const components = circuit.components
+    .filter((c) => c && typeof c.id === "string" && (VALID_COMPONENT_TYPES as string[]).includes(c.type))
+    .map((c) => {
+      const base = makeComponent(c.id, c.type, Number(c.x) || 0, Number(c.y) || 0, normalizeRotation(c.rotation));
+      return {
+        ...base,
+        voltage: typeof c.voltage === "number" && Number.isFinite(c.voltage) ? c.voltage : base.voltage,
+        resistance: typeof c.resistance === "number" && Number.isFinite(c.resistance) ? c.resistance : base.resistance,
+        rating: typeof c.rating === "number" && Number.isFinite(c.rating) ? c.rating : base.rating,
+        closed: typeof c.closed === "boolean" ? c.closed : base.closed,
+        tripped: typeof c.tripped === "boolean" ? c.tripped : base.tripped
+      };
+    });
+  const ids = new Set(components.map((c) => c.id));
+  const wires = circuit.wires.filter(
+    (w) =>
+      w &&
+      ids.has(w.fromId) &&
+      ids.has(w.toId) &&
+      (w.fromTerminal === 0 || w.fromTerminal === 1) &&
+      (w.toTerminal === 0 || w.toTerminal === 1)
+  );
+  return { components, wires };
 }
 
 function readSavedCircuits(): SavedCircuit[] {
@@ -298,11 +335,16 @@ export function InteractivePage({ isActive }: Props) {
 
   const dragRef = useRef<DragState>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const welcomeTrapRef = useFocusTrap<HTMLDivElement>(showWelcome);
 
   const sim = useMemo(() => (energized ? simulate(circuit) : null), [circuit, energized]);
   const trippedBreakerKey = sim?.trippedBreakers.join("|") ?? "";
   const trippedBreakerIds = useMemo(
     () => new Set(sim?.trippedBreakers ?? []),
+    // `sim` is the real input; `trippedBreakerKey` is derived from it and used as
+    // the dep so the Set keeps a stable identity when the tripped list is
+    // unchanged (the auto-trip effect below relies on that to avoid a loop).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [trippedBreakerKey]
   );
 
@@ -363,7 +405,7 @@ export function InteractivePage({ isActive }: Props) {
   function loadSavedCircuit(id = selectedSavedCircuitId) {
     const saved = savedCircuits.find((entry) => entry.id === id);
     if (!saved) return;
-    setCircuit(saved.circuit);
+    setCircuit(normalizeCircuit(saved.circuit));
     setCircuitName(saved.name);
     setSelectedSavedCircuitId(saved.id);
     setEnergized(false);
@@ -493,15 +535,32 @@ export function InteractivePage({ isActive }: Props) {
     dragRef.current = null;
   }
 
-  function handleTerminalClick(e: ReactPointerEvent<SVGCircleElement>, c: CircuitComponent, terminal: 0 | 1) {
-    e.stopPropagation();
+  function activateTerminal(c: CircuitComponent, terminal: 0 | 1) {
     setSelectedId(null);
     if (!pendingWire) {
       setPendingWire({ componentId: c.id, terminal });
+      // Seed the rubber-band origin at the clicked terminal so the preview line
+      // doesn't spring from a stale point (or stay invisible on touch, where
+      // there's no pointer-move between the two taps).
+      setPointerPos(terminalWorldPosition(c, terminal));
       return;
     }
-    if (pendingWire.componentId === c.id && pendingWire.terminal === terminal) {
+    // Clicking the same component (either terminal) cancels — a component can't
+    // be wired to itself.
+    if (pendingWire.componentId === c.id) {
       setPendingWire(null);
+      setPointerPos(null);
+      return;
+    }
+    // Skip a duplicate wire between the same unordered terminal pair.
+    const duplicate = circuit.wires.some(
+      (w) =>
+        (w.fromId === pendingWire.componentId && w.fromTerminal === pendingWire.terminal && w.toId === c.id && w.toTerminal === terminal) ||
+        (w.fromId === c.id && w.fromTerminal === terminal && w.toId === pendingWire.componentId && w.toTerminal === pendingWire.terminal)
+    );
+    if (duplicate) {
+      setPendingWire(null);
+      setPointerPos(null);
       return;
     }
     const w: Wire = {
@@ -513,6 +572,21 @@ export function InteractivePage({ isActive }: Props) {
     };
     setCircuit((cur) => ({ ...cur, wires: [...cur.wires, w] }));
     setPendingWire(null);
+    setPointerPos(null);
+  }
+
+  function handleTerminalClick(e: ReactPointerEvent<SVGCircleElement>, c: CircuitComponent, terminal: 0 | 1) {
+    e.stopPropagation();
+    activateTerminal(c, terminal);
+  }
+
+  function nudgeComponent(id: string, dx: number, dy: number) {
+    setCircuit((cur) => ({
+      ...cur,
+      components: cur.components.map((cm) =>
+        cm.id === id ? { ...cm, x: snap(cm.x + dx), y: snap(cm.y + dy) } : cm
+      )
+    }));
   }
 
   useEffect(() => {
@@ -540,6 +614,17 @@ export function InteractivePage({ isActive }: Props) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isActive, selectedId, circuit]);
+
+  // Dismiss the welcome dialog on Escape (it's aria-modal, so it must be
+  // keyboard-dismissible; focus is trapped/restored by useFocusTrap above).
+  useEffect(() => {
+    if (!showWelcome) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dismissWelcome();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showWelcome]);
 
   const selectedComponent = useMemo(
     () => circuit.components.find((c) => c.id === selectedId) ?? null,
@@ -694,6 +779,8 @@ export function InteractivePage({ isActive }: Props) {
             ref={svgRef}
             className={`ix-canvas ${energized ? "is-energized" : ""}`}
             viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+            role="application"
+            aria-label="Circuit canvas. Tab to a component or terminal. Enter or Space selects a component or starts and finishes a wire. Arrow keys move the selected component, R rotates it, Delete removes it."
             onPointerDown={handleCanvasPointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -753,9 +840,25 @@ export function InteractivePage({ isActive }: Props) {
                   transform={`translate(${c.x}, ${c.y}) rotate(${c.rotation})`}
                   className={`ix-component ix-${c.type} ${isSelected ? "is-selected" : ""} ${isHover ? "is-hover" : ""}`}
                   style={c.type === "lamp" ? ({ ["--lamp-glow" as const]: lampGlow } as React.CSSProperties) : undefined}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${c.type}${isSelected ? ", selected" : ""}. Arrow keys move, R rotates, Delete removes.`}
                   onPointerDown={(e) => handleComponentPointerDown(e, c)}
                   onPointerEnter={() => setHoverId(c.id)}
                   onPointerLeave={() => setHoverId(null)}
+                  onFocus={() => setSelectedId(c.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedId(c.id);
+                      return;
+                    }
+                    const step = e.shiftKey ? GRID * 2 : GRID;
+                    if (e.key === "ArrowLeft") { e.preventDefault(); nudgeComponent(c.id, -step, 0); }
+                    else if (e.key === "ArrowRight") { e.preventDefault(); nudgeComponent(c.id, step, 0); }
+                    else if (e.key === "ArrowUp") { e.preventDefault(); nudgeComponent(c.id, 0, -step); }
+                    else if (e.key === "ArrowDown") { e.preventDefault(); nudgeComponent(c.id, 0, step); }
+                  }}
                 >
                   <ComponentGlyph c={renderedComponent} energized={energized && sim?.ok === true && !sim.fault} />
                   <circle
@@ -764,7 +867,16 @@ export function InteractivePage({ isActive }: Props) {
                     r={6}
                     className={`ix-terminal ${pendingWire?.componentId === c.id && pendingWire.terminal === 0 ? "is-pending" : ""}`}
                     transform={`rotate(${-c.rotation})`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${c.type} terminal 1. Enter ${pendingWire ? "connects the wire here" : "starts a wire"}.`}
                     onPointerDown={(e) => handleTerminalClick(e, c, 0)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        activateTerminal(c, 0);
+                      }
+                    }}
                   />
                   <circle
                     cx={t1.x - c.x}
@@ -772,7 +884,16 @@ export function InteractivePage({ isActive }: Props) {
                     r={6}
                     className={`ix-terminal ${pendingWire?.componentId === c.id && pendingWire.terminal === 1 ? "is-pending" : ""}`}
                     transform={`rotate(${-c.rotation})`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${c.type} terminal 2. Enter ${pendingWire ? "connects the wire here" : "starts a wire"}.`}
                     onPointerDown={(e) => handleTerminalClick(e, c, 1)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        activateTerminal(c, 1);
+                      }
+                    }}
                   />
                 </g>
               );
@@ -819,10 +940,12 @@ export function InteractivePage({ isActive }: Props) {
                       max={240}
                       onChange={(e) => {
                         const v = Number(e.target.value);
+                        if (!Number.isFinite(v)) return;
+                        const voltage = Math.min(Math.max(v, 1), 240);
                         setCircuit((c) => ({
                           ...c,
                           components: c.components.map((cm) =>
-                            cm.id === selectedComponent.id ? { ...cm, voltage: Number.isFinite(v) ? v : 0 } : cm
+                            cm.id === selectedComponent.id ? { ...cm, voltage } : cm
                           )
                         }));
                       }}
@@ -838,10 +961,12 @@ export function InteractivePage({ isActive }: Props) {
                       min={1}
                       onChange={(e) => {
                         const v = Number(e.target.value);
+                        if (!Number.isFinite(v)) return;
+                        const resistance = Math.min(Math.max(v, 1), 1_000_000);
                         setCircuit((c) => ({
                           ...c,
                           components: c.components.map((cm) =>
-                            cm.id === selectedComponent.id ? { ...cm, resistance: Number.isFinite(v) ? v : 0 } : cm
+                            cm.id === selectedComponent.id ? { ...cm, resistance } : cm
                           )
                         }));
                       }}
@@ -857,10 +982,12 @@ export function InteractivePage({ isActive }: Props) {
                       min={1}
                       onChange={(e) => {
                         const v = Number(e.target.value);
+                        if (!Number.isFinite(v)) return;
+                        const rating = Math.min(Math.max(v, 1), 1000);
                         setCircuit((c) => ({
                           ...c,
                           components: c.components.map((cm) =>
-                            cm.id === selectedComponent.id ? { ...cm, rating: Number.isFinite(v) ? v : 0 } : cm
+                            cm.id === selectedComponent.id ? { ...cm, rating } : cm
                           )
                         }));
                       }}
@@ -934,7 +1061,17 @@ export function InteractivePage({ isActive }: Props) {
 
       {showWelcome ? (
         <div className="ix-welcome-backdrop" onClick={dismissWelcome}>
-          <div className="ix-welcome" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="ix-welcome"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Build a circuit"
+            ref={welcomeTrapRef}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button type="button" className="ix-welcome-close" onClick={dismissWelcome} aria-label="Close">
+              ✕
+            </button>
             <h3>Build a circuit</h3>
             <ol>
               <li>Pick a component from the palette and click on the canvas to place it.</li>

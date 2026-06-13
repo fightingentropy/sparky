@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePersistedState } from "./usePersistedState";
 import "./FaultFinding.css";
+
+const isNonNegativeNumber = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0;
 
 // ---------- Types ----------
 
@@ -67,6 +71,7 @@ type ScenarioState = {
     correct: boolean;
   } | null;
   hintsShown: number;
+  hintsCounted: number;
   solved: boolean;
   attempts: number;
 };
@@ -789,6 +794,7 @@ const initialState = (sc: Scenario): ScenarioState => ({
   selectedChoice: null,
   submission: null,
   hintsShown: 0,
+  hintsCounted: 0,
   solved: false,
   attempts: 0
 });
@@ -796,9 +802,9 @@ const initialState = (sc: Scenario): ScenarioState => ({
 export function FaultFinding(): React.ReactElement {
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [faultStats, setFaultStats] = useState<FaultStats>(readFaultStats);
-  const [streak, setStreak] = useState(0);
-  const [bestStreak, setBestStreak] = useState(0);
-  const [solvedSet, setSolvedSet] = useState<Set<string>>(new Set());
+  // Persisted so the streak survives reloads, matching the persisted faultStats.
+  const [streak, setStreak] = usePersistedState<number>("ff-streak", 0, isNonNegativeNumber);
+  const [bestStreak, setBestStreak] = usePersistedState<number>("ff-best-streak", 0, isNonNegativeNumber);
   const [states, setStates] = useState<Record<string, ScenarioState>>(() => {
     const out: Record<string, ScenarioState> = {};
     for (const s of SCENARIOS) out[s.id] = initialState(s);
@@ -825,6 +831,17 @@ export function FaultFinding(): React.ReactElement {
     });
   }, []);
 
+  // Single source of truth for "solved": derive from the persisted faultStats so
+  // the nav chip and the practice-history tile can never disagree after reload.
+  const solvedSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of SCENARIOS) {
+      if ((faultStats.scenarios[s.id]?.solves ?? 0) > 0) set.add(s.id);
+    }
+    return set;
+  }, [faultStats]);
+
+  const schematic = useMemo(() => scenario.draw(), [scenario]);
   const reading = useMemo(() => lookupReading(scenario, st), [scenario, st]);
   const formatted = useMemo(() => formatReading(reading, st.mode), [reading, st.mode]);
   const beeping = st.mode === "CONT" && reading != null && !reading.ol && reading.value < 30;
@@ -891,9 +908,13 @@ export function FaultFinding(): React.ReactElement {
     const correct = !!choice.correct;
     const attempts = st.attempts + 1;
     const elapsedSeconds = Math.max(1, Math.round((Date.now() - scenarioStartedAtRef.current) / 1000));
+    // Credit only hints revealed since the last submission, so multi-attempt
+    // scenarios don't multiply the hint count by the number of attempts.
+    const newHints = Math.max(0, st.hintsShown - st.hintsCounted);
     updateState(scenario.id, {
       submission: { choice: st.selectedChoice, correct },
-      attempts
+      attempts,
+      hintsCounted: st.hintsShown
     });
     setFaultStats((prev) => {
       const current = prev.scenarios[scenario.id] ?? emptyScenarioStats();
@@ -901,7 +922,7 @@ export function FaultFinding(): React.ReactElement {
         attempts: current.attempts + 1,
         solves: current.solves + (correct ? 1 : 0),
         firstTrySolves: current.firstTrySolves + (correct && attempts === 1 ? 1 : 0),
-        hintsUsed: current.hintsUsed + st.hintsShown,
+        hintsUsed: current.hintsUsed + newHints,
         totalSeconds: current.totalSeconds + elapsedSeconds,
         bestSeconds: correct
           ? current.bestSeconds === null
@@ -919,15 +940,13 @@ export function FaultFinding(): React.ReactElement {
     });
     if (correct) {
       if (attempts === 1) {
-        setStreak((s) => {
-          const next = s + 1;
-          setBestStreak((b) => Math.max(b, next));
-          return next;
-        });
+        // streak is fresh in this event handler; compute next outside the
+        // updaters so neither setter runs a side effect inside the other.
+        const nextStreak = streak + 1;
+        setStreak(nextStreak);
+        setBestStreak((b) => Math.max(b, nextStreak));
       }
-      if (!solvedSet.has(scenario.id)) {
-        setSolvedSet((prev) => new Set(prev).add(scenario.id));
-      }
+      // solvedSet is derived from faultStats (updated above), so nothing to set.
     } else {
       setStreak(0);
     }
@@ -996,7 +1015,7 @@ export function FaultFinding(): React.ReactElement {
           </defs>
           <rect width={SVG_W} height={SVG_H} fill="url(#ff-grid)" />
 
-          {scenario.draw()}
+          {schematic}
 
           {scenario.testPoints.map((tp) => {
             const isRed = st.redTP === tp.id;
@@ -1004,7 +1023,20 @@ export function FaultFinding(): React.ReactElement {
             const tooltipX = tp.x + 14;
             const tooltipY = tp.y - 38;
             return (
-              <g key={tp.id} className="ff-tp" onClick={() => handleTPClick(tp.id)}>
+              <g
+                key={tp.id}
+                className="ff-tp"
+                role="button"
+                tabIndex={0}
+                aria-label={`Probe ${tp.label}: ${tp.description}`}
+                onClick={() => handleTPClick(tp.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleTPClick(tp.id);
+                  }
+                }}
+              >
                 <circle cx={tp.x} cy={tp.y} r={11} className="ff-tp-hit" />
                 <circle
                   cx={tp.x}
@@ -1174,6 +1206,7 @@ export function FaultFinding(): React.ReactElement {
                 className={"ff-mode-btn" + (st.mode === m ? " ff-mode-active" : "")}
                 onClick={() => handleModeSelect(m)}
                 aria-pressed={st.mode === m}
+                aria-label={modeLabel(m)}
               >
                 {modeShort(m)}
               </button>

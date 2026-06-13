@@ -107,6 +107,15 @@
   filter: none;
 }
 
+/* Keyboard focus: clear ring on the dot and reveal the description tooltip. */
+.ff-tp:focus-visible { outline: none; }
+.ff-tp:focus-visible .ff-tp-dot {
+  stroke: var(--accent-strong);
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 4px var(--accent-strong));
+}
+.ff-tp:focus-visible .ff-tp-tooltip { opacity: 1; }
+
 .ff-tp-red {
   fill: #ef5350 !important;
   stroke: #ffb4b4 !important;
