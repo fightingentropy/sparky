@@ -37,7 +37,7 @@ export default defineConfig({
         // runtimeCaching below. Precaching everything (the old `json` glob plus
         // the react-three chunks) inflated the install payload to ~3.3 MB and
         // defeated the lazy-load architecture.
-        globPatterns: ["**/*.{js,css,html,svg,png,ico,webmanifest}"],
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,webmanifest,woff2}"],
         globIgnores: [
           "assets/react-three-*.js",
           "assets/three-core-*.js",

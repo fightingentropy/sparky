@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 export type HistoryEntry = {
   id: string;
@@ -10,6 +10,19 @@ export type HistoryEntry = {
 
 const MAX_ENTRIES = 30;
 const STORAGE_KEY = "sparky-history";
+
+function isHistoryEntry(value: unknown): value is HistoryEntry {
+  if (!value || typeof value !== "object") return false;
+  const entry = value as Record<string, unknown>;
+  return (
+    typeof entry.id === "string" &&
+    typeof entry.tool === "string" &&
+    typeof entry.label === "string" &&
+    typeof entry.value === "string" &&
+    typeof entry.timestamp === "number" &&
+    Number.isFinite(entry.timestamp)
+  );
+}
 
 // Globally-unique id, computed outside the setState updater so the updater
 // stays pure (a module-global `nextId++` inside it advanced twice under
@@ -26,7 +39,12 @@ function newEntryId(): string {
 function loadHistory(): HistoryEntry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as HistoryEntry[]) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    // Drop any malformed entries (older shapes / tampered storage) rather than
+    // trusting the blob wholesale.
+    return parsed.filter(isHistoryEntry).slice(0, MAX_ENTRIES);
   } catch {
     return [];
   }
@@ -42,6 +60,18 @@ function saveHistory(entries: HistoryEntry[]) {
 
 export function useHistory() {
   const [entries, setEntries] = useState<HistoryEntry[]>(loadHistory);
+
+  // Cross-tab sync: adopt history written by another tab so two open tabs don't
+  // present a stale list. Only addEntry/clearHistory write, so reloading from
+  // storage here can't feed back into a write loop.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY || event.storageArea !== localStorage) return;
+      setEntries(loadHistory());
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const addEntry = useCallback((tool: string, label: string, value: string) => {
     if (value.startsWith("--")) return;

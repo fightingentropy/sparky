@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { ContactShadows, Environment, OrbitControls, Text } from "@react-three/drei";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { ContactShadows, OrbitControls, Text } from "@react-three/drei";
 import type { Group, Mesh } from "three";
 import "./PanelTrainer.css";
 
@@ -92,7 +92,11 @@ function defaultAwgForRating(rating: Rating): AWG {
 }
 
 function uid(prefix: string): string {
-  return `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
+  try {
+    return `${prefix}-${crypto.randomUUID()}`;
+  } catch {
+    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  }
 }
 
 function warningsFor(b: Breaker): Warning[] {
@@ -385,13 +389,21 @@ function EmptySlotMarker({ slot, hovered, onPointerOver, onPointerOut }: EmptySl
 
 function BreakerToggle({ on, tripped }: { on: boolean; tripped: boolean }) {
   const ref = useRef<Mesh>(null);
+  const invalidate = useThree((s) => s.invalidate);
   const target = tripped ? 0 : on ? 0.4 : -0.4;
+  // The canvas renders on demand (frameloop="demand"), so kick a frame whenever
+  // the target changes and keep requesting frames from inside useFrame until the
+  // handle settles — otherwise the tween would freeze between demand renders.
+  useEffect(() => {
+    invalidate();
+  }, [target, invalidate]);
   useFrame((_, dt) => {
     const m = ref.current;
     if (!m) return;
     const cur = m.rotation.x;
     const next = cur + (target - cur) * Math.min(1, dt * 8);
     m.rotation.x = next;
+    if (Math.abs(target - next) > 0.001) invalidate();
   });
   return (
     <mesh ref={ref} position={[0, 0, SLOT_DEPTH / 2 + 0.006]} castShadow>
@@ -512,6 +524,7 @@ function ReflectiveFloor() {
 
 type PanelSceneProps = {
   breakers: Breaker[];
+  breakerWarnings: Record<string, Warning[]>;
   selectedId: string | null;
   hoverSlot: number | null;
   onSelectBreaker: (id: string) => void;
@@ -519,7 +532,7 @@ type PanelSceneProps = {
   onUnhoverSlot: (slot: number) => void;
 };
 
-function PanelScene({ breakers, selectedId, hoverSlot, onSelectBreaker, onHoverSlot, onUnhoverSlot }: PanelSceneProps) {
+function PanelScene({ breakers, breakerWarnings, selectedId, hoverSlot, onSelectBreaker, onHoverSlot, onUnhoverSlot }: PanelSceneProps) {
   const groupRef = useRef<Group>(null);
   const occupied = useMemo(() => {
     const set = new Set<number>();
@@ -534,11 +547,6 @@ function PanelScene({ breakers, selectedId, hoverSlot, onSelectBreaker, onHoverS
     for (let i = 1; i <= TOTAL_SLOTS; i++) out.push(i);
     return out;
   }, []);
-  const breakerWarnings = useMemo(() => {
-    const map: Record<string, Warning[]> = {};
-    for (const b of breakers) map[b.id] = warningsFor(b);
-    return map;
-  }, [breakers]);
   const [hoverBreakerId, setHoverBreakerId] = useState<string | null>(null);
   return (
     <group ref={groupRef} position={[0, PANEL.centerY, 0]}>
@@ -681,14 +689,22 @@ function LibraryPanel({ onPick }: { onPick: (item: LibraryItem) => void }) {
 type CircuitRowProps = {
   breaker: Breaker;
   selected: boolean;
-  warnings: Warning[];
-  onUpdate: (patch: Partial<Breaker>) => void;
-  onRemove: () => void;
-  onSelect: () => void;
-  onTrip: () => void;
+  onUpdate: (id: string, patch: Partial<Breaker>) => void;
+  onRemove: (id: string) => void;
+  onSelect: (id: string) => void;
+  onTrip: (id: string) => void;
 };
 
-function CircuitRow({ breaker, selected, warnings, onUpdate, onRemove, onSelect, onTrip }: CircuitRowProps) {
+const CircuitRow = memo(function CircuitRow({ breaker, selected, onUpdate, onRemove, onSelect, onTrip }: CircuitRowProps) {
+  // Computed here (not passed in) so React.memo can skip rows whose breaker
+  // reference is unchanged — typing in one circuit no longer re-renders all 40.
+  const warnings = useMemo(() => warningsFor(breaker), [breaker]);
+  // Local string mirror of loadAmps so the field can be cleared or hold "12."
+  // mid-edit instead of snapping to 0; valid values commit live, blur tidies up.
+  const [loadInput, setLoadInput] = useState(() => String(breaker.loadAmps));
+  useEffect(() => {
+    setLoadInput((cur) => (Number(cur) === breaker.loadAmps ? cur : String(breaker.loadAmps)));
+  }, [breaker.loadAmps]);
   const slotLabel = breaker.poles === 2 ? `${breaker.slot}/${breaker.slot + 2}` : `${breaker.slot}`;
   const live = breaker.on && !breaker.tripped;
   const hasError = warnings.some((w) => w.level === "error");
@@ -709,11 +725,11 @@ function CircuitRow({ breaker, selected, warnings, onUpdate, onRemove, onSelect,
   const cardCls = `pt-circuit${selected ? " is-selected" : ""}`;
   return (
     <div
-      onClick={onSelect}
+      onClick={() => onSelect(breaker.id)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onSelect();
+          onSelect(breaker.id);
         }
       }}
       role="button"
@@ -736,7 +752,7 @@ function CircuitRow({ breaker, selected, warnings, onUpdate, onRemove, onSelect,
         type="text"
         value={breaker.name}
         placeholder="Circuit name (e.g., Kitchen lights)"
-        onChange={(e) => onUpdate({ name: e.target.value })}
+        onChange={(e) => onUpdate(breaker.id, { name: e.target.value })}
         onClick={(e) => e.stopPropagation()}
         className="pt-circuit-name"
       />
@@ -749,7 +765,7 @@ function CircuitRow({ breaker, selected, warnings, onUpdate, onRemove, onSelect,
           <select
             id={`pt-awg-${breaker.id}`}
             value={breaker.awg}
-            onChange={(e) => onUpdate({ awg: Number(e.target.value) as AWG })}
+            onChange={(e) => onUpdate(breaker.id, { awg: Number(e.target.value) as AWG })}
             className="pt-select"
           >
             {AWG_OPTIONS.map((awg) => (
@@ -769,10 +785,21 @@ function CircuitRow({ breaker, selected, warnings, onUpdate, onRemove, onSelect,
               type="number"
               min={0}
               step={0.1}
-              value={breaker.loadAmps}
+              value={loadInput}
               onChange={(e) => {
-                const v = Number(e.target.value);
-                onUpdate({ loadAmps: Number.isFinite(v) && v >= 0 ? v : 0 });
+                const raw = e.target.value;
+                setLoadInput(raw);
+                if (raw.trim() === "") return; // allow an empty field while editing
+                const v = Number(raw);
+                if (Number.isFinite(v) && v >= 0) onUpdate(breaker.id, { loadAmps: v });
+              }}
+              onBlur={() => {
+                const v = Number(loadInput);
+                setLoadInput(
+                  loadInput.trim() === "" || !Number.isFinite(v) || v < 0
+                    ? String(breaker.loadAmps)
+                    : String(v)
+                );
               }}
               className="pt-amp-input"
             />
@@ -790,7 +817,7 @@ function CircuitRow({ breaker, selected, warnings, onUpdate, onRemove, onSelect,
               role="switch"
               aria-checked={live}
               checked={live}
-              onChange={() => onUpdate({ on: !breaker.on, tripped: false })}
+              onChange={() => onUpdate(breaker.id, { on: !breaker.on, tripped: false })}
               className="pt-switch-input"
             />
             <span className={trackCls} aria-hidden="true">
@@ -804,7 +831,7 @@ function CircuitRow({ breaker, selected, warnings, onUpdate, onRemove, onSelect,
       <div className="pt-actions">
         <button
           type="button"
-          onClick={stopper(onTrip)}
+          onClick={stopper(() => onTrip(breaker.id))}
           className="pt-icon-btn is-trip"
           title="Simulate trip"
           aria-label="Simulate trip"
@@ -813,7 +840,7 @@ function CircuitRow({ breaker, selected, warnings, onUpdate, onRemove, onSelect,
         </button>
         <button
           type="button"
-          onClick={stopper(onRemove)}
+          onClick={stopper(() => onRemove(breaker.id))}
           className="pt-icon-btn is-danger"
           title="Remove breaker"
           aria-label="Remove breaker"
@@ -840,7 +867,7 @@ function CircuitRow({ breaker, selected, warnings, onUpdate, onRemove, onSelect,
       ) : null}
     </div>
   );
-}
+});
 
 function SummaryStat({
   label,
@@ -918,20 +945,20 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
     setSelectedId(id);
   }
 
-  function updateBreaker(id: string, patch: Partial<Breaker>) {
+  // Stable across renders (functional updates only) so the React.memo'd
+  // CircuitRows don't re-render just because the parent re-rendered.
+  const updateBreaker = useCallback((id: string, patch: Partial<Breaker>) => {
     setBreakers((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
-  }
+  }, []);
 
-  function removeBreaker(id: string) {
+  const removeBreaker = useCallback((id: string) => {
     setBreakers((prev) => prev.filter((b) => b.id !== id));
-    if (selectedId === id) setSelectedId(null);
-  }
+    setSelectedId((cur) => (cur === id ? null : cur));
+  }, []);
 
-  function tripBreaker(id: string) {
-    setBreakers((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, tripped: true, on: false } : b))
-    );
-  }
+  const tripBreaker = useCallback((id: string) => {
+    setBreakers((prev) => prev.map((b) => (b.id === id ? { ...b, tripped: true, on: false } : b)));
+  }, []);
 
   // Auto-scroll selected circuit into view
   const selectedRef = useRef<string | null>(null);
@@ -950,25 +977,35 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
   return (
     <div className="pt-shell">
       <div className="pt-scene">
-        <Canvas shadows frameloop={active ? "always" : "never"} camera={{ position: [0, 1.1, 1.45], fov: 32 }}>
+        <Canvas
+          shadows
+          frameloop={active ? "demand" : "never"}
+          camera={{ position: [0, 1.1, 1.45], fov: 32 }}
+          aria-label="3D view of the breaker panel. Use the Installed Circuits list below to add and edit breakers."
+        >
           <color attach="background" args={["#0e1116"]} />
-          <ambientLight intensity={0.45} />
+          <ambientLight intensity={0.55} />
           <directionalLight position={[2, 4, 3]} intensity={1.4} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
           <directionalLight position={[-2, 2, 1]} intensity={0.4} color="#fff5e0" />
-          <Environment preset="warehouse" />
           <ReflectiveFloor />
-          <ContactShadows position={[0, PANEL.centerY - PANEL.height / 2 - 0.005, 0]} opacity={0.45} blur={2.4} scale={3} far={1.5} />
+          <ContactShadows position={[0, PANEL.centerY - PANEL.height / 2 - 0.005, 0]} opacity={0.45} blur={2.4} scale={3} far={1.5} frames={1} />
           <PanelScene
             breakers={breakers}
+            breakerWarnings={breakerWarnings}
             selectedId={selectedId}
             hoverSlot={hoverSlot}
             onSelectBreaker={setSelectedId}
             onHoverSlot={(slot) => setHoverSlot(slot)}
             onUnhoverSlot={(slot) => setHoverSlot((prev) => (prev === slot ? null : prev))}
           />
-          <OrbitControls enablePan={false} target={[0, 1, 0]} minDistance={1.1} maxDistance={4} />
+          <OrbitControls enablePan={false} target={[0, PANEL.centerY, 0]} minDistance={1.1} maxDistance={4} />
         </Canvas>
         <div className="pt-scene-overlay">200A Split-Phase Load Center</div>
+        <p className="sr-only">
+          3D breaker panel: {breakers.length} breaker{breakers.length === 1 ? "" : "s"} installed,{" "}
+          {slotsUsed} of {TOTAL_SLOTS} slots used. This view is decorative — use the Installed
+          Circuits list to add, edit, and remove breakers.
+        </p>
       </div>
 
       <aside className="pt-hud">
@@ -994,11 +1031,10 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
                   key={b.id}
                   breaker={b}
                   selected={selectedId === b.id}
-                  warnings={breakerWarnings[b.id] ?? []}
-                  onSelect={() => setSelectedId(b.id)}
-                  onUpdate={(patch) => updateBreaker(b.id, patch)}
-                  onRemove={() => removeBreaker(b.id)}
-                  onTrip={() => tripBreaker(b.id)}
+                  onSelect={setSelectedId}
+                  onUpdate={updateBreaker}
+                  onRemove={removeBreaker}
+                  onTrip={tripBreaker}
                 />
               ))}
             </div>

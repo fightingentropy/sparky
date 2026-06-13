@@ -24,6 +24,7 @@ import { usePersistedState } from "./usePersistedState";
 import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
 import { writeClipboardText } from "./clipboard";
+import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
 import { isBoolean } from "./validators";
 
 type Answers = Record<number, ExamChoice>;
@@ -223,7 +224,9 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   useEffect(() => {
     if (!practiceTarget || !isKnownExamId(practiceTarget.examId)) return;
     setSelectedExamId(practiceTarget.examId);
-  }, [practiceTarget?.examId, practiceTarget?.nonce, setSelectedExamId]);
+    // practiceTarget is a fresh object per "open this exam" request (its nonce
+    // is bumped each time), so depending on it re-runs exactly when intended.
+  }, [practiceTarget, setSelectedExamId]);
 
   const selectedExamEntry = getExamEntry(selectedExamId);
   const [loadedExam, setLoadedExam] = useState<Exam | null>(null);
@@ -270,6 +273,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   );
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
   const [reviewSectionId, setReviewSectionId] = useState("all");
+  const [examInfoOpen, setExamInfoOpen] = useState(false);
   const [retryQuestionNumbers, setRetryQuestionNumbers] = useState<number[] | null>(null);
   const [examCopyState, setExamCopyState] = useState<CopyState>("idle");
   const examCopyTimeoutRef = useRef<number | null>(null);
@@ -286,6 +290,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     setReviewFilter("all");
     setReviewSectionId("all");
     setRetryQuestionNumbers(null);
+    setExamInfoOpen(false);
     setExamCopyState("idle");
     if (examCopyTimeoutRef.current !== null) {
       window.clearTimeout(examCopyTimeoutRef.current);
@@ -492,11 +497,12 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
 
   function setAnswer(questionNumber: number, choice: ExamChoice) {
     if (!exam || submitted) return;
-    setAnswers((current) => {
-      const next = { ...current, [questionNumber]: choice };
-      syncToServer(next, false);
-      return next;
-    });
+    // Compute next from the committed `answers` (fresh in this event handler) so
+    // the server sync runs as a plain effect, not as a side effect inside the
+    // setState updater (which would double-fire under StrictMode).
+    const next = { ...answers, [questionNumber]: choice };
+    setAnswers(next);
+    syncToServer(next, false);
   }
 
   function handleSubmit() {
@@ -505,7 +511,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     setSubmitted(true);
     syncToServer(answers, true);
     window.setTimeout(() => {
-      reviewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      scrollIntoViewSafely(reviewRef.current, { block: "start" });
     }, 60);
   }
 
@@ -519,28 +525,24 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     // attemptCountRef yet, so a fresh test on another device lands on the same
     // variant the answers belong to.
     syncToServer({} as Answers, false, attemptCount + 1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollToSafely(window, { top: 0 });
   }
 
   function handleRetryMissed() {
     if (!exam || missedQuestionNumbers.length === 0) return;
     const missedSet = new Set(missedQuestionNumbers);
-    setAnswers((current) => {
-      const next = { ...current };
-      for (const questionNumber of missedSet) {
-        delete next[questionNumber];
-      }
-      syncToServer(next, false);
-      return next;
-    });
+    const next = { ...answers };
+    for (const questionNumber of missedSet) {
+      delete next[questionNumber];
+    }
+    setAnswers(next);
+    syncToServer(next, false);
     setRetryQuestionNumbers(missedQuestionNumbers);
     setSubmitted(false);
     setReviewFilter("all");
     setReviewSectionId("all");
     window.setTimeout(() => {
-      document
-        .getElementById(`exam-q-${missedQuestionNumbers[0]}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      scrollIntoViewSafely(document.getElementById(`exam-q-${missedQuestionNumbers[0]}`), { block: "center" });
     }, 60);
   }
 
@@ -552,9 +554,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   function scrollToFirstUnanswered() {
     for (const q of questions) {
       if (!(q.number in answers)) {
-        document
-          .getElementById(`exam-q-${q.number}`)
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        scrollIntoViewSafely(document.getElementById(`exam-q-${q.number}`), { block: "center" });
         return;
       }
     }
@@ -682,15 +682,20 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               )}
               {exam ? (
                 <>
-                  <span
+                  <button
+                    type="button"
                     className="exam-title-info"
-                    tabIndex={0}
-                    role="button"
                     aria-label="About this exam"
+                    aria-expanded={examInfoOpen}
+                    onClick={() => setExamInfoOpen((open) => !open)}
+                    onBlur={() => setExamInfoOpen(false)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") setExamInfoOpen(false);
+                    }}
                   >
                     i
-                  </span>
-                  <div className="exam-tooltip" role="tooltip">
+                  </button>
+                  <div className={`exam-tooltip${examInfoOpen ? " is-open" : ""}`} role="tooltip">
                     <span className="exam-tooltip-subtitle">{exam.subtitle}</span>
                     <p className="exam-tooltip-description">{exam.description}</p>
                     <p className="exam-tooltip-format">{exam.format}</p>

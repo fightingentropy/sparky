@@ -27,6 +27,7 @@ import { usePersistedState } from "./usePersistedState";
 import { useHistory } from "./useHistory";
 import { useFocusTrap } from "./useFocusTrap";
 import { writeClipboardText } from "./clipboard";
+import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
 import { isBoolean } from "./validators";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
@@ -1348,10 +1349,7 @@ export default function App() {
 
     if (targetId) {
       window.setTimeout(() => {
-        document.getElementById(targetId)?.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
+        scrollIntoViewSafely(document.getElementById(targetId), { block: "start" });
       }, 50);
     }
   }, []);
@@ -1372,7 +1370,7 @@ export default function App() {
     const maxIndex = Math.max(filteredApplets.length - 1, 0);
     const nextIndex = Math.min(Math.max(index, 0), maxIndex);
     setActiveToolIndex((current) => (current === nextIndex ? current : nextIndex));
-    grid.scrollTo({ left: grid.clientWidth * nextIndex, behavior: "smooth" });
+    scrollToSafely(grid, { left: grid.clientWidth * nextIndex });
   }
 
   function openCommandPalette() {
@@ -1667,8 +1665,12 @@ export default function App() {
 
   const filteredCheatSections = cheatSheetSections;
 
-  const paletteItems = useMemo(() => {
-    const baseItems: PaletteItem[] = [
+  // Built once — every source is module-static and navigateTo is stable — so
+  // typing in the palette only re-runs the cheap filter below rather than
+  // rebuilding the whole index (hundreds of items with large keyword strings)
+  // on every keystroke.
+  const paletteBaseItems = useMemo<PaletteItem[]>(() => {
+    return [
       {
         title: "Home",
         subtitle: "Open the tools page.",
@@ -1763,11 +1765,15 @@ export default function App() {
         action: () => navigateTo("tutorials", tutorial.id)
       }))
     ];
+  }, [navigateTo]);
 
-    return baseItems
-      .filter((item) => matchesQuery(`${item.title} ${item.subtitle} ${item.keywords}`, paletteQuery))
-      .slice(0, 12);
-  }, [paletteQuery]);
+  const paletteItems = useMemo(
+    () =>
+      paletteBaseItems
+        .filter((item) => matchesQuery(`${item.title} ${item.subtitle} ${item.keywords}`, paletteQuery))
+        .slice(0, 12),
+    [paletteBaseItems, paletteQuery]
+  );
 
   useEffect(() => {
     const updatePage = () => setPage(getPageFromLocation());
@@ -1830,6 +1836,13 @@ export default function App() {
     };
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [navMenuOpen]);
+
+  // Move focus into the menu when it opens so keyboard users land on the first
+  // item (paired with arrow-key roving in handleNavMenuKeyDown below).
+  useEffect(() => {
+    if (!navMenuOpen) return;
+    navMenuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
   }, [navMenuOpen]);
 
   useEffect(() => {
@@ -1921,6 +1934,27 @@ export default function App() {
       window.removeEventListener("resize", updateHeight);
     };
   }, [activeToolIndex, filteredAppletIds, filteredApplets.length, page]);
+
+  function handleNavMenuKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    const container = navMenuRef.current;
+    if (!container) return;
+    const items = Array.from(container.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+    if (items.length === 0) return;
+    const currentIndex = items.indexOf(document.activeElement as HTMLElement);
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      items[currentIndex < 0 ? 0 : (currentIndex + 1) % items.length]?.focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      items[currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length]?.focus();
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      items[0]?.focus();
+    } else if (event.key === "End") {
+      event.preventDefault();
+      items[items.length - 1]?.focus();
+    }
+  }
 
   function handlePaletteKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (!paletteItems.length) return;
@@ -2105,6 +2139,7 @@ export default function App() {
                 className="nav-menu"
                 role="menu"
                 aria-label="Pages"
+                onKeyDown={handleNavMenuKeyDown}
               >
                 <div className="nav-menu-pages" role="none">
                   {PAGE_NAV_ITEMS.map((item) => (

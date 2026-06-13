@@ -1,0 +1,15 @@
+# Cloudflare Pages security headers (applied to every response).
+# CSP notes:
+#  - script-src 'self': the built index.html has no inline scripts; all JS is
+#    hashed same-origin bundles, and the service worker is same-origin.
+#  - style-src 'unsafe-inline': the app uses inline style attributes for
+#    progress-bar widths and CSS custom properties. The font is self-hosted.
+#  - img-src allows electriciantraining.co.uk: some exam questions reference
+#    diagram images hosted there. data:/blob: cover canvas/texture sources.
+#  - connect-src 'self': the only network calls are the same-origin /api routes.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://electriciantraining.co.uk; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
