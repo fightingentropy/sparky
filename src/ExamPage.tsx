@@ -3,7 +3,6 @@ import {
   getActiveVariantIndex,
   getPassMark,
   getScoringBand,
-  getScoringRanges,
   getSectionQuestionsForVariant,
   getVariantCount,
   type ScoringRange
@@ -272,7 +271,6 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     isBoolean
   );
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
-  const [reviewSectionId, setReviewSectionId] = useState("all");
   const [examInfoOpen, setExamInfoOpen] = useState(false);
   const [retryQuestionNumbers, setRetryQuestionNumbers] = useState<number[] | null>(null);
   const [examCopyState, setExamCopyState] = useState<CopyState>("idle");
@@ -288,7 +286,6 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
 
   useEffect(() => {
     setReviewFilter("all");
-    setReviewSectionId("all");
     setRetryQuestionNumbers(null);
     setExamInfoOpen(false);
     setExamCopyState("idle");
@@ -441,7 +438,6 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   );
   const total = questions.length;
   const passMark = useMemo(() => (exam ? getPassMark(exam, total) : 0), [exam, total]);
-  const scoringRanges = useMemo(() => (exam ? getScoringRanges(exam, total) : []), [exam, total]);
 
   const answeredCount = useMemo(
     () => questions.reduce((count, question) => count + (answers[question.number] ? 1 : 0), 0),
@@ -484,16 +480,10 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
         .map((question) => question.number),
     [activeSectionGroups, answers]
   );
-  const displaySectionGroups = useMemo(() => {
-    if (!submitted) return activeSectionGroups;
-    return activeSectionGroups
-      .filter(({ section }) => reviewSectionId === "all" || section.id === reviewSectionId)
-      .map(({ section, questions: sectionQuestions }) => ({
-        section,
-        questions: sectionQuestions.filter((question) => matchesReviewFilter(question, answers, reviewFilter))
-      }))
-      .filter((group) => group.questions.length > 0);
-  }, [activeSectionGroups, answers, reviewFilter, reviewSectionId, submitted]);
+  const displayQuestions = useMemo(() => {
+    if (!submitted) return questions;
+    return questions.filter((question) => matchesReviewFilter(question, answers, reviewFilter));
+  }, [questions, answers, reviewFilter, submitted]);
 
   function setAnswer(questionNumber: number, choice: ExamChoice) {
     if (!exam || submitted) return;
@@ -540,7 +530,6 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     setRetryQuestionNumbers(missedQuestionNumbers);
     setSubmitted(false);
     setReviewFilter("all");
-    setReviewSectionId("all");
     window.setTimeout(() => {
       scrollIntoViewSafely(document.getElementById(`exam-q-${missedQuestionNumbers[0]}`), { block: "center" });
     }, 60);
@@ -748,15 +737,11 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
 
         {submitted && exam && scoringBand ? (
           <ExamResults
-            exam={exam}
-            sectionGroups={activeSectionGroups}
-            answers={answers}
             correctCount={correctCount}
             total={total}
             percent={percent}
             passed={passed}
             scoringBand={scoringBand}
-            scoringRanges={scoringRanges}
             reviewRef={reviewRef}
           />
         ) : null}
@@ -777,23 +762,9 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                 </button>
               ))}
             </div>
-            <label className="exam-review-section">
-              <span>Section</span>
-              <select
-                value={reviewSectionId}
-                onChange={(event) => setReviewSectionId(event.target.value)}
-              >
-                <option value="all">All sections</option>
-                {activeSectionGroups.map(({ section }) => (
-                  <option key={section.id} value={section.id}>
-                    {section.title.replace(/^Section \d+ — /, "")}
-                  </option>
-                ))}
-              </select>
-            </label>
             <button
               type="button"
-              className="ghost-button"
+              className="ghost-button exam-review-retry"
               onClick={handleRetryMissed}
               disabled={missedQuestionNumbers.length === 0}
             >
@@ -807,25 +778,20 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
         ) : null}
 
         <div className="exam-sections">
-          {displaySectionGroups.map(({ section, questions: sectionQuestions }) => (
-            <article key={section.id} className="exam-section" id={section.id}>
-              <h3 className="exam-section-title">{section.title}</h3>
-              <div className="exam-question-list">
-                {sectionQuestions.map((question) => (
-                  <QuestionCard
-                    key={question.number}
-                    question={question}
-                    selected={answers[question.number]}
-                    submitted={submitted}
-                    onSelect={(choice) => setAnswer(question.number, choice)}
-                  />
-                ))}
-              </div>
-            </article>
-          ))}
+          <div className="exam-question-list">
+            {displayQuestions.map((question) => (
+              <QuestionCard
+                key={question.number}
+                question={question}
+                selected={answers[question.number]}
+                submitted={submitted}
+                onSelect={(choice) => setAnswer(question.number, choice)}
+              />
+            ))}
+          </div>
         </div>
 
-        {submitted && exam && displaySectionGroups.length === 0 ? (
+        {submitted && exam && displayQuestions.length === 0 ? (
           <p className="empty-state">No questions match the current review filters.</p>
         ) : null}
 
@@ -1059,50 +1025,23 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
   );
 }
 
-type SectionGroup = ReturnType<typeof getSectionQuestionsForVariant>[number];
-
 type ResultsProps = {
-  exam: Exam;
-  sectionGroups: SectionGroup[];
-  answers: Answers;
   correctCount: number;
   total: number;
   percent: number;
   passed: boolean;
   scoringBand: ScoringRange;
-  scoringRanges: ScoringRange[];
   reviewRef: React.RefObject<HTMLDivElement | null>;
 };
 
 function ExamResults({
-  exam,
-  sectionGroups,
-  answers,
   correctCount,
   total,
   percent,
   passed,
   scoringBand,
-  scoringRanges,
   reviewRef
 }: ResultsProps) {
-  const sectionStats = useMemo(() => {
-    return sectionGroups.map(({ section, questions: sectionQuestions }) => {
-      const sectionTotal = sectionQuestions.length;
-      const correct = sectionQuestions.reduce(
-        (acc, q) => acc + (answers[q.number] === q.answer ? 1 : 0),
-        0
-      );
-      return {
-        id: section.id,
-        title: section.title.replace(/^Section \d+ — /, ""),
-        correct,
-        total: sectionTotal,
-        pct: sectionTotal ? Math.round((correct / sectionTotal) * 100) : 0
-      };
-    });
-  }, [sectionGroups, answers]);
-
   return (
     <div className="exam-results" ref={reviewRef}>
       <div className={`exam-results-banner ${passed ? "is-pass" : "is-fail"}`}>
@@ -1116,52 +1055,6 @@ function ExamResults({
         <div className="exam-results-verdict">
           <strong>{scoringBand.range}</strong>
           <span>{scoringBand.label}</span>
-        </div>
-      </div>
-
-      <div className="exam-results-grid">
-        <div className="exam-results-card">
-          <h4>Scoring guide</h4>
-          <ul className="exam-scoring-list">
-            {scoringRanges.map((band) => {
-              const isActive = band.range === scoringBand.range;
-              return (
-                <li key={band.range} className={isActive ? "is-active" : undefined}>
-                  <strong>{band.range}</strong>
-                  <span>{band.label}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-        <div className="exam-results-card">
-          <h4>Topics to prioritise</h4>
-          <ul className="exam-priorities-list">
-            {exam.priorities.map((p) => (
-              <li key={p}>{p}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="exam-results-card exam-results-card--by-section">
-          <h4>By section</h4>
-          <ul className="exam-section-breakdown">
-            {sectionStats.map((s) => (
-              <li key={s.id}>
-                <div className="exam-section-breakdown-head">
-                  <span className="exam-section-breakdown-title">{s.title}</span>
-                  <strong>
-                    {s.correct}/{s.total}
-                  </strong>
-                </div>
-                <div className="exam-section-breakdown-bar">
-                  <div
-                    className="exam-section-breakdown-fill"
-                    style={{ width: `${s.pct}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </div>

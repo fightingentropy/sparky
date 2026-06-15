@@ -79,14 +79,16 @@ export default defineConfig({
   ],
   server: {
     host: true,
-    port: 4173,
+    // Honor a port assigned via the PORT env var (e.g. preview tooling that
+    // auto-picks a free port to avoid collisions); fall back to 4173 otherwise.
+    port: Number(process.env.PORT) || 4173,
     proxy: {
       "/api": "http://localhost:8788"
     }
   },
   preview: {
     host: true,
-    port: 4173
+    port: Number(process.env.PORT) || 4173
   },
   build: {
     rolldownOptions: {
