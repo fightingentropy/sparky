@@ -2991,20 +2991,6 @@ input:disabled {
   gap: 24px;
 }
 
-.exam-section {
-  display: grid;
-  gap: 14px;
-}
-
-.exam-section-title {
-  font-size: 1rem;
-  color: var(--text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
-
 .exam-question-list {
   display: grid;
   gap: 14px;
@@ -3434,16 +3420,40 @@ input:disabled {
 }
 
 .exam-review-filter {
-  min-height: 30px;
-  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 8px 0 13px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface-alt);
   color: var(--muted-strong);
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition: border-color 160ms var(--ease), background 160ms var(--ease), color 160ms var(--ease);
+}
+
+.exam-review-filter span {
+  white-space: nowrap;
+}
+
+.exam-review-filter strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.45rem;
+  height: 1.45rem;
+  padding: 0 0.42rem;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .exam-review-filter:hover,
@@ -3453,23 +3463,15 @@ input:disabled {
   color: var(--accent-strong);
 }
 
-.exam-review-section {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 650;
-  white-space: nowrap;
+.exam-review-filter.is-active strong {
+  background: color-mix(in srgb, var(--bg) 14%, transparent);
+  color: var(--bg);
 }
 
-.exam-review-section select {
+.exam-review-retry {
+  justify-self: end;
   min-height: 32px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-alt);
-  color: var(--text);
-  padding: 0 8px;
+  font-size: 0.78rem;
 }
 
 /* ── Exam results ──────────────────────── */
@@ -3482,10 +3484,10 @@ input:disabled {
 
 .exam-results-banner {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 20px 24px;
+  gap: 6px 16px;
+  padding: 12px 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -3505,35 +3507,36 @@ input:disabled {
 }
 
 .exam-results-score-block {
-  display: grid;
-  gap: 2px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
 }
 
 .exam-results-label {
   color: var(--muted-strong);
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .exam-results-score {
-  font-size: clamp(2rem, 6vw, 3rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   line-height: 1;
   color: var(--text);
 }
 
 .exam-results-score span {
-  font-size: 0.55em;
+  font-size: 0.62em;
   font-weight: 600;
   color: var(--muted-strong);
-  margin-left: 2px;
+  margin-left: 1px;
 }
 
 .exam-results-percent {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--accent-strong);
 }
@@ -3547,15 +3550,18 @@ input:disabled {
 }
 
 .exam-results-verdict {
-  display: grid;
-  gap: 4px;
-  text-align: right;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-left: auto;
+  min-width: 0;
 }
 
 .exam-results-verdict strong {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text);
+  white-space: nowrap;
 }
 
 .exam-results-verdict span {
@@ -3719,16 +3725,6 @@ input:disabled {
     grid-template-columns: 1fr;
   }
 
-  .exam-review-section {
-    width: 100%;
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .exam-review-section select {
-    width: 100%;
-  }
-
   .exam-results-verdict {
     text-align: left;
   }
@@ -3836,7 +3832,6 @@ input:disabled {
   }
 
   .exam-sections,
-  .exam-section,
   .exam-question-list {
     min-width: 0;
     max-width: 100%;
@@ -3844,15 +3839,6 @@ input:disabled {
 
   .exam-sections {
     gap: 16px;
-  }
-
-  .exam-section {
-    gap: 10px;
-  }
-
-  .exam-section-title {
-    padding-bottom: 6px;
-    font-size: 0.9rem;
   }
 
   .exam-question {
@@ -3993,7 +3979,7 @@ body[data-page="interactive"] .page-interactive {
   width: 100vw;
   margin-left: calc(50% - 50vw);
   max-width: none;
-  padding: 0 16px 16px;
+  padding: 0 clamp(16px, 3vw, 40px) 24px;
   flex: 1;
   min-height: calc(100dvh - 90px);
 }
@@ -4021,6 +4007,12 @@ body[data-page="interactive"] .ix-canvas {
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.page-interactive .ix-header h2 {
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  max-width: none;
 }
 
 .ix-header-actions {
@@ -4114,8 +4106,10 @@ body[data-page="interactive"] .ix-3d-wrap {
 .ix-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
   border-bottom: 1px solid var(--line);
 }
 
@@ -4127,7 +4121,7 @@ body[data-page="interactive"] .ix-3d-wrap {
 
 .ix-save-group {
   align-items: center;
-  margin-left: auto;
+  flex-wrap: nowrap;
 }
 
 .ix-save-input,
@@ -4142,11 +4136,11 @@ body[data-page="interactive"] .ix-3d-wrap {
 }
 
 .ix-save-input {
-  width: min(180px, 100%);
+  flex: 0 1 150px;
 }
 
 .ix-save-select {
-  width: min(220px, 100%);
+  flex: 0 1 170px;
 }
 
 .ix-layout {
@@ -5232,7 +5226,7 @@ select:focus,
 }
 
 .exam-option.is-selected:not(.is-answer):not(.is-wrong) .exam-option-letter {
-  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 12%, transparent);
 }
 
 .exam-submit-btn,
