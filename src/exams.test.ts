@@ -61,7 +61,13 @@ const expectedPerAttempt: Record<string, number[]> = {
   "level-2-electrical-installation": repeat(30, 5),
   "level-3-electrical-installation": repeat(30, 5),
   "building-regulations": repeat(20, 7),
-  "18th-edition": repeat(60, 5),
+  // variants 0-4 are the original five source mocks; 5-24 are Mock 6-25 copied
+  // from the ElectricianTraining bank (some 59 where a broken/duplicate source
+  // row was dropped).
+  "18th-edition": [
+    60, 60, 60, 60, 60, 59, 60, 59, 60, 60, 59, 59, 60, 60, 59, 60, 60, 60, 59, 60, 60, 59, 60, 60,
+    60
+  ],
   "special-locations": [30],
   "pat-testing": [50, 50, 50, 30],
   // variant 5 dropped a duplicate question (90 -> 89).
@@ -70,7 +76,13 @@ const expectedPerAttempt: Record<string, number[]> = {
   "inspection-design-2396": [30, 30, 30, 27, 30, 30, 30, 30, 30, 30, 30, 30, 30, 18],
   "periodic-inspection": repeat(40, 5),
   "am2-installation-assessment": repeat(30, 2),
-  "ecs-health-safety": [50, 50, 50, 49, 36, 16, 24, 28, 38, 27, 28, 32, 27, 40, 21]
+  // variants 0-14 are the original ECS set (3 full mocks, 1 older mock, 11 topic
+  // tests); 15-26 are ECS Test 4-15 copied from the bank (Test 4 is 48 where two
+  // broken source rows were dropped).
+  "ecs-health-safety": [
+    50, 50, 50, 49, 36, 16, 24, 28, 38, 27, 28, 32, 27, 40, 21, 48, 50, 50, 50, 50, 49, 50, 49, 50,
+    50, 50, 50
+  ]
 };
 
 const sourceExamIds = new Set([
