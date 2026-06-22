@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
-import { login as apiLogin, signup as apiSignup, getMe, setToken, ApiError } from "./api";
+import { login as apiLogin, signup as apiSignup, getMe, updateProfile as apiUpdateProfile, setToken, ApiError, type ApiUser, type ProfileUpdate } from "./api";
 
-type User = { id: string; email: string };
+type User = ApiUser;
 
 type AuthState = {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
+  updateProfile: (update: ProfileUpdate) => Promise<void>;
   logout: () => void;
 };
 
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthState>({
   loading: true,
   login: async () => {},
   signup: async () => {},
+  updateProfile: async () => {},
   logout: () => {},
 });
 
@@ -63,13 +65,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(res.user);
   }, []);
 
+  const updateProfile = useCallback(async (update: ProfileUpdate) => {
+    const res = await apiUpdateProfile(update);
+    setUser(res.user);
+  }, []);
+
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, updateProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );

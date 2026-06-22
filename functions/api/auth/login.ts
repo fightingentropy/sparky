@@ -2,7 +2,7 @@ import { verifyPassword, createJWT } from "../_lib/crypto";
 import { json, readJsonBody, type Env } from "../_lib/auth";
 import { rateLimit, clientIp, maybeCleanupRateLimits } from "../_lib/rateLimit";
 
-type UserRow = { id: string; email: string; password_hash: string };
+type UserRow = { id: string; email: string; password_hash: string; nickname: string | null; avatar: string | null };
 
 const TOKEN_TTL_SECONDS = 7 * 24 * 3600;
 const RATE_WINDOW_MS = 15 * 60 * 1000;
@@ -33,7 +33,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
   if (!ipOk || !emailOk) return json({ error: "Too many attempts. Try again later." }, 429);
   waitUntil(maybeCleanupRateLimits(env, now));
 
-  const row = await env.DB.prepare("SELECT id, email, password_hash FROM users WHERE email = ?")
+  const row = await env.DB.prepare("SELECT id, email, password_hash, nickname, avatar FROM users WHERE email = ?")
     .bind(email)
     .first<UserRow>();
 
@@ -47,5 +47,5 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
     { sub: row.id, email: row.email, exp: Math.floor(now / 1000) + TOKEN_TTL_SECONDS },
     env.JWT_SECRET
   );
-  return json({ token, user: { id: row.id, email: row.email } });
+  return json({ token, user: { id: row.id, email: row.email, nickname: row.nickname ?? null, avatar: row.avatar ?? null } });
 };

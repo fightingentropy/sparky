@@ -52,8 +52,10 @@ import { TUTORIALS } from "./tutorials";
 import { COURSE_GUIDES, GUIDE_CATEGORY_LABELS } from "./courseGuides";
 import { useAuth } from "./AuthContext";
 import { AuthModal } from "./AuthModal";
+import { SettingsPage } from "./SettingsPage";
+import { AccountAvatar } from "./AccountAvatar";
 
-type PageId = "home" | "cheatsheet" | "learn" | "exams" | "tutorials" | "interactive";
+type PageId = "home" | "cheatsheet" | "learn" | "exams" | "tutorials" | "interactive" | "settings";
 
 type LegendItem = {
   label: string;
@@ -1168,6 +1170,7 @@ function getPageFromLocation(): PageId {
   if (path === "/exams") return "exams";
   if (path === "/tutorials") return "tutorials";
   if (path === "/interactive") return "interactive";
+  if (path === "/settings") return "settings";
   return DEFAULT_PAGE;
 }
 
@@ -1185,6 +1188,8 @@ function getPageHref(page: PageId): string {
       return "/tutorials";
     case "interactive":
       return "/interactive";
+    case "settings":
+      return "/settings";
   }
 }
 
@@ -1193,9 +1198,18 @@ export default function App() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const { user, logout } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
+  const [reduceMotion, setReduceMotion] = usePersistedState<boolean>("pref-reduce-motion", false, isBoolean);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
   const navMenuRef = useRef<HTMLDivElement | null>(null);
   const navMenuButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  // Apply the reduce-motion preference globally by toggling a class on <html>
+  // (the matching CSS mirrors the prefers-reduced-motion media query).
+  useEffect(() => {
+    document.documentElement.classList.toggle("reduce-motion", reduceMotion);
+  }, [reduceMotion]);
+
+  const displayName = user ? (user.nickname?.trim() || user.email) : null;
 
   const [page, setPage] = useState<PageId>(getPageFromLocation());
   // Track which lazy-loaded pages we have ever activated. We only mount each
@@ -1727,6 +1741,13 @@ export default function App() {
         keywords: "history recent calculations log",
         action: () => setHistoryOpen(true)
       },
+      {
+        title: "Settings",
+        subtitle: "Profile, photo, nickname, and preferences.",
+        tag: "Page",
+        keywords: "settings profile account avatar photo nickname display name preferences reduce motion log out",
+        action: () => navigateTo("settings")
+      },
       ...applets.map((applet) => ({
         title: applet.title,
         subtitle: applet.subtitle,
@@ -2084,24 +2105,13 @@ export default function App() {
               type="button"
               ref={navMenuButtonRef}
               className="topbar-account-btn"
-              aria-label={user ? `Menu and account for ${user.email}` : "Menu"}
+              aria-label={user ? `Menu and account for ${displayName}` : "Menu"}
               aria-haspopup="menu"
               aria-expanded={navMenuOpen}
               aria-controls="page-nav-menu"
               onClick={() => setNavMenuOpen((open) => !open)}
             >
-              <span className="account-avatar">
-                <span className="account-avatar-initial" aria-hidden="true">{user ? (user.email[0] ?? "?").toUpperCase() : "E"}</span>
-                <img
-                  className="account-avatar-img"
-                  src="/profile.jpg"
-                  alt=""
-                  aria-hidden="true"
-                  onError={(event) => {
-                    event.currentTarget.style.display = "none";
-                  }}
-                />
-              </span>
+              <AccountAvatar avatar={user?.avatar} name={displayName} />
             </button>
             {navMenuOpen ? (
               <div
@@ -2133,21 +2143,26 @@ export default function App() {
                 <div className="nav-menu-account" role="none">
                   {user ? (
                     <>
-                      <span className="nav-menu-account-label">
-                        <span className="account-avatar">
-                          <span className="account-avatar-initial" aria-hidden="true">{(user.email[0] ?? "?").toUpperCase()}</span>
-                          <img
-                            className="account-avatar-img"
-                            src="/profile.jpg"
-                            alt=""
-                            aria-hidden="true"
-                            onError={(event) => {
-                              event.currentTarget.style.display = "none";
-                            }}
-                          />
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="nav-menu-item nav-menu-account-card"
+                        aria-label={`Profile and settings for ${displayName}`}
+                        onClick={() => {
+                          navigateTo("settings");
+                          setNavMenuOpen(false);
+                        }}
+                      >
+                        <AccountAvatar avatar={user.avatar} name={displayName} />
+                        <span className="nav-menu-account-identity">
+                          <span className="nav-menu-account-name">{displayName}</span>
+                          {user.nickname?.trim() ? <span className="nav-menu-account-email">{user.email}</span> : null}
                         </span>
-                        <span>{user.email}</span>
-                      </span>
+                        <svg className="nav-menu-account-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="3" />
+                          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                      </button>
                       <button
                         type="button"
                         role="menuitem"
@@ -2161,17 +2176,30 @@ export default function App() {
                       </button>
                     </>
                   ) : (
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className="nav-menu-item nav-menu-account-action"
-                      onClick={() => {
-                        setAuthOpen(true);
-                        setNavMenuOpen(false);
-                      }}
-                    >
-                      Log in
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="nav-menu-item nav-menu-account-action"
+                        onClick={() => {
+                          navigateTo("settings");
+                          setNavMenuOpen(false);
+                        }}
+                      >
+                        Settings
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="nav-menu-item nav-menu-account-action"
+                        onClick={() => {
+                          setAuthOpen(true);
+                          setNavMenuOpen(false);
+                        }}
+                      >
+                        Log in
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -3622,6 +3650,13 @@ export default function App() {
           {visitedPages.has("tutorials") ? <TutorialsPage isActive={page === "tutorials"} /> : null}
           {visitedPages.has("interactive") ? <InteractivePage isActive={page === "interactive"} /> : null}
         </Suspense>
+
+        <SettingsPage
+          isActive={page === "settings"}
+          reduceMotion={reduceMotion}
+          onReduceMotionChange={setReduceMotion}
+          onRequestAuth={() => setAuthOpen(true)}
+        />
       </main>
 
       {paletteOpen ? (

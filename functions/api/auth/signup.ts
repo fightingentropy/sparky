@@ -41,5 +41,5 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
     { sub: id, email, exp: Math.floor(now / 1000) + TOKEN_TTL_SECONDS },
     env.JWT_SECRET
   );
-  return json({ token, user: { id, email } }, 201);
+  return json({ token, user: { id, email, nickname: null, avatar: null } }, 201);
 };
