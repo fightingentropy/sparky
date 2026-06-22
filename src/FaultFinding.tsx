@@ -1048,7 +1048,7 @@ export function FaultFinding(): React.ReactElement {
                   {tp.label}
                 </text>
                 <g className="ff-tp-tooltip">
-                  <rect x={tooltipX} y={tooltipY} width={150} height={32} rx="4" fill="#0e1116" stroke="var(--border-strong)" />
+                  <rect x={tooltipX} y={tooltipY} width={150} height={32} rx="4" fill="#16120d" stroke="var(--border-strong)" />
                   <text x={tooltipX + 8} y={tooltipY + 13} fontSize="10" fill="var(--text)" fontWeight={600}>{tp.label}</text>
                   <text x={tooltipX + 8} y={tooltipY + 26} fontSize="9" fill="var(--muted-strong)">{tp.description}</text>
                 </g>
