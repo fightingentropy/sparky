@@ -1,7 +1,9 @@
 const API_BASE = "/api";
 
-type AuthResponse = { token: string; user: { id: string; email: string } };
-type MeResponse = { user: { id: string; email: string } };
+export type ApiUser = { id: string; email: string; nickname: string | null; avatar: string | null };
+type AuthResponse = { token: string; user: ApiUser };
+type MeResponse = { user: ApiUser };
+export type ProfileUpdate = { nickname?: string | null; avatar?: string | null };
 export type VariantSlot = { answers: Record<string, string>; submitted: boolean };
 type ProgressResponse = {
   progress: Record<
@@ -81,6 +83,13 @@ export async function login(email: string, password: string): Promise<AuthRespon
 
 export async function getMe(): Promise<MeResponse> {
   return request<MeResponse>("/auth/me");
+}
+
+export async function updateProfile(update: ProfileUpdate): Promise<MeResponse> {
+  return request<MeResponse>("/profile", {
+    method: "PUT",
+    body: JSON.stringify(update),
+  });
 }
 
 export async function getExamProgress(): Promise<ProgressResponse> {

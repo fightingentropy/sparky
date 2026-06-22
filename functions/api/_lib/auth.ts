@@ -30,6 +30,36 @@ export function isValidPassword(password: string): boolean {
   return typeof password === "string" && password.length >= 8 && password.length <= 128;
 }
 
+export const MAX_NICKNAME_LENGTH = 40;
+// Generous cap on the stored data: URL. The client resizes avatars to a small
+// square (well under ~60 KB), so anything approaching this ceiling is abuse.
+const MAX_AVATAR_BYTES = 256 * 1024;
+const AVATAR_DATA_URL = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+export type FieldResult = { ok: true; value: string | null } | { ok: false; error: string };
+
+// Trim a nickname; an empty/whitespace string clears it back to null (fall back
+// to the email). Bounds the length so it fits the UI and the column.
+export function normalizeNickname(input: unknown): FieldResult {
+  if (input === null || input === undefined) return { ok: true, value: null };
+  if (typeof input !== "string") return { ok: false, error: "Invalid nickname" };
+  const trimmed = input.trim();
+  if (trimmed.length === 0) return { ok: true, value: null };
+  if (trimmed.length > MAX_NICKNAME_LENGTH) return { ok: false, error: `Nickname must be ${MAX_NICKNAME_LENGTH} characters or fewer` };
+  return { ok: true, value: trimmed };
+}
+
+// Accept only a base64 PNG/JPEG/WebP data URL, size-bounded. Empty string or
+// null removes the avatar.
+export function normalizeAvatar(input: unknown): FieldResult {
+  if (input === null || input === undefined) return { ok: true, value: null };
+  if (typeof input !== "string") return { ok: false, error: "Invalid image" };
+  if (input.length === 0) return { ok: true, value: null };
+  if (input.length > MAX_AVATAR_BYTES) return { ok: false, error: "Image is too large" };
+  if (!AVATAR_DATA_URL.test(input)) return { ok: false, error: "Unsupported image format" };
+  return { ok: true, value: input };
+}
+
 // Allowed exam IDs. Mirror of EXAM_REGISTRY in src/examRegistry.ts. Kept here
 // so the server can reject unknown examIds without importing client code.
 export const VALID_EXAM_IDS = new Set([
