@@ -2,10 +2,11 @@ const API_BASE = "/api";
 
 type AuthResponse = { token: string; user: { id: string; email: string } };
 type MeResponse = { user: { id: string; email: string } };
+export type VariantSlot = { answers: Record<string, string>; submitted: boolean };
 type ProgressResponse = {
   progress: Record<
     string,
-    { answers: Record<string, string>; submitted: boolean; updatedAt: string; attemptCount: number }
+    { variants: Record<string, VariantSlot>; current: number; updatedAt: string }
   >;
 };
 
@@ -88,12 +89,11 @@ export async function getExamProgress(): Promise<ProgressResponse> {
 
 export async function saveExamProgress(
   examId: string,
-  answers: Record<string, string>,
-  submitted: boolean,
-  attemptCount: number
+  current: number,
+  variant?: { index: number; answers: Record<string, string>; submitted: boolean }
 ): Promise<void> {
   await request(`/exams/progress/${examId}`, {
     method: "PUT",
-    body: JSON.stringify({ answers, submitted, attemptCount }),
+    body: JSON.stringify({ current, variant }),
   });
 }

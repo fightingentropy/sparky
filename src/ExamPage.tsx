@@ -24,7 +24,6 @@ import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
 import { writeClipboardText } from "./clipboard";
 import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
-import { isBoolean } from "./validators";
 
 type Answers = Record<number, ExamChoice>;
 type ReviewFilter = "all" | "missed" | "wrong" | "unanswered" | "correct";
@@ -37,11 +36,18 @@ const REVIEW_FILTER_LABELS: Record<ReviewFilter, string> = {
   unanswered: "Unanswered",
   correct: "Correct"
 };
-const EXAM_STORAGE_VERSION = "2026-05-source-matched-covered-exams";
-const EXAM_ANSWERS_STORAGE_PREFIX = `exam-answers-${EXAM_STORAGE_VERSION}-`;
-const EXAM_SUBMITTED_STORAGE_PREFIX = `exam-submitted-${EXAM_STORAGE_VERSION}-`;
-const EXAM_VARIANT_STORAGE_PREFIX = `exam-variant-${EXAM_STORAGE_VERSION}-`;
+// Bumped when exam content or the stored progress shape changes so stale
+// in-progress state is dropped. Per-test memory landed in this version.
+const EXAM_STORAGE_VERSION = "2026-06-per-test";
+const EXAM_PROGRESS_STORAGE_PREFIX = `exam-progress-${EXAM_STORAGE_VERSION}-`;
 const EXAM_UPDATED_STORAGE_PREFIX = `exam-updated-${EXAM_STORAGE_VERSION}-`;
+
+// Each test (variant) of an exam keeps its own answers + completed state, so
+// finishing one test is remembered independently of the others.
+type VariantSlot = { answers: Answers; submitted: boolean };
+type ExamProgress = { variants: Record<string, VariantSlot>; current: number };
+const EMPTY_ANSWERS: Answers = {};
+const EMPTY_PROGRESS: ExamProgress = { variants: {}, current: 0 };
 const PERIODIC_INSPECTION_RESET_AT = Date.UTC(2026, 5, 7, 0, 0);
 const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
   "level-2-electrical-installation": Date.UTC(2026, 4, 26, 21, 1),
@@ -108,8 +114,21 @@ function isAnswers(value: unknown): value is Answers {
   );
 }
 
-function isNonNegativeInt(value: unknown): value is number {
-  return typeof value === "number" && Number.isInteger(value) && value >= 0;
+function isExamProgress(value: unknown): value is ExamProgress {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const progress = value as { variants?: unknown; current?: unknown };
+  if (typeof progress.current !== "number" || !Number.isInteger(progress.current) || progress.current < 0) return false;
+  if (!progress.variants || typeof progress.variants !== "object" || Array.isArray(progress.variants)) return false;
+  return Object.values(progress.variants as Record<string, unknown>).every((slot) => {
+    if (!slot || typeof slot !== "object") return false;
+    const typed = slot as { answers?: unknown; submitted?: unknown };
+    return typeof typed.submitted === "boolean" && isAnswers(typed.answers);
+  });
+}
+
+// Replace one variant's slot, leaving the other tests' progress untouched.
+function writeSlot(progress: ExamProgress, variantIndex: number, slot: VariantSlot): ExamProgress {
+  return { ...progress, variants: { ...progress.variants, [String(variantIndex)]: slot } };
 }
 
 function questionState(question: ExamQuestion, answers: Answers): "correct" | "wrong" | "unanswered" {
@@ -130,9 +149,7 @@ function clearStaleExamProgress() {
     const validExamIds = getValidExamIds();
     const validStorageKeys = new Set(
       validExamIds.flatMap((examId) => [
-        `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`,
-        `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`,
-        `${EXAM_VARIANT_STORAGE_PREFIX}${examId}`,
+        `${EXAM_PROGRESS_STORAGE_PREFIX}${examId}`,
         `${EXAM_UPDATED_STORAGE_PREFIX}${examId}`
       ])
     );
@@ -141,11 +158,14 @@ function clearStaleExamProgress() {
       const key = localStorage.key(index);
       if (!key) continue;
 
+      // Sweep current-shape keys for retired exams, plus any keys left by older
+      // storage shapes/versions (per-exam answers/submitted/variant).
       const isExamProgressKey =
+        key.startsWith("exam-progress-") ||
+        key.startsWith("exam-updated-") ||
         key.startsWith("exam-answers-") ||
         key.startsWith("exam-submitted-") ||
-        key.startsWith("exam-variant-") ||
-        key.startsWith("exam-updated-");
+        key.startsWith("exam-variant-");
       if (isExamProgressKey && !validStorageKeys.has(key)) {
         localStorage.removeItem(key);
       }
@@ -153,16 +173,11 @@ function clearStaleExamProgress() {
 
     for (const [examId, resetAt] of Object.entries(EXAM_LOCAL_PROGRESS_RESET_AT)) {
       if (!resetAt || !isKnownExamId(examId)) continue;
-      const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`;
-      const submittedKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`;
-      const variantKey = `${EXAM_VARIANT_STORAGE_PREFIX}${examId}`;
+      const progressKey = `${EXAM_PROGRESS_STORAGE_PREFIX}${examId}`;
       const updatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${examId}`;
-      const hasLocalProgress = localStorage.getItem(answersKey) !== null || localStorage.getItem(submittedKey) !== null;
       const localUpdatedAt = Number(localStorage.getItem(updatedKey)) || 0;
-      if (hasLocalProgress && localUpdatedAt < resetAt) {
-        localStorage.removeItem(answersKey);
-        localStorage.removeItem(submittedKey);
-        localStorage.removeItem(variantKey);
+      if (localStorage.getItem(progressKey) !== null && localUpdatedAt < resetAt) {
+        localStorage.removeItem(progressKey);
         localStorage.removeItem(updatedKey);
       }
     }
@@ -273,28 +288,18 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   const selectedExamIdRef = useRef(selectedExamEntry.id);
   selectedExamIdRef.current = selectedExamEntry.id;
 
-  const [attemptCount, setAttemptCount] = usePersistedState<number>(
-    `${EXAM_VARIANT_STORAGE_PREFIX}${selectedExamEntry.id}`,
-    0,
-    isNonNegativeInt
+  const [progress, setProgress] = usePersistedState<ExamProgress>(
+    `${EXAM_PROGRESS_STORAGE_PREFIX}${selectedExamEntry.id}`,
+    EMPTY_PROGRESS,
+    isExamProgress
   );
   const variantCount = exam ? getVariantCount(exam) : 0;
-  const variantIndex = exam ? getActiveVariantIndex(attemptCount, exam) : 0;
-  // Always-current attemptCount for the debounced save path (syncToServer runs
-  // inside setState updaters where the closed-over value can be stale).
-  const attemptCountRef = useRef(attemptCount);
-  attemptCountRef.current = attemptCount;
-
-  const [answers, setAnswers] = usePersistedState<Answers>(
-    `${EXAM_ANSWERS_STORAGE_PREFIX}${selectedExamEntry.id}`,
-    {},
-    isAnswers
-  );
-  const [submitted, setSubmitted] = usePersistedState<boolean>(
-    `${EXAM_SUBMITTED_STORAGE_PREFIX}${selectedExamEntry.id}`,
-    false,
-    isBoolean
-  );
+  const variantIndex = exam ? getActiveVariantIndex(progress.current, exam) : 0;
+  // The active test's saved answers/completed state are derived from the current
+  // variant slot; each test persists independently.
+  const currentSlot = progress.variants[String(variantIndex)];
+  const answers: Answers = currentSlot?.answers ?? EMPTY_ANSWERS;
+  const submitted = currentSlot?.submitted ?? false;
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
   const [examInfoOpen, setExamInfoOpen] = useState(false);
   const [retryQuestionNumbers, setRetryQuestionNumbers] = useState<number[] | null>(null);
@@ -331,36 +336,20 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
           try {
             // Skip examIds we don't recognise — protects against poisoned rows.
             if (!isKnownExamId(examId)) continue;
-            if (!isAnswers(data.answers) || typeof data.submitted !== "boolean") continue;
-            const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${examId}`;
-            const submittedKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${examId}`;
-            const variantKey = `${EXAM_VARIANT_STORAGE_PREFIX}${examId}`;
+            // Built as unknown: the API types answers as Record<string,string>;
+            // isExamProgress validates the shape and narrows it to ExamProgress.
+            const serverProgress: unknown = { variants: data.variants, current: data.current };
+            if (!isExamProgress(serverProgress)) continue;
+            const progressKey = `${EXAM_PROGRESS_STORAGE_PREFIX}${examId}`;
             const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${examId}`;
-            const localRaw = localStorage.getItem(answersKey);
-            let localAnswers: Answers = {};
-            try {
-              if (localRaw) {
-                const parsedLocal = JSON.parse(localRaw);
-                if (isAnswers(parsedLocal)) localAnswers = parsedLocal;
-              }
-            } catch {}
-            const hasLocal = Object.keys(localAnswers).length > 0;
+            const hasLocal = localStorage.getItem(progressKey) !== null;
             const localUpdatedAt = Number(localStorage.getItem(localUpdatedKey)) || 0;
             const serverUpdatedAt = parseServerUpdatedAt(data.updatedAt);
             const remoteResetAt = EXAM_REMOTE_PROGRESS_RESET_AT[examId] ?? 0;
             if (remoteResetAt > 0 && serverUpdatedAt < remoteResetAt) continue;
-            // Use the server copy if there's nothing local, or if the server is strictly newer.
+            // Use the server copy if there's nothing local, or if it's strictly newer.
             if (!hasLocal || serverUpdatedAt > localUpdatedAt) {
-              localStorage.setItem(answersKey, JSON.stringify(data.answers));
-              localStorage.setItem(submittedKey, JSON.stringify(data.submitted));
-              // Adopt the server's attempt count too: answers are keyed by
-              // question number, but which questions (and, for hardened exams,
-              // the choice order) a number maps to depends on the variant the
-              // attempt count selects. Restoring answers without it would grade
-              // them against a different variant's questions.
-              if (isNonNegativeInt(data.attemptCount)) {
-                localStorage.setItem(variantKey, JSON.stringify(data.attemptCount));
-              }
+              localStorage.setItem(progressKey, JSON.stringify(serverProgress));
               localStorage.setItem(localUpdatedKey, String(serverUpdatedAt || Date.now()));
             }
           } catch {}
@@ -368,60 +357,44 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
         // Re-hydrate React state for the currently selected exam after the merge.
         const currentExamId = selectedExamIdRef.current;
         try {
-          const variantStored = localStorage.getItem(`${EXAM_VARIANT_STORAGE_PREFIX}${currentExamId}`);
-          if (variantStored) {
-            const parsed = JSON.parse(variantStored);
-            if (isNonNegativeInt(parsed)) setAttemptCount(parsed);
-          }
-        } catch {}
-        try {
-          const answersKey = `${EXAM_ANSWERS_STORAGE_PREFIX}${currentExamId}`;
-          const stored = localStorage.getItem(answersKey);
+          const stored = localStorage.getItem(`${EXAM_PROGRESS_STORAGE_PREFIX}${currentExamId}`);
           if (stored) {
             const parsed = JSON.parse(stored);
-            if (isAnswers(parsed)) setAnswers(parsed);
-          }
-        } catch {}
-        try {
-          const subKey = `${EXAM_SUBMITTED_STORAGE_PREFIX}${currentExamId}`;
-          const subStored = localStorage.getItem(subKey);
-          if (subStored) {
-            const parsed = JSON.parse(subStored);
-            if (isBoolean(parsed)) setSubmitted(parsed);
+            if (isExamProgress(parsed)) setProgress(parsed);
           }
         } catch {}
       })
       .catch(() => {});
-  }, [user, selectedExamEntry.id, setAnswers, setSubmitted, setAttemptCount]);
+  }, [user, selectedExamEntry.id, setProgress]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingSaveRef = useRef<{ examId: string; answers: Answers; submitted: boolean; attemptCount: number } | null>(
-    null
-  );
+  const pendingSaveRef = useRef<
+    { examId: string; current: number; variant?: { index: number; answers: Answers; submitted: boolean } } | null
+  >(null);
   const flushSave = useCallback(() => {
     if (!user || !pendingSaveRef.current) return;
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = null;
     }
-    const { examId, answers: pendingAnswers, submitted: pendingSubmitted, attemptCount: pendingAttempt } =
-      pendingSaveRef.current;
+    const { examId, current, variant } = pendingSaveRef.current;
     pendingSaveRef.current = null;
-    saveExamProgress(examId, pendingAnswers as Record<string, string>, pendingSubmitted, pendingAttempt).catch(() => {});
+    saveExamProgress(
+      examId,
+      current,
+      variant
+        ? { index: variant.index, answers: variant.answers as Record<string, string>, submitted: variant.submitted }
+        : undefined
+    ).catch(() => {});
   }, [user]);
   const syncToServer = useCallback(
-    (nextAnswers: Answers, nextSubmitted: boolean, nextAttemptCount: number = attemptCountRef.current) => {
+    (payload: { current: number; variant?: { index: number; answers: Answers; submitted: boolean } }) => {
       try {
         const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${selectedExamEntry.id}`;
         localStorage.setItem(localUpdatedKey, String(Date.now()));
       } catch {}
       if (!user) return;
-      pendingSaveRef.current = {
-        examId: selectedExamEntry.id,
-        answers: nextAnswers,
-        submitted: nextSubmitted,
-        attemptCount: nextAttemptCount,
-      };
+      pendingSaveRef.current = { examId: selectedExamEntry.id, ...payload };
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(flushSave, 1000);
     },
@@ -524,30 +497,29 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     } else {
       next[questionNumber] = choice;
     }
-    setAnswers(next);
-    syncToServer(next, false);
+    const nextProgress = writeSlot(progress, variantIndex, { answers: next, submitted: false });
+    setProgress(nextProgress);
+    syncToServer({ current: variantIndex, variant: { index: variantIndex, answers: next, submitted: false } });
   }
 
   function handleSubmit() {
     if (!exam) return;
     setRetryQuestionNumbers(null);
-    setSubmitted(true);
-    syncToServer(answers, true);
+    const nextProgress = writeSlot(progress, variantIndex, { answers, submitted: true });
+    setProgress(nextProgress);
+    syncToServer({ current: variantIndex, variant: { index: variantIndex, answers, submitted: true } });
     window.setTimeout(() => {
       scrollIntoViewSafely(reviewRef.current, { block: "start" });
     }, 60);
   }
 
-  function handleReset() {
+  // Clears just the current test so it can be retaken; other tests stay saved.
+  function resetCurrentTest() {
     if (!exam) return;
-    setAnswers({});
-    setSubmitted(false);
     setRetryQuestionNumbers(null);
-    setAttemptCount((current) => current + 1);
-    // Sync the incremented count explicitly — setAttemptCount hasn't flushed to
-    // attemptCountRef yet, so a fresh test on another device lands on the same
-    // variant the answers belong to.
-    syncToServer({} as Answers, false, attemptCount + 1);
+    const nextProgress = writeSlot(progress, variantIndex, { answers: {}, submitted: false });
+    setProgress(nextProgress);
+    syncToServer({ current: variantIndex, variant: { index: variantIndex, answers: {}, submitted: false } });
     scrollToSafely(window, { top: 0 });
   }
 
@@ -556,25 +528,19 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
       setTestMenuOpen(false);
       return;
     }
-    // Each test is a distinct variant whose questions differ, so switching
-    // starts the chosen test fresh rather than carrying answers across. Guard
-    // against losing in-progress work to an accidental tap.
-    if (!submitted && Object.keys(answers).length > 0) {
-      const ok = window.confirm(
-        `Switch to Test ${index + 1}? Your current answers for Test ${variantIndex + 1} will be cleared.`,
-      );
-      if (!ok) {
-        setTestMenuOpen(false);
-        return;
-      }
-    }
-    setAnswers({});
-    setSubmitted(false);
+    // Switching tests is non-destructive: each test keeps its own answers and
+    // completed state, so we just move the pointer and let the chosen test's
+    // saved slot load.
     setRetryQuestionNumbers(null);
-    setAttemptCount(index);
-    syncToServer({} as Answers, false, index);
+    setProgress({ ...progress, current: index });
+    syncToServer({ current: index });
     setTestMenuOpen(false);
     scrollToSafely(window, { top: 0 });
+  }
+
+  function goToNextTest() {
+    if (!exam || variantCount <= 1) return;
+    switchToTest((variantIndex + 1) % variantCount);
   }
 
   function handleRetryMissed() {
@@ -584,10 +550,10 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     for (const questionNumber of missedSet) {
       delete next[questionNumber];
     }
-    setAnswers(next);
-    syncToServer(next, false);
+    const nextProgress = writeSlot(progress, variantIndex, { answers: next, submitted: false });
+    setProgress(nextProgress);
+    syncToServer({ current: variantIndex, variant: { index: variantIndex, answers: next, submitted: false } });
     setRetryQuestionNumbers(missedQuestionNumbers);
-    setSubmitted(false);
     setReviewFilter("all");
     window.setTimeout(() => {
       scrollIntoViewSafely(document.getElementById(`exam-q-${missedQuestionNumbers[0]}`), { block: "center" });
@@ -596,7 +562,6 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
 
   function exitRetryMode() {
     setRetryQuestionNumbers(null);
-    setSubmitted(false);
   }
 
   function scrollToFirstUnanswered() {
@@ -772,18 +737,24 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                 </button>
                 {testMenuOpen ? (
                   <div id="exam-test-menu" className="exam-test-menu" role="listbox" aria-label="Switch test">
-                    {Array.from({ length: variantCount }, (_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        role="option"
-                        aria-selected={i === variantIndex}
-                        className={`exam-test-option${i === variantIndex ? " is-active" : ""}`}
-                        onClick={() => switchToTest(i)}
-                      >
-                        Test {i + 1}
-                      </button>
-                    ))}
+                    {Array.from({ length: variantCount }, (_, i) => {
+                      const done = progress.variants[String(i)]?.submitted ?? false;
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          role="option"
+                          aria-selected={i === variantIndex}
+                          className={`exam-test-option${i === variantIndex ? " is-active" : ""}${done ? " is-done" : ""}`}
+                          onClick={() => switchToTest(i)}
+                        >
+                          <span>Test {i + 1}</span>
+                          {done ? (
+                            <span className="exam-test-done" aria-hidden="true">✓</span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
@@ -854,14 +825,6 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              className="ghost-button exam-review-retry"
-              onClick={handleRetryMissed}
-              disabled={missedQuestionNumbers.length === 0}
-            >
-              Retry missed questions
-            </button>
           </div>
         ) : null}
 
@@ -943,9 +906,14 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                 >
                   Retry missed
                 </button>
-                <button type="button" className="ghost-button" onClick={handleReset}>
-                  Reset &amp; try next test
+                <button type="button" className="ghost-button" onClick={resetCurrentTest}>
+                  Reset test
                 </button>
+                {variantCount > 1 ? (
+                  <button type="button" className="ghost-button" onClick={goToNextTest}>
+                    Next test
+                  </button>
+                ) : null}
               </div>
             </>
           )}
