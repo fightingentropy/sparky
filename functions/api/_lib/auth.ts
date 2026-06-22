@@ -67,6 +67,53 @@ export function validateAnswers(input: unknown): { ok: true; value: Record<strin
   return { ok: true, value: out };
 }
 
+// Per-test (per-variant) progress. Each exam stores a map of variant index ->
+// { answers, submitted } plus the current variant the user is on. Persisted as
+// JSON in the existing exam_progress.answers TEXT column (tagged __v: 2) so no
+// schema migration is needed; legacy rows (a flat answers map) are converted to
+// a single variant slot on read.
+export type VariantSlot = { answers: Record<string, string>; submitted: boolean };
+export type StoredProgress = { variants: Record<string, VariantSlot>; current: number };
+
+export const MAX_VARIANTS = 60;
+
+export function clampIndex(input: unknown): number {
+  return typeof input === "number" && Number.isInteger(input) && input >= 0 ? Math.min(input, 1000) : 0;
+}
+
+export function parseStoredProgress(answersText: string, submittedInt: number, attemptCount: number): StoredProgress {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(answersText);
+  } catch {
+    return { variants: {}, current: clampIndex(attemptCount) };
+  }
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && (parsed as { __v?: unknown }).__v === 2) {
+    const obj = parsed as { variants?: unknown; current?: unknown };
+    const variants: Record<string, VariantSlot> = {};
+    if (obj.variants && typeof obj.variants === "object" && !Array.isArray(obj.variants)) {
+      for (const [key, value] of Object.entries(obj.variants as Record<string, unknown>)) {
+        if (!/^\d+$/.test(key)) continue;
+        if (!value || typeof value !== "object") continue;
+        const slot = value as { answers?: unknown; submitted?: unknown };
+        const validated = validateAnswers(slot.answers);
+        if (!validated.ok) continue;
+        variants[key] = { answers: validated.value, submitted: slot.submitted === true };
+      }
+    }
+    return { variants, current: clampIndex(obj.current) };
+  }
+  // Legacy flat answers map — fold into a single variant slot for its attempt.
+  const current = clampIndex(attemptCount);
+  const validated = validateAnswers(parsed);
+  if (!validated.ok) return { variants: {}, current };
+  return { variants: { [String(current)]: { answers: validated.value, submitted: submittedInt === 1 } }, current };
+}
+
+export function serializeProgress(progress: StoredProgress): string {
+  return JSON.stringify({ __v: 2, variants: progress.variants, current: progress.current });
+}
+
 // Best-effort parse of a JSON request body. Returns null on empty/malformed input.
 export async function readJsonBody<T>(request: Request): Promise<T | null> {
   try {

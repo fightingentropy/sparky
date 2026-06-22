@@ -1,4 +1,4 @@
-import { getUserFromRequest, json, validateAnswers, VALID_EXAM_IDS, type Env } from "../_lib/auth";
+import { getUserFromRequest, json, parseStoredProgress, VALID_EXAM_IDS, type Env } from "../_lib/auth";
 
 type ProgressRow = {
   exam_id: string;
@@ -20,24 +20,20 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 
   const progress: Record<
     string,
-    { answers: Record<string, string>; submitted: boolean; attemptCount: number; updatedAt: string }
+    {
+      variants: Record<string, { answers: Record<string, string>; submitted: boolean }>;
+      current: number;
+      updatedAt: string;
+    }
   > = {};
   for (const row of rows.results) {
     // Skip rows for exams we no longer recognise.
     if (!VALID_EXAM_IDS.has(row.exam_id)) continue;
-    let parsedAnswers: unknown;
-    try {
-      parsedAnswers = JSON.parse(row.answers);
-    } catch {
-      // Corrupted or legacy row — skip rather than 500 the whole response.
-      continue;
-    }
-    const validated = validateAnswers(parsedAnswers);
-    if (!validated.ok) continue;
+    // parseStoredProgress tolerates corrupted/legacy rows (returns empty variants).
+    const stored = parseStoredProgress(row.answers, row.submitted, row.attempt_count);
     progress[row.exam_id] = {
-      answers: validated.value,
-      submitted: row.submitted === 1,
-      attemptCount: Number.isInteger(row.attempt_count) && row.attempt_count >= 0 ? row.attempt_count : 0,
+      variants: stored.variants,
+      current: stored.current,
       updatedAt: row.updated_at,
     };
   }
