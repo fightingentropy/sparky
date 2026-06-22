@@ -43,7 +43,10 @@ export default defineConfig({
           "assets/three-core-*.js",
           "assets/three-examples-*.js",
           // Build source for maskable-512.png — never referenced at runtime.
-          "icons/maskable.svg"
+          "icons/maskable.svg",
+          // Per-question diagram images are runtime-cached on first use (see
+          // runtimeCaching), not precached, to keep the install payload small.
+          "exam-images/**"
         ],
         navigateFallback: "/index.html",
         cleanupOutdatedCaches: true,
@@ -66,6 +69,17 @@ export default defineConfig({
             options: {
               cacheName: "three-chunks",
               expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 60 }
+            }
+          },
+          {
+            // Per-question diagram images under /exam-images, loaded with their
+            // exam. Runtime-cached so they work offline after first view without
+            // bloating the install precache.
+            urlPattern: /\/exam-images\/.*\.(png|jpe?g)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "exam-images",
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 60 }
             }
           }
         ]

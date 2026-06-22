@@ -61,9 +61,8 @@ const expectedPerAttempt: Record<string, number[]> = {
   "level-2-electrical-installation": repeat(30, 5),
   "level-3-electrical-installation": repeat(30, 5),
   "building-regulations": repeat(20, 7),
-  // variants 0-4 are the original five source mocks; 5-24 are Mock 6-25 copied
-  // from the ElectricianTraining bank (some 59 where a broken/duplicate source
-  // row was dropped).
+  // variants 0-4 are the original five source mocks; 5-24 are Mock 6-25 (some
+  // 59 where a broken/duplicate source row was dropped).
   "18th-edition": [
     60, 60, 60, 60, 60, 59, 60, 59, 60, 60, 59, 59, 60, 60, 59, 60, 60, 60, 59, 60, 60, 59, 60, 60,
     60
@@ -77,8 +76,8 @@ const expectedPerAttempt: Record<string, number[]> = {
   "periodic-inspection": repeat(40, 5),
   "am2-installation-assessment": repeat(30, 2),
   // variants 0-14 are the original ECS set (3 full mocks, 1 older mock, 11 topic
-  // tests); 15-26 are ECS Test 4-15 copied from the bank (Test 4 is 48 where two
-  // broken source rows were dropped).
+  // tests); 15-26 are ECS Test 4-15 (Test 4 is 48 where two broken source rows
+  // were dropped).
   "ecs-health-safety": [
     50, 50, 50, 49, 36, 16, 24, 28, 38, 27, 28, 32, 27, 40, 21, 48, 50, 50, 50, 50, 49, 50, 49, 50,
     50, 50, 50
@@ -169,11 +168,11 @@ describe("exam data", () => {
               expect(choice.length).toBeGreaterThan(0);
             }
             for (const url of question.imageUrls ?? []) {
-              expect(url).toMatch(/^https:\/\/electriciantraining\.co\.uk\//);
+              expect(url).toMatch(/^\/exam-images\//);
             }
             for (const [letter, url] of Object.entries(question.optionImageUrls ?? {})) {
               expect(["A", "B", "C", "D"]).toContain(letter);
-              expect(url).toMatch(/^https:\/\/electriciantraining\.co\.uk\//);
+              expect(url).toMatch(/^\/exam-images\//);
             }
           }
         }
@@ -253,7 +252,7 @@ describe("exam data", () => {
   });
 
   it("uses explanatory answer rationales instead of placeholders", () => {
-    const placeholderPattern = /ElectricianTraining source mock marks this answer as correct/i;
+    const placeholderPattern = /source mock marks this answer as correct/i;
 
     for (const exam of EXAMS) {
       for (const section of exam.sections) {
@@ -303,18 +302,18 @@ describe("exam data", () => {
     }
   });
 
-  it("serves source-only ElectricianTraining categories with their source section ids", () => {
+  it("serves source-only mock categories with their source section ids", () => {
     const expectedSectionIds: Record<string, string> = {
-      "level-2-electrical-installation": "source-electrician-training-level-2-electrical-installation",
-      "level-3-electrical-installation": "source-electrician-training-level-3-electrical-installation",
-      "building-regulations": "source-electrician-training-part-p",
-      "18th-edition": "source-electrician-training-18th-edition",
-      "special-locations": "source-electrician-training-special-locations",
-      "pat-testing": "source-electrician-training-pat",
-      "initial-verification": "source-electrician-training-2391",
-      "inspection-design-2396": "source-electrician-training-2396",
-      "am2-installation-assessment": "source-electrician-training-am2",
-      "ecs-health-safety": "source-electrician-training-ecs-health-safety"
+      "level-2-electrical-installation": "source-mock-level-2-electrical-installation",
+      "level-3-electrical-installation": "source-mock-level-3-electrical-installation",
+      "building-regulations": "source-mock-part-p",
+      "18th-edition": "source-mock-18th-edition",
+      "special-locations": "source-mock-special-locations",
+      "pat-testing": "source-mock-pat",
+      "initial-verification": "source-mock-2391",
+      "inspection-design-2396": "source-mock-2396",
+      "am2-installation-assessment": "source-mock-am2",
+      "ecs-health-safety": "source-mock-ecs-health-safety"
     };
 
     for (const [examId, sectionId] of Object.entries(expectedSectionIds)) {
@@ -325,7 +324,7 @@ describe("exam data", () => {
     }
   });
 
-  it("preserves key ElectricianTraining source mocks and repaired rows", () => {
+  it("preserves key source mocks and repaired rows", () => {
     const expectations: Record<string, Array<{ variant: number; length: number; firstPrompt: string }>> = {
       "building-regulations": [
         {
@@ -393,7 +392,7 @@ describe("exam data", () => {
     const design2396 = EXAMS.find((entry) => entry.id === "inspection-design-2396");
     expect(design2396).toBeDefined();
     expect(getQuestionsForVariant(design2396!, 13)[0].imageUrls).toEqual([
-      "https://electriciantraining.co.uk/images-18/test-instruments-Q1.jpg"
+      "/exam-images/test-instruments-Q1.jpg"
     ]);
 
     const level3 = EXAMS.find((entry) => entry.id === "level-3-electrical-installation");
