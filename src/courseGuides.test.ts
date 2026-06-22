@@ -17,7 +17,7 @@ const expectedGuidedExamIds = [
 ] as const;
 
 describe("course guides", () => {
-  it("has valid guide content and source metadata", () => {
+  it("has valid guide content", () => {
     const ids = new Set<string>();
 
     for (const guide of COURSE_GUIDES) {
@@ -26,8 +26,6 @@ describe("course guides", () => {
       expect(guide.title.trim()).toBe(guide.title);
       expect(guide.title.length).toBeGreaterThan(0);
       expect(guide.summary.length).toBeGreaterThan(30);
-      expect(guide.sourceUrl).toMatch(/^https:\/\/electriciantraining\.co\.uk\//);
-      expect(guide.sourceLabel.length).toBeGreaterThan(0);
       expect(guide.facts.length).toBeGreaterThanOrEqual(3);
       expect(guide.sections.length).toBeGreaterThanOrEqual(3);
       expect(guide.pitfalls.length).toBeGreaterThanOrEqual(3);
@@ -56,10 +54,5 @@ describe("course guides", () => {
   it("covers every active exam category with at least one guide", () => {
     const guidedExamIds = new Set(COURSE_GUIDES.flatMap((guide) => (guide.examId ? [guide.examId] : [])));
     expect([...guidedExamIds].sort()).toEqual([...expectedGuidedExamIds].sort());
-  });
-
-  it("references multiple distinct source URLs", () => {
-    const distinctSourceUrls = new Set(COURSE_GUIDES.map((guide) => guide.sourceUrl));
-    expect(distinctSourceUrls.size).toBeGreaterThan(1);
   });
 });

@@ -23,8 +23,6 @@ export type CourseGuide = {
   kicker: string;
   category: GuideCategory;
   summary: string;
-  sourceUrl: string;
-  sourceLabel: string;
   examId?: ExamId;
   examLabel?: string;
   noteLinks?: GuideNoteLink[];
@@ -49,8 +47,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "route",
     summary:
       "A practical map from first training choice through Level 2, Level 3, NVQ, AM2 and ECS card status.",
-    sourceUrl: "https://electriciantraining.co.uk/",
-    sourceLabel: "ElectricianTraining career guide",
     facts: [
       { label: "Main routes", value: "Apprenticeship or diploma/NVQ" },
       { label: "Final gate", value: "NVQ Level 3 plus AM2" },
@@ -101,8 +97,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "qualification",
     summary:
       "The baseline knowledge set for electrical science, safe systems of work, common installation methods and entry-level site competence.",
-    sourceUrl: "https://electriciantraining.co.uk/electrician-courses/",
-    sourceLabel: "ElectricianTraining course guide",
     examId: "level-2-electrical-installation",
     examLabel: "Level 2",
     noteLinks: [
@@ -159,8 +153,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "qualification",
     summary:
       "A bridge from advanced diploma knowledge into the NVQ evidence mindset: prove competence, not just recall.",
-    sourceUrl: "https://electriciantraining.co.uk/electrician-qualifications/",
-    sourceLabel: "ElectricianTraining qualifications guide",
     examId: "level-3-electrical-installation",
     examLabel: "Level 3",
     noteLinks: [
@@ -218,8 +210,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "reference",
     summary:
       "A structured approach to using BS 7671 as a working document instead of memorising isolated regulation snippets.",
-    sourceUrl: "https://electriciantraining.co.uk/18th-edition/",
-    sourceLabel: "ElectricianTraining 18th Edition guide",
     examId: "18th-edition",
     examLabel: "18th Edition",
     noteLinks: [
@@ -276,8 +266,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "qualification",
     summary:
       "A domestic-work guide covering Part P scope, LABC interaction, notifiable work and the certificate trail.",
-    sourceUrl: "https://electriciantraining.co.uk/part-p/",
-    sourceLabel: "ElectricianTraining Part P guide",
     examId: "building-regulations",
     examLabel: "Building regs",
     noteLinks: [
@@ -334,8 +322,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "assessment",
     summary:
       "The structure behind 2391-50, 2391-51 and 2391-52, with the theory and practical areas candidates must be sharp on.",
-    sourceUrl: "https://electriciantraining.co.uk/2391-course-city-and-guilds-inspection-and-testing/",
-    sourceLabel: "ElectricianTraining 2391 course guide",
     examId: "initial-verification",
     examLabel: "Initial verification",
     noteLinks: [
@@ -392,8 +378,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "assessment",
     summary:
       "A judgement guide for existing installations: extent, limitations, sampling, coding and defensible EICR outcomes.",
-    sourceUrl: "https://electriciantraining.co.uk/2391-exam/",
-    sourceLabel: "ElectricianTraining 2391 exam guide",
     examId: "periodic-inspection",
     examLabel: "Periodic / EICR",
     noteLinks: [
@@ -450,8 +434,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "assessment",
     summary:
       "A Level 4 design guide for experienced candidates who need to connect design, verification, installation and certification.",
-    sourceUrl: "https://electriciantraining.co.uk/2396-course/",
-    sourceLabel: "ElectricianTraining 2396 course guide",
     examId: "inspection-design-2396",
     examLabel: "2396",
     noteLinks: [
@@ -508,8 +490,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "qualification",
     summary:
       "A compact guide to C&G 2377-77, the IET Code of Practice, tester types, equipment classes, labels and records.",
-    sourceUrl: "https://electriciantraining.co.uk/pat-testing-equipment/",
-    sourceLabel: "ElectricianTraining PAT equipment guide",
     examId: "pat-testing",
     examLabel: "PAT testing",
     noteLinks: [{ noteId: "cheat-course-pat-testing", label: "PAT classes and pass criteria" }],
@@ -562,8 +542,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "assessment",
     summary:
       "The final occupational competence assessment broken into its practical, fault-finding, testing and online exam demands.",
-    sourceUrl: "https://electriciantraining.co.uk/am2-exam/",
-    sourceLabel: "ElectricianTraining AM2 guide",
     examId: "am2-installation-assessment",
     examLabel: "AM2",
     noteLinks: [
@@ -622,8 +600,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "assessment",
     summary:
       "A card-route and test-prep guide covering trainee stages, labourer route, Gold Card target and ECS H&S test structure.",
-    sourceUrl: "https://electriciantraining.co.uk/ecs-card/",
-    sourceLabel: "ElectricianTraining ECS card guide",
     examId: "ecs-health-safety",
     examLabel: "ECS H&S",
     facts: [
@@ -675,8 +651,6 @@ export const COURSE_GUIDES: CourseGuide[] = [
     category: "reference",
     summary:
       "A high-risk-location guide for bathrooms, pools, saunas, medical locations, marinas, caravans and similar Part 7 scenarios.",
-    sourceUrl: "https://electriciantraining.co.uk/18th-edition/",
-    sourceLabel: "ElectricianTraining 18th Edition guide",
     examId: "special-locations",
     examLabel: "Special locations",
     noteLinks: [

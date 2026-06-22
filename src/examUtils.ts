@@ -25,16 +25,16 @@ const HARDENED_EXAM_IDS = new Set([
 
 const CHOICES: ExamChoice[] = ["A", "B", "C", "D"];
 const SOURCE_MOCK_SECTION_IDS = new Set([
-  "source-electrician-training-18th-edition",
-  "source-electrician-training-part-p",
-  "source-electrician-training-pat",
-  "source-electrician-training-am2",
-  "source-electrician-training-2391",
-  "source-electrician-training-2396",
-  "source-electrician-training-ecs-health-safety",
-  "source-electrician-training-level-2-electrical-installation",
-  "source-electrician-training-level-3-electrical-installation",
-  "source-electrician-training-special-locations",
+  "source-mock-18th-edition",
+  "source-mock-part-p",
+  "source-mock-pat",
+  "source-mock-am2",
+  "source-mock-2391",
+  "source-mock-2396",
+  "source-mock-ecs-health-safety",
+  "source-mock-level-2-electrical-installation",
+  "source-mock-level-3-electrical-installation",
+  "source-mock-special-locations",
 ]);
 
 const DISTRACTOR_REPLACEMENTS: Record<string, string> = {
