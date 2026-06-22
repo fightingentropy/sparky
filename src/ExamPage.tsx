@@ -186,6 +186,8 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   const { user } = useAuth();
   const [examMenuOpen, setExamMenuOpen] = useState(false);
   const examMenuRef = useRef<HTMLDivElement>(null);
+  const [testMenuOpen, setTestMenuOpen] = useState(false);
+  const testMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     clearStaleExamProgress();
@@ -213,6 +215,29 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [examMenuOpen]);
+
+  useEffect(() => {
+    if (!testMenuOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!testMenuRef.current?.contains(event.target as Node)) {
+        setTestMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setTestMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [testMenuOpen]);
 
   const [selectedExamId, setSelectedExamId] = usePersistedState<string>(
     "exam-selected",
@@ -288,6 +313,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     setReviewFilter("all");
     setRetryQuestionNumbers(null);
     setExamInfoOpen(false);
+    setTestMenuOpen(false);
     setExamCopyState("idle");
     if (examCopyTimeoutRef.current !== null) {
       window.clearTimeout(examCopyTimeoutRef.current);
@@ -490,7 +516,14 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     // Compute next from the committed `answers` (fresh in this event handler) so
     // the server sync runs as a plain effect, not as a side effect inside the
     // setState updater (which would double-fire under StrictMode).
-    const next = { ...answers, [questionNumber]: choice };
+    // Clicking the already-selected choice toggles it off, returning the
+    // question to the unanswered state — same as a fresh start.
+    const next = { ...answers };
+    if (next[questionNumber] === choice) {
+      delete next[questionNumber];
+    } else {
+      next[questionNumber] = choice;
+    }
     setAnswers(next);
     syncToServer(next, false);
   }
@@ -515,6 +548,32 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     // attemptCountRef yet, so a fresh test on another device lands on the same
     // variant the answers belong to.
     syncToServer({} as Answers, false, attemptCount + 1);
+    scrollToSafely(window, { top: 0 });
+  }
+
+  function switchToTest(index: number) {
+    if (!exam || index === variantIndex) {
+      setTestMenuOpen(false);
+      return;
+    }
+    // Each test is a distinct variant whose questions differ, so switching
+    // starts the chosen test fresh rather than carrying answers across. Guard
+    // against losing in-progress work to an accidental tap.
+    if (!submitted && Object.keys(answers).length > 0) {
+      const ok = window.confirm(
+        `Switch to Test ${index + 1}? Your current answers for Test ${variantIndex + 1} will be cleared.`,
+      );
+      if (!ok) {
+        setTestMenuOpen(false);
+        return;
+      }
+    }
+    setAnswers({});
+    setSubmitted(false);
+    setRetryQuestionNumbers(null);
+    setAttemptCount(index);
+    syncToServer({} as Answers, false, index);
+    setTestMenuOpen(false);
     scrollToSafely(window, { top: 0 });
   }
 
@@ -694,13 +753,46 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
             </div>
           </div>
           <div className="exam-hero-stats">
-            <div className="exam-stat">
-              <span>Test</span>
-              <strong>
-                {variantIndex + 1}
-                <span className="exam-stat-sub">/{variantCount}</span>
-              </strong>
-            </div>
+            {variantCount > 1 ? (
+              <div className="exam-stat exam-stat--switch" ref={testMenuRef}>
+                <span>Test</span>
+                <button
+                  type="button"
+                  className="exam-test-switch"
+                  aria-haspopup="listbox"
+                  aria-expanded={testMenuOpen}
+                  aria-controls={testMenuOpen ? "exam-test-menu" : undefined}
+                  disabled={!exam}
+                  onClick={() => setTestMenuOpen((open) => !open)}
+                >
+                  <strong>{variantIndex + 1}</strong>
+                  <svg className="exam-test-switch-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="m5 7.5 5 5 5-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                {testMenuOpen ? (
+                  <div id="exam-test-menu" className="exam-test-menu" role="listbox" aria-label="Switch test">
+                    {Array.from({ length: variantCount }, (_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        role="option"
+                        aria-selected={i === variantIndex}
+                        className={`exam-test-option${i === variantIndex ? " is-active" : ""}`}
+                        onClick={() => switchToTest(i)}
+                      >
+                        Test {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className="exam-stat">
+                <span>Test</span>
+                <strong>{variantIndex + 1}</strong>
+              </div>
+            )}
             <div className="exam-stat">
               <span>Questions</span>
               <strong>{total}</strong>
@@ -876,6 +968,7 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
   const isIncorrect = submitted && selected !== undefined && selected !== correct;
   const isUnanswered = submitted && selected === undefined;
   const [copyState, setCopyState] = useState<CopyState>("idle");
+  const [preview, setPreview] = useState(false);
   const copyTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -929,6 +1022,31 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
       <div className="exam-question-head">
         <span className="exam-q-number">Q{question.number}</span>
         <div className="exam-question-actions">
+          {!submitted ? (
+            <button
+              type="button"
+              className={`exam-copy-btn exam-preview-btn${preview ? " is-active" : ""}`}
+              onClick={() => setPreview((open) => !open)}
+              aria-pressed={preview}
+              aria-label={preview ? `Hide the answer for question ${question.number}` : `Reveal the answer for question ${question.number}`}
+              title={preview ? "Hide answer" : "Reveal answer"}
+            >
+              <span className="exam-copy-icon" aria-hidden="true">
+                {preview ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 3l18 18" />
+                    <path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c5 0 9.3 3.1 11 7a17 17 0 0 1-2.2 3.2M6.2 6.2C4 7.5 2.2 9.5 1 12c1.7 3.9 6 7 11 7 1.6 0 3.1-.3 4.4-.8" />
+                    <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </span>
+            </button>
+          ) : null}
           <button
             type="button"
             className={`exam-copy-btn exam-copy-btn--${copyState}`}
@@ -972,7 +1090,8 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
       <div className="exam-options" role="radiogroup" aria-label={`Question ${question.number}`}>
         {LETTERS.map((letter) => {
           const isSelected = selected === letter;
-          const isAnswer = submitted && letter === correct;
+          const reveal = submitted || preview;
+          const isAnswer = reveal && letter === correct;
           const isWrongPick = submitted && isSelected && letter !== correct;
           const classes = [
             "exam-option",
@@ -1005,7 +1124,7 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
                   />
                 ) : null}
               </span>
-              {submitted && isAnswer ? (
+              {isAnswer ? (
                 <span className="exam-option-mark" aria-hidden="true">✓</span>
               ) : null}
               {submitted && isWrongPick ? (
@@ -1015,9 +1134,11 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
           );
         })}
       </div>
-      {submitted ? (
+      {submitted || preview ? (
         <div className="exam-explanation">
-          <span className="exam-explanation-label">Explanation</span>
+          <span className="exam-explanation-label">
+            {submitted ? "Explanation" : `Answer: ${correct}`}
+          </span>
           <p>{question.explanation}</p>
         </div>
       ) : null}

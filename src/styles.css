@@ -1,50 +1,49 @@
-/* Self-hosted Geist (variable weight). Bundled under public/fonts and precached
-   so the UI font loads offline and the app makes no third-party font request. */
+/* Self-hosted Inter (variable weight 100–900), bundled under public/fonts and
+   precached so the type loads offline with no third-party font request. Inter is a
+   clean, neutral grotesque — the closest freely-licensed analogue to Anthropic's
+   Styrene sans — used for both UI chrome and body/exam copy. */
 @font-face {
-  font-family: "Geist";
+  font-family: "Inter";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("/fonts/geist-latin.woff2") format("woff2");
+  src: url("/fonts/inter-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: "Geist";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("/fonts/geist-latin-ext.woff2") format("woff2");
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 :root {
   color-scheme: dark;
-  --bg: #0c0c0c;
-  --surface: #111111;
-  --surface-alt: #151515;
-  --surface-soft: #1b1b1b;
-  --border: rgba(255, 255, 255, 0.11);
-  --border-strong: rgba(255, 255, 255, 0.22);
-  --line: rgba(255, 255, 255, 0.08);
-  --fill: rgba(255, 255, 255, 0.055);
-  --text: #fafafa;
-  --muted: #666666;
-  --muted-strong: #a3a3a3;
-  --text-muted: #666666;
-  --accent: #ffffff;
-  --accent-soft: rgba(255, 255, 255, 0.08);
-  --accent-strong: #ffffff;
-  --accent-muted: rgba(255, 255, 255, 0.2);
-  --accent-glow: rgba(255, 255, 255, 0.08);
-  --danger: #ff4d4f;
+  /* Warm, soft charcoal: a low-saturation amber-leaning neutral instead of a cool
+     pure black, so large dark areas feel calmer and the white-on-black contrast
+     reads softer. Text is a warm off-white rather than icy #fafafa. */
+  --bg: #13100d;
+  --surface: #1a1612;
+  --surface-alt: #211c17;
+  --surface-soft: #29221b;
+  --border: rgba(255, 244, 232, 0.11);
+  --border-strong: rgba(255, 244, 232, 0.22);
+  --line: rgba(255, 244, 232, 0.08);
+  --fill: rgba(255, 244, 232, 0.05);
+  --text: #d9d2c7;
+  --muted: #7a7064;
+  --muted-strong: #a89f92;
+  --text-muted: #7a7064;
+  --accent: #e7e0d5;
+  --accent-soft: rgba(255, 244, 232, 0.08);
+  --accent-strong: #efe8dd;
+  --accent-muted: rgba(255, 244, 232, 0.2);
+  --accent-glow: rgba(255, 244, 232, 0.08);
+  --danger: #ff5a4d;
   --shadow-card: none;
   --shadow-glow: 0 0 0 1px var(--accent-muted);
-  --radius-lg: 0;
-  --radius-md: 0;
-  --radius-sm: 0;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 9px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --font-ui: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-  --font-heading: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-heading: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  /* Faint warm dot for the page background grid (matches the surface family). */
+  --dot: rgba(255, 244, 232, 0.06);
 }
 
 * {
@@ -56,17 +55,36 @@ body,
 #root {
   height: 100%;
   min-height: 100%;
-  background: var(--bg);
 }
 
+/* Slightly larger root than the 16px default so all rem-based type reads a touch
+   bigger; Inter's tall x-height already adds apparent size, so 16px is plenty.
+   Per-component reading sizes are bumped further below. */
+html {
+  font-size: 16px;
+  background-color: var(--bg);
+}
+
+/* The page background carries a faint warm dot grid. It lives on <body> with a
+   fixed attachment (a static texture behind the scrolling content); #root is left
+   transparent so the dots show through the gutters and behind the floating topbar. */
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dot) 1.1px, transparent 1.6px);
+  background-size: 22px 22px;
+  background-position: center top;
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-ui);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-optical-sizing: auto;
+}
+
+#root {
+  background: transparent;
 }
 
 a,
@@ -151,7 +169,7 @@ a {
   margin-bottom: 24px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(5, 5, 5, 0.82);
+  background: rgba(9, 7, 5, 0.82);
   backdrop-filter: blur(22px) saturate(1.25);
   -webkit-backdrop-filter: blur(22px) saturate(1.25);
   box-shadow:
@@ -198,45 +216,7 @@ h1, h2, h3 {
   flex: 0 0 auto;
 }
 
-/* ── Desktop nav tabs ───────────────────── */
-
-.topbar-nav {
-  display: none;
-  justify-content: center;
-  gap: 4px;
-  min-width: 0;
-  padding: 3px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.025);
-}
-
-.topbar-nav-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0 12px;
-  border-radius: 999px;
-  color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 550;
-  white-space: nowrap;
-  transition: color 160ms var(--ease), background 160ms var(--ease);
-}
-
-.topbar-nav-link:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.topbar-nav-link.is-active {
-  background: var(--text);
-  color: var(--bg);
-  font-weight: 650;
-}
-
-.topbar-account-btn,
-.topbar-sign-in-btn {
+.topbar-account-btn {
   display: none;
 }
 
@@ -259,66 +239,23 @@ h1, h2, h3 {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-.topbar-sign-in-label {
-  font-size: 0.84rem;
-  font-weight: 600;
+.topbar-account-btn:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
 }
 
 @media (min-width: 981px) {
-  .topbar-nav {
-    display: inline-flex;
-  }
-
   .topbar-account-btn {
     display: inline-flex;
   }
-
-  .nav-menu-toggle {
-    display: none;
-  }
-
-  .nav-menu-pages {
-    display: none;
-  }
 }
 
-/* ── Hamburger nav menu ─────────────────── */
+/* ── Profile nav menu ───────────────────── */
 
 .nav-menu-wrap {
   position: relative;
   display: inline-flex;
-}
-
-.nav-menu-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 34px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 180ms var(--ease);
-}
-
-.nav-menu-toggle:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.07);
-  border-color: var(--border-strong);
-}
-
-.nav-menu-toggle[aria-expanded="true"] {
-  color: var(--text);
-  background: var(--accent-soft);
-  border-color: var(--accent-muted);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-.nav-menu-toggle svg {
-  display: block;
 }
 
 .nav-menu {
@@ -332,7 +269,7 @@ h1, h2, h3 {
   padding: 7px;
   border: 1px solid var(--border-strong);
   border-radius: 14px;
-  background: rgba(12, 13, 14, 0.98);
+  background: rgba(20, 17, 13, 0.98);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
@@ -1091,7 +1028,7 @@ kbd {
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #050607;
+  background: #0c0a07;
 }
 
 .tutorial-embed iframe {
@@ -1169,7 +1106,7 @@ kbd {
   padding: 10px 12px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  background: rgba(18, 19, 21, 0.98);
+  background: rgba(26, 22, 18, 0.98);
   color: var(--muted-strong);
   font-size: 0.76rem;
   line-height: 1.5;
@@ -1823,7 +1760,7 @@ input:disabled {
   padding: 20px;
   border: 1px solid var(--border-strong);
   border-radius: 16px;
-  background: rgba(12, 13, 14, 0.98);
+  background: rgba(20, 17, 13, 0.98);
   box-shadow: 0 28px 100px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
@@ -2169,7 +2106,7 @@ input:disabled {
       calc(env(safe-area-inset-right) + 10px)
       max(env(safe-area-inset-bottom) - 18px, 8px)
       calc(env(safe-area-inset-left) + 10px);
-    background: rgba(5, 5, 5, 0.94);
+    background: rgba(9, 7, 5, 0.94);
     backdrop-filter: blur(16px) saturate(1.3);
     -webkit-backdrop-filter: blur(16px) saturate(1.3);
     border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -2207,7 +2144,7 @@ input:disabled {
     border: 0;
     border-bottom: 1px solid var(--border);
     border-radius: 0;
-    background: rgba(5, 5, 5, 0.94);
+    background: rgba(9, 7, 5, 0.94);
     backdrop-filter: none;
   }
 
@@ -2255,12 +2192,6 @@ input:disabled {
   .topbar-actions .nav-menu-wrap {
     grid-column: 3;
     justify-self: end;
-  }
-
-  .nav-menu-toggle {
-    width: 34px;
-    height: 34px;
-    border-radius: var(--radius-sm);
   }
 
   .search-field {
@@ -2796,7 +2727,7 @@ input:disabled {
   padding: 12px 14px;
   display: grid;
   gap: 6px;
-  background: rgba(18, 19, 21, 0.98);
+  background: rgba(26, 22, 18, 0.98);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
@@ -2895,10 +2826,10 @@ input:disabled {
   max-height: min(420px, calc(100vh - 220px));
   overflow: auto;
   padding: 6px;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  background: rgba(17, 17, 17, 0.98);
-  box-shadow: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: rgba(26, 22, 18, 0.98);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
 }
 
 .exam-title-option {
@@ -2906,7 +2837,7 @@ input:disabled {
   min-height: 36px;
   padding: 8px 10px;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--muted-strong);
   font-family: var(--font-ui);
@@ -3170,7 +3101,7 @@ input:disabled {
 
 .exam-q-prompt {
   margin: 0;
-  font-size: 0.96rem;
+  font-size: 1.1rem;
   line-height: 1.55;
   color: var(--text);
   font-weight: 500;
@@ -3212,7 +3143,7 @@ input:disabled {
   background: var(--surface-alt);
   color: var(--text);
   text-align: left;
-  font-size: 0.88rem;
+  font-size: 1.02rem;
   line-height: 1.5;
   cursor: pointer;
   transition: all 180ms var(--ease);
@@ -3253,7 +3184,7 @@ input:disabled {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
   color: var(--muted-strong);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -3325,7 +3256,7 @@ input:disabled {
 
 .exam-explanation p {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.96rem;
   line-height: 1.6;
   color: var(--muted-strong);
 }
@@ -3341,7 +3272,7 @@ input:disabled {
   padding: 14px 18px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(8, 9, 10, 0.9);
+  background: rgba(20, 17, 13, 0.9);
   backdrop-filter: blur(14px) saturate(1.3);
   -webkit-backdrop-filter: blur(14px) saturate(1.3);
   box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.22), var(--shadow-card);
@@ -4574,7 +4505,7 @@ body[data-page="interactive"] .ix-3d-wrap {
 .ix-welcome-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(5, 5, 5, 0.72);
+  background: rgba(9, 7, 5, 0.72);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4698,7 +4629,7 @@ body[data-page="interactive"] .ix-3d-wrap {
   padding: 32px 28px 28px;
   border: 1px solid var(--border-strong);
   border-radius: 18px;
-  background: rgba(12, 13, 14, 0.98);
+  background: rgba(20, 17, 13, 0.98);
   box-shadow: 0 28px 100px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
@@ -4844,10 +4775,11 @@ body[data-page="interactive"] .ix-3d-wrap {
 }
 
 body {
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    var(--bg);
-  background-size: 100% 96px;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dot) 1.1px, transparent 1.6px);
+  background-size: 22px 22px;
+  background-position: center top;
+  background-attachment: fixed;
 }
 
 .site-shell {
@@ -4864,7 +4796,7 @@ body {
   border-style: solid;
   border-color: var(--border);
   border-radius: 0;
-  background: rgba(12, 12, 12, 0.86);
+  background: rgba(20, 17, 13, 0.86);
   box-shadow: none;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -4894,52 +4826,12 @@ body {
   color: var(--text);
 }
 
-.topbar-nav {
-  gap: 18px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.topbar-nav-link {
-  min-height: 34px;
-  padding: 0;
-  border-radius: 0;
-  color: var(--muted);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.topbar-nav-link:hover {
-  background: transparent;
-  color: var(--text);
-}
-
-.topbar-nav-link.is-active {
-  background: transparent;
-  color: var(--text);
-  box-shadow: inset 0 -1px 0 var(--text);
-  font-weight: 500;
-}
-
 .topbar-actions {
   gap: 10px;
 }
 
-.topbar-account-btn:has(.topbar-sign-in-label) {
-  width: auto;
-  min-width: 62px;
-  padding-inline: 12px;
-}
-
-.topbar-sign-in-label {
-  white-space: nowrap;
-}
-
 .topbar-icon-button,
 .topbar-account-btn,
-.nav-menu-toggle,
 .search-field {
   border-color: var(--border);
   background: transparent;
@@ -4948,7 +4840,6 @@ body {
 
 .topbar-icon-button:hover,
 .topbar-account-btn:hover,
-.nav-menu-toggle:hover,
 .search-field:hover {
   border-color: var(--border-strong);
   background: var(--accent-soft);
@@ -4965,8 +4856,7 @@ body {
   color: var(--text);
 }
 
-.search-field:focus-visible,
-.nav-menu-toggle[aria-expanded="true"] {
+.search-field:focus-visible {
   border-color: var(--border-strong);
   background: var(--surface-soft);
   box-shadow: 0 0 0 1px var(--border-strong);
@@ -4983,14 +4873,14 @@ kbd {
 .modal-shell,
 .auth-modal {
   border-color: var(--border);
-  border-radius: 0;
-  background: rgba(17, 17, 17, 0.98);
+  border-radius: var(--radius-lg);
+  background: rgba(26, 22, 18, 0.98);
   box-shadow: none;
 }
 
 .nav-menu-item,
 .modal-close {
-  border-radius: 0;
+  border-radius: var(--radius-sm);
 }
 
 .nav-menu-item:hover,
@@ -5073,7 +4963,7 @@ kbd {
 .ix-welcome,
 .auth-modal {
   border-color: var(--border);
-  border-radius: 0;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: none;
 }
@@ -5160,7 +5050,7 @@ select,
 .unit-select,
 .suffix {
   border-color: var(--border);
-  border-radius: 0;
+  border-radius: var(--radius-sm);
   background: var(--surface-alt);
   box-shadow: none;
 }
@@ -5322,10 +5212,11 @@ select:focus,
 }
 
 .exam-footer {
-  border-width: 1px 0 0;
-  border-radius: 0;
-  background: rgba(12, 12, 12, 0.9);
-  box-shadow: none;
+  border-width: 1px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  background: rgba(20, 17, 13, 0.9);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
 }
 
 .ix-canvas-bg {
@@ -5407,7 +5298,7 @@ select:focus,
       calc(env(safe-area-inset-right) + 12px)
       10px
       calc(env(safe-area-inset-left) + 12px);
-    background: rgba(12, 12, 12, 0.96);
+    background: rgba(20, 17, 13, 0.96);
   }
 
   .page.is-active:not(.page-home) {
@@ -5444,22 +5335,9 @@ select:focus,
     padding: 14px;
   }
 
-  .search-field,
-  .nav-menu-toggle,
-  .topbar .topbar-icon-button {
-    border-radius: 0;
-  }
-
   .mobile-indicator,
   .exam-footer {
-    background: rgba(12, 12, 12, 0.96);
-  }
-}
-
-@media (min-width: 981px) {
-  .nav-menu-toggle,
-  .nav-menu-pages {
-    display: none;
+    background: rgba(20, 17, 13, 0.96);
   }
 }
 
@@ -5471,4 +5349,202 @@ select:focus,
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Topbar redesign: a softer floating rounded bar with the search centered and
+   the page navigation tucked into a menu under the profile avatar (right).
+   ────────────────────────────────────────────────────────────────────────── */
+
+@media (min-width: 721px) {
+  .topbar {
+    grid-template-columns: 1fr auto 1fr;
+    top: 12px;
+    margin-inline: auto;
+    margin-bottom: 24px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: rgba(20, 17, 13, 0.72);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 18px 50px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  }
+
+  .topbar > .brand {
+    justify-self: start;
+  }
+
+  .topbar > .search-field {
+    justify-self: center;
+    width: clamp(220px, 34vw, 440px);
+    max-width: 100%;
+  }
+
+  .topbar > .topbar-actions {
+    grid-column: auto;
+    justify-self: end;
+    width: auto;
+  }
+}
+
+/* The avatar is the sole navigation/account trigger now — show it at every
+   width, and surface the page links inside its menu (previously desktop-only
+   inline tabs hid these). */
+.topbar .topbar-account-btn {
+  display: inline-flex;
+  overflow: hidden;
+}
+
+.nav-menu .nav-menu-pages {
+  display: grid;
+  gap: 2px;
+}
+
+/* Selfie avatar: the image covers the circle; the initial shows as a fallback
+   when /profile.jpg is missing or fails to load. */
+.account-avatar {
+  position: relative;
+  overflow: hidden;
+}
+
+.account-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    grid-template-columns: auto 1fr auto;
+    column-gap: 10px;
+    row-gap: 8px;
+  }
+
+  .topbar > .brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .topbar > .topbar-actions {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    display: flex;
+    width: auto;
+    gap: 8px;
+  }
+
+  .topbar > .search-field {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: stretch;
+    width: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  .topbar .topbar-icon-button {
+    border-radius: 999px;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Exam: the TEST tile is now a switcher, plus a per-question answer preview.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.exam-stat--switch {
+  position: relative;
+}
+
+.exam-test-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: color 160ms var(--ease);
+}
+
+.exam-test-switch:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.exam-test-switch:hover:not(:disabled),
+.exam-test-switch:focus-visible {
+  color: var(--accent-strong);
+  outline: none;
+}
+
+.exam-test-switch-chevron {
+  width: 15px;
+  height: 15px;
+  color: var(--muted-strong);
+  transition: transform 160ms var(--ease);
+}
+
+.exam-test-switch[aria-expanded="true"] .exam-test-switch-chevron {
+  transform: rotate(180deg);
+}
+
+.exam-test-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  z-index: 30;
+  display: grid;
+  gap: 2px;
+  min-width: 150px;
+  max-height: 280px;
+  overflow: auto;
+  padding: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: rgba(26, 22, 18, 0.98);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  transform: translateX(-50%);
+}
+
+.exam-test-option {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted-strong);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 140ms var(--ease), color 140ms var(--ease);
+}
+
+.exam-test-option:hover,
+.exam-test-option:focus-visible {
+  background: var(--surface-soft);
+  color: var(--text);
+  outline: none;
+}
+
+.exam-test-option.is-active {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.exam-preview-btn.is-active {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--accent-soft);
 }

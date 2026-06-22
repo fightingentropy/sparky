@@ -517,7 +517,7 @@ function ReflectiveFloor() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, PANEL.centerY - PANEL.height / 2 - 0.4, 0]} receiveShadow>
       <planeGeometry args={[6, 6]} />
-      <meshStandardMaterial color="#0e1116" metalness={0.4} roughness={0.7} />
+      <meshStandardMaterial color="#16120d" metalness={0.4} roughness={0.7} />
     </mesh>
   );
 }
@@ -983,7 +983,7 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
           camera={{ position: [0, 1.1, 1.45], fov: 32 }}
           aria-label="3D view of the breaker panel. Use the Installed Circuits list below to add and edit breakers."
         >
-          <color attach="background" args={["#0e1116"]} />
+          <color attach="background" args={["#16120d"]} />
           <ambientLight intensity={0.55} />
           <directionalLight position={[2, 4, 3]} intensity={1.4} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
           <directionalLight position={[-2, 2, 1]} intensity={0.4} color="#fff5e0" />

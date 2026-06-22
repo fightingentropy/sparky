@@ -2057,80 +2057,51 @@ export default function App() {
           <strong>Sparky</strong>
         </a>
 
-        <nav className="topbar-nav" aria-label="Main">
-          {PAGE_NAV_ITEMS.map((item) => (
-            <a
-              key={item.id}
-              href={getPageHref(item.id)}
-              className={`topbar-nav-link${page === item.id ? " is-active" : ""}`}
-              aria-current={page === item.id ? "page" : undefined}
-              onClick={(event) => {
-                event.preventDefault();
-                navigateTo(item.id);
-              }}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+        <button
+          type="button"
+          className="search-field"
+          aria-label="Open command palette"
+          aria-haspopup="dialog"
+          aria-expanded={paletteOpen}
+          onClick={openCommandPalette}
+        >
+          <svg className="search-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none">
+            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M12.7 12.7 17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          <span className="search-placeholder">Search</span>
+          <span className="search-hint">⌘ K</span>
+        </button>
 
         <div className="topbar-actions">
-          <button type="button" className="topbar-icon-button" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </button>
-          <button
-            type="button"
-            className="search-field"
-            aria-label="Open command palette"
-            aria-haspopup="dialog"
-            aria-expanded={paletteOpen}
-            onClick={openCommandPalette}
-          >
-            <svg className="search-icon" viewBox="0 0 20 20" aria-hidden="true" fill="none">
-              <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
-              <path d="M12.7 12.7 17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-            <span className="search-placeholder">Search</span>
-            <span className="search-hint">⌘ K</span>
-          </button>
+          {page === "home" ? (
+            <button type="button" className="topbar-icon-button" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </button>
+          ) : null}
           <div className="nav-menu-wrap">
             <button
               type="button"
-              className="topbar-account-btn"
-              aria-label={user ? `Account menu for ${user.email}` : "Log in"}
-              aria-haspopup={user ? "menu" : undefined}
-              aria-expanded={user ? navMenuOpen : undefined}
-              aria-controls={user ? "page-nav-menu" : undefined}
-              onClick={() => {
-                if (user) {
-                  setNavMenuOpen((open) => !open);
-                  return;
-                }
-                setAuthOpen(true);
-                setNavMenuOpen(false);
-              }}
-            >
-              {user ? (
-                <span className="account-avatar">{(user.email[0] ?? "?").toUpperCase()}</span>
-              ) : (
-                <span className="topbar-sign-in-label">Log in</span>
-              )}
-            </button>
-            <button
-              type="button"
               ref={navMenuButtonRef}
-              className="nav-menu-toggle"
-              aria-label="Open navigation menu"
+              className="topbar-account-btn"
+              aria-label={user ? `Menu and account for ${user.email}` : "Menu"}
               aria-haspopup="menu"
               aria-expanded={navMenuOpen}
               aria-controls="page-nav-menu"
               onClick={() => setNavMenuOpen((open) => !open)}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <line x1="4" y1="7" x2="20" y2="7" />
-                <line x1="4" y1="12" x2="20" y2="12" />
-                <line x1="4" y1="17" x2="20" y2="17" />
-              </svg>
+              <span className="account-avatar">
+                <span className="account-avatar-initial" aria-hidden="true">{user ? (user.email[0] ?? "?").toUpperCase() : "E"}</span>
+                <img
+                  className="account-avatar-img"
+                  src="/profile.jpg"
+                  alt=""
+                  aria-hidden="true"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+              </span>
             </button>
             {navMenuOpen ? (
               <div
@@ -2163,7 +2134,18 @@ export default function App() {
                   {user ? (
                     <>
                       <span className="nav-menu-account-label">
-                        <span className="account-avatar">{(user.email[0] ?? "?").toUpperCase()}</span>
+                        <span className="account-avatar">
+                          <span className="account-avatar-initial" aria-hidden="true">{(user.email[0] ?? "?").toUpperCase()}</span>
+                          <img
+                            className="account-avatar-img"
+                            src="/profile.jpg"
+                            alt=""
+                            aria-hidden="true"
+                            onError={(event) => {
+                              event.currentTarget.style.display = "none";
+                            }}
+                          />
+                        </span>
                         <span>{user.email}</span>
                       </span>
                       <button
