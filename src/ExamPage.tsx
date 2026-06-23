@@ -305,6 +305,9 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   const [retryQuestionNumbers, setRetryQuestionNumbers] = useState<number[] | null>(null);
   const [examCopyState, setExamCopyState] = useState<CopyState>("idle");
   const examCopyTimeoutRef = useRef<number | null>(null);
+  // Marks each category complete once every one of its tests has been submitted,
+  // so the category list can tick a whole exam off (not just its individual tests).
+  const [examCompletion, setExamCompletion] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     return () => {
@@ -366,6 +369,41 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
       })
       .catch(() => {});
   }, [user, selectedExamEntry.id, setProgress]);
+
+  // Recompute which categories are fully done whenever the menu opens (and when
+  // the active exam's progress changes while it's open). Variant counts come from
+  // the cached exam assets; the submitted flags are read from each exam's stored
+  // progress, so finishing the last test of a category ticks the whole category.
+  useEffect(() => {
+    if (!examMenuOpen) return;
+    let cancelled = false;
+
+    Promise.all(
+      EXAM_REGISTRY.map(async (entry) => {
+        try {
+          const loaded = await entry.load();
+          const count = getVariantCount(loaded);
+          if (count === 0) return [entry.id, false] as const;
+          const stored = localStorage.getItem(`${EXAM_PROGRESS_STORAGE_PREFIX}${entry.id}`);
+          const parsed: unknown = stored ? JSON.parse(stored) : null;
+          const variants = isExamProgress(parsed) ? parsed.variants : {};
+          let submittedCount = 0;
+          for (let i = 0; i < count; i += 1) {
+            if (variants[String(i)]?.submitted) submittedCount += 1;
+          }
+          return [entry.id, submittedCount >= count] as const;
+        } catch {
+          return [entry.id, false] as const;
+        }
+      })
+    ).then((entries) => {
+      if (!cancelled) setExamCompletion(Object.fromEntries(entries));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [examMenuOpen, progress]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSaveRef = useRef<
@@ -672,21 +710,27 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                       role="listbox"
                       aria-label="Mock exam"
                     >
-                      {EXAM_REGISTRY.map((entry) => (
-                        <button
-                          key={entry.id}
-                          type="button"
-                          role="option"
-                          aria-selected={entry.id === selectedExamEntry.id}
-                          className={`exam-title-option${entry.id === selectedExamEntry.id ? " is-active" : ""}`}
-                          onClick={() => {
-                            setSelectedExamId(entry.id);
-                            setExamMenuOpen(false);
-                          }}
-                        >
-                          {entry.title}
-                        </button>
-                      ))}
+                      {EXAM_REGISTRY.map((entry) => {
+                        const complete = examCompletion[entry.id] ?? false;
+                        return (
+                          <button
+                            key={entry.id}
+                            type="button"
+                            role="option"
+                            aria-selected={entry.id === selectedExamEntry.id}
+                            className={`exam-title-option${entry.id === selectedExamEntry.id ? " is-active" : ""}${complete ? " is-complete" : ""}`}
+                            onClick={() => {
+                              setSelectedExamId(entry.id);
+                              setExamMenuOpen(false);
+                            }}
+                          >
+                            <span>{entry.title}</span>
+                            {complete ? (
+                              <span className="exam-title-done" aria-hidden="true">✓</span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
                     </div>
                   ) : null}
                 </div>
