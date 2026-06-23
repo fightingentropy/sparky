@@ -129,13 +129,6 @@ export function SettingsPage({ isActive, reduceMotion, onReduceMotionChange, onR
 
   return (
     <section className={`page page-settings ${isActive ? "is-active" : ""}`}>
-      <header className="page-header">
-        <div>
-          <h2>Settings</h2>
-          <p className="page-copy">Your profile, preferences, and account.</p>
-        </div>
-      </header>
-
       <div className="settings-page">
         <section className="settings-section">
           <h3 className="settings-section-title">Profile</h3>
