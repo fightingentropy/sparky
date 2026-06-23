@@ -673,9 +673,12 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
 
   return (
     <section className={`page page-exams ${isActive ? "is-active" : ""}`}>
+      {/* The triangle-mesh backdrop now lives at the app root (.app-bg in App.tsx)
+          so it spans every page; the exam page no longer renders its own. */}
       <div className="exam-shell">
         <header className="exam-hero">
           <div className="exam-hero-text">
+            <span className="exam-eyebrow">{"PRACTICE EXAM · EAL — City & Guilds aligned"}</span>
             <div className="exam-title-wrap" ref={examMenuRef}>
               {EXAM_REGISTRY.length > 1 ? (
                 <div className="exam-title-menu-wrap">
@@ -687,7 +690,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                     aria-controls="exam-title-menu"
                     onClick={() => setExamMenuOpen((open) => !open)}
                   >
-                    <span>{selectedExamEntry.title}</span>
+                    <span className="exam-title-text">{selectedExamEntry.title}</span>
                     <svg
                       className="exam-title-chevron"
                       viewBox="0 0 20 20"
@@ -821,7 +824,10 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
             </div>
             <div className="exam-stat">
               <span>Pass mark</span>
-              <strong>{passMark}</strong>
+              <strong>
+                {passMark}
+                <span className="exam-stat-sub">/{total}</span>
+              </strong>
             </div>
           </div>
         </header>
@@ -1136,6 +1142,9 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
                   />
                 ) : null}
               </span>
+              {isSelected && !submitted && !isAnswer ? (
+                <span className="exam-option-check" aria-hidden="true">✓</span>
+              ) : null}
               {isAnswer ? (
                 <span className="exam-option-mark" aria-hidden="true">✓</span>
               ) : null}
