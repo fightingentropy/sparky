@@ -2844,6 +2844,8 @@ input:disabled {
 }
 
 .exam-title-option {
+  display: flex;
+  align-items: center;
   width: 100%;
   min-height: 36px;
   padding: 8px 10px;
@@ -2867,6 +2869,19 @@ input:disabled {
 
 .exam-title-option.is-active {
   background: var(--text);
+  color: var(--bg);
+}
+
+.exam-title-done {
+  margin-left: auto;
+  padding-left: 12px;
+  color: #6fcf8e;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.exam-title-option.is-active .exam-title-done {
   color: var(--bg);
 }
 
