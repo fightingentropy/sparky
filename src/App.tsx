@@ -1,4 +1,4 @@
-import { Suspense, lazy, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Suspense, lazy, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   CONTAINMENT_OPTIONS,
   DEFAULT_CONTAINMENT_ROD_VALUES,
@@ -111,6 +111,55 @@ const PAGE_NAV_ITEMS: { id: PageId; label: string }[] = [
   { id: "exams", label: "Exams" },
   { id: "tutorials", label: "Tutorials" },
   { id: "interactive", label: "Interactive" }
+];
+
+// The primary pages surfaced in the mobile bottom tab bar. The remaining pages
+// (Tutorials, Interactive, Settings) stay reachable from the avatar menu and the
+// command palette, both of which list every page. The bar is hidden on the exams
+// page, which has its own fixed bottom action bar.
+const MOBILE_TAB_ITEMS: { id: PageId; label: string; icon: ReactNode }[] = [
+  {
+    id: "home",
+    label: "Tools",
+    icon: (
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    )
+  },
+  {
+    id: "cheatsheet",
+    label: "Notes",
+    icon: (
+      <>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="M16 13H8" />
+        <path d="M16 17H8" />
+        <path d="M10 9H8" />
+      </>
+    )
+  },
+  {
+    id: "learn",
+    label: "Learn",
+    icon: (
+      <>
+        <path d="M22 10 12 5 2 10l10 5z" />
+        <path d="M6 12v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4" />
+        <path d="M22 10v5" />
+      </>
+    )
+  },
+  {
+    id: "exams",
+    label: "Exams",
+    icon: (
+      <>
+        <rect width="8" height="4" x="8" y="2" rx="1" />
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        <path d="m9 14 2 2 4-4" />
+      </>
+    )
+  }
 ];
 const ANGLE_UNITS: readonly AngleUnit[] = ["mm", "cm", "m"];
 const CONTAINMENT_BEND_DIRECTIONS: readonly ContainmentBendDirection[] = ["out", "in"];
@@ -3866,6 +3915,32 @@ export default function App() {
           </button>
         </div>
       ) : null}
+
+      <nav className="mobile-tabbar" aria-label="Primary">
+        {MOBILE_TAB_ITEMS.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={`mobile-tab${page === item.id ? " is-active" : ""}`}
+            aria-current={page === item.id ? "page" : undefined}
+            onClick={() => navigateTo(item.id)}
+          >
+            <svg
+              className="mobile-tab-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              {item.icon}
+            </svg>
+            <span className="mobile-tab-label">{item.label}</span>
+          </button>
+        ))}
+      </nav>
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
       </div>

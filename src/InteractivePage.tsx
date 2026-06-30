@@ -60,6 +60,11 @@ type SavedCircuit = {
 
 const CANVAS_W = 1200;
 const CANVAS_H = 720;
+// On phones the full 1200×720 canvas renders the component symbols far too small.
+// Frame a tighter, content-centred window there so the symbols read at a usable
+// size; the presets and default circuit all live inside this region, and taps map
+// correctly into it via getScreenCTM (see svgPoint). Desktop keeps the full canvas.
+const COMPACT_VIEWBOX = "180 96 760 600";
 const GRID = 16;
 const SAVED_CIRCUITS_KEY = "ix-saved-circuits-v1";
 const PALETTE_TOOLS: { tool: Tool; label: string; hint: string }[] = [
@@ -250,70 +255,92 @@ function lessonFor(circuit: Circuit, energized: boolean, sim: ReturnType<typeof 
   return `Current is flowing. Source delivers ${formatA(sim.totalCurrent)}. Hover or tap a component to see its drop.`;
 }
 
-function ComponentGlyph({ c, energized }: { c: CircuitComponent; energized: boolean }) {
+function ComponentGlyph({
+  c,
+  energized,
+  scale = 1
+}: {
+  c: CircuitComponent;
+  energized: boolean;
+  scale?: number;
+}) {
   const t0 = { x: -32, y: 0 };
   const t1 = { x: 32, y: 0 };
+  const s = scale;
+  // Leads stay anchored to the fixed ±32 terminals; only the body scales, so the
+  // symbol reads larger on phones without moving the wire connection points.
+  const bodyTransform = s === 1 ? undefined : `scale(${s})`;
   switch (c.type) {
     case "battery":
       return (
         <g>
-          <line x1={t0.x} y1={0} x2={-12} y2={0} className="ix-lead" />
-          <line x1={12} y1={0} x2={t1.x} y2={0} className="ix-lead" />
-          <line x1={-6} y1={-14} x2={-6} y2={14} className="ix-batt-long" />
-          <line x1={6} y1={-8} x2={6} y2={8} className="ix-batt-short" />
-          <text x={-14} y={-20} className="ix-glyph-label">+</text>
-          <text x={10} y={-20} className="ix-glyph-label">-</text>
-          <text x={0} y={28} className="ix-glyph-meta">{c.voltage ?? 0} V</text>
+          <line x1={t0.x} y1={0} x2={-12 * s} y2={0} className="ix-lead" />
+          <line x1={12 * s} y1={0} x2={t1.x} y2={0} className="ix-lead" />
+          <g transform={bodyTransform}>
+            <line x1={-6} y1={-14} x2={-6} y2={14} className="ix-batt-long" />
+            <line x1={6} y1={-8} x2={6} y2={8} className="ix-batt-short" />
+            <text x={-14} y={-20} className="ix-glyph-label">+</text>
+            <text x={10} y={-20} className="ix-glyph-label">-</text>
+            <text x={0} y={28} className="ix-glyph-meta">{c.voltage ?? 0} V</text>
+          </g>
         </g>
       );
     case "switch":
       return (
         <g>
-          <line x1={t0.x} y1={0} x2={-12} y2={0} className="ix-lead" />
-          <line x1={12} y1={0} x2={t1.x} y2={0} className="ix-lead" />
-          <circle cx={-12} cy={0} r={2.5} className="ix-pin" />
-          <circle cx={12} cy={0} r={2.5} className="ix-pin" />
-          <line
-            x1={-12}
-            y1={0}
-            x2={c.closed ? 12 : 8}
-            y2={c.closed ? 0 : -16}
-            className="ix-switch-lever"
-          />
-          <text x={0} y={28} className="ix-glyph-meta">{c.closed ? "ON" : "OFF"}</text>
+          <line x1={t0.x} y1={0} x2={-12 * s} y2={0} className="ix-lead" />
+          <line x1={12 * s} y1={0} x2={t1.x} y2={0} className="ix-lead" />
+          <g transform={bodyTransform}>
+            <circle cx={-12} cy={0} r={2.5} className="ix-pin" />
+            <circle cx={12} cy={0} r={2.5} className="ix-pin" />
+            <line
+              x1={-12}
+              y1={0}
+              x2={c.closed ? 12 : 8}
+              y2={c.closed ? 0 : -16}
+              className="ix-switch-lever"
+            />
+            <text x={0} y={28} className="ix-glyph-meta">{c.closed ? "ON" : "OFF"}</text>
+          </g>
         </g>
       );
     case "lamp":
       return (
         <g>
-          <line x1={t0.x} y1={0} x2={-14} y2={0} className="ix-lead" />
-          <line x1={14} y1={0} x2={t1.x} y2={0} className="ix-lead" />
-          <circle cx={0} cy={0} r={14} className={`ix-lamp-bulb ${energized ? "is-on" : ""}`} />
-          <line x1={-9} y1={-9} x2={9} y2={9} className="ix-lamp-cross" />
-          <line x1={9} y1={-9} x2={-9} y2={9} className="ix-lamp-cross" />
-          <text x={0} y={32} className="ix-glyph-meta">{c.resistance ?? 0} Ω</text>
+          <line x1={t0.x} y1={0} x2={-14 * s} y2={0} className="ix-lead" />
+          <line x1={14 * s} y1={0} x2={t1.x} y2={0} className="ix-lead" />
+          <g transform={bodyTransform}>
+            <circle cx={0} cy={0} r={14} className={`ix-lamp-bulb ${energized ? "is-on" : ""}`} />
+            <line x1={-9} y1={-9} x2={9} y2={9} className="ix-lamp-cross" />
+            <line x1={9} y1={-9} x2={-9} y2={9} className="ix-lamp-cross" />
+            <text x={0} y={32} className="ix-glyph-meta">{c.resistance ?? 0} Ω</text>
+          </g>
         </g>
       );
     case "resistor":
       return (
         <g>
-          <line x1={t0.x} y1={0} x2={-18} y2={0} className="ix-lead" />
-          <line x1={18} y1={0} x2={t1.x} y2={0} className="ix-lead" />
-          <polyline
-            points="-18,0 -14,-8 -10,8 -6,-8 -2,8 2,-8 6,8 10,-8 14,8 18,0"
-            className="ix-resistor"
-          />
-          <text x={0} y={26} className="ix-glyph-meta">{c.resistance ?? 0} Ω</text>
+          <line x1={t0.x} y1={0} x2={-18 * s} y2={0} className="ix-lead" />
+          <line x1={18 * s} y1={0} x2={t1.x} y2={0} className="ix-lead" />
+          <g transform={bodyTransform}>
+            <polyline
+              points="-18,0 -14,-8 -10,8 -6,-8 -2,8 2,-8 6,8 10,-8 14,8 18,0"
+              className="ix-resistor"
+            />
+            <text x={0} y={26} className="ix-glyph-meta">{c.resistance ?? 0} Ω</text>
+          </g>
         </g>
       );
     case "breaker":
       return (
         <g>
-          <line x1={t0.x} y1={0} x2={-14} y2={0} className="ix-lead" />
-          <line x1={14} y1={0} x2={t1.x} y2={0} className="ix-lead" />
-          <rect x={-14} y={-12} width={28} height={24} rx={4} className={`ix-breaker-body ${c.tripped ? "is-tripped" : ""}`} />
-          <text x={0} y={3} className="ix-glyph-rating">{c.rating ?? 0}A</text>
-          <text x={0} y={28} className="ix-glyph-meta">{c.tripped ? "TRIPPED" : "OK"}</text>
+          <line x1={t0.x} y1={0} x2={-14 * s} y2={0} className="ix-lead" />
+          <line x1={14 * s} y1={0} x2={t1.x} y2={0} className="ix-lead" />
+          <g transform={bodyTransform}>
+            <rect x={-14} y={-12} width={28} height={24} rx={4} className={`ix-breaker-body ${c.tripped ? "is-tripped" : ""}`} />
+            <text x={0} y={3} className="ix-glyph-rating">{c.rating ?? 0}A</text>
+            <text x={0} y={28} className="ix-glyph-meta">{c.tripped ? "TRIPPED" : "OK"}</text>
+          </g>
         </g>
       );
   }
@@ -332,6 +359,16 @@ export function InteractivePage({ isActive }: Props) {
   const [savedCircuits, setSavedCircuits] = useState<SavedCircuit[]>(readSavedCircuits);
   const [circuitName, setCircuitName] = useState("");
   const [selectedSavedCircuitId, setSelectedSavedCircuitId] = useState("");
+  // Zoom the canvas in on phones so the symbols are large enough to read and tap.
+  const [compactView, setCompactView] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 720px)");
+    const onChange = (e: MediaQueryListEvent) => setCompactView(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   const dragRef = useRef<DragState>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -422,13 +459,14 @@ export function InteractivePage({ isActive }: Props) {
   function svgPoint(e: { clientX: number; clientY: number }): { x: number; y: number } {
     const svg = svgRef.current;
     if (!svg) return { x: 0, y: 0 };
-    const rect = svg.getBoundingClientRect();
-    const scaleX = CANVAS_W / rect.width;
-    const scaleY = CANVAS_H / rect.height;
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY
-    };
+    // Map screen → SVG user coordinates via the live CTM so placement is correct
+    // for any viewBox, zoom, or letterboxing (the old width-ratio math assumed
+    // the viewBox filled the element, which is false on the portrait phone canvas
+    // and on the zoomed-in compact view below).
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return { x: 0, y: 0 };
+    const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
+    return { x: pt.x, y: pt.y };
   }
 
   function placeComponent(type: ComponentType, x: number, y: number) {
@@ -778,7 +816,8 @@ export function InteractivePage({ isActive }: Props) {
           <svg
             ref={svgRef}
             className={`ix-canvas ${energized ? "is-energized" : ""}`}
-            viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+            viewBox={compactView ? COMPACT_VIEWBOX : `0 0 ${CANVAS_W} ${CANVAS_H}`}
+            preserveAspectRatio="xMidYMid meet"
             role="application"
             aria-label="Circuit canvas. Tab to a component or terminal. Enter or Space selects a component or starts and finishes a wire. Arrow keys move the selected component, R rotates it, Delete removes it."
             onPointerDown={handleCanvasPointerDown}
@@ -860,7 +899,11 @@ export function InteractivePage({ isActive }: Props) {
                     else if (e.key === "ArrowDown") { e.preventDefault(); nudgeComponent(c.id, 0, step); }
                   }}
                 >
-                  <ComponentGlyph c={renderedComponent} energized={energized && sim?.ok === true && !sim.fault} />
+                  <ComponentGlyph
+                    c={renderedComponent}
+                    energized={energized && sim?.ok === true && !sim.fault}
+                    scale={compactView ? 1.5 : 1}
+                  />
                   <circle
                     cx={t0.x - c.x}
                     cy={t0.y - c.y}
