@@ -5519,10 +5519,13 @@ body[data-page="exams"] .exam-option:disabled{
   cursor: default;
 }
 
-/* Selected (answering) — brass border + faint brass tint + filled badge. */
+/* Selected (answering) — brass border + faint brass tint + filled badge.
+   The tint is faint, so the base .is-selected `color: var(--on-accent)`
+   (dark ink for solid brass fills) must be reset to light text here. */
 body[data-page="exams"] .exam-option.is-selected:not(.is-answer):not(.is-wrong){
   border-color: var(--ex-brass);
   background: var(--ex-brass-tint);
+  color: var(--ex-text);
   box-shadow: none;
 }
 
