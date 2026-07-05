@@ -3,12 +3,14 @@ import {
   CONTAINMENT_OPTIONS,
   DEFAULT_CONTAINMENT_ROD_VALUES,
   DEFAULT_TRUNKING_OPPOSITE_VALUES,
+  DEFAULT_TRAY_BEND_CUT_VALUES,
   DEFAULT_UNISTRUT_LENGTH_VALUES,
   calcContainmentRod,
   calcUnistrutLength,
   calcAngle,
   calcContainmentBendStart,
   calcTrunkingOppositeMark,
+  calcTrayBendCut,
   calcPower,
   calcVoltageDrop,
   calcBreaker,
@@ -1066,6 +1068,13 @@ const applets: Applet[] = [
       "trunking opposite mark 100mm 100 mm layout bend angle adjacent tangent half angle tan calculation"
   },
   {
+    id: "tool-tray-bend-cut",
+    title: "Containment bend cut",
+    subtitle: "Notch marks, tray or trunking",
+    keywords:
+      "containment bend cut twice segmented notch gusset 90 degree right angle inside angle deflection setback mark tangent number of cuts width tray trunking basket ladder cable corner turn"
+  },
+  {
     id: "tool-power",
     title: "kW / A / V",
     subtitle: "Power current voltage",
@@ -1107,6 +1116,8 @@ const toolHints = {
     "Forward offset = centreline offset x tan(angle / 2). Add it when the new containment is further out; subtract it when further in.",
   trunkingOpposite:
     "Calculation angle = desired bend angle / 2. Opposite = tan(calculation angle) x adjacent. Use adjacent 100 mm for 100 mm trunking.",
+  trayBendCut:
+    "Total bend = 180 - inside angle. Bend per cut = total bend / cuts. Each cut mark = tan(bend per cut / 2) x width.",
   power: "Single-phase: P = V x I x PF. Three-phase: P = sqrt(3) x V x I x PF.",
   vdrop: "Single-phase: Vd = 2 x I x L x rho / A. Three-phase: Vd = sqrt(3) x I x L x rho / A.",
   breaker: "Rounds design current up to the next standard breaker size.",
@@ -1358,6 +1369,19 @@ export default function App() {
     DEFAULT_TRUNKING_OPPOSITE_VALUES.adjacent
   );
 
+  const [trayBendInsideAngle, setTrayBendInsideAngle] = usePersistedState<string>(
+    "tbc-inside-angle",
+    DEFAULT_TRAY_BEND_CUT_VALUES.insideAngle
+  );
+  const [trayBendCuts, setTrayBendCuts] = usePersistedState<string>(
+    "tbc-cuts",
+    DEFAULT_TRAY_BEND_CUT_VALUES.cuts
+  );
+  const [trayBendWidth, setTrayBendWidth] = usePersistedState<string>(
+    "tbc-width",
+    DEFAULT_TRAY_BEND_CUT_VALUES.width
+  );
+
   const [powerTarget, setPowerTarget] = usePersistedState<PowerTarget>("power-target", "current", isPowerTarget);
   const [powerPhase, setPowerPhase] = usePersistedState<PhaseType>("power-phase", "single", isPhaseType);
   const [powerValueA, setPowerValueA] = usePersistedState("power-a", "1");
@@ -1599,6 +1623,18 @@ export default function App() {
     setTrunkingOppositeAdjacent(adjacent);
   }
 
+  function clearTrayBendCut() {
+    setTrayBendInsideAngle("");
+    setTrayBendCuts("");
+    setTrayBendWidth("");
+  }
+
+  function applyTrayBendCutPreset(insideAngle: string, cuts: string, width: string) {
+    setTrayBendInsideAngle(insideAngle);
+    setTrayBendCuts(cuts);
+    setTrayBendWidth(width);
+  }
+
   function applyPowerPreset(target: PowerTarget, phase: PhaseType, valueA: string, valueB: string, pf = "0.95") {
     setPowerTarget(target);
     setPowerPhase(phase);
@@ -1694,6 +1730,11 @@ export default function App() {
   const trunkingOppositeResult = useMemo(() =>
     calcTrunkingOppositeMark(trunkingOppositeAngle, trunkingOppositeAdjacent),
     [trunkingOppositeAdjacent, trunkingOppositeAngle]
+  );
+
+  const trayBendCutResult = useMemo(() =>
+    calcTrayBendCut(trayBendInsideAngle, trayBendCuts, trayBendWidth),
+    [trayBendCuts, trayBendInsideAngle, trayBendWidth]
   );
 
   const powerResult = useMemo(() =>
@@ -3069,6 +3110,140 @@ export default function App() {
                   </div>
                 </div>
                 <FormulaToggle formula={formulas.trunkingOpposite} />
+              </article>
+            ) : null}
+
+            {filteredApplets.some((a) => a.id === "tool-tray-bend-cut") ? (
+              <article id="tool-tray-bend-cut" className="tool-panel">
+                <div className="tool-heading">
+                  <ToolTitle title="Containment bend cut" hint={toolHints.trayBendCut} />
+                  <button type="button" className="ghost-button" onClick={clearTrayBendCut}>
+                    Clear
+                  </button>
+                </div>
+
+                <div className="tool-form">
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Inside angle</span>
+                      <div className="input-wrap">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="0.1"
+                          max="179.9"
+                          step="0.1"
+                          aria-invalid={
+                            trayBendCutResult.validationMessage?.includes("Inside angle")
+                              ? true
+                              : undefined
+                          }
+                          value={trayBendInsideAngle}
+                          onChange={(e) => setTrayBendInsideAngle(e.target.value)}
+                        />
+                        <span className="suffix">deg</span>
+                      </div>
+                    </label>
+
+                    <label className="field">
+                      <span>Number of cuts</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min="1"
+                        step="1"
+                        aria-invalid={
+                          trayBendCutResult.validationMessage?.includes("cuts")
+                            ? true
+                            : undefined
+                        }
+                        value={trayBendCuts}
+                        onChange={(e) => setTrayBendCuts(e.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <label className="field">
+                    <span>Width (tray / trunking)</span>
+                    <div className="input-wrap">
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0.1"
+                        step="0.1"
+                        aria-invalid={
+                          trayBendCutResult.validationMessage?.includes("Width")
+                            ? true
+                            : undefined
+                        }
+                        value={trayBendWidth}
+                        onChange={(e) => setTrayBendWidth(e.target.value)}
+                      />
+                      <span className="suffix">mm</span>
+                    </div>
+                  </label>
+
+                  <p className="field-note">
+                    Measure the inside angle of the corner; the run turns through 180 - that angle. One cut is a single notch — add cuts only to split a sharp turn into gentler ones. Each cut is marked tan(half its bend) x width on each side of centre.
+                  </p>
+
+                  <PresetButtons
+                    ariaLabel="Containment bend cut presets"
+                    presets={[
+                      { label: "90° / 1 cut", onSelect: () => applyTrayBendCutPreset("90", "1", "300") },
+                      { label: "67° / 2 cuts", onSelect: () => applyTrayBendCutPreset("67", "2", "300") },
+                      { label: "90° / 100 mm", onSelect: () => applyTrayBendCutPreset("90", "1", "100") }
+                    ]}
+                  />
+
+                  {trayBendCutResult.validationMessage ? (
+                    <p className="field-error" role="alert">
+                      {trayBendCutResult.validationMessage}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="tool-output">
+                  <div className="result-main">
+                    <p className="result-label">Cut each side</p>
+                    <p className="result-value">
+                      <CopyableResult
+                        value={trayBendCutResult.roundedSetbackValue}
+                        onCopy={() =>
+                          addHistoryEntry(
+                            "Containment bend cut",
+                            "Cut each side",
+                            trayBendCutResult.roundedSetbackValue
+                          )
+                        }
+                      />
+                    </p>
+                    <p className="result-sub">
+                      {trayBendCutResult.cutsLabel}, marked from centre · nearest mm
+                    </p>
+                  </div>
+                  <div className="mini-metrics">
+                    <div>
+                      <span>Total bend</span>
+                      <strong>{trayBendCutResult.totalBendValue}</strong>
+                    </div>
+                    <div>
+                      <span>Bend per cut</span>
+                      <strong>{trayBendCutResult.bendPerCutValue}</strong>
+                    </div>
+                    <div>
+                      <span>Calculation angle</span>
+                      <strong>{trayBendCutResult.calculationAngleValue}</strong>
+                    </div>
+                    <div>
+                      <span>Each side (exact)</span>
+                      <strong>
+                        <CopyableResult value={trayBendCutResult.setbackValue} />
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+                <FormulaToggle formula={formulas.trayBendCut} />
               </article>
             ) : null}
 
