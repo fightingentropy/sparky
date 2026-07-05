@@ -65,8 +65,6 @@
   --font-ui: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-heading: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  /* Faint warm dot for the page background grid (mostly superseded by the mesh). */
-  --dot: rgba(255, 255, 255, 0.05);
 }
 
 * {
@@ -88,16 +86,12 @@ html {
   background-color: var(--bg);
 }
 
-/* The page background carries a faint warm dot grid. It lives on <body> with a
-   fixed attachment (a static texture behind the scrolling content); #root is left
-   transparent so the dots show through the gutters and behind the floating topbar. */
+/* The page background is a flat dark base; the grid backdrop is the fixed SVG
+   mesh layer (.app-bg) rendered at the app root. #root is left transparent so
+   the grid shows through the gutters and behind the floating topbar. */
 body {
   margin: 0;
   background-color: var(--bg);
-  background-image: radial-gradient(var(--dot) 1.1px, transparent 1.6px);
-  background-size: 22px 22px;
-  background-position: center top;
-  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-ui);
   line-height: 1.55;
@@ -3647,14 +3641,6 @@ body[data-page="interactive"] .ix-3d-wrap {
   color: var(--bg);
 }
 
-body {
-  background-color: var(--bg);
-  /* Warm top glow over the near-black base; the triangle mesh is a fixed DOM
-     layer (.app-bg) added at the app root so it sits behind every page. */
-  background-image: radial-gradient(110% 65% at 50% -10%, rgba(50, 42, 30, 0.5), transparent 55%);
-  background-attachment: fixed;
-}
-
 .site-shell {
   position: relative;
   z-index: 1;
@@ -4778,10 +4764,9 @@ body[data-page="exams"]{
   --ex-bad-line: rgba(207, 139, 111, 0.42);
   --ex-ui: "Hanken Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --ex-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  /* Dark base + a subtle warm top glow; the triangle mesh is the app-wide fixed
-     DOM layer (.app-bg, rendered at the app root). Matches the global body bg. */
+  /* Dark base; the grid backdrop is the app-wide fixed DOM layer (.app-bg,
+     rendered at the app root). Matches the global body bg. */
   background-color: var(--ex-bg);
-  background-image: radial-gradient(110% 65% at 50% -10%, rgba(50, 42, 30, 0.5), transparent 55%);
 }
 
 /* ── Top bar (global chrome, restyled on exams only) ───────────────────── */
