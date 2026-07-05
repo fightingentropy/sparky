@@ -1035,17 +1035,17 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
 
 const applets: Applet[] = [
   {
-    id: "tool-angle",
-    title: "Angle drop",
-    subtitle: "Drop and developed length",
-    keywords: "angle drop tray bracket piece length offset trig 45 degree bend top straight bottom straight allowance developed length"
-  },
-  {
     id: "tool-tray-bend-cut",
     title: "Containment bend cut",
     subtitle: "Notch marks, tray or trunking",
     keywords:
       "containment bend cut twice segmented notch gusset 90 degree right angle inside angle deflection setback mark tangent number of cuts width tray trunking basket ladder cable corner turn"
+  },
+  {
+    id: "tool-angle",
+    title: "Angle drop",
+    subtitle: "Drop and developed length",
+    keywords: "angle drop tray bracket piece length offset trig 45 degree bend top straight bottom straight allowance developed length"
   }
 ];
 
@@ -2607,6 +2607,140 @@ export default function App() {
               </article>
             ) : null}
 
+            {filteredApplets.some((a) => a.id === "tool-tray-bend-cut") ? (
+              <article id="tool-tray-bend-cut" className="tool-panel">
+                <div className="tool-heading">
+                  <ToolTitle title="Containment bend cut" hint={toolHints.trayBendCut} />
+                  <button type="button" className="ghost-button" onClick={clearTrayBendCut}>
+                    Clear
+                  </button>
+                </div>
+
+                <div className="tool-form">
+                  <div className="field-row">
+                    <label className="field">
+                      <span>Inside angle</span>
+                      <div className="input-wrap">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="0.1"
+                          max="179.9"
+                          step="0.1"
+                          aria-invalid={
+                            trayBendCutResult.validationMessage?.includes("Inside angle")
+                              ? true
+                              : undefined
+                          }
+                          value={trayBendInsideAngle}
+                          onChange={(e) => setTrayBendInsideAngle(e.target.value)}
+                        />
+                        <span className="suffix">deg</span>
+                      </div>
+                    </label>
+
+                    <label className="field">
+                      <span>Number of cuts</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min="1"
+                        step="1"
+                        aria-invalid={
+                          trayBendCutResult.validationMessage?.includes("cuts")
+                            ? true
+                            : undefined
+                        }
+                        value={trayBendCuts}
+                        onChange={(e) => setTrayBendCuts(e.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <label className="field">
+                    <span>Width (tray / trunking)</span>
+                    <div className="input-wrap">
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0.1"
+                        step="0.1"
+                        aria-invalid={
+                          trayBendCutResult.validationMessage?.includes("Width")
+                            ? true
+                            : undefined
+                        }
+                        value={trayBendWidth}
+                        onChange={(e) => setTrayBendWidth(e.target.value)}
+                      />
+                      <span className="suffix">mm</span>
+                    </div>
+                  </label>
+
+                  <p className="field-note">
+                    Measure the inside angle of the corner; the run turns through 180 - that angle. One cut is a single notch — add cuts only to split a sharp turn into gentler ones. Each cut is marked tan(half its bend) x width on each side of centre.
+                  </p>
+
+                  <PresetButtons
+                    ariaLabel="Containment bend cut presets"
+                    presets={[
+                      { label: "90° / 1 cut", onSelect: () => applyTrayBendCutPreset("90", "1", "300") },
+                      { label: "67° / 2 cuts", onSelect: () => applyTrayBendCutPreset("67", "2", "300") },
+                      { label: "90° / 100 mm", onSelect: () => applyTrayBendCutPreset("90", "1", "100") }
+                    ]}
+                  />
+
+                  {trayBendCutResult.validationMessage ? (
+                    <p className="field-error" role="alert">
+                      {trayBendCutResult.validationMessage}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="tool-output">
+                  <div className="result-main">
+                    <p className="result-label">Cut each side</p>
+                    <p className="result-value">
+                      <CopyableResult
+                        value={trayBendCutResult.roundedSetbackValue}
+                        onCopy={() =>
+                          addHistoryEntry(
+                            "Containment bend cut",
+                            "Cut each side",
+                            trayBendCutResult.roundedSetbackValue
+                          )
+                        }
+                      />
+                    </p>
+                    <p className="result-sub">
+                      {trayBendCutResult.cutsLabel}, marked from centre · nearest mm
+                    </p>
+                  </div>
+                  <div className="mini-metrics">
+                    <div>
+                      <span>Total bend</span>
+                      <strong>{trayBendCutResult.totalBendValue}</strong>
+                    </div>
+                    <div>
+                      <span>Bend per cut</span>
+                      <strong>{trayBendCutResult.bendPerCutValue}</strong>
+                    </div>
+                    <div>
+                      <span>Calculation angle</span>
+                      <strong>{trayBendCutResult.calculationAngleValue}</strong>
+                    </div>
+                    <div>
+                      <span>Each side (exact)</span>
+                      <strong>
+                        <CopyableResult value={trayBendCutResult.setbackValue} />
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+                <FormulaToggle formula={formulas.trayBendCut} />
+              </article>
+            ) : null}
+
             {filteredApplets.some((a) => a.id === "tool-angle") ? (
               <article id="tool-angle" className="tool-panel">
                 <div className="tool-heading">
@@ -3053,140 +3187,6 @@ export default function App() {
                   </div>
                 </div>
                 <FormulaToggle formula={formulas.trunkingOpposite} />
-              </article>
-            ) : null}
-
-            {filteredApplets.some((a) => a.id === "tool-tray-bend-cut") ? (
-              <article id="tool-tray-bend-cut" className="tool-panel">
-                <div className="tool-heading">
-                  <ToolTitle title="Containment bend cut" hint={toolHints.trayBendCut} />
-                  <button type="button" className="ghost-button" onClick={clearTrayBendCut}>
-                    Clear
-                  </button>
-                </div>
-
-                <div className="tool-form">
-                  <div className="field-row">
-                    <label className="field">
-                      <span>Inside angle</span>
-                      <div className="input-wrap">
-                        <input
-                          type="number"
-                          inputMode="decimal"
-                          min="0.1"
-                          max="179.9"
-                          step="0.1"
-                          aria-invalid={
-                            trayBendCutResult.validationMessage?.includes("Inside angle")
-                              ? true
-                              : undefined
-                          }
-                          value={trayBendInsideAngle}
-                          onChange={(e) => setTrayBendInsideAngle(e.target.value)}
-                        />
-                        <span className="suffix">deg</span>
-                      </div>
-                    </label>
-
-                    <label className="field">
-                      <span>Number of cuts</span>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min="1"
-                        step="1"
-                        aria-invalid={
-                          trayBendCutResult.validationMessage?.includes("cuts")
-                            ? true
-                            : undefined
-                        }
-                        value={trayBendCuts}
-                        onChange={(e) => setTrayBendCuts(e.target.value)}
-                      />
-                    </label>
-                  </div>
-
-                  <label className="field">
-                    <span>Width (tray / trunking)</span>
-                    <div className="input-wrap">
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        min="0.1"
-                        step="0.1"
-                        aria-invalid={
-                          trayBendCutResult.validationMessage?.includes("Width")
-                            ? true
-                            : undefined
-                        }
-                        value={trayBendWidth}
-                        onChange={(e) => setTrayBendWidth(e.target.value)}
-                      />
-                      <span className="suffix">mm</span>
-                    </div>
-                  </label>
-
-                  <p className="field-note">
-                    Measure the inside angle of the corner; the run turns through 180 - that angle. One cut is a single notch — add cuts only to split a sharp turn into gentler ones. Each cut is marked tan(half its bend) x width on each side of centre.
-                  </p>
-
-                  <PresetButtons
-                    ariaLabel="Containment bend cut presets"
-                    presets={[
-                      { label: "90° / 1 cut", onSelect: () => applyTrayBendCutPreset("90", "1", "300") },
-                      { label: "67° / 2 cuts", onSelect: () => applyTrayBendCutPreset("67", "2", "300") },
-                      { label: "90° / 100 mm", onSelect: () => applyTrayBendCutPreset("90", "1", "100") }
-                    ]}
-                  />
-
-                  {trayBendCutResult.validationMessage ? (
-                    <p className="field-error" role="alert">
-                      {trayBendCutResult.validationMessage}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="tool-output">
-                  <div className="result-main">
-                    <p className="result-label">Cut each side</p>
-                    <p className="result-value">
-                      <CopyableResult
-                        value={trayBendCutResult.roundedSetbackValue}
-                        onCopy={() =>
-                          addHistoryEntry(
-                            "Containment bend cut",
-                            "Cut each side",
-                            trayBendCutResult.roundedSetbackValue
-                          )
-                        }
-                      />
-                    </p>
-                    <p className="result-sub">
-                      {trayBendCutResult.cutsLabel}, marked from centre · nearest mm
-                    </p>
-                  </div>
-                  <div className="mini-metrics">
-                    <div>
-                      <span>Total bend</span>
-                      <strong>{trayBendCutResult.totalBendValue}</strong>
-                    </div>
-                    <div>
-                      <span>Bend per cut</span>
-                      <strong>{trayBendCutResult.bendPerCutValue}</strong>
-                    </div>
-                    <div>
-                      <span>Calculation angle</span>
-                      <strong>{trayBendCutResult.calculationAngleValue}</strong>
-                    </div>
-                    <div>
-                      <span>Each side (exact)</span>
-                      <strong>
-                        <CopyableResult value={trayBendCutResult.setbackValue} />
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-                <FormulaToggle formula={formulas.trayBendCut} />
               </article>
             ) : null}
 
