@@ -62,11 +62,11 @@ export const DEFAULT_TRUNKING_OPPOSITE_VALUES = {
 
 // A single notch is the common case, so cuts defaults to 1 — bump it to 2+ only
 // to spread a sharp turn over several gentler cuts (see the presets). Seeded with
-// a plain right-angle bend across a 300 mm tray; the 67° two-cut job is a preset.
+// a plain 90° right-angle bend in 100 mm trunking; the 300 mm tray jobs are presets.
 export const DEFAULT_TRAY_BEND_CUT_VALUES = {
   insideAngle: "90",
   cuts: "1",
-  width: "300"
+  width: "100"
 } as const;
 
 // ── Types ──────────────────────────────────────────────
