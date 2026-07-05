@@ -7,6 +7,7 @@ import {
   calcAngle,
   calcContainmentBendStart,
   calcTrunkingOppositeMark,
+  calcTrayBendCut,
   calcPower,
   calcVoltageDrop,
   calcBreaker,
@@ -255,6 +256,62 @@ describe("calcTrunkingOppositeMark", () => {
     const result = calcTrunkingOppositeMark("45", "-100");
     expect(result.validationMessage).toBe("Adjacent measurement cannot be negative.");
     expect(result.oppositeValue).toBe("-- mm");
+  });
+});
+
+describe("calcTrayBendCut", () => {
+  it("calculates the two-cut 67 degree / 300 mm tray example", () => {
+    const result = calcTrayBendCut("67", "2", "300");
+    expect(result.validationMessage).toBeNull();
+    expect(result.insideAngleValue).toBe("67 deg");
+    expect(result.totalBendValue).toBe("113 deg");
+    expect(result.bendPerCutValue).toBe("56.5 deg");
+    expect(result.calculationAngleValue).toBe("28.25 deg");
+    expect(result.trayWidthValue).toBe("300 mm");
+    expect(result.setbackValue).toBe("161.2 mm");
+    expect(result.roundedSetbackValue).toBe("161 mm");
+    expect(result.cutsLabel).toBe("2 cuts");
+  });
+
+  it("reduces to a single tan(half angle) x width mark for one cut", () => {
+    // One cut through a 90 degree inside corner turns the tray 90 degrees:
+    // tan(45) x 300 = 300.
+    const result = calcTrayBendCut("90", "1", "300");
+    expect(result.totalBendValue).toBe("90 deg");
+    expect(result.bendPerCutValue).toBe("90 deg");
+    expect(result.calculationAngleValue).toBe("45 deg");
+    expect(result.setbackValue).toBe("300 mm");
+    expect(result.cutsLabel).toBe("1 cut");
+  });
+
+  it("returns placeholders for empty values", () => {
+    const result = calcTrayBendCut("", "", "");
+    expect(result.validationMessage).toBeNull();
+    expect(result.setbackValue).toBe("-- mm");
+    expect(result.roundedSetbackValue).toBe("-- mm");
+  });
+
+  it("rejects invalid inside angles", () => {
+    const result = calcTrayBendCut("180", "2", "300");
+    expect(result.validationMessage).toBe(
+      "Inside angle must be greater than 0 and less than 180 degrees."
+    );
+    expect(result.setbackValue).toBe("-- mm");
+  });
+
+  it("rejects fractional or zero cut counts", () => {
+    expect(calcTrayBendCut("67", "2.5", "300").validationMessage).toBe(
+      "Number of cuts must be a whole number of 1 or more."
+    );
+    expect(calcTrayBendCut("67", "0", "300").validationMessage).toBe(
+      "Number of cuts must be a whole number of 1 or more."
+    );
+  });
+
+  it("rejects negative widths", () => {
+    const result = calcTrayBendCut("67", "2", "-300");
+    expect(result.validationMessage).toBe("Width cannot be negative.");
+    expect(result.setbackValue).toBe("-- mm");
   });
 });
 

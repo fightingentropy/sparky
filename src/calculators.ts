@@ -60,6 +60,15 @@ export const DEFAULT_TRUNKING_OPPOSITE_VALUES = {
   adjacent: "100"
 } as const;
 
+// A single notch is the common case, so cuts defaults to 1 — bump it to 2+ only
+// to spread a sharp turn over several gentler cuts (see the presets). Seeded with
+// a plain right-angle bend across a 300 mm tray; the 67° two-cut job is a preset.
+export const DEFAULT_TRAY_BEND_CUT_VALUES = {
+  insideAngle: "90",
+  cuts: "1",
+  width: "300"
+} as const;
+
 // ── Types ──────────────────────────────────────────────
 export type PhaseType = "single" | "three";
 export type PowerTarget = "power" | "current" | "voltage";
@@ -108,6 +117,18 @@ export type TrunkingOppositeResult = {
   adjacentValue: string;
   oppositeValue: string;
   roundedOppositeValue: string;
+};
+
+export type TrayBendCutResult = {
+  validationMessage: string | null;
+  insideAngleValue: string;
+  totalBendValue: string;
+  bendPerCutValue: string;
+  calculationAngleValue: string;
+  trayWidthValue: string;
+  setbackValue: string;
+  roundedSetbackValue: string;
+  cutsLabel: string;
 };
 
 export type PowerResult = {
@@ -181,6 +202,8 @@ export const formulas = {
     "Forward offset = centreline offset x tan(bend angle / 2)\nFurther out: new bend start = reference bend start + forward offset\nFurther in: new bend start = reference bend start - forward offset",
   trunkingOpposite:
     "Calculation angle = desired bend angle / 2\nOpposite = tan(calculation angle) x adjacent\nFor 100 mm trunking: opposite = tan(A / 2) x 100",
+  trayBendCut:
+    "Total bend = 180 - inside angle\nBend per cut = total bend / number of cuts\nCut mark = tan(bend per cut / 2) x width",
   power:
     "Single-phase: P = V x I x PF\nThree-phase: P = sqrt(3) x V x I x PF",
   vdrop:
@@ -512,6 +535,87 @@ export function calcTrunkingOppositeMark(
     adjacentValue: formatMeasure(adjacent, "mm"),
     oppositeValue: formatTenthMeasure(opposite, "mm"),
     roundedOppositeValue: formatMeasure(Math.round(opposite), "mm")
+  };
+}
+
+// Segmented ("cut twice") tray bend. You measure the inside angle of the corner
+// the tray has to wrap; the tray therefore has to turn through 180 − that angle.
+// Splitting the turn across N notch cuts, each cut is marked back from centre by
+// tan(half the per-cut turn) × width — the single-cut case (N = 1) reduces
+// to the same tan(A/2) × side the 100 mm trunking mark uses.
+export function calcTrayBendCut(
+  insideAngleStr: string,
+  cutsStr: string,
+  widthStr: string
+): TrayBendCutResult {
+  const insideAngle = Number.parseFloat(insideAngleStr);
+  const cuts = Number.parseFloat(cutsStr);
+  const width = Number.parseFloat(widthStr);
+
+  const empty: TrayBendCutResult = {
+    validationMessage: null,
+    insideAngleValue: "-- deg",
+    totalBendValue: "-- deg",
+    bendPerCutValue: "-- deg",
+    calculationAngleValue: "-- deg",
+    trayWidthValue: "-- mm",
+    setbackValue: "-- mm",
+    roundedSetbackValue: "-- mm",
+    cutsLabel: "-- cuts"
+  };
+
+  if (Number.isFinite(insideAngle) && (insideAngle <= 0 || insideAngle >= 180)) {
+    return {
+      ...empty,
+      validationMessage: "Inside angle must be greater than 0 and less than 180 degrees."
+    };
+  }
+
+  if (Number.isFinite(cuts) && (cuts < 1 || !Number.isInteger(cuts))) {
+    return {
+      ...empty,
+      validationMessage: "Number of cuts must be a whole number of 1 or more."
+    };
+  }
+
+  if (Number.isFinite(width) && width < 0) {
+    return {
+      ...empty,
+      validationMessage: "Width cannot be negative."
+    };
+  }
+
+  if (!Number.isFinite(insideAngle) || !Number.isFinite(cuts) || !Number.isFinite(width)) {
+    return empty;
+  }
+
+  if (width <= 0) {
+    return {
+      ...empty,
+      validationMessage: "Width must be greater than 0 mm."
+    };
+  }
+
+  const totalBend = 180 - insideAngle;
+  const bendPerCut = totalBend / cuts;
+  const calculationAngle = bendPerCut / 2;
+  const calculationAngleRadians = (calculationAngle * Math.PI) / 180;
+  const tangent = Math.tan(calculationAngleRadians);
+
+  if (!Number.isFinite(tangent)) return empty;
+
+  const setback = tangent * width;
+
+  return {
+    validationMessage: null,
+    insideAngleValue: `${formatNumber(insideAngle)} deg`,
+    totalBendValue: `${formatNumber(totalBend)} deg`,
+    bendPerCutValue: `${formatNumber(bendPerCut)} deg`,
+    calculationAngleValue: `${formatNumber(calculationAngle)} deg`,
+    trayWidthValue: formatMeasure(width, "mm"),
+    setbackValue: formatTenthMeasure(setback, "mm"),
+    roundedSetbackValue: formatMeasure(Math.round(setback), "mm"),
+    cutsLabel: `${formatNumber(cuts)} cut${cuts === 1 ? "" : "s"}`
   };
 }
 
