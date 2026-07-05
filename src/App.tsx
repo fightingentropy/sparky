@@ -1035,37 +1035,10 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
 
 const applets: Applet[] = [
   {
-    id: "tool-containment-rod",
-    title: "Containment rod",
-    subtitle: "Rod cut and Unistrut drop",
-    keywords: "containment rod threaded rod cut length unistrut strut drop buffer support channel"
-  },
-  {
-    id: "tool-unistrut-length",
-    title: "Unistrut length",
-    subtitle: "Multiple containment runs",
-    keywords:
-      "unistrut length calculator strut support channel tray basket trunking containment widths gap side allowance multiple runs"
-  },
-  {
     id: "tool-angle",
     title: "Angle drop",
     subtitle: "Drop and developed length",
     keywords: "angle drop tray bracket piece length offset trig 45 degree bend top straight bottom straight allowance developed length"
-  },
-  {
-    id: "tool-containment-bend-start",
-    title: "Containment bend start",
-    subtitle: "Line up parallel bends",
-    keywords:
-      "containment bend start align offset centreline centerline tray basket trunking ladder rack conduit further out further in tangent geometry"
-  },
-  {
-    id: "tool-trunking-opposite-mark",
-    title: "100 mm trunking mark",
-    subtitle: "Opposite by tangent",
-    keywords:
-      "trunking opposite mark 100mm 100 mm layout bend angle adjacent tangent half angle tan calculation"
   },
   {
     id: "tool-tray-bend-cut",
@@ -1073,36 +1046,6 @@ const applets: Applet[] = [
     subtitle: "Notch marks, tray or trunking",
     keywords:
       "containment bend cut twice segmented notch gusset 90 degree right angle inside angle deflection setback mark tangent number of cuts width tray trunking basket ladder cable corner turn"
-  },
-  {
-    id: "tool-power",
-    title: "kW / A / V",
-    subtitle: "Power current voltage",
-    keywords: "load current amps power single phase three phase kilowatt voltage pf converter"
-  },
-  {
-    id: "tool-vdrop",
-    title: "Voltage drop",
-    subtitle: "Quick estimate",
-    keywords: "voltage drop cable size current length single phase three phase percent"
-  },
-  {
-    id: "tool-breaker",
-    title: "Breaker sizing",
-    subtitle: "Quick selection",
-    keywords: "breaker fuse mcb rcbo size current kilowatt protective device"
-  },
-  {
-    id: "tool-conduit",
-    title: "Conduit fill",
-    subtitle: "Area check",
-    keywords: "conduit fill cable diameter count area percent containment"
-  },
-  {
-    id: "tool-structure",
-    title: "Structural limits",
-    subtitle: "Wall chases and joists",
-    keywords: "joist notch chase wall thickness building work structure"
   }
 ];
 
