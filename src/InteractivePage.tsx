@@ -24,12 +24,12 @@ const TAB_META: Record<TabId, { label: string; title: string; copy: string }> = 
   circuits: {
     label: "Circuits",
     title: "Interactive Circuits",
-    copy: "Wire components, then energize the loop. Watch current, voltage drop, and tripped breakers in real time."
+    copy: "Wire components, then energise the loop. Watch current, voltage drop, and tripped breakers in real time."
   },
   panel: {
-    label: "Panel wiring",
-    title: "Panel Wiring Trainer",
-    copy: "Install breakers in a 3D load center. Mismatch a wire AWG and you'll get yelled at — NEC 240.4(D) won't let it slide."
+    label: "Consumer unit",
+    title: "Consumer Unit Trainer",
+    copy: "Build a UK-style consumer unit. Match RCBOs and cable CSA, then check the design logic behind every circuit."
   },
   faults: {
     label: "Fault finding",
@@ -244,7 +244,7 @@ function lessonFor(circuit: Circuit, energized: boolean, sim: ReturnType<typeof 
   if (!hasBattery) return "No source yet. Add a battery so current has somewhere to come from.";
   if (!hasLoad) return "Add a load (lamp or resistor) so the battery has somewhere to push current.";
   if (!circuit.wires.length) return "Click a terminal, then click another to draw a wire between them.";
-  if (!energized) return "Press Energize to see current flow. Watch for tripped breakers.";
+  if (!energized) return "Press Energise to see current flow. Watch for tripped breakers.";
   if (!sim) return "";
   if (sim.fault === "short") return "Short circuit. No resistance in the loop means runaway current.";
   if (sim.fault === "no-source") return "No source connected. The circuit cannot flow.";
@@ -677,7 +677,7 @@ export function InteractivePage({ isActive }: Props) {
     <section className={`page page-interactive ${isActive ? "is-active" : ""}`}>
       <header className="page-header ix-header">
         <div>
-          <h2>{meta.title}</h2>
+      <h1>{meta.title}</h1>
           <p className="page-copy">{meta.copy}</p>
         </div>
         {tab === "circuits" ? (
@@ -687,7 +687,7 @@ export function InteractivePage({ isActive }: Props) {
               className={`ix-energize ${energized ? "is-on" : ""}`}
               onClick={() => setEnergized((v) => !v)}
             >
-              {energized ? "De-energize" : "Energize"}
+              {energized ? "De-energise" : "Energise"}
             </button>
           </div>
         ) : null}
@@ -710,7 +710,7 @@ export function InteractivePage({ isActive }: Props) {
 
       {tab === "panel" ? (
         <div className="ix-3d-wrap">
-          <Suspense fallback={<div className="ix-panel-loading" role="status">Loading panel trainer...</div>}>
+          <Suspense fallback={<div className="ix-panel-loading" role="status">Loading consumer unit trainer...</div>}>
             <PanelTrainer active={isActive} />
           </Suspense>
         </div>

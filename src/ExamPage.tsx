@@ -23,10 +23,12 @@ import { usePersistedState } from "./usePersistedState";
 import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
 import { writeClipboardText } from "./clipboard";
+import { getExamClipboardText, getQuestionClipboardText } from "./examClipboard";
 import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
 
 type Answers = Record<number, ExamChoice>;
 type ReviewFilter = "all" | "missed" | "wrong" | "unanswered" | "correct";
+type ExamViewMode = "all" | "focus";
 
 const LETTERS: ExamChoice[] = ["A", "B", "C", "D"];
 const REVIEW_FILTER_LABELS: Record<ReviewFilter, string> = {
@@ -67,40 +69,6 @@ const EXAM_LOCAL_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
 };
 
 type CopyState = "idle" | "copied" | "failed";
-
-function getQuestionClipboardText(question: ExamQuestion, includeAnswer = false): string {
-  const imageLines = question.imageUrls?.length
-    ? ["", ...question.imageUrls.map((url) => `Image: ${url}`)]
-    : [];
-  const optionLines = LETTERS.map((letter) => {
-    const imageUrl = question.optionImageUrls?.[letter];
-    return imageUrl
-      ? `${letter}. ${question.options[letter]} (${imageUrl})`
-      : `${letter}. ${question.options[letter]}`;
-  });
-  const answerLines = includeAnswer
-    ? ["", `Answer: ${question.answer}. ${question.options[question.answer]}`]
-    : [];
-  return [`Q${question.number}`, question.prompt, ...imageLines, "", ...optionLines, ...answerLines].join("\n");
-}
-
-function getExamClipboardText(
-  exam: Exam,
-  sectionGroups: Array<{ section: Exam["sections"][number]; questions: ExamQuestion[] }>,
-  variantIndex: number
-): string {
-  const header = [
-    exam.title,
-    exam.subtitle,
-    `Format: ${exam.format}`,
-    `Test: ${variantIndex + 1}`
-  ];
-  const sectionBlocks = sectionGroups.map(({ section, questions }) =>
-    [section.title, ...questions.map((question) => getQuestionClipboardText(question, true))].join("\n\n")
-  );
-
-  return [...header, ...sectionBlocks].join("\n\n");
-}
 
 function isExamChoice(value: unknown): value is ExamChoice {
   return typeof value === "string" && (LETTERS as string[]).includes(value);
@@ -304,6 +272,9 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   const [examInfoOpen, setExamInfoOpen] = useState(false);
   const [retryQuestionNumbers, setRetryQuestionNumbers] = useState<number[] | null>(null);
   const [examCopyState, setExamCopyState] = useState<CopyState>("idle");
+  const [viewMode, setViewMode] = useState<ExamViewMode>("all");
+  const [focusQuestionIndex, setFocusQuestionIndex] = useState(0);
+  const [flaggedQuestionNumbers, setFlaggedQuestionNumbers] = useState<Set<number>>(() => new Set());
   const examCopyTimeoutRef = useRef<number | null>(null);
   // Marks each category complete once every one of its tests has been submitted,
   // so the category list can tick a whole exam off (not just its individual tests).
@@ -323,6 +294,9 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     setExamInfoOpen(false);
     setTestMenuOpen(false);
     setExamCopyState("idle");
+    setViewMode("all");
+    setFocusQuestionIndex(0);
+    setFlaggedQuestionNumbers(new Set());
     if (examCopyTimeoutRef.current !== null) {
       window.clearTimeout(examCopyTimeoutRef.current);
       examCopyTimeoutRef.current = null;
@@ -518,9 +492,17 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     [activeSectionGroups, answers]
   );
   const displayQuestions = useMemo(() => {
+    if (!submitted && viewMode === "focus") {
+      const question = questions[Math.min(focusQuestionIndex, Math.max(questions.length - 1, 0))];
+      return question ? [question] : [];
+    }
     if (!submitted) return questions;
     return questions.filter((question) => matchesReviewFilter(question, answers, reviewFilter));
-  }, [questions, answers, reviewFilter, submitted]);
+  }, [questions, answers, focusQuestionIndex, reviewFilter, submitted, viewMode]);
+
+  useEffect(() => {
+    setFocusQuestionIndex((current) => Math.min(current, Math.max(questions.length - 1, 0)));
+  }, [questions.length]);
 
   function setAnswer(questionNumber: number, choice: ExamChoice) {
     if (!exam || submitted) return;
@@ -542,6 +524,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
 
   function handleSubmit() {
     if (!exam) return;
+    setViewMode("all");
     setRetryQuestionNumbers(null);
     const nextProgress = writeSlot(progress, variantIndex, { answers, submitted: true });
     setProgress(nextProgress);
@@ -603,12 +586,26 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   }
 
   function scrollToFirstUnanswered() {
-    for (const q of questions) {
+    for (let index = 0; index < questions.length; index += 1) {
+      const q = questions[index];
       if (!(q.number in answers)) {
+        if (viewMode === "focus") {
+          setFocusQuestionIndex(index);
+          return;
+        }
         scrollIntoViewSafely(document.getElementById(`exam-q-${q.number}`), { block: "center" });
         return;
       }
     }
+  }
+
+  function toggleQuestionFlag(questionNumber: number) {
+    setFlaggedQuestionNumbers((current) => {
+      const next = new Set(current);
+      if (next.has(questionNumber)) next.delete(questionNumber);
+      else next.add(questionNumber);
+      return next;
+    });
   }
 
   async function copyFullExam() {
@@ -618,7 +615,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     }
 
     try {
-      await writeClipboardText(getExamClipboardText(exam, sectionGroups, variantIndex));
+      await writeClipboardText(getExamClipboardText(sectionGroups));
       setExamCopyState("copied");
       examCopyTimeoutRef.current = window.setTimeout(() => {
         setExamCopyState("idle");
@@ -679,6 +676,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
         <header className="exam-hero">
           <div className="exam-hero-text">
             <span className="exam-eyebrow">{"PRACTICE EXAM · EAL — City & Guilds aligned"}</span>
+            <h1 className="sr-only">{selectedExamEntry.title} practice exam</h1>
             <div className="exam-title-wrap" ref={examMenuRef}>
               {EXAM_REGISTRY.length > 1 ? (
                 <div className="exam-title-menu-wrap">
@@ -832,6 +830,10 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
           </div>
         </header>
 
+        <aside className="exam-content-notice" role="note">
+          Study aid: confirm current awarding-body requirements, BS 7671 editions and official guidance before relying on technical or regulatory wording.
+        </aside>
+
         {total > 0 ? (
           <div
             className="exam-progress"
@@ -845,6 +847,49 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               className="exam-progress-bar"
               style={{ width: `${(answeredCount / total) * 100}%` }}
             />
+          </div>
+        ) : null}
+
+        {!submitted && total > 0 ? (
+          <div className="exam-view-toolbar">
+            <div className="exam-view-switch" role="group" aria-label="Question view">
+              <button
+                type="button"
+                className={viewMode === "all" ? "is-active" : ""}
+                aria-pressed={viewMode === "all"}
+                onClick={() => setViewMode("all")}
+              >
+                All questions
+              </button>
+              <button
+                type="button"
+                className={viewMode === "focus" ? "is-active" : ""}
+                aria-pressed={viewMode === "focus"}
+                onClick={() => setViewMode("focus")}
+              >
+                Focus mode
+              </button>
+            </div>
+            {viewMode === "focus" ? (
+              <div className="exam-question-navigator" aria-label="Question navigator">
+                {questions.map((question, index) => {
+                  const answered = Boolean(answers[question.number]);
+                  const flagged = flaggedQuestionNumbers.has(question.number);
+                  return (
+                    <button
+                      key={question.number}
+                      type="button"
+                      className={`${index === focusQuestionIndex ? "is-current" : ""}${answered ? " is-answered" : ""}${flagged ? " is-flagged" : ""}`}
+                      aria-current={index === focusQuestionIndex ? "true" : undefined}
+                      aria-label={`Question ${question.number}${answered ? ", answered" : ", unanswered"}${flagged ? ", flagged" : ""}`}
+                      onClick={() => setFocusQuestionIndex(index)}
+                    >
+                      {question.number}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
         ) : null}
 
@@ -891,10 +936,41 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                 selected={answers[question.number]}
                 submitted={submitted}
                 onSelect={(choice) => setAnswer(question.number, choice)}
+                flagged={flaggedQuestionNumbers.has(question.number)}
+                onToggleFlag={() => toggleQuestionFlag(question.number)}
               />
             ))}
           </div>
         </div>
+
+        {!submitted && viewMode === "focus" && displayQuestions.length > 0 ? (
+          <div className="exam-focus-controls" aria-label="Focus mode navigation">
+            <button
+              type="button"
+              className="ghost-button"
+              disabled={focusQuestionIndex === 0}
+              onClick={() => setFocusQuestionIndex((current) => Math.max(0, current - 1))}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              className={`ghost-button exam-flag-control${flaggedQuestionNumbers.has(displayQuestions[0].number) ? " is-active" : ""}`}
+              aria-pressed={flaggedQuestionNumbers.has(displayQuestions[0].number)}
+              onClick={() => toggleQuestionFlag(displayQuestions[0].number)}
+            >
+              {flaggedQuestionNumbers.has(displayQuestions[0].number) ? "Flagged" : "Flag for review"}
+            </button>
+            <button
+              type="button"
+              className="ghost-button"
+              disabled={focusQuestionIndex >= questions.length - 1}
+              onClick={() => setFocusQuestionIndex((current) => Math.min(questions.length - 1, current + 1))}
+            >
+              Next
+            </button>
+          </div>
+        ) : null}
 
         {submitted && exam && displayQuestions.length === 0 ? (
           <p className="empty-state">No questions match the current review filters.</p>
@@ -978,9 +1054,11 @@ type QuestionCardProps = {
   selected: ExamChoice | undefined;
   submitted: boolean;
   onSelect: (choice: ExamChoice) => void;
+  flagged: boolean;
+  onToggleFlag: () => void;
 };
 
-function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardProps) {
+function QuestionCard({ question, selected, submitted, onSelect, flagged, onToggleFlag }: QuestionCardProps) {
   const correct = question.answer;
   const isCorrect = submitted && selected === correct;
   const isIncorrect = submitted && selected !== undefined && selected !== correct;
@@ -1040,6 +1118,21 @@ function QuestionCard({ question, selected, submitted, onSelect }: QuestionCardP
       <div className="exam-question-head">
         <span className="exam-q-number">Q{question.number}</span>
         <div className="exam-question-actions">
+          {!submitted ? (
+            <button
+              type="button"
+              className={`exam-copy-btn exam-flag-btn${flagged ? " is-active" : ""}`}
+              onClick={onToggleFlag}
+              aria-pressed={flagged}
+              aria-label={flagged ? `Remove review flag from question ${question.number}` : `Flag question ${question.number} for review`}
+              title={flagged ? "Remove review flag" : "Flag for review"}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={flagged ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 4v17" />
+                <path d="M5 5h11l-2.5 4L16 13H5" />
+              </svg>
+            </button>
+          ) : null}
           {!submitted ? (
             <button
               type="button"

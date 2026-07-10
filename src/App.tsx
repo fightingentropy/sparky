@@ -1035,6 +1035,20 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
 
 const applets: Applet[] = [
   {
+    id: "tool-containment-rod",
+    title: "Containment rod",
+    subtitle: "Threaded rod cut length",
+    keywords:
+      "containment rod threaded rod trapeze ceiling drop unistrut overall height buffer cut length support"
+  },
+  {
+    id: "tool-unistrut-length",
+    title: "Unistrut length",
+    subtitle: "Support rail cut length",
+    keywords:
+      "unistrut channel support trapeze rail containment width allowance gap cut length strut"
+  },
+  {
     id: "tool-tray-bend-cut",
     title: "Containment bend cut",
     subtitle: "Notch marks, tray or trunking",
@@ -1046,6 +1060,49 @@ const applets: Applet[] = [
     title: "Angle drop",
     subtitle: "Drop and developed length",
     keywords: "angle drop tray bracket piece length offset trig 45 degree bend top straight bottom straight allowance developed length"
+  },
+  {
+    id: "tool-containment-bend-start",
+    title: "Containment bend start",
+    subtitle: "Start mark from a reference",
+    keywords:
+      "containment bend start centreline offset reference mark further in out tangent tray trunking bend"
+  },
+  {
+    id: "tool-trunking-opposite-mark",
+    title: "Trunking opposite mark",
+    subtitle: "Opposite mark for a bend",
+    keywords: "trunking opposite mark bend angle tangent adjacent 100mm set out fabrication"
+  },
+  {
+    id: "tool-power",
+    title: "kW / A / V",
+    subtitle: "Single and three-phase power",
+    keywords: "power current voltage kw amps volts three phase power factor electrical calculation"
+  },
+  {
+    id: "tool-vdrop",
+    title: "Voltage drop",
+    subtitle: "Cable voltage-drop check",
+    keywords: "voltage drop cable length current cable size single three phase volt mv amp metre"
+  },
+  {
+    id: "tool-breaker",
+    title: "Breaker sizing",
+    subtitle: "Protective-device starting point",
+    keywords: "breaker mcb rcbo protective device current power circuit rating cable electrical"
+  },
+  {
+    id: "tool-conduit",
+    title: "Conduit fill",
+    subtitle: "Cable space in conduit",
+    keywords: "conduit fill cable diameter count capacity percentage containment install"
+  },
+  {
+    id: "tool-structure",
+    title: "Structural limits",
+    subtitle: "Chases and joist notches",
+    keywords: "structural limits wall chase joist notch building regulations depth electrical cable"
   }
 ];
 
@@ -1098,6 +1155,10 @@ function referenceTableClipboardText(table: ReferenceTable) {
 
 function isOneOf<T extends string>(options: readonly T[], value: unknown): value is T {
   return typeof value === "string" && options.includes(value as T);
+}
+
+function isStringArrayValue(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
 function isAngleUnit(value: unknown): value is AngleUnit {
@@ -1203,6 +1264,7 @@ export default function App() {
   const { user, logout } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
   const [reduceMotion, setReduceMotion] = usePersistedState<boolean>("pref-reduce-motion", false, isBoolean);
+  const [comfortableText, setComfortableText] = usePersistedState<boolean>("pref-comfortable-text", false, isBoolean);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
   const navMenuRef = useRef<HTMLDivElement | null>(null);
   const navMenuButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -1212,6 +1274,10 @@ export default function App() {
   useEffect(() => {
     document.documentElement.classList.toggle("reduce-motion", reduceMotion);
   }, [reduceMotion]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("comfortable-text", comfortableText);
+  }, [comfortableText]);
 
   const displayName = user ? (user.nickname?.trim() || user.email) : null;
 
@@ -1230,6 +1296,11 @@ export default function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [copiedSectionId, setCopiedSectionId] = useState<string | null>(null);
+  const [noteQuery, setNoteQuery] = useState("");
+  const [savedNoteIds, setSavedNoteIds] = usePersistedState<string[]>("saved-note-ids", [], isStringArrayValue);
+  const [showSavedNotes, setShowSavedNotes] = useState(false);
+  const [expandedNoteIds, setExpandedNoteIds] = useState<Set<string>>(() => new Set());
+  const [highlightedNoteId, setHighlightedNoteId] = useState<string | null>(null);
   const [examPracticeTarget, setExamPracticeTarget] = useState<{ examId: ExamId; nonce: number } | null>(null);
 
   const paletteTrapRef = useFocusTrap<HTMLDivElement>(paletteOpen);
@@ -1393,7 +1464,15 @@ export default function App() {
     [navigateTo]
   );
 
-  const handleOpenNote = useCallback((noteId: string) => navigateTo("cheatsheet", noteId), [navigateTo]);
+  const handleOpenNote = useCallback(
+    (noteId: string) => {
+      setExpandedNoteIds((current) => new Set(current).add(noteId));
+      setHighlightedNoteId(noteId);
+      navigateTo("cheatsheet", noteId);
+      window.setTimeout(() => setHighlightedNoteId((current) => (current === noteId ? null : current)), 2200);
+    },
+    [navigateTo]
+  );
 
   function scrollToTool(index: number) {
     const grid = toolGridRef.current;
@@ -1402,6 +1481,7 @@ export default function App() {
     const nextIndex = Math.min(Math.max(index, 0), maxIndex);
     setActiveToolIndex((current) => (current === nextIndex ? current : nextIndex));
     scrollToSafely(grid, { left: grid.clientWidth * nextIndex });
+    scrollIntoViewSafely(grid, { block: "start" });
   }
 
   function openCommandPalette() {
@@ -1711,7 +1791,23 @@ export default function App() {
     [filteredApplets]
   );
 
-  const filteredCheatSections = cheatSheetSections;
+  const filteredCheatSections = useMemo(() => {
+    const query = noteQuery.trim();
+    return cheatSheetSections.filter((section) => {
+      if (showSavedNotes && !savedNoteIds.includes(section.id)) return false;
+      if (!query) return true;
+      return matchesQuery(
+        [
+          section.title,
+          section.summary,
+          ...section.items,
+          ...(section.tables?.flatMap((table) => [table.title, ...table.headers, ...table.rows.flat()]) ?? []),
+          ...(section.legend?.map((entry) => entry.label) ?? [])
+        ].join(" "),
+        query
+      );
+    });
+  }, [noteQuery, savedNoteIds, showSavedNotes]);
 
   // Built once — every source is module-static and navigateTo is stable — so
   // typing in the palette only re-runs the cheap filter below rather than
@@ -1720,10 +1816,10 @@ export default function App() {
   const paletteBaseItems = useMemo<PaletteItem[]>(() => {
     return [
       {
-        title: "Home",
-        subtitle: "Open the tools page.",
+        title: "Tools",
+        subtitle: "Open the calculator dashboard.",
         tag: "Page",
-        keywords: "home start tools calculators",
+        keywords: "home dashboard start tools calculators",
         action: () => navigateTo("home")
       },
       {
@@ -1838,6 +1934,16 @@ export default function App() {
 
   useEffect(() => {
     document.body.setAttribute("data-page", page);
+    const pageTitle: Record<PageId, string> = {
+      home: "Tools",
+      cheatsheet: "Notes",
+      learn: "Learning Guides",
+      exams: "Practice Exams",
+      tutorials: "Workplace Tutorials",
+      interactive: "Interactive Training",
+      settings: "Settings"
+    };
+    document.title = `${pageTitle[page]} · Sparky`;
   }, [page]);
 
   useEffect(() => {
@@ -2070,7 +2176,7 @@ export default function App() {
         <a
           className="brand"
           href={getPageHref("home")}
-          aria-label="Go to overview"
+          aria-label="Go to Tools dashboard"
           onClick={(event) => {
             event.preventDefault();
             navigateTo("home");
@@ -2134,11 +2240,6 @@ export default function App() {
           {page === "home" ? (
             <button type="button" className="topbar-icon-button" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </button>
-          ) : null}
-          {page === "exams" ? (
-            <button type="button" className="topbar-icon-button topbar-bell-button" aria-label="Notifications" title="Notifications">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
             </button>
           ) : null}
           <div className="nav-menu-wrap">
@@ -2251,6 +2352,63 @@ export default function App() {
 
       <main className="workspace">
         <section className={`page page-home ${page === "home" ? "is-active" : ""}`}>
+          <header className="dashboard-hero">
+            <div className="dashboard-intro">
+              <span className="dashboard-kicker">UK electrician's workspace</span>
+              <h1>Tools, revision and practice in one place.</h1>
+              <p>Pick up a calculation, revise a topic, or continue with a mock exam without digging through menus.</p>
+            </div>
+            <div className="dashboard-actions" aria-label="Quick actions">
+              <button type="button" className="dashboard-action dashboard-action--primary" onClick={() => navigateTo("exams")}>
+                <span>Practice</span>
+                <strong>Open mock exams</strong>
+              </button>
+              <button type="button" className="dashboard-action" onClick={() => navigateTo("cheatsheet")}>
+                <span>Revise</span>
+                <strong>Browse notes</strong>
+              </button>
+              <button type="button" className="dashboard-action" onClick={() => navigateTo("learn")}>
+                <span>Plan</span>
+                <strong>Learning guides</strong>
+              </button>
+              <div className="dashboard-action dashboard-action--status">
+                <span>Recent calculation</span>
+                {historyEntries[0] ? (
+                  <strong>{historyEntries[0].tool}: {historyEntries[0].value}</strong>
+                ) : (
+                  <strong>Start with a tool below</strong>
+                )}
+              </div>
+            </div>
+          </header>
+
+          <section className="tool-library" aria-labelledby="tool-library-title">
+            <div className="tool-library-head">
+              <div>
+                <span className="dashboard-kicker">Calculator library</span>
+                <h2 id="tool-library-title">{applets.length} site and design tools</h2>
+              </div>
+              <button type="button" className="ghost-button" onClick={() => setHistoryOpen(true)}>
+                Calculation history
+              </button>
+            </div>
+            <ul className="tool-library-list">
+              {filteredApplets.map((applet, index) => (
+                <li key={applet.id}>
+                  <button
+                    type="button"
+                    className={`tool-library-item${index === activeToolIndex ? " is-active" : ""}`}
+                    aria-pressed={index === activeToolIndex}
+                    onClick={() => scrollToTool(index)}
+                  >
+                    <strong>{applet.title}</strong>
+                    <span>{applet.subtitle}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+
           <div className="tool-grid" ref={toolGridRef} style={toolGridStyle}>
             {filteredApplets.some((a) => a.id === "tool-containment-rod") ? (
               <article id="tool-containment-rod" className="tool-panel">
@@ -3663,19 +3821,71 @@ export default function App() {
           {!filteredApplets.length ? <p className="empty-state">No tools match that search.</p> : null}
         </section>
 
-        <section className={`page ${page === "cheatsheet" ? "is-active" : ""}`}>
+        <section className={`page page-notes ${page === "cheatsheet" ? "is-active" : ""}`}>
+          <header className="page-header notes-header">
+            <div>
+              <span className="dashboard-kicker">UK electrical revision</span>
+              <h1>Notes and quick reference</h1>
+              <p className="page-copy">Search the working notes, open the detail you need, and jump straight into a linked practice exam.</p>
+            </div>
+            <div className="notes-controls">
+              <label className="notes-search">
+                <span className="sr-only">Search notes</span>
+                <input
+                  type="search"
+                  value={noteQuery}
+                  onChange={(event) => setNoteQuery(event.target.value)}
+                  placeholder="Search notes, regulations and formulas"
+                />
+              </label>
+              <button
+                type="button"
+                className={`ghost-button notes-saved-toggle${showSavedNotes ? " is-active" : ""}`}
+                aria-pressed={showSavedNotes}
+                onClick={() => setShowSavedNotes((current) => !current)}
+              >
+                Saved ({savedNoteIds.length})
+              </button>
+            </div>
+          </header>
+          <aside className="content-notice" role="note">
+            <strong>Study aid for UK electrical practice.</strong>
+            <span>Always confirm the current BS 7671 edition, official guidance, manufacturer data and site conditions before work.</span>
+          </aside>
           <div className="sheet-grid">
-            {filteredCheatSections.map((section) => (
-              <article key={section.id} id={section.id} className="sheet-card">
+            {filteredCheatSections.map((section) => {
+              const expanded = expandedNoteIds.has(section.id);
+              return (
+              <article
+                key={section.id}
+                id={section.id}
+                className={`sheet-card${expanded ? " is-expanded" : ""}${highlightedNoteId === section.id ? " is-highlighted" : ""}`}
+              >
                 <div className="sheet-card-head">
                   <h3>{section.title}</h3>
-                  <button
-                    type="button"
-                    className="icon-button"
-                    aria-label={copiedSectionId === section.id ? "Copied" : `Copy ${section.title}`}
-                    onClick={() => copyNoteSection(section)}
-                  >
-                    {copiedSectionId === section.id ? (
+                  <div className="sheet-card-actions">
+                    <button
+                      type="button"
+                      className={`icon-button sheet-save-btn${savedNoteIds.includes(section.id) ? " is-active" : ""}`}
+                      aria-pressed={savedNoteIds.includes(section.id)}
+                      aria-label={savedNoteIds.includes(section.id) ? `Remove ${section.title} from saved notes` : `Save ${section.title}`}
+                      onClick={() => setSavedNoteIds((current) =>
+                        current.includes(section.id)
+                          ? current.filter((id) => id !== section.id)
+                          : [...current, section.id]
+                      )}
+                    >
+                      <svg viewBox="0 0 24 24" fill={savedNoteIds.includes(section.id) ? "currentColor" : "none"} aria-hidden="true">
+                        <path d="M6 4h12v17l-6-4-6 4V4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-button"
+                      aria-label={copiedSectionId === section.id ? "Copied" : `Copy ${section.title}`}
+                      onClick={() => copyNoteSection(section)}
+                    >
+                      {copiedSectionId === section.id ? (
                       <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
                         <path
                           d="M5.5 12.5l4.2 4.2L18.5 7.9"
@@ -3685,7 +3895,7 @@ export default function App() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                    ) : (
+                      ) : (
                       <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
                         <rect
                           x="8"
@@ -3704,10 +3914,27 @@ export default function App() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                    )}
-                  </button>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <p className="sheet-summary">{section.summary}</p>
+                <button
+                  type="button"
+                  className="sheet-expand-btn"
+                  aria-expanded={expanded}
+                  aria-controls={`${section.id}-detail`}
+                  onClick={() => setExpandedNoteIds((current) => {
+                    const next = new Set(current);
+                    if (next.has(section.id)) next.delete(section.id);
+                    else next.add(section.id);
+                    return next;
+                  })}
+                >
+                  {expanded ? "Hide note" : "Open note"}
+                </button>
+                {expanded ? (
+                  <div id={`${section.id}-detail`} className="sheet-detail">
                 {(NOTE_PRACTICE_LINKS[section.id] ?? []).length > 0 ? (
                   <div className="sheet-practice-links" aria-label={`${section.title} practice exams`}>
                     {(NOTE_PRACTICE_LINKS[section.id] ?? []).map((link) => (
@@ -3804,12 +4031,17 @@ export default function App() {
                     ))}
                   </div>
                 ) : null}
+                  </div>
+                ) : null}
               </article>
-            ))}
+              );
+            })}
           </div>
 
           {!filteredCheatSections.length ? (
-            <p className="empty-state">No cheat sheet entries match that search.</p>
+            <p className="empty-state">
+              {showSavedNotes ? "No saved notes match these filters." : "No notes match that search."}
+            </p>
           ) : null}
         </section>
 
@@ -3830,6 +4062,8 @@ export default function App() {
           isActive={page === "settings"}
           reduceMotion={reduceMotion}
           onReduceMotionChange={setReduceMotion}
+          comfortableText={comfortableText}
+          onComfortableTextChange={setComfortableText}
           onRequestAuth={() => setAuthOpen(true)}
         />
       </main>

@@ -12,6 +12,8 @@ type Props = {
   isActive: boolean;
   reduceMotion: boolean;
   onReduceMotionChange: (value: boolean) => void;
+  comfortableText: boolean;
+  onComfortableTextChange: (value: boolean) => void;
   onRequestAuth: () => void;
 };
 
@@ -53,7 +55,14 @@ function processAvatar(file: File): Promise<string> {
   });
 }
 
-export function SettingsPage({ isActive, reduceMotion, onReduceMotionChange, onRequestAuth }: Props) {
+export function SettingsPage({
+  isActive,
+  reduceMotion,
+  onReduceMotionChange,
+  comfortableText,
+  onComfortableTextChange,
+  onRequestAuth
+}: Props) {
   const { user, updateProfile, logout } = useAuth();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -127,9 +136,43 @@ export function SettingsPage({ isActive, reduceMotion, onReduceMotionChange, onR
     }
   }
 
+  function exportLocalData() {
+    const data: Record<string, unknown> = {};
+    try {
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (!key) continue;
+        const raw = localStorage.getItem(key);
+        if (raw === null) continue;
+        try {
+          data[key] = JSON.parse(raw);
+        } catch {
+          data[key] = raw;
+        }
+      }
+    } catch {}
+
+    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), data }, null, 2)], {
+      type: "application/json"
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `sparky-data-${new Date().toISOString().slice(0, 10)}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <section className={`page page-settings ${isActive ? "is-active" : ""}`}>
       <div className="settings-page">
+        <header className="page-header settings-header">
+          <div>
+            <span className="dashboard-kicker">Personalise Sparky</span>
+            <h1>Settings</h1>
+            <p className="page-copy">Account, accessibility and local app data.</p>
+          </div>
+        </header>
         <section className="settings-section">
           <h3 className="settings-section-title">Profile</h3>
           {user ? (
@@ -198,6 +241,35 @@ export function SettingsPage({ isActive, reduceMotion, onReduceMotionChange, onR
               onClick={() => onReduceMotionChange(!reduceMotion)}
             >
               <span className="settings-switch-knob" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-text">
+              <span className="settings-toggle-label">Comfortable text</span>
+              <span className="settings-hint">Increase reading size across notes, guides and controls.</span>
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={comfortableText}
+              aria-label="Comfortable text"
+              className={`settings-switch${comfortableText ? " is-on" : ""}`}
+              onClick={() => onComfortableTextChange(!comfortableText)}
+            >
+              <span className="settings-switch-knob" aria-hidden="true" />
+            </button>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <h3 className="settings-section-title">Data</h3>
+          <div className="settings-row settings-data-row">
+            <span>
+              <span className="settings-toggle-label">Export local data</span>
+              <span className="settings-hint">Download calculator values, preferences, learning progress and locally stored exam progress.</span>
+            </span>
+            <button type="button" className="ghost-button" onClick={exportLocalData}>
+              Export JSON
             </button>
           </div>
         </section>
