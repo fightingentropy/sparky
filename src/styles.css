@@ -5653,6 +5653,13 @@ body[data-page="exams"] .exam-test-menu{
   border-radius: 12px;
   background: rgba(16, 14, 12, 0.98);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  transform: none;
+}
+
+/* Phones use the platform picker instead of opening a long desktop dropdown
+   over the exam content. */
+body[data-page="exams"] .exam-test-select{
+  display: none;
 }
 
 body[data-page="exams"] .exam-test-option{
@@ -6419,14 +6426,23 @@ body[data-page="exams"] .exam-title-text{
   }
 
   body[data-page="exams"] .exam-title-wrap{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
     width: 100%;
     min-width: 0;
   }
 
-  body[data-page="exams"] .exam-title-button,
-body[data-page="exams"] .exam-title-menu-wrap{
+  body[data-page="exams"] .exam-title-menu-wrap{
+    width: auto;
+    min-width: 0;
+  }
+
+  body[data-page="exams"] .exam-title-button{
     width: 100%;
     min-width: 0;
+    flex-wrap: nowrap;
   }
 
   body[data-page="exams"] .exam-title-text{
@@ -6475,6 +6491,35 @@ body[data-page="exams"] .exam-title-menu-wrap{
   body[data-page="exams"] .exam-stat strong,
 body[data-page="exams"] .exam-test-switch{
     font-size: 1.4rem;
+  }
+
+  body[data-page="exams"] .exam-test-switch,
+  body[data-page="exams"] .exam-test-menu{
+    display: none;
+  }
+
+  body[data-page="exams"] .exam-test-select{
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 32px;
+    margin: -4px 0 -5px;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ex-heading);
+    font-family: var(--ex-mono);
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1;
+    color-scheme: dark;
+  }
+
+  body[data-page="exams"] .exam-test-select:focus-visible{
+    border-color: var(--ex-brass);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ex-brass-tint);
   }
 
   body[data-page="exams"] .exam-progress{
