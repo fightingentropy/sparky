@@ -310,11 +310,11 @@ function Receptacle({ x, y, label }: { x: number; y: number; label?: string }) {
   );
 }
 
-function GFCI({ x, y, label }: { x: number; y: number; label?: string }) {
+function RcdSocket({ x, y, label }: { x: number; y: number; label?: string }) {
   return (
     <g transform={`translate(${x}, ${y})`}>
       <rect x="-22" y="-22" width="44" height="44" rx="6" fill="var(--surface-alt)" stroke="currentColor" strokeWidth="1.5" />
-      <text x="0" y="-6" textAnchor="middle" fontSize="9" fill="var(--accent-strong)" fontWeight="600">GFCI</text>
+      <text x="0" y="-6" textAnchor="middle" fontSize="9" fill="var(--accent-strong)" fontWeight="600">RCD</text>
       <line x1="-8" y1="4" x2="-8" y2="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       <line x1="8" y1="4" x2="8" y2="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       <text x="-12" y="-30" textAnchor="end" fontSize="8" fill="var(--muted)">LINE</text>
@@ -357,23 +357,23 @@ const SCENARIOS: Scenario[] = [
   // ------------------------- SCENARIO 1 -------------------------
   (() => {
     const tps: TestPoint[] = [
-      { id: "TP1", x: 90, y: 110, label: "TP1", description: "Panel hot rail" },
+      { id: "TP1", x: 90, y: 110, label: "TP1", description: "Consumer unit line busbar" },
       { id: "TP2", x: 270, y: 230, label: "TP2", description: "Switch line side" },
       { id: "TP3", x: 330, y: 230, label: "TP3", description: "Switch load side" },
-      { id: "TP4", x: 540, y: 230, label: "TP4", description: "Lamp hot terminal" },
+      { id: "TP4", x: 540, y: 230, label: "TP4", description: "Lamp line terminal" },
       { id: "TP5", x: 600, y: 230, label: "TP5", description: "Lamp neutral terminal" },
-      { id: "TP6", x: 90, y: 410, label: "TP6", description: "Panel neutral rail" }
+      { id: "TP6", x: 90, y: 410, label: "TP6", description: "Consumer unit neutral bar" }
     ];
     const r: Record<string, Reading> = {};
-    r["TP1|TP6|VAC"] = { value: 120.0, unit: "V" };
-    r["TP2|TP6|VAC"] = { value: 120.0, unit: "V" };
+    r["TP1|TP6|VAC"] = { value: 230.0, unit: "V" };
+    r["TP2|TP6|VAC"] = { value: 230.0, unit: "V" };
     r["TP1|TP2|VAC"] = { value: 0.0, unit: "V" };
     r["TP3|TP6|VAC"] = { value: 0.0, unit: "V" };
     r["TP3|TP4|VAC"] = { value: 0.0, unit: "V" };
     r["TP4|TP6|VAC"] = { value: 0.0, unit: "V" };
     r["TP5|TP6|VAC"] = { value: 0.0, unit: "V" };
     r["TP4|TP5|VAC"] = { value: 0.0, unit: "V" };
-    r["TP2|TP3|VAC"] = { value: 120.0, unit: "V" };
+    r["TP2|TP3|VAC"] = { value: 230.0, unit: "V" };
     r["TP2|TP3|OHMS"] = { value: 0, unit: "Ω", ol: true };
     r["TP4|TP5|OHMS"] = { value: 32, unit: "Ω" };
     r["TP1|TP2|OHMS"] = { value: 0.4, unit: "Ω" };
@@ -390,12 +390,12 @@ const SCENARIOS: Scenario[] = [
       title: "The dead lamp",
       difficulty: "Easy",
       symptom:
-        "Single ceiling lamp on a plain switch. Breaker is on, but the lamp is dead. Flipping the switch makes no difference. Other lights on the same circuit work fine.",
+        "Single ceiling lamp on a one-way switch. The MCB is on, but the lamp is dead. Operating the switch makes no difference. Other lights on the same circuit work fine.",
       draw: () => (
         <g color="var(--text)">
           <rect x="40" y="80" width="80" height="360" rx="6" fill="var(--surface-alt)" stroke="currentColor" strokeWidth="1.5" />
-          <text x="80" y="72" textAnchor="middle" fontSize="11" fill="var(--muted-strong)">PANEL</text>
-          <Breaker x={80} y={140} label="15A" />
+          <text x="80" y="72" textAnchor="middle" fontSize="11" fill="var(--muted-strong)">CONSUMER UNIT</text>
+          <Breaker x={80} y={140} label="6A" />
           <text x="80" y="425" textAnchor="middle" fontSize="9" fill="var(--muted)">N</text>
           <Wire d="M 80 152 L 80 110 L 270 110 L 270 220" />
           <Switch x={300} y={230} closed={false} label="SWITCH" />
@@ -403,7 +403,7 @@ const SCENARIOS: Scenario[] = [
           <Lamp x={570} y={230} label="LAMP" />
           <Wire d="M 600 244 L 600 410 L 80 410" />
           <text x="80" y="455" textAnchor="middle" fontSize="9" fill="var(--muted)">to neutral bar</text>
-          <text x="200" y="100" fontSize="9" fill="var(--muted)">HOT</text>
+          <text x="200" y="100" fontSize="9" fill="var(--muted)">LINE</text>
           <text x="540" y="400" fontSize="9" fill="var(--muted)">NEUTRAL</text>
         </g>
       ),
@@ -412,63 +412,63 @@ const SCENARIOS: Scenario[] = [
       blackAnchor: { x: 776, y: 470 },
       readings: r,
       hints: [
-        "Confirm the supply: probe between TP1 (hot) and TP6 (neutral). You should read 120 V AC.",
+        "Confirm the supply: probe between TP1 (line) and TP6 (neutral). You should read 230 V AC.",
         "Voltage on the line side of the switch (TP2 vs TP6) tells you whether power reaches the switch. What's on the load side (TP3)?",
-        "If TP2 has 120 V but TP3 reads 0 V regardless of switch position, the switch itself is broken open."
+        "If TP2 has 230 V but TP3 reads 0 V regardless of switch position, the switch itself is broken open."
       ],
       choices: [
         { key: "A", text: "Switch is faulty — open in both positions.", correct: true },
         {
           key: "B",
-          text: "Neutral wire is broken between the lamp and the panel.",
+          text: "Neutral conductor is broken between the lamp and the consumer unit.",
           whyWrong:
             "TP5 reads 0 V to TP6 — the neutral has continuity. A broken neutral would show floating voltage on TP5."
         },
         {
           key: "C",
-          text: "Bulb is burned out.",
+          text: "Lamp has failed.",
           whyWrong:
             "Resistance across the lamp terminals (TP4–TP5) is ~32 Ω, normal for an incandescent filament. The bulb is good."
         },
         {
           key: "D",
-          text: "Hot wire is broken between the panel and the switch.",
+          text: "Line conductor is broken between the consumer unit and the switch.",
           whyWrong:
-            "TP2 reads 120 V to neutral, so hot reaches the switch. The break is downstream of TP2."
+            "TP2 reads 230 V to neutral, so line reaches the switch. The break is downstream of TP2."
         }
       ],
       teaching:
-        "The switch is internally open. TP2 sees full hot voltage; TP3 stays at 0 V even when the toggle is flipped. Replace the switch.",
+        "The switch is internally open. TP2 sees full line voltage; TP3 stays at 0 V even when the toggle is flipped. Replace the switch.",
       confirm:
-        "Kill the breaker, pull the switch out, and ohm across the two screws. A good single-pole reads 0 Ω closed and OL open. This one reads OL in both positions."
+        "Kill the MCB, pull the switch out, and ohm across the two screws. A good single-pole reads 0 Ω closed and OL open. This one reads OL in both positions."
     };
   })(),
 
   // ------------------------- SCENARIO 2 -------------------------
   (() => {
     const tps: TestPoint[] = [
-      { id: "TP1", x: 130, y: 90, label: "TP1", description: "Panel hot rail" },
-      { id: "TP2", x: 130, y: 430, label: "TP2", description: "Panel neutral rail" },
-      { id: "TP3", x: 260, y: 200, label: "TP3", description: "Outlet A — hot screw (line)" },
-      { id: "TP4", x: 260, y: 290, label: "TP4", description: "Outlet A — neutral screw (line)" },
-      { id: "TP5", x: 330, y: 200, label: "TP5", description: "Outlet A — hot screw (load)" },
-      { id: "TP6", x: 330, y: 290, label: "TP6", description: "Outlet A — neutral pigtail (load side)" },
-      { id: "TP7", x: 470, y: 200, label: "TP7", description: "Outlet B — hot terminal" },
-      { id: "TP8", x: 470, y: 290, label: "TP8", description: "Outlet B — neutral terminal" },
-      { id: "TP9", x: 620, y: 200, label: "TP9", description: "Outlet C — hot terminal" },
-      { id: "TP10", x: 620, y: 290, label: "TP10", description: "Outlet C — neutral terminal" }
+      { id: "TP1", x: 130, y: 90, label: "TP1", description: "Consumer unit line busbar" },
+      { id: "TP2", x: 130, y: 430, label: "TP2", description: "Consumer unit neutral bar" },
+      { id: "TP3", x: 260, y: 200, label: "TP3", description: "Socket A — line screw (line)" },
+      { id: "TP4", x: 260, y: 290, label: "TP4", description: "Socket A — neutral screw (line)" },
+      { id: "TP5", x: 330, y: 200, label: "TP5", description: "Socket A — line screw (load)" },
+      { id: "TP6", x: 330, y: 290, label: "TP6", description: "Socket A — neutral link conductor (load side)" },
+      { id: "TP7", x: 470, y: 200, label: "TP7", description: "Socket B — line terminal" },
+      { id: "TP8", x: 470, y: 290, label: "TP8", description: "Socket B — neutral terminal" },
+      { id: "TP9", x: 620, y: 200, label: "TP9", description: "Socket C — line terminal" },
+      { id: "TP10", x: 620, y: 290, label: "TP10", description: "Socket C — neutral terminal" }
     ];
 
     const r: Record<string, Reading> = {};
-    r["TP1|TP2|VAC"] = { value: 120.0, unit: "V" };
-    r["TP3|TP4|VAC"] = { value: 120.0, unit: "V" };
-    r["TP3|TP2|VAC"] = { value: 120.0, unit: "V" };
+    r["TP1|TP2|VAC"] = { value: 230.0, unit: "V" };
+    r["TP3|TP4|VAC"] = { value: 230.0, unit: "V" };
+    r["TP3|TP2|VAC"] = { value: 230.0, unit: "V" };
     r["TP4|TP2|VAC"] = { value: 0.0, unit: "V" };
-    r["TP5|TP2|VAC"] = { value: 120.0, unit: "V" };
-    r["TP5|TP4|VAC"] = { value: 120.0, unit: "V" };
+    r["TP5|TP2|VAC"] = { value: 230.0, unit: "V" };
+    r["TP5|TP4|VAC"] = { value: 230.0, unit: "V" };
     r["TP6|TP2|VAC"] = { value: 0.0, unit: "V" };
-    r["TP7|TP2|VAC"] = { value: 120.0, unit: "V" };
-    r["TP9|TP2|VAC"] = { value: 120.0, unit: "V" };
+    r["TP7|TP2|VAC"] = { value: 230.0, unit: "V" };
+    r["TP9|TP2|VAC"] = { value: 230.0, unit: "V" };
     r["TP8|TP2|VAC"] = { value: 78.0, unit: "V" };
     r["TP10|TP2|VAC"] = { value: 78.0, unit: "V" };
     r["TP7|TP8|VAC"] = { value: 42.0, unit: "V" };
@@ -491,26 +491,26 @@ const SCENARIOS: Scenario[] = [
 
     return {
       id: "s2-downstream-outlets",
-      title: "Two downstream outlets dead",
+      title: "Two downstream sockets dead",
       difficulty: "Medium",
       symptom:
-        "A daisy-chain of three bedroom outlets. The first (closest to the panel) works fine. The next two are dead — no power for a vacuum, lamp, or phone charger. Breaker is on, no visible damage.",
+        "A radial circuit supplies three bedroom sockets. The first, closest to the consumer unit, works normally. The next two are dead — no power for a vacuum, lamp or phone charger. The MCB is on and there is no visible damage.",
       draw: () => (
         <g color="var(--text)">
           <rect x="40" y="60" width="80" height="380" rx="6" fill="var(--surface-alt)" stroke="currentColor" strokeWidth="1.5" />
-          <text x="80" y="52" textAnchor="middle" fontSize="11" fill="var(--muted-strong)">PANEL</text>
+          <text x="80" y="52" textAnchor="middle" fontSize="11" fill="var(--muted-strong)">CONSUMER UNIT</text>
           <Breaker x={80} y={140} label="20A" />
           <text x="80" y="460" textAnchor="middle" fontSize="9" fill="var(--muted)">N bar</text>
           <Wire d="M 80 152 L 80 90 L 130 90 L 130 200 L 240 200" />
           <Wire d="M 80 152 L 80 430 L 130 430 L 130 290 L 240 290" />
-          <Receptacle x={295} y={245} label="OUTLET A" />
+          <Receptacle x={295} y={245} label="SOCKET A" />
           <Wire d="M 350 200 L 450 200" />
           <Wire d="M 350 290 L 450 290" broken />
-          <text x="370" y="282" fontSize="9" fill="var(--danger)">loose pigtail</text>
-          <Receptacle x={495} y={245} label="OUTLET B" />
+          <text x="370" y="282" fontSize="9" fill="var(--danger)">loose link conductor</text>
+          <Receptacle x={495} y={245} label="SOCKET B" />
           <Wire d="M 520 200 L 600 200" />
           <Wire d="M 520 290 L 600 290" />
-          <Receptacle x={645} y={245} label="OUTLET C" />
+          <Receptacle x={645} y={245} label="SOCKET C" />
           <text x="260" y="180" fontSize="9" fill="var(--muted)">line H</text>
           <text x="330" y="180" fontSize="9" fill="var(--muted)">load H</text>
           <text x="260" y="312" fontSize="9" fill="var(--muted)">line N</text>
@@ -522,50 +522,50 @@ const SCENARIOS: Scenario[] = [
       blackAnchor: { x: 776, y: 470 },
       readings: r,
       hints: [
-        "Outlet A works, B and C don't. The break is between A's downstream pigtail and outlet B somewhere — but on which conductor?",
-        "Probe TP7 (B's hot) to TP2 (panel neutral): 120 V — hot is reaching B. Now probe TP7 to TP8 (B's hot to its own neutral): only ~42 V. That's a phantom reading.",
-        "Phantom voltage with no load + zero across hot-to-neutral when loaded means the neutral is open. Trace the neutral back: ohm TP4 to TP6."
+        "Socket A works, B and C don't. The break is between A's downstream link conductor and socket B somewhere — but on which conductor?",
+        "Probe TP7 (B's line) to TP2 (consumer unit neutral bar): 230 V — line is reaching B. Now probe TP7 to TP8 (B's line to its own neutral): only ~42 V. That's a phantom reading.",
+        "Phantom voltage with no load + zero across line-to-neutral when loaded means the neutral is open. Trace the neutral back: ohm TP4 to TP6."
       ],
       choices: [
         {
           key: "A",
-          text: "Open hot at outlet A's downstream terminal.",
+          text: "Open line at socket A's downstream terminal.",
           whyWrong:
-            "TP5 (load-side hot at A) reads 120 V to neutral, and so do TP7 and TP9. The hot run is intact through all three boxes."
+            "TP5 (load-side line at A) reads 230 V to neutral, and so do TP7 and TP9. The line run is intact through all three boxes."
         },
-        { key: "B", text: "Open neutral at outlet A's downstream pigtail.", correct: true },
+        { key: "B", text: "Open neutral at socket A's downstream link conductor.", correct: true },
         {
           key: "C",
-          text: "Backstabbed connection at outlet B has failed.",
+          text: "Loose terminal connection at socket B has failed.",
           whyWrong:
-            "If the failure were inside outlet B, outlet C would behave differently from B. They show identical phantom readings — the break is upstream of B."
+            "If the failure were inside socket B, socket C would behave differently from B. They show identical phantom readings — the break is upstream of B."
         },
         {
           key: "D",
           text: "Outlets B and C are both bad.",
           whyWrong:
-            "Two simultaneous identical failures is implausible, and ohming TP6–TP8 confirms the wire between them is fine. The fault is at A's pigtail."
+            "Two simultaneous identical failures is implausible, and ohming TP6–TP8 confirms the wire between them is fine. The fault is at A's link conductor."
         }
       ],
       teaching:
-        "Open neutral on the upstream wire-nut at outlet A. The downstream lights lose their return path. The 'phantom' 78 V you see on the dead outlets is capacitive coupling — a high-impedance meter picks it up but it can't drive a load.",
+        "Open neutral on the upstream maintenance-free connector at socket A. The downstream sockets lose their return path. The 'phantom' 78 V you see is capacitive coupling — a high-impedance meter picks it up but it cannot drive a load.",
       confirm:
-        "Kill the breaker. Open box A. The neutral pigtail will be loose on the wire-nut or back-stabbed and pulled out. Re-pigtail with a properly-tightened wire-nut and verify continuity TP4 to TP6 reads near 0 Ω."
+        "Kill the MCB. Open box A. The neutral link conductor will be loose on the maintenance-free connector or poorly terminated and pulled out. Re-link conductor with a properly-tightened maintenance-free connector and verify continuity TP4 to TP6 reads near 0 Ω."
     };
   })(),
 
   // ------------------------- SCENARIO 3 -------------------------
   (() => {
     const tps: TestPoint[] = [
-      { id: "TP1", x: 100, y: 80, label: "TP1", description: "Panel hot rail" },
-      { id: "TP2", x: 100, y: 440, label: "TP2", description: "Panel neutral rail" },
+      { id: "TP1", x: 100, y: 80, label: "TP1", description: "Consumer unit line busbar" },
+      { id: "TP2", x: 100, y: 440, label: "TP2", description: "Consumer unit neutral bar" },
       { id: "TP3", x: 230, y: 250, label: "TP3", description: "S1 common terminal" },
-      { id: "TP4", x: 320, y: 200, label: "TP4", description: "S1 traveler #1 terminal" },
-      { id: "TP5", x: 320, y: 300, label: "TP5", description: "S1 traveler #2 terminal" },
-      { id: "TP6", x: 540, y: 200, label: "TP6", description: "S2 traveler #1 terminal" },
-      { id: "TP7", x: 540, y: 300, label: "TP7", description: "S2 traveler #2 terminal" },
+      { id: "TP4", x: 320, y: 200, label: "TP4", description: "S1 strapper #1 terminal" },
+      { id: "TP5", x: 320, y: 300, label: "TP5", description: "S1 strapper #2 terminal" },
+      { id: "TP6", x: 540, y: 200, label: "TP6", description: "S2 strapper #1 terminal" },
+      { id: "TP7", x: 540, y: 300, label: "TP7", description: "S2 strapper #2 terminal" },
       { id: "TP8", x: 630, y: 250, label: "TP8", description: "S2 common terminal" },
-      { id: "TP9", x: 700, y: 130, label: "TP9", description: "Light hot terminal" },
+      { id: "TP9", x: 700, y: 130, label: "TP9", description: "Light line terminal" },
       { id: "TP10", x: 700, y: 410, label: "TP10", description: "Light neutral terminal" }
     ];
     const knobs: Knob[] = [
@@ -585,19 +585,19 @@ const SCENARIOS: Scenario[] = [
     for (const c of combos) {
       const knobsStr = `S1=${c.s1},S2=${c.s2}`;
       const k = (a: string, b: string, mode: Mode): string => `${a}|${b}|${mode}|${knobsStr}`;
-      r[k("TP1", "TP2", "VAC")] = { value: 120.0, unit: "V" };
-      r[k("TP3", "TP2", "VAC")] = { value: 120.0, unit: "V" };
-      r[k("TP4", "TP2", "VAC")] = c.s1 === "Up" ? { value: 120.0, unit: "V" } : { value: 0.0, unit: "V" };
-      r[k("TP5", "TP2", "VAC")] = c.s1 === "Down" ? { value: 120.0, unit: "V" } : { value: 0.0, unit: "V" };
+      r[k("TP1", "TP2", "VAC")] = { value: 230.0, unit: "V" };
+      r[k("TP3", "TP2", "VAC")] = { value: 230.0, unit: "V" };
+      r[k("TP4", "TP2", "VAC")] = c.s1 === "Up" ? { value: 230.0, unit: "V" } : { value: 0.0, unit: "V" };
+      r[k("TP5", "TP2", "VAC")] = c.s1 === "Down" ? { value: 230.0, unit: "V" } : { value: 0.0, unit: "V" };
       r[k("TP6", "TP2", "VAC")] = { value: 0.0, unit: "V" };
-      r[k("TP7", "TP2", "VAC")] = c.s1 === "Down" ? { value: 120.0, unit: "V" } : { value: 0.0, unit: "V" };
+      r[k("TP7", "TP2", "VAC")] = c.s1 === "Down" ? { value: 230.0, unit: "V" } : { value: 0.0, unit: "V" };
       const s2Routes: "T1" | "T2" = c.s2 === "Up" ? "T1" : "T2";
-      const lightHot = s2Routes === "T2" && c.s1 === "Down" ? 120.0 : 0.0;
+      const lightHot = s2Routes === "T2" && c.s1 === "Down" ? 230.0 : 0.0;
       r[k("TP8", "TP2", "VAC")] = { value: lightHot, unit: "V" };
       r[k("TP9", "TP2", "VAC")] = { value: lightHot, unit: "V" };
       r[k("TP10", "TP2", "VAC")] = { value: 0.0, unit: "V" };
       r[k("TP9", "TP10", "VAC")] = { value: lightHot, unit: "V" };
-      r[k("TP4", "TP6", "VAC")] = c.s1 === "Up" ? { value: 120.0, unit: "V" } : { value: 0.0, unit: "V" };
+      r[k("TP4", "TP6", "VAC")] = c.s1 === "Up" ? { value: 230.0, unit: "V" } : { value: 0.0, unit: "V" };
       r[k("TP5", "TP7", "VAC")] = { value: 0.0, unit: "V" };
       r[k("TP4", "TP6", "OHMS")] = { value: 9999, unit: "Ω", ol: true };
       r[k("TP5", "TP7", "OHMS")] = { value: 0.4, unit: "Ω" };
@@ -607,22 +607,22 @@ const SCENARIOS: Scenario[] = [
 
     return {
       id: "s3-three-way",
-      title: "Three-way switch puzzle",
+      title: "Two-way switch puzzle",
       difficulty: "Hard",
       symptom:
-        "Stairwell light controlled by two 3-way switches. Sometimes the top switch turns it on, sometimes the bottom. But when the bottom switch is in one specific position, the top switch can't change anything — the light is stuck off in that combination.",
+        "Stairwell light controlled by two two-way switches. Sometimes the top switch turns it on, sometimes the bottom. But when the bottom switch is in one specific position, the top switch can't change anything — the light is stuck off in that combination.",
       draw: () => (
         <g color="var(--text)">
           <rect x="40" y="60" width="80" height="400" rx="6" fill="var(--surface-alt)" stroke="currentColor" strokeWidth="1.5" />
-          <text x="80" y="52" textAnchor="middle" fontSize="11" fill="var(--muted-strong)">PANEL</text>
-          <Breaker x={80} y={140} label="15A" />
+          <text x="80" y="52" textAnchor="middle" fontSize="11" fill="var(--muted-strong)">CONSUMER UNIT</text>
+          <Breaker x={80} y={140} label="6A" />
           <Wire d="M 80 152 L 80 80 L 200 80 L 200 250 L 230 250" />
           <ThreeWaySwitch x={260} y={250} position="up" label="S1" />
           <ThreeWaySwitch x={570} y={250} position="up" label="S2" />
           <Wire d="M 320 200 L 540 200" broken />
           <Wire d="M 320 300 L 540 300" />
-          <text x="420" y="190" fontSize="9" fill="var(--danger)">traveler #1 (open)</text>
-          <text x="420" y="318" fontSize="9" fill="var(--muted)">traveler #2</text>
+          <text x="420" y="190" fontSize="9" fill="var(--danger)">strapper #1 (open)</text>
+          <text x="420" y="318" fontSize="9" fill="var(--muted)">strapper #2</text>
           <Wire d="M 630 250 L 700 250 L 700 130" />
           <Lamp x={700} y={130} label="LIGHT" />
           <Wire d="M 700 144 L 700 410 L 80 410 L 80 460" />
@@ -636,65 +636,65 @@ const SCENARIOS: Scenario[] = [
       knobs,
       hints: [
         "Try every combination of S1/S2 and watch what makes the light come on. Look for the combo that's stuck.",
-        "Probe TP4 (S1 traveler 1) to neutral with S1=Up: 120 V. Now probe TP6 (S2 traveler 1) to neutral: 0 V. The voltage isn't getting across that traveler.",
-        "Ohm or use continuity from TP4 to TP6 with the breaker off — if it reads OL, that traveler wire is open."
+        "Probe TP4 (S1 strapper 1) to neutral with S1=Up: 230 V. Now probe TP6 (S2 strapper 1) to neutral: 0 V. The voltage isn't getting across that strapper.",
+        "Ohm or use continuity from TP4 to TP6 with the MCB off — if it reads OL, that strapper wire is open."
       ],
       choices: [
         {
           key: "A",
           text: "S1's common terminal is bad.",
           whyWrong:
-            "TP3 (S1 common) reads 120 V to neutral. The common is fine — voltage is reaching the switch and being routed."
+            "TP3 (S1 common) reads 230 V to neutral. The common is fine — voltage is reaching the switch and being routed."
         },
         {
           key: "B",
           text: "S2's common terminal is bad.",
           whyWrong:
-            "When the working traveler (#2) is selected by both switches, you get 120 V at S2's common (TP8). The terminal isn't the issue."
+            "When the working strapper (#2) is selected by both switches, you get 230 V at S2's common (TP8). The terminal isn't the issue."
         },
-        { key: "C", text: "Traveler #1 (between S1 and S2) is open.", correct: true },
+        { key: "C", text: "Strapper #1 (between S1 and S2) is open.", correct: true },
         {
           key: "D",
           text: "The light fixture is bad.",
           whyWrong:
-            "When the circuit does close (S1=Down + S2=Down), you read 120 V across the lamp terminals and the light works. The fixture is good."
+            "When the circuit does close (S1=Down + S2=Down), you read 230 V across the lamp terminals and the light works. The fixture is good."
         }
       ],
       teaching:
-        "Traveler #1 between the two 3-way switches is broken. Whenever S1 routes to that traveler, S2 has nothing to switch — flipping S2 can't recover the circuit because no voltage is arriving on that wire.",
+        "Strapper #1 between the two two-way switches is broken. Whenever S1 routes to that strapper, S2 has nothing to switch — flipping S2 can't recover the circuit because no voltage is arriving on that wire.",
       confirm:
-        "De-energize. Disconnect both ends of traveler #1 and ohm it: if OL, the wire's open. With long runs in stud cavities, common culprits are nail-strikes or a broken splice in a junction box mid-run."
+        "Isolate the circuit. Disconnect both ends of strapper #1 and test continuity: an OL reading confirms it is open circuit. With long runs in stud cavities, common culprits are nail damage or a broken joint in a junction box mid-run."
     };
   })(),
 
   // ------------------------- SCENARIO 4 -------------------------
   (() => {
     const tps: TestPoint[] = [
-      { id: "TP1", x: 90, y: 80, label: "TP1", description: "Panel hot" },
-      { id: "TP2", x: 90, y: 440, label: "TP2", description: "Panel neutral" },
-      { id: "TP3", x: 90, y: 360, label: "TP3", description: "Panel ground bar" },
-      { id: "TP4", x: 250, y: 170, label: "TP4", description: "GFCI line — hot" },
-      { id: "TP5", x: 250, y: 270, label: "TP5", description: "GFCI line — neutral" },
-      { id: "TP6", x: 360, y: 170, label: "TP6", description: "GFCI load — hot" },
-      { id: "TP7", x: 360, y: 270, label: "TP7", description: "GFCI load — neutral" },
-      { id: "TP8", x: 510, y: 170, label: "TP8", description: "Outlet B — hot" },
-      { id: "TP9", x: 510, y: 270, label: "TP9", description: "Outlet B — neutral" },
-      { id: "TP10", x: 510, y: 360, label: "TP10", description: "Outlet B — ground" },
-      { id: "TP11", x: 660, y: 170, label: "TP11", description: "Outlet C — hot" },
-      { id: "TP12", x: 660, y: 270, label: "TP12", description: "Outlet C — neutral" },
-      { id: "TP13", x: 660, y: 360, label: "TP13", description: "Outlet C — ground" }
+      { id: "TP1", x: 90, y: 80, label: "TP1", description: "Consumer unit line busbar" },
+      { id: "TP2", x: 90, y: 440, label: "TP2", description: "Consumer unit neutral bar" },
+      { id: "TP3", x: 90, y: 360, label: "TP3", description: "Consumer unit CPC bar" },
+      { id: "TP4", x: 250, y: 170, label: "TP4", description: "RCD line side — line" },
+      { id: "TP5", x: 250, y: 270, label: "TP5", description: "RCD line side — neutral" },
+      { id: "TP6", x: 360, y: 170, label: "TP6", description: "RCD load side — line" },
+      { id: "TP7", x: 360, y: 270, label: "TP7", description: "RCD load side — neutral" },
+      { id: "TP8", x: 510, y: 170, label: "TP8", description: "Socket B — line" },
+      { id: "TP9", x: 510, y: 270, label: "TP9", description: "Socket B — neutral" },
+      { id: "TP10", x: 510, y: 360, label: "TP10", description: "Socket B — CPC/earth" },
+      { id: "TP11", x: 660, y: 170, label: "TP11", description: "Socket C — line" },
+      { id: "TP12", x: 660, y: 270, label: "TP12", description: "Socket C — neutral" },
+      { id: "TP13", x: 660, y: 360, label: "TP13", description: "Socket C — CPC/earth" }
     ];
 
     const r: Record<string, Reading> = {};
-    r["TP1|TP2|VAC"] = { value: 120.0, unit: "V" };
-    r["TP1|TP3|VAC"] = { value: 120.0, unit: "V" };
+    r["TP1|TP2|VAC"] = { value: 230.0, unit: "V" };
+    r["TP1|TP3|VAC"] = { value: 230.0, unit: "V" };
     r["TP2|TP3|VAC"] = { value: 0.1, unit: "V" };
-    r["TP4|TP5|VAC"] = { value: 120.0, unit: "V" };
-    r["TP4|TP3|VAC"] = { value: 120.0, unit: "V" };
+    r["TP4|TP5|VAC"] = { value: 230.0, unit: "V" };
+    r["TP4|TP3|VAC"] = { value: 230.0, unit: "V" };
     r["TP5|TP3|VAC"] = { value: 0.1, unit: "V" };
-    r["TP6|TP7|VAC"] = { value: 120.0, unit: "V" };
-    r["TP8|TP9|VAC"] = { value: 120.0, unit: "V" };
-    r["TP11|TP12|VAC"] = { value: 120.0, unit: "V" };
+    r["TP6|TP7|VAC"] = { value: 230.0, unit: "V" };
+    r["TP8|TP9|VAC"] = { value: 230.0, unit: "V" };
+    r["TP11|TP12|VAC"] = { value: 230.0, unit: "V" };
     r["TP4|TP3|OHMS"] = { value: 9999, unit: "Ω", ol: true };
     r["TP6|TP3|OHMS"] = { value: 9999, unit: "Ω", ol: true };
     r["TP8|TP10|OHMS"] = { value: 9999, unit: "Ω", ol: true };
@@ -715,29 +715,29 @@ const SCENARIOS: Scenario[] = [
 
     return {
       id: "s4-gfci-trip",
-      title: "GFCI keeps tripping",
+      title: "RCD keeps tripping",
       difficulty: "Hard",
       symptom:
-        "A new GFCI receptacle in a kitchen trips the moment it's reset. Nothing is plugged in. The previous standard duplex in the same spot didn't trip. The downstream outlets work when the GFCI is bypassed.",
+        "A 30 mA RCD protecting a kitchen socket circuit trips as soon as it is reset. Nothing is plugged in. The downstream sockets work when the RCD is bypassed for controlled testing.",
       draw: () => (
         <g color="var(--text)">
           <rect x="40" y="60" width="80" height="400" rx="6" fill="var(--surface-alt)" stroke="currentColor" strokeWidth="1.5" />
-          <text x="80" y="52" textAnchor="middle" fontSize="11" fill="var(--muted-strong)">PANEL</text>
+          <text x="80" y="52" textAnchor="middle" fontSize="11" fill="var(--muted-strong)">CONSUMER UNIT</text>
           <Breaker x={80} y={140} label="20A" />
-          <text x="80" y="478" textAnchor="middle" fontSize="9" fill="var(--muted)">N / G bars</text>
+          <text x="80" y="478" textAnchor="middle" fontSize="9" fill="var(--muted)">N / CPC bars</text>
           <Wire d="M 80 152 L 80 80 L 250 80 L 250 160" />
           <Wire d="M 80 152 L 80 270 L 250 270" />
           <Wire d="M 80 360 L 200 360 L 200 400 L 700 400 L 700 370" />
-          <GFCI x={310} y={220} label="GFCI A" />
+          <RcdSocket x={310} y={220} label="RCD A" />
           <Wire d="M 332 200 L 360 170 L 510 170" />
           <Wire d="M 332 240 L 360 270 L 510 270" />
-          <Receptacle x={510} y={220} label="OUTLET B" />
+          <Receptacle x={510} y={220} label="SOCKET B" />
           <Wire d="M 532 212 L 660 170" />
           <Wire d="M 532 228 L 660 270" />
           <Wire d="M 510 240 L 510 360" />
           <Wire d="M 460 320 L 510 320" broken />
-          <text x="380" y="338" fontSize="9" fill="var(--danger)">illegal N–G bond</text>
-          <Receptacle x={660} y={220} label="OUTLET C" />
+          <text x="380" y="338" fontSize="9" fill="var(--danger)">incorrect N–CPC connection</text>
+          <Receptacle x={660} y={220} label="SOCKET C" />
           <Wire d="M 660 240 L 660 360" />
         </g>
       ),
@@ -746,39 +746,39 @@ const SCENARIOS: Scenario[] = [
       blackAnchor: { x: 776, y: 470 },
       readings: r,
       hints: [
-        "A GFCI trips the moment it's reset = it's seeing imbalance immediately. With nothing plugged in, the imbalance is in the wiring itself.",
-        "Disconnect the load wires from the GFCI. Ohm the load-side neutral against the load-side ground (TP7 vs TP10).",
-        "If the load-side neutral reads ~0 Ω to ground anywhere downstream, the neutral is bonded to ground — that's a parallel path that imbalances every GFCI."
+        "An RCD that trips immediately is detecting an imbalance. With nothing plugged in, investigate the fixed wiring and connected equipment.",
+        "Isolate, lock off and prove dead. Disconnect the RCD load conductors, then test load-side neutral against CPC (TP7 vs TP10).",
+        "If load-side neutral reads near 0 Ω to CPC downstream, an incorrect neutral-to-earth connection is providing a parallel return path."
       ],
       choices: [
         {
           key: "A",
-          text: "GFCI is defective.",
+          text: "RCD is defective.",
           whyWrong:
-            "Swapping the GFCI for a known good one wouldn't fix this — any working GFCI will trip on the same neutral-to-ground fault."
+            "A known-good RCD would detect the same downstream neutral-to-CPC fault and trip."
         },
         {
           key: "B",
-          text: "Hot and neutral are swapped on the line side of the GFCI.",
+          text: "Line and neutral are swapped on the line side of the RCD.",
           whyWrong:
-            "Modern GFCIs detect line/load reversal and refuse to reset, but this one resets and instantly trips. The line wiring is correct."
+            "The measured line-side supply is correct; the evidence points to a downstream parallel path."
         },
         {
           key: "C",
-          text: "Downstream neutral is bonded to ground (creates a parallel path that imbalances the GFCI).",
+          text: "Downstream neutral is connected to CPC (creating a parallel path that imbalances the RCD).",
           correct: true
         },
         {
           key: "D",
-          text: "Downstream hot is shorted to ground.",
+          text: "Downstream line is shorted to CPC/earth.",
           whyWrong:
-            "A hot-to-ground short would trip the breaker, not just the GFCI. Ohming TP6 or TP8 to ground reads OL — no hot-to-ground short exists."
+            "A line-to-CPC short would operate the protective device. Testing TP6 or TP8 to CPC reads OL, so that fault is not present."
         }
       ],
       teaching:
-        "A neutral-to-ground bond exists somewhere downstream of the GFCI. Once normal current flows, some of it returns on the ground wire. The GFCI sees more current going out on hot than coming back on neutral and trips at 5 mA. NEC 250.142 only allows the neutral to be bonded to ground at the service.",
+        "An incorrect neutral-to-CPC connection exists downstream of the RCD. Some return current takes the CPC path, so the RCD detects an imbalance and trips. Neutral and CPC must remain separated downstream of the appropriate supply origin.",
       confirm:
-        "Pop each downstream box. Test load-side neutral to load-side ground with the GFCI's load wires disconnected. If you read continuity, separate the conductors at that box and the GFCI will hold."
+        "With the circuit isolated, inspect each downstream accessory and test load-side neutral to CPC with the RCD load conductors disconnected. Remove the incorrect connection, then complete the required dead and live tests before returning the circuit to service."
     };
   })()
 ];
@@ -1328,8 +1328,8 @@ export function FaultFinding(): React.ReactElement {
 
         <section className="ff-card ff-card-note">
           <p className="ff-muted-note">
-            Tip: this is a teaching simulation. In real diagnostics, always de-energize before resistance/continuity testing,
-            verify your meter on a known live source, and lock-out / tag-out the breaker.
+            Tip: this is a teaching simulation. In real diagnostics, always isolate before resistance or continuity testing,
+            prove the instrument before and after use, isolate and lock off the circuit, retain the key, and prove dead at the point of work.
           </p>
         </section>
       </aside>

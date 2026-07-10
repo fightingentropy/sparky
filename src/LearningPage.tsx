@@ -6,6 +6,7 @@ import {
   type GuideCategory
 } from "./courseGuides";
 import type { ExamId } from "./examRegistry";
+import { usePersistedState } from "./usePersistedState";
 
 type Props = {
   isActive: boolean;
@@ -22,19 +23,45 @@ const GUIDE_FILTER_LABELS: Record<GuideFilter, string> = {
   ...GUIDE_CATEGORY_LABELS
 };
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
 export function LearningPage({ isActive, onOpenExam, onOpenNote }: Props) {
   const [activeFilter, setActiveFilter] = useState<GuideFilter>("all");
+  const [expandedGuideIds, setExpandedGuideIds] = useState<Set<string>>(() => new Set());
+  const [completedGuideIds, setCompletedGuideIds] = usePersistedState<string[]>(
+    "learning-completed-guides",
+    [],
+    isStringArray
+  );
 
   const filteredGuides = useMemo(
     () => COURSE_GUIDES.filter((guide) => activeFilter === "all" || guide.category === activeFilter),
     [activeFilter]
   );
 
+  function toggleGuide(id: string) {
+    setExpandedGuideIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleCompleted(id: string) {
+    setCompletedGuideIds((current) =>
+      current.includes(id) ? current.filter((currentId) => currentId !== id) : [...current, id]
+    );
+  }
+
   return (
     <section className={`page page-learning ${isActive ? "is-active" : ""}`}>
       <header className="page-header learning-header">
         <div>
-          <h2>Learning Guides</h2>
+          <span className="learning-kicker">UK electrician pathway</span>
+          <h1>Learning Guides</h1>
           <p className="page-copy">
             Structured course routes, assessment checklists and revision pages matched to the Sparky exam categories.
           </p>
@@ -42,11 +69,16 @@ export function LearningPage({ isActive, onOpenExam, onOpenNote }: Props) {
         <span className="learning-count">{COURSE_GUIDES.length} guides</span>
       </header>
 
-      <div className="learning-route-strip" aria-label="Qualification route">
+      <ol className="learning-route-strip" aria-label="Qualification route">
         {["Level 2", "Level 3", "NVQ evidence", "AM2", "ECS card"].map((step) => (
-          <span key={step}>{step}</span>
+          <li key={step}>{step}</li>
         ))}
-      </div>
+      </ol>
+
+      <aside className="content-notice" role="note">
+        <strong>Plan with current sources.</strong>
+        <span>Qualification routes, requirements and regulations can change; confirm course, card and standards requirements with the awarding body and official guidance.</span>
+      </aside>
 
       <div className="learning-filters" role="group" aria-label="Guide categories">
         {GUIDE_FILTERS.map((filter) => (
@@ -64,7 +96,16 @@ export function LearningPage({ isActive, onOpenExam, onOpenNote }: Props) {
 
       <div className="learning-grid">
         {filteredGuides.map((guide) => (
-          <GuideCard key={guide.id} guide={guide} onOpenExam={onOpenExam} onOpenNote={onOpenNote} />
+          <GuideCard
+            key={guide.id}
+            guide={guide}
+            expanded={expandedGuideIds.has(guide.id)}
+            completed={completedGuideIds.includes(guide.id)}
+            onToggle={() => toggleGuide(guide.id)}
+            onToggleComplete={() => toggleCompleted(guide.id)}
+            onOpenExam={onOpenExam}
+            onOpenNote={onOpenNote}
+          />
         ))}
       </div>
     </section>
@@ -73,15 +114,23 @@ export function LearningPage({ isActive, onOpenExam, onOpenNote }: Props) {
 
 function GuideCard({
   guide,
+  expanded,
+  completed,
+  onToggle,
+  onToggleComplete,
   onOpenExam,
   onOpenNote
 }: {
   guide: CourseGuide;
+  expanded: boolean;
+  completed: boolean;
+  onToggle: () => void;
+  onToggleComplete: () => void;
   onOpenExam: (examId: ExamId) => void;
   onOpenNote: (noteId: string) => void;
 }) {
   return (
-    <article id={guide.id} className="learning-card">
+    <article id={guide.id} className={`learning-card${expanded ? " is-expanded" : ""}${completed ? " is-complete" : ""}`}>
       <header className="learning-card-head">
         <div>
           <span className="learning-kicker">{guide.kicker}</span>
@@ -101,7 +150,16 @@ function GuideCard({
         ))}
       </dl>
 
-      {(guide.examId || guide.noteLinks?.length) ? (
+      <div className="learning-card-actions">
+        <button type="button" className="learning-open-btn" onClick={onToggle} aria-expanded={expanded}>
+          {expanded ? "Hide guide" : "Open guide"}
+        </button>
+        <button type="button" className="learning-complete-btn" onClick={onToggleComplete} aria-pressed={completed}>
+          {completed ? "Completed" : "Mark complete"}
+        </button>
+      </div>
+
+      {expanded && (guide.examId || guide.noteLinks?.length) ? (
         <div className="learning-action-row">
           {guide.examId ? (
             <button type="button" className="sheet-practice-btn" onClick={() => onOpenExam(guide.examId!)}>
@@ -121,7 +179,7 @@ function GuideCard({
         </div>
       ) : null}
 
-      <div className="learning-section-stack">
+      {expanded ? <div className="learning-section-stack">
         {guide.sections.map((section) => (
           <section key={`${guide.id}-${section.title}`} className="learning-section">
             <h4>{section.title}</h4>
@@ -132,9 +190,9 @@ function GuideCard({
             </ul>
           </section>
         ))}
-      </div>
+      </div> : null}
 
-      <div className="learning-bottom-grid">
+      {expanded ? <div className="learning-bottom-grid">
         <section className="learning-section learning-section--compact">
           <h4>Common traps</h4>
           <ul>
@@ -151,7 +209,7 @@ function GuideCard({
             ))}
           </ul>
         </section>
-      </div>
+      </div> : null}
     </article>
   );
 }

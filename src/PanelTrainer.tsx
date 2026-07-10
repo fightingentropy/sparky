@@ -5,9 +5,9 @@ import type { Group, Mesh } from "three";
 import "./PanelTrainer.css";
 
 type Pole = 1 | 2;
-type AWG = 14 | 12 | 10 | 8 | 6 | 4 | 2;
+type CableCsa = 1 | 1.5 | 2.5 | 4 | 6 | 10 | 16;
 type Side = "L" | "R";
-type Rating = 15 | 20 | 30 | 40 | 60;
+type Rating = 6 | 16 | 20 | 32 | 40 | 50 | 63;
 
 type LibraryItem = { key: string; rating: Rating; poles: Pole; label: string };
 
@@ -19,7 +19,7 @@ type Breaker = {
   side: Side;
   on: boolean;
   tripped: boolean;
-  awg: AWG;
+  csa: CableCsa;
   loadAmps: number;
   name: string;
   hasWire: boolean;
@@ -31,26 +31,33 @@ const TOTAL_SLOTS = 40;
 const SLOTS_PER_SIDE = 20;
 
 const LIBRARY: LibraryItem[] = [
-  { key: "sp-15", rating: 15, poles: 1, label: "15A 1P" },
-  { key: "sp-20", rating: 20, poles: 1, label: "20A 1P" },
-  { key: "sp-30", rating: 30, poles: 1, label: "30A 1P" },
-  { key: "sp-40", rating: 40, poles: 1, label: "40A 1P" },
-  { key: "sp-60", rating: 60, poles: 1, label: "60A 1P" },
-  { key: "dp-30", rating: 30, poles: 2, label: "30A 2P" },
-  { key: "dp-60", rating: 60, poles: 2, label: "60A 2P" }
+  { key: "rcbo-6", rating: 6, poles: 1, label: "6A RCBO" },
+  { key: "rcbo-16", rating: 16, poles: 1, label: "16A RCBO" },
+  { key: "rcbo-20", rating: 20, poles: 1, label: "20A RCBO" },
+  { key: "rcbo-32", rating: 32, poles: 1, label: "32A RCBO" },
+  { key: "rcbo-40", rating: 40, poles: 1, label: "40A RCBO" },
+  { key: "rcbo-50", rating: 50, poles: 1, label: "50A RCBO" },
+  { key: "dp-63", rating: 63, poles: 2, label: "63A DP" }
 ];
 
-const AWG_AMPACITY: Record<AWG, number> = { 14: 15, 12: 20, 10: 30, 8: 50, 6: 65, 4: 85, 2: 115 };
-
-const AWG_OPTIONS: AWG[] = [14, 12, 10, 8, 6, 4, 2];
+const CABLE_CSA_OPTIONS: CableCsa[] = [1, 1.5, 2.5, 4, 6, 10, 16];
+const MIN_CSA_FOR_RATING: Record<Rating, CableCsa> = {
+  6: 1,
+  16: 1.5,
+  20: 2.5,
+  32: 4,
+  40: 6,
+  50: 10,
+  63: 16
+};
 
 const TIPS = [
-  "Single-pole breakers serve 120V circuits. Double-pole breakers span both buses for 240V loads.",
-  "Continuous loads must be sized at 125% per NEC 210.19/220.10.",
-  "The neutral bar is for grounded conductors; the ground bar bonds equipment grounds.",
-  "Slot numbering alternates: 1 left, 2 right, 3 left, 4 right…",
-  "A 20A breaker requires at least 12 AWG copper per NEC 240.4(D).",
-  "Torque every lug to manufacturer spec — loose connections start fires."
+  "Single-pole RCBOs protect final circuits; the main switch isolates line and neutral at the consumer unit.",
+  "Choose cable CSA from Ib, In and Iz, then check installation method, grouping, voltage drop and fault protection.",
+  "The neutral bar returns load current; the CPC bar provides the protective earth path under fault conditions.",
+  "RCBOs combine overcurrent and residual-current protection for a final circuit.",
+  "For this trainer, a 32A circuit starts at 4 mm². Always verify the final design against BS 7671 tables.",
+  "Torque every termination to the manufacturer's specification — loose connections can overheat."
 ];
 
 // ---- helpers ----------------------------------------------------------------
@@ -82,13 +89,8 @@ function nextFreeSlot(breakers: Breaker[], poles: Pole): number | null {
   return null;
 }
 
-function defaultAwgForRating(rating: Rating): AWG {
-  if (rating <= 15) return 14;
-  if (rating <= 20) return 12;
-  if (rating <= 30) return 10;
-  if (rating <= 50) return 8;
-  if (rating <= 60) return 6;
-  return 4;
+function defaultCsaForRating(rating: Rating): CableCsa {
+  return MIN_CSA_FOR_RATING[rating];
 }
 
 function uid(prefix: string): string {
@@ -101,11 +103,11 @@ function uid(prefix: string): string {
 
 function warningsFor(b: Breaker): Warning[] {
   const out: Warning[] = [];
-  if (AWG_AMPACITY[b.awg] < b.rating) {
+  if (b.csa < MIN_CSA_FOR_RATING[b.rating]) {
     out.push({
-      id: `${b.id}-awg`,
+      id: `${b.id}-csa`,
       level: "error",
-      message: `Wire too small — ${b.awg} AWG protects only ${AWG_AMPACITY[b.awg]}A. NEC 240.4(D).`
+      message: `Training check: ${b.csa} mm² is below the starting conductor size for a ${b.rating}A circuit. Confirm Ib, In, Iz and installation method.`
     });
   }
   if (b.loadAmps > b.rating) {
@@ -114,7 +116,7 @@ function warningsFor(b: Breaker): Warning[] {
     out.push({
       id: `${b.id}-cont`,
       level: "warn",
-      message: "Continuous load > 80% — size at 125% per NEC 210.19/220.10."
+      message: "High connected load — check diversity, voltage drop and protective-device coordination."
     });
   }
   return out;
@@ -349,10 +351,10 @@ function MainBreaker() {
         <meshStandardMaterial color="#e2e2e2" metalness={0.1} roughness={0.5} />
       </mesh>
       <Text fontSize={0.012} color="#f5f5f5" position={[0, 0.018, SLOT_DEPTH / 2 + 0.001]} anchorX="center" anchorY="middle">
-        MAIN 200A
+        MAIN 100A
       </Text>
       <Text fontSize={0.008} color="#bbb" position={[0, -0.018, SLOT_DEPTH / 2 + 0.001]} anchorX="center" anchorY="middle">
-        240V
+        230V
       </Text>
     </group>
   );
@@ -503,7 +505,7 @@ function BreakerObject({ breaker, selected, hovered, warnings, onClick, onPointe
       </Text>
       {isDouble ? (
         <Text fontSize={0.008} color="#bbb" position={[0, bodyHeight / 4, SLOT_DEPTH / 2 + 0.001]} anchorX="center" anchorY="middle">
-          240V
+          230V
         </Text>
       ) : null}
       <BreakerToggle on={breaker.on} tripped={breaker.tripped} />
@@ -663,14 +665,14 @@ function LibraryPanel({ onPick }: { onPick: (item: LibraryItem) => void }) {
     <div className="pt-library-grid">
       {LIBRARY.map((it) => {
         const cls = `pt-library-button${pulseKey === it.key ? " is-pulsing" : ""}`;
-        const polesLabel = it.poles === 2 ? "2-POLE" : "1-POLE";
+        const polesLabel = it.poles === 2 ? "DOUBLE POLE" : "RCBO";
         return (
           <button
             key={it.key}
             type="button"
             onClick={() => handlePick(it)}
             className={cls}
-            aria-label={`Install ${it.rating} amp ${polesLabel} breaker`}
+            aria-label={`Install ${it.rating} amp ${polesLabel}`}
           >
             <span className="pt-library-button-text">
               <span className="pt-library-rating">{it.rating}A</span>
@@ -740,7 +742,7 @@ const CircuitRow = memo(function CircuitRow({ breaker, selected, onUpdate, onRem
       <div className="pt-circuit-top">
         <span className="pt-slot-pill">#{slotLabel}</span>
         <span className="pt-circuit-rating">{breaker.rating}A</span>
-        <span className="pt-pole-tag">{breaker.poles === 2 ? "2P" : "1P"}</span>
+        <span className="pt-pole-tag">{breaker.poles === 2 ? "DP" : "RCBO"}</span>
         {hasError ? (
           <span className="pt-status-dot is-error" aria-label="Has error" title="Has error" />
         ) : hasWarn ? (
@@ -759,18 +761,18 @@ const CircuitRow = memo(function CircuitRow({ breaker, selected, onUpdate, onRem
 
       <div className="pt-field-row" onClick={(e) => e.stopPropagation()}>
         <div className="pt-field">
-          <label className="pt-field-label" htmlFor={`pt-awg-${breaker.id}`}>
-            Wire
+          <label className="pt-field-label" htmlFor={`pt-csa-${breaker.id}`}>
+            Cable CSA
           </label>
           <select
-            id={`pt-awg-${breaker.id}`}
-            value={breaker.awg}
-            onChange={(e) => onUpdate(breaker.id, { awg: Number(e.target.value) as AWG })}
+            id={`pt-csa-${breaker.id}`}
+            value={breaker.csa}
+            onChange={(e) => onUpdate(breaker.id, { csa: Number(e.target.value) as CableCsa })}
             className="pt-select"
           >
-            {AWG_OPTIONS.map((awg) => (
-              <option key={awg} value={awg}>
-                {awg} AWG
+            {CABLE_CSA_OPTIONS.map((csa) => (
+              <option key={csa} value={csa}>
+                {csa} mm²
               </option>
             ))}
           </select>
@@ -916,7 +918,10 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
     () => breakers.reduce((sum, b) => sum + (b.on && !b.tripped ? b.loadAmps : 0), 0),
     [breakers]
   );
-  const totalContinuous = useMemo(() => totalConnected * 1.25, [totalConnected]);
+  const highestRating = useMemo(
+    () => breakers.reduce((highest, breaker) => Math.max(highest, breaker.rating), 0),
+    [breakers]
+  );
 
   const slotsUsed = useMemo(() => {
     let count = 0;
@@ -936,7 +941,7 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
       side: slotToSide(free),
       on: true,
       tripped: false,
-      awg: defaultAwgForRating(item.rating),
+      csa: defaultCsaForRating(item.rating),
       loadAmps: 0,
       name: "",
       hasWire: true
@@ -968,7 +973,7 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
 
   const tipText = useMemo(() => {
     if (breakers.length === 0)
-      return "Click a rating in the breaker library to install it in the next slot.";
+      return "Choose an RCBO from the library to install it in the next available way.";
     return TIPS[tipIndex % TIPS.length];
   }, [breakers.length, tipIndex]);
 
@@ -978,10 +983,10 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
     <div className="pt-shell">
       <div className="pt-scene">
         <Canvas
-          shadows
+          shadows="basic"
           frameloop={active ? "demand" : "never"}
           camera={{ position: [0, 1.1, 1.45], fov: 32 }}
-          aria-label="3D view of the breaker panel. Use the Installed Circuits list below to add and edit breakers."
+          aria-label="3D view of the consumer unit. Use the Installed Circuits list below to add and edit protective devices."
         >
           <color attach="background" args={["#16120d"]} />
           <ambientLight intensity={0.55} />
@@ -1000,16 +1005,16 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
           />
           <OrbitControls enablePan={false} target={[0, PANEL.centerY, 0]} minDistance={1.1} maxDistance={4} />
         </Canvas>
-        <div className="pt-scene-overlay">200A Split-Phase Load Center</div>
+        <div className="pt-scene-overlay">100A Single-Phase Consumer Unit</div>
         <p className="sr-only">
-          3D breaker panel: {breakers.length} breaker{breakers.length === 1 ? "" : "s"} installed,{" "}
+          3D consumer unit: {breakers.length} protective device{breakers.length === 1 ? "" : "s"} installed,{" "}
           {slotsUsed} of {TOTAL_SLOTS} slots used. This view is decorative — use the Installed
-          Circuits list to add, edit, and remove breakers.
+          Circuits list to add, edit, and remove protective devices.
         </p>
       </div>
 
       <aside className="pt-hud">
-        <CardBox title="Breaker Library" subtitle="Click to install in next free slot.">
+        <CardBox title="RCBO Library" subtitle="Click to install in the next available way.">
           <LibraryPanel onPick={installFromLibrary} />
         </CardBox>
 
@@ -1022,7 +1027,7 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
               <span className="pt-empty-icon" aria-hidden="true">
                 {"ⓘ"}
               </span>
-              <span>Install a breaker from the library to begin.</span>
+              <span>Install an RCBO from the library to begin.</span>
             </div>
           ) : (
             <div className="pt-circuit-list">
@@ -1041,15 +1046,11 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
           )}
         </CardBox>
 
-        <CardBox title="Panel Summary">
+        <CardBox title="Consumer Unit Summary">
           <div className="pt-summary-grid">
             <SummaryStat label="Connected" value={totalConnected.toFixed(1)} unit="A" />
-            <SummaryStat
-              label={"Continuous (×1.25)"}
-              value={totalContinuous.toFixed(1)}
-              unit="A"
-            />
-            <SummaryStat label="Breakers" value={String(breakers.length)} />
+            <SummaryStat label="Highest device" value={String(highestRating)} unit="A" />
+            <SummaryStat label="RCBOs / devices" value={String(breakers.length)} />
             <SummaryStat
               label="Warnings"
               value={String(allWarnings)}
@@ -1062,7 +1063,7 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
               <strong>
                 slot {selected.poles === 2 ? `${selected.slot}/${selected.slot + 2}` : selected.slot}
               </strong>{" "}
-              {selected.rating}A {selected.poles === 2 ? "2P" : "1P"}
+              {selected.rating}A {selected.poles === 2 ? "DP" : "RCBO"}
               {selected.name ? ` — ${selected.name}` : ""}
             </div>
           ) : null}
