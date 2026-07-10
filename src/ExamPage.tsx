@@ -780,6 +780,17 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                     <path d="m5 7.5 5 5 5-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
+                <select
+                  className="exam-test-select"
+                  aria-label="Switch test"
+                  value={variantIndex}
+                  disabled={!exam}
+                  onChange={(event) => switchToTest(Number(event.target.value))}
+                >
+                  {Array.from({ length: variantCount }, (_, i) => (
+                    <option key={i} value={i}>{i + 1}</option>
+                  ))}
+                </select>
                 {testMenuOpen ? (
                   <div id="exam-test-menu" className="exam-test-menu" role="listbox" aria-label="Switch test">
                     {Array.from({ length: variantCount }, (_, i) => {
