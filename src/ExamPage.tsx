@@ -165,6 +165,16 @@ function parseServerUpdatedAt(value: string): number {
   return Date.parse(normalized) || 0;
 }
 
+function isTextEntryActive(eventTarget: EventTarget | null): boolean {
+  const target = eventTarget instanceof HTMLElement ? eventTarget : null;
+  const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  return [target, activeElement].some(
+    (element) =>
+      element?.isContentEditable ||
+      element?.closest("input, textarea, select, [contenteditable='true']")
+  );
+}
+
 type Props = {
   isActive: boolean;
   practiceTarget?: {
@@ -556,16 +566,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
 
-      const target = event.target instanceof HTMLElement ? event.target : null;
-      const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      const isTextControl = [target, activeElement].some(
-        (element) =>
-          element?.isContentEditable ||
-          element?.closest("input, textarea, select, [contenteditable='true']")
-      );
-      if (isTextControl) {
-        return;
-      }
+      if (isTextEntryActive(event.target)) return;
 
       if (event.key === "ArrowLeft") {
         event.preventDefault();
@@ -1140,6 +1141,13 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                 onSelect={(choice) => setAnswer(question.number, choice)}
                 flagged={flaggedQuestionNumbers.has(question.number)}
                 onToggleFlag={() => toggleQuestionFlag(question.number)}
+                keyboardShortcutActive={
+                  !submitted && question.number === questions[focusQuestionIndex]?.number
+                }
+                onActivate={() => {
+                  const index = questions.findIndex((candidate) => candidate.number === question.number);
+                  setFocusQuestionIndex(Math.max(0, index));
+                }}
               />
             ))}
           </div>
@@ -1258,9 +1266,20 @@ type QuestionCardProps = {
   onSelect: (choice: ExamChoice) => void;
   flagged: boolean;
   onToggleFlag: () => void;
+  keyboardShortcutActive: boolean;
+  onActivate: () => void;
 };
 
-function QuestionCard({ question, selected, submitted, onSelect, flagged, onToggleFlag }: QuestionCardProps) {
+function QuestionCard({
+  question,
+  selected,
+  submitted,
+  onSelect,
+  flagged,
+  onToggleFlag,
+  keyboardShortcutActive,
+  onActivate
+}: QuestionCardProps) {
   const correct = question.answer;
   const isCorrect = submitted && selected === correct;
   const isIncorrect = submitted && selected !== undefined && selected !== correct;
@@ -1270,6 +1289,7 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
   const [previewHovered, setPreviewHovered] = useState(false);
   const [previewFocused, setPreviewFocused] = useState(false);
   const copyTimeoutRef = useRef<number | null>(null);
+  const previewButtonRef = useRef<HTMLButtonElement>(null);
   const preview = previewPinned || previewHovered || previewFocused;
   const answerPanelId = `exam-answer-${question.number}`;
   const optionExplanations = useMemo(() => buildOptionExplanations(question), [question]);
@@ -1281,6 +1301,35 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!keyboardShortcutActive || submitted) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (
+        event.defaultPrevented ||
+        event.repeat ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        event.key.toLowerCase() !== "v" ||
+        isTextEntryActive(event.target)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      const shouldOpen = !preview;
+      setPreviewPinned(shouldOpen);
+      setPreviewHovered(false);
+      setPreviewFocused(false);
+      if (!shouldOpen) previewButtonRef.current?.blur();
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [keyboardShortcutActive, preview, submitted]);
 
   async function copyQuestion() {
     if (copyTimeoutRef.current !== null) {
@@ -1334,6 +1383,8 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
   return (
     <div
       id={`exam-q-${question.number}`}
+      onPointerEnter={onActivate}
+      onFocusCapture={onActivate}
       className={[
         "exam-question",
         submitted && isCorrect ? "is-correct" : "",
@@ -1348,6 +1399,7 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
         <div className="exam-question-actions">
           {!submitted ? (
             <button
+              ref={previewButtonRef}
               type="button"
               className={`exam-copy-btn exam-preview-btn${preview ? " is-active" : ""}`}
               onPointerEnter={(event) => {
@@ -1361,10 +1413,13 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
               aria-controls={answerPanelId}
               aria-expanded={preview}
               aria-pressed={previewPinned}
+              aria-keyshortcuts="V"
               aria-label={previewPinned
-                ? `Hide the answer for question ${question.number}`
-                : `Preview the answer for question ${question.number}. Hover or focus to reveal; press to keep it open.`}
-              title={previewPinned ? "Hide answer" : "Hover or focus to preview · click to keep open"}
+                ? `Hide the answer for question ${question.number}. Press V to toggle.`
+                : `Preview the answer for question ${question.number}. Hover or focus to reveal; press to keep it open. Press V to toggle.`}
+              title={previewPinned
+                ? "Hide answer · V to toggle"
+                : "Hover or focus to preview · click to keep open · V to toggle"}
             >
               <span className="exam-copy-icon" aria-hidden="true">
                 {preview ? (
