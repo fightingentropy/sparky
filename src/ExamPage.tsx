@@ -1531,7 +1531,7 @@ function QuestionCard({
                 ) : null}
                 {optionExplanation ? (
                   <span className={`exam-option-feedback ${letter === correct ? "is-correct" : "is-incorrect"}`}>
-                    <strong>{letter === correct ? "Correct" : "Why not"}</strong>
+                    <strong>{letter === correct ? "Correct" : "Why not here"}</strong>
                     <span>{optionExplanation}</span>
                   </span>
                 ) : null}
