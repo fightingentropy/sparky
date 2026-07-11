@@ -1,5 +1,6 @@
 import type { Exam } from "./exams/types";
 import { applyExamExplanationEnhancements } from "./examExplanationEnhancements";
+import { applyExamSolutionTables } from "./examSolutionTables";
 import eighteenthEditionUrl from "./exam-data/18th-edition.json?url";
 import am2InstallationAssessmentUrl from "./exam-data/am2-installation-assessment.json?url";
 import buildingRegulationsUrl from "./exam-data/building-regulations.json?url";
@@ -49,7 +50,7 @@ function loadExamAsset(id: ExamAssetId): Promise<Exam> {
     if (exam.id !== id) {
       throw new Error(`Loaded exam id ${exam.id} did not match requested exam ${id}`);
     }
-    return applyExamExplanationEnhancements(exam);
+    return applyExamSolutionTables(applyExamExplanationEnhancements(exam));
   });
 
   examCache.set(id, request);

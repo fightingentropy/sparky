@@ -6243,6 +6243,180 @@ body[data-page="exams"] .exam-explanation p{
   color: var(--ex-muted);
 }
 
+body[data-page="exams"] .exam-solution-tables{
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+body[data-page="exams"] .exam-solution-table{
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--ex-hair);
+  border-radius: 12px;
+  background: var(--ex-surface-2);
+}
+
+body[data-page="exams"] .exam-solution-table-head{
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+body[data-page="exams"] .exam-solution-table-head > div{
+  display: grid;
+  gap: 3px;
+}
+
+body[data-page="exams"] .exam-solution-table-head strong{
+  color: var(--ex-heading);
+  font-size: 0.98rem;
+}
+
+body[data-page="exams"] .exam-solution-table-kicker{
+  color: var(--ex-brass);
+  font-family: var(--ex-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+body[data-page="exams"] .exam-solution-source-status{
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border: 1px solid var(--ex-hair);
+  border-radius: 999px;
+  color: var(--ex-muted);
+  font-family: var(--ex-mono);
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+body[data-page="exams"] .exam-solution-source-status.is-verified{
+  border-color: var(--ex-good-line);
+  color: var(--ex-good);
+}
+
+body[data-page="exams"] .exam-solution-table-scroll{
+  overflow-x: auto;
+  border: 1px solid var(--ex-hair);
+  border-radius: 10px;
+}
+
+body[data-page="exams"] .exam-solution-table table{
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+  color: var(--ex-text);
+  font-size: 0.84rem;
+  text-align: left;
+}
+
+body[data-page="exams"] .exam-solution-table th,
+body[data-page="exams"] .exam-solution-table td{
+  padding: 10px 12px;
+  border-right: 1px solid var(--ex-hair);
+  border-bottom: 1px solid var(--ex-hair);
+  vertical-align: top;
+}
+
+body[data-page="exams"] .exam-solution-table th:last-child,
+body[data-page="exams"] .exam-solution-table td:last-child{
+  border-right: 0;
+}
+
+body[data-page="exams"] .exam-solution-table tbody tr:last-child td{
+  border-bottom: 0;
+}
+
+body[data-page="exams"] .exam-solution-table th{
+  background: var(--ex-hair-soft);
+  color: var(--ex-muted);
+  font-family: var(--ex-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+body[data-page="exams"] .exam-solution-table td:last-child{
+  color: var(--ex-heading);
+  font-weight: 700;
+}
+
+body[data-page="exams"] .exam-solution-source-meta{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+body[data-page="exams"] .exam-solution-source-meta div{
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+body[data-page="exams"] .exam-solution-source-meta dt{
+  color: var(--ex-faint);
+  font-family: var(--ex-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body[data-page="exams"] .exam-solution-source-meta dd{
+  margin: 0;
+  color: var(--ex-text);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+body[data-page="exams"] .exam-solution-table-note{
+  color: var(--ex-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+body[data-page="exams"] .exam-solution-table-source{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ex-hair);
+  color: var(--ex-faint);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+body[data-page="exams"] .exam-solution-table-source a{
+  flex: 0 0 auto;
+  color: var(--ex-brass);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+body[data-page="exams"] .exam-solution-table-source a:hover,
+body[data-page="exams"] .exam-solution-table-source a:focus-visible{
+  color: var(--ex-brass-hover);
+  text-decoration: underline;
+}
+
+@media (max-width: 720px){
+  body[data-page="exams"] .exam-solution-table-head,
+  body[data-page="exams"] .exam-solution-table-source{
+    align-items: start;
+    flex-direction: column;
+  }
+
+  body[data-page="exams"] .exam-solution-source-meta{
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Review tools ──────────────────────────────────────────────────────── */
 
 body[data-page="exams"] .exam-review-tools{
