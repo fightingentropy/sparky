@@ -1305,21 +1305,6 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
           {!submitted ? (
             <button
               type="button"
-              className={`exam-copy-btn exam-flag-btn${flagged ? " is-active" : ""}`}
-              onClick={onToggleFlag}
-              aria-pressed={flagged}
-              aria-label={flagged ? `Remove review flag from question ${question.number}` : `Flag question ${question.number} for review`}
-              title={flagged ? "Remove review flag" : "Flag for review"}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill={flagged ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M5 4v17" />
-                <path d="M5 5h11l-2.5 4L16 13H5" />
-              </svg>
-            </button>
-          ) : null}
-          {!submitted ? (
-            <button
-              type="button"
               className={`exam-copy-btn exam-preview-btn${preview ? " is-active" : ""}`}
               onClick={() => setPreview((open) => !open)}
               aria-pressed={preview}
@@ -1367,6 +1352,21 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
               )}
             </span>
           </button>
+          {!submitted ? (
+            <button
+              type="button"
+              className={`exam-copy-btn exam-flag-btn${flagged ? " is-active" : ""}`}
+              onClick={onToggleFlag}
+              aria-pressed={flagged}
+              aria-label={flagged ? `Remove review flag from question ${question.number}` : `Flag question ${question.number} for review`}
+              title={flagged ? "Remove review flag" : "Flag for review"}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={flagged ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 4v17" />
+                <path d="M5 5h11l-2.5 4L16 13H5" />
+              </svg>
+            </button>
+          ) : null}
           {submitted ? (
             <span className={`exam-q-badge exam-q-badge--${isCorrect ? "ok" : "bad"}`}>
               {isCorrect ? "Correct" : isUnanswered ? "Not answered" : "Incorrect"}
