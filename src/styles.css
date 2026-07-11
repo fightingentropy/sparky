@@ -4500,7 +4500,6 @@ select:focus,
 }
 
 .mobile-dot.is-active,
-.exam-progress-bar,
 .exam-section-breakdown-fill {
   background: var(--accent);
   box-shadow: none;
@@ -5822,20 +5821,68 @@ body[data-page="exams"] .exam-test-done{
 /* ── Progress bar ──────────────────────────────────────────────────────── */
 
 body[data-page="exams"] .exam-progress{
-  position: relative;
-  height: 6px;
+  display: grid;
+  gap: 1px;
+  height: 14px;
   width: 100%;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-body[data-page="exams"] .exam-progress-bar{
+body[data-page="exams"] .exam-progress::-webkit-scrollbar{
+  display: none;
+}
+
+body[data-page="exams"] .exam-progress-segment{
+  position: relative;
+  min-width: 3px;
   height: 100%;
-  border-radius: 999px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: var(--ex-hair);
+  cursor: pointer;
+  transition: background 160ms var(--ease), box-shadow 160ms var(--ease), transform 160ms var(--ease);
+}
+
+body[data-page="exams"] .exam-progress-segment:hover{
+  background: var(--ex-hair-soft);
+  transform: scaleY(1.18);
+}
+
+body[data-page="exams"] .exam-progress-segment:focus-visible{
+  outline: 2px solid var(--ex-brass);
+  outline-offset: 2px;
+  z-index: 1;
+}
+
+body[data-page="exams"] .exam-progress-segment.is-answered,
+body[data-page="exams"] .exam-progress-segment.is-current{
   background: var(--ex-brass);
-  box-shadow: none;
-  transition: width 280ms var(--ease);
+}
+
+body[data-page="exams"] .exam-progress-segment.is-current{
+  box-shadow: 0 0 0 2px var(--ex-bg), 0 0 0 4px var(--ex-brass);
+  z-index: 1;
+}
+
+body[data-page="exams"] .exam-progress-segment.is-correct{
+  background: var(--ex-good);
+}
+
+body[data-page="exams"] .exam-progress-segment.is-wrong{
+  background: var(--ex-bad);
+}
+
+body[data-page="exams"] .exam-progress-segment.is-flagged::after{
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ex-heading);
 }
 
 /* ── Question cards ────────────────────────────────────────────────────── */
@@ -6735,9 +6782,7 @@ body[data-page="exams"] .exam-test-switch{
     box-shadow: 0 0 0 2px var(--ex-brass-tint);
   }
 
-  body[data-page="exams"] .exam-progress{
-    height: 5px;
-  }
+  body[data-page="exams"] .exam-progress{ height: 12px; }
 
   body[data-page="exams"] .exam-sections{
     gap: 16px;
@@ -7091,58 +7136,6 @@ body[data-page="exams"] .exam-view-switch button.is-active {
   color: var(--ex-heading);
 }
 
-body[data-page="exams"] .exam-navigator-toggle {
-  min-height: 34px;
-  gap: 7px;
-  padding-inline: 11px;
-  font-size: 0.78rem;
-  white-space: nowrap;
-}
-
-body[data-page="exams"] .exam-question-navigator {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  max-height: 124px;
-  overflow: auto;
-}
-
-body[data-page="exams"] .exam-question-navigator button {
-  position: relative;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: 1px solid var(--ex-hair);
-  border-radius: 9px;
-  background: transparent;
-  color: var(--ex-faint);
-  font-family: var(--ex-mono);
-  font-size: 0.72rem;
-  cursor: pointer;
-}
-
-body[data-page="exams"] .exam-question-navigator button.is-answered {
-  border-color: var(--ex-good-line);
-  color: var(--ex-good);
-}
-
-body[data-page="exams"] .exam-question-navigator button.is-current {
-  border-color: var(--ex-brass);
-  background: var(--ex-brass-tint);
-  color: var(--ex-heading);
-}
-
-body[data-page="exams"] .exam-question-navigator button.is-flagged::after {
-  content: "";
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--ex-brass);
-}
-
 body[data-page="exams"] .exam-flag-btn.is-active,
 body[data-page="exams"] .exam-flag-control.is-active {
   border-color: var(--ex-brass-line);
@@ -7171,9 +7164,6 @@ body[data-page="exams"] .exam-submit-btn:disabled {
   body[data-page="exams"] .exam-view-toolbar-row { align-items: stretch; flex-direction: column; }
   body[data-page="exams"] .exam-view-switch { width: 100%; }
   body[data-page="exams"] .exam-view-switch button { flex: 1; }
-  body[data-page="exams"] .exam-navigator-toggle { width: 100%; justify-content: center; }
-  body[data-page="exams"] .exam-question-navigator { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
-  body[data-page="exams"] .exam-question-navigator button { flex: 0 0 32px; width: 32px; height: 32px; }
   body[data-page="exams"] .exam-focus-controls { justify-content: space-between; }
   body[data-page="exams"] .exam-focus-controls .ghost-button { min-width: 0; padding-inline: 10px; }
 }
