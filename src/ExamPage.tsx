@@ -548,6 +548,36 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     setFocusQuestionIndex((current) => Math.min(current, Math.max(questions.length - 1, 0)));
   }, [questions.length]);
 
+  useEffect(() => {
+    if (!isActive || submitted || viewMode !== "focus" || questions.length === 0) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      const isTextControl = [target, activeElement].some(
+        (element) =>
+          element?.isContentEditable ||
+          element?.closest("input, textarea, select, [contenteditable='true']")
+      );
+      if (isTextControl) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setFocusQuestionIndex((current) => Math.max(0, current - 1));
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setFocusQuestionIndex((current) => Math.min(questions.length - 1, current + 1));
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isActive, questions.length, submitted, viewMode]);
+
   function setAnswer(questionNumber: number, choice: ExamChoice) {
     if (!exam || submitted) return;
     // Compute next from the committed `answers` (fresh in this event handler) so
@@ -923,82 +953,104 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               ) : null}
             </div>
           </div>
-          <div className="exam-hero-stats">
-            {variantCount > 1 ? (
-              <div className="exam-stat exam-stat--switch" ref={testMenuRef}>
-                <span>Test</span>
+          <div className="exam-hero-summary">
+            <div className="exam-hero-stats">
+              {variantCount > 1 ? (
+                <div className="exam-stat exam-stat--switch" ref={testMenuRef}>
+                  <span>Test</span>
+                  <button
+                    type="button"
+                    className="exam-test-switch"
+                    aria-haspopup="listbox"
+                    aria-expanded={testMenuOpen}
+                    aria-controls={testMenuOpen ? "exam-test-menu" : undefined}
+                    disabled={!exam}
+                    onClick={() => setTestMenuOpen((open) => !open)}
+                  >
+                    <strong>{variantIndex + 1}</strong>
+                    <svg className="exam-test-switch-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="m5 7.5 5 5 5-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <select
+                    className="exam-test-select"
+                    aria-label="Switch test"
+                    value={variantIndex}
+                    disabled={!exam}
+                    onChange={(event) => switchToTest(Number(event.target.value))}
+                  >
+                    {Array.from({ length: variantCount }, (_, i) => (
+                      <option key={i} value={i}>{i + 1}</option>
+                    ))}
+                  </select>
+                  {testMenuOpen ? (
+                    <div id="exam-test-menu" className="exam-test-menu" role="listbox" aria-label="Switch test">
+                      {Array.from({ length: variantCount }, (_, i) => {
+                        const done = progress.variants[String(i)]?.submitted ?? false;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            role="option"
+                            aria-selected={i === variantIndex}
+                            className={`exam-test-option${i === variantIndex ? " is-active" : ""}${done ? " is-done" : ""}`}
+                            onClick={() => switchToTest(i)}
+                          >
+                            <span>Test {i + 1}</span>
+                            {done ? (
+                              <span className="exam-test-done" aria-hidden="true">✓</span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="exam-stat">
+                  <span>Test</span>
+                  <strong>{variantIndex + 1}</strong>
+                </div>
+              )}
+              <div className="exam-stat">
+                <span>Questions</span>
+                <strong>{total}</strong>
+              </div>
+              <div className="exam-stat">
+                <span>Answered</span>
+                <strong>
+                  {answeredCount}
+                  <span className="exam-stat-sub">/{total}</span>
+                </strong>
+              </div>
+              <div className="exam-stat">
+                <span>Pass mark</span>
+                <strong>
+                  {passMark}
+                  <span className="exam-stat-sub">/{total}</span>
+                </strong>
+              </div>
+            </div>
+            {!submitted && total > 0 ? (
+              <div className="exam-view-switch" role="group" aria-label="Question view">
                 <button
                   type="button"
-                  className="exam-test-switch"
-                  aria-haspopup="listbox"
-                  aria-expanded={testMenuOpen}
-                  aria-controls={testMenuOpen ? "exam-test-menu" : undefined}
-                  disabled={!exam}
-                  onClick={() => setTestMenuOpen((open) => !open)}
+                  className={viewMode === "all" ? "is-active" : ""}
+                  aria-pressed={viewMode === "all"}
+                  onClick={() => setViewMode("all")}
                 >
-                  <strong>{variantIndex + 1}</strong>
-                  <svg className="exam-test-switch-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                    <path d="m5 7.5 5 5 5-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  All questions
                 </button>
-                <select
-                  className="exam-test-select"
-                  aria-label="Switch test"
-                  value={variantIndex}
-                  disabled={!exam}
-                  onChange={(event) => switchToTest(Number(event.target.value))}
+                <button
+                  type="button"
+                  className={viewMode === "focus" ? "is-active" : ""}
+                  aria-pressed={viewMode === "focus"}
+                  onClick={() => setViewMode("focus")}
                 >
-                  {Array.from({ length: variantCount }, (_, i) => (
-                    <option key={i} value={i}>{i + 1}</option>
-                  ))}
-                </select>
-                {testMenuOpen ? (
-                  <div id="exam-test-menu" className="exam-test-menu" role="listbox" aria-label="Switch test">
-                    {Array.from({ length: variantCount }, (_, i) => {
-                      const done = progress.variants[String(i)]?.submitted ?? false;
-                      return (
-                        <button
-                          key={i}
-                          type="button"
-                          role="option"
-                          aria-selected={i === variantIndex}
-                          className={`exam-test-option${i === variantIndex ? " is-active" : ""}${done ? " is-done" : ""}`}
-                          onClick={() => switchToTest(i)}
-                        >
-                          <span>Test {i + 1}</span>
-                          {done ? (
-                            <span className="exam-test-done" aria-hidden="true">✓</span>
-                          ) : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : null}
+                  Focus mode
+                </button>
               </div>
-            ) : (
-              <div className="exam-stat">
-                <span>Test</span>
-                <strong>{variantIndex + 1}</strong>
-              </div>
-            )}
-            <div className="exam-stat">
-              <span>Questions</span>
-              <strong>{total}</strong>
-            </div>
-            <div className="exam-stat">
-              <span>Answered</span>
-              <strong>
-                {answeredCount}
-                <span className="exam-stat-sub">/{total}</span>
-              </strong>
-            </div>
-            <div className="exam-stat">
-              <span>Pass mark</span>
-              <strong>
-                {passMark}
-                <span className="exam-stat-sub">/{total}</span>
-              </strong>
-            </div>
+            ) : null}
           </div>
         </header>
 
@@ -1039,31 +1091,6 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               );
             })}
           </nav>
-        ) : null}
-
-        {!submitted && total > 0 ? (
-          <div className="exam-view-toolbar">
-            <div className="exam-view-toolbar-row">
-              <div className="exam-view-switch" role="group" aria-label="Question view">
-                <button
-                  type="button"
-                  className={viewMode === "all" ? "is-active" : ""}
-                  aria-pressed={viewMode === "all"}
-                  onClick={() => setViewMode("all")}
-                >
-                  All questions
-                </button>
-                <button
-                  type="button"
-                  className={viewMode === "focus" ? "is-active" : ""}
-                  aria-pressed={viewMode === "focus"}
-                  onClick={() => setViewMode("focus")}
-                >
-                  Focus mode
-                </button>
-              </div>
-            </div>
-          </div>
         ) : null}
 
         {submitted && exam && scoringBand ? (
@@ -1122,22 +1149,18 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               type="button"
               className="ghost-button"
               disabled={focusQuestionIndex === 0}
+              aria-keyshortcuts="ArrowLeft"
+              title="Previous question (Left Arrow)"
               onClick={() => setFocusQuestionIndex((current) => Math.max(0, current - 1))}
             >
               Previous
             </button>
             <button
               type="button"
-              className={`ghost-button exam-flag-control${flaggedQuestionNumbers.has(displayQuestions[0].number) ? " is-active" : ""}`}
-              aria-pressed={flaggedQuestionNumbers.has(displayQuestions[0].number)}
-              onClick={() => toggleQuestionFlag(displayQuestions[0].number)}
-            >
-              {flaggedQuestionNumbers.has(displayQuestions[0].number) ? "Flagged" : "Flag for review"}
-            </button>
-            <button
-              type="button"
               className="ghost-button"
               disabled={focusQuestionIndex >= questions.length - 1}
+              aria-keyshortcuts="ArrowRight"
+              title="Next question (Right Arrow)"
               onClick={() => setFocusQuestionIndex((current) => Math.min(questions.length - 1, current + 1))}
             >
               Next
