@@ -307,6 +307,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   const [examExportMessage, setExamExportMessage] = useState("Export full exam");
   const [viewMode, setViewMode] = useState<ExamViewMode>("all");
   const [focusQuestionIndex, setFocusQuestionIndex] = useState(0);
+  const [focusNavigatorOpen, setFocusNavigatorOpen] = useState(false);
   const [flaggedQuestionNumbers, setFlaggedQuestionNumbers] = useState<Set<number>>(() => new Set());
   const examCopyTimeoutRef = useRef<number | null>(null);
   const examExportTimeoutRef = useRef<number | null>(null);
@@ -336,6 +337,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     setExamExportMessage("Export full exam");
     setViewMode("all");
     setFocusQuestionIndex(0);
+    setFocusNavigatorOpen(false);
     setFlaggedQuestionNumbers(new Set());
     if (examCopyTimeoutRef.current !== null) {
       window.clearTimeout(examCopyTimeoutRef.current);
@@ -1004,26 +1006,51 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
 
         {!submitted && total > 0 ? (
           <div className="exam-view-toolbar">
-            <div className="exam-view-switch" role="group" aria-label="Question view">
-              <button
-                type="button"
-                className={viewMode === "all" ? "is-active" : ""}
-                aria-pressed={viewMode === "all"}
-                onClick={() => setViewMode("all")}
-              >
-                All questions
-              </button>
-              <button
-                type="button"
-                className={viewMode === "focus" ? "is-active" : ""}
-                aria-pressed={viewMode === "focus"}
-                onClick={() => setViewMode("focus")}
-              >
-                Focus mode
-              </button>
+            <div className="exam-view-toolbar-row">
+              <div className="exam-view-switch" role="group" aria-label="Question view">
+                <button
+                  type="button"
+                  className={viewMode === "all" ? "is-active" : ""}
+                  aria-pressed={viewMode === "all"}
+                  onClick={() => {
+                    setViewMode("all");
+                    setFocusNavigatorOpen(false);
+                  }}
+                >
+                  All questions
+                </button>
+                <button
+                  type="button"
+                  className={viewMode === "focus" ? "is-active" : ""}
+                  aria-pressed={viewMode === "focus"}
+                  onClick={() => {
+                    setViewMode("focus");
+                    setFocusNavigatorOpen(false);
+                  }}
+                >
+                  Focus mode
+                </button>
+              </div>
+              {viewMode === "focus" ? (
+                <button
+                  type="button"
+                  className="ghost-button exam-navigator-toggle"
+                  aria-expanded={focusNavigatorOpen}
+                  aria-controls="exam-question-navigator"
+                  onClick={() => setFocusNavigatorOpen((open) => !open)}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                    <rect x="4" y="4" width="5" height="5" rx="1" />
+                    <rect x="15" y="4" width="5" height="5" rx="1" />
+                    <rect x="4" y="15" width="5" height="5" rx="1" />
+                    <rect x="15" y="15" width="5" height="5" rx="1" />
+                  </svg>
+                  {focusNavigatorOpen ? "Hide question navigator" : "Show question navigator"}
+                </button>
+              ) : null}
             </div>
-            {viewMode === "focus" ? (
-              <div className="exam-question-navigator" aria-label="Question navigator">
+            {viewMode === "focus" && focusNavigatorOpen ? (
+              <div id="exam-question-navigator" className="exam-question-navigator" aria-label="Question navigator">
                 {questions.map((question, index) => {
                   const answered = Boolean(answers[question.number]);
                   const flagged = flaggedQuestionNumbers.has(question.number);
@@ -1034,7 +1061,10 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                       className={`${index === focusQuestionIndex ? "is-current" : ""}${answered ? " is-answered" : ""}${flagged ? " is-flagged" : ""}`}
                       aria-current={index === focusQuestionIndex ? "true" : undefined}
                       aria-label={`Question ${question.number}${answered ? ", answered" : ", unanswered"}${flagged ? ", flagged" : ""}`}
-                      onClick={() => setFocusQuestionIndex(index)}
+                      onClick={() => {
+                        setFocusQuestionIndex(index);
+                        setFocusNavigatorOpen(false);
+                      }}
                     >
                       {question.number}
                     </button>

@@ -6858,6 +6858,13 @@ body[data-page="exams"] .exam-view-toolbar {
   background: rgba(16, 14, 12, 0.58);
 }
 
+body[data-page="exams"] .exam-view-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 body[data-page="exams"] .exam-content-notice {
   padding: 10px 13px;
   border: 1px solid var(--ex-hair);
@@ -6892,6 +6899,14 @@ body[data-page="exams"] .exam-view-switch button {
 body[data-page="exams"] .exam-view-switch button.is-active {
   background: var(--ex-brass-tint);
   color: var(--ex-heading);
+}
+
+body[data-page="exams"] .exam-navigator-toggle {
+  min-height: 34px;
+  gap: 7px;
+  padding-inline: 11px;
+  font-size: 0.78rem;
+  white-space: nowrap;
 }
 
 body[data-page="exams"] .exam-question-navigator {
@@ -6963,8 +6978,10 @@ body[data-page="exams"] .exam-submit-btn:disabled {
 
 @media (max-width: 720px) {
   body[data-page="exams"] .exam-view-toolbar { padding: 10px; }
+  body[data-page="exams"] .exam-view-toolbar-row { align-items: stretch; flex-direction: column; }
   body[data-page="exams"] .exam-view-switch { width: 100%; }
   body[data-page="exams"] .exam-view-switch button { flex: 1; }
+  body[data-page="exams"] .exam-navigator-toggle { width: 100%; justify-content: center; }
   body[data-page="exams"] .exam-question-navigator { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
   body[data-page="exams"] .exam-question-navigator button { flex: 0 0 32px; width: 32px; height: 32px; }
   body[data-page="exams"] .exam-focus-controls { justify-content: space-between; }
