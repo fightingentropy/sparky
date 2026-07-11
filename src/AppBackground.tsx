@@ -11,7 +11,7 @@ export function AppBackground() {
             <path
               d="M0 0H50V50H0Z"
               fill="none"
-              stroke="rgba(255,255,255,0.05)"
+              stroke="currentColor"
               strokeWidth="1"
             />
           </pattern>
