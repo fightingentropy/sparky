@@ -1,5 +1,21 @@
 export type ExamChoice = "A" | "B" | "C" | "D";
 
+export type ExamSolutionTable = {
+  title: string;
+  columns: string[];
+  rows: string[][];
+  source: {
+    publication: string;
+    edition: string;
+    locator: string;
+    url?: string;
+    licence: string;
+    status: "verified" | "source-citation";
+    verifiedOn?: string;
+  };
+  note?: string;
+};
+
 export type ExamQuestion = {
   number: number;
   prompt: string;
@@ -8,6 +24,7 @@ export type ExamQuestion = {
   optionImageUrls?: Partial<Record<ExamChoice, string>>;
   answer: ExamChoice;
   explanation: string;
+  solutionTables?: ExamSolutionTable[];
   preserveChoices?: boolean;
 };
 

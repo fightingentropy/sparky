@@ -10,7 +10,8 @@ import {
 import {
   type Exam,
   type ExamChoice,
-  type ExamQuestion
+  type ExamQuestion,
+  type ExamSolutionTable
 } from "./exams/types";
 import {
   DEFAULT_EXAM_ID,
@@ -1454,9 +1455,72 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
             {submitted ? "Explanation" : `Answer: ${correct}`}
           </span>
           <p>{question.explanation}</p>
+          {question.solutionTables?.length ? (
+            <div className="exam-solution-tables">
+              {question.solutionTables.map((table, index) => (
+                <SolutionTable
+                  key={`${table.source.publication}-${table.source.locator}-${index}`}
+                  table={table}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
+  );
+}
+
+function SolutionTable({ table }: { table: ExamSolutionTable }) {
+  return (
+    <section className="exam-solution-table" aria-label={table.title}>
+      <header className="exam-solution-table-head">
+        <div>
+          <span className="exam-solution-table-kicker">Reference lookup</span>
+          <strong>{table.title}</strong>
+        </div>
+        <span className={`exam-solution-source-status is-${table.source.status}`}>
+          {table.source.status === "verified" ? "Verified" : "Edition check needed"}
+        </span>
+      </header>
+      <div className="exam-solution-table-scroll">
+        <table>
+          <thead>
+            <tr>
+              {table.columns.map((column) => <th key={column} scope="col">{column}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {table.rows.map((row, rowIndex) => (
+              <tr key={`${row.join("-")}-${rowIndex}`}>
+                {row.map((cell, cellIndex) => (
+                  <td key={`${cell}-${cellIndex}`}>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <dl className="exam-solution-source-meta">
+        <div>
+          <dt>Publication</dt>
+          <dd>{table.source.publication}</dd>
+        </div>
+        <div>
+          <dt>Edition</dt>
+          <dd>{table.source.edition}</dd>
+        </div>
+      </dl>
+      {table.note ? <p className="exam-solution-table-note">{table.note}</p> : null}
+      <footer className="exam-solution-table-source">
+        <span>{table.source.licence}</span>
+        {table.source.url ? (
+          <a href={table.source.url} target="_blank" rel="noreferrer">
+            Check official source
+          </a>
+        ) : null}
+      </footer>
+    </section>
   );
 }
 
