@@ -4106,7 +4106,7 @@ export default function App() {
         <div className="modal-backdrop" onClick={() => setPaletteOpen(false)}>
           <div
             ref={paletteTrapRef}
-            className="modal-shell"
+            className="modal-shell palette-shell"
             role="dialog"
             aria-modal="true"
             aria-label="Command palette"
