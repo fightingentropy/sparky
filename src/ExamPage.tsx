@@ -1068,7 +1068,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               const status = submitted
                 ? state === "wrong" ? "incorrect" : state
                 : answered ? "answered" : "unanswered";
-              const label = `Question ${question.number}, ${status}${flagged ? ", flagged" : ""}`;
+              const label = `Question ${question.number}, ${status}${current ? ", current question" : ""}${flagged ? ", flagged" : ""}`;
 
               return (
                 <button
@@ -1153,7 +1153,8 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               title="Previous question (Left Arrow)"
               onClick={() => setFocusQuestionIndex((current) => Math.max(0, current - 1))}
             >
-              Previous
+              <kbd className="exam-focus-shortcut" aria-hidden="true">←</kbd>
+              <span>Previous</span>
             </button>
             <button
               type="button"
@@ -1163,7 +1164,8 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               title="Next question (Right Arrow)"
               onClick={() => setFocusQuestionIndex((current) => Math.min(questions.length - 1, current + 1))}
             >
-              Next
+              <span>Next</span>
+              <kbd className="exam-focus-shortcut" aria-hidden="true">→</kbd>
             </button>
           </div>
         ) : null}

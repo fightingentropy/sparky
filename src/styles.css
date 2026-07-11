@@ -5870,14 +5870,14 @@ body[data-page="exams"] .exam-progress-segment:focus-visible{
   z-index: 1;
 }
 
-body[data-page="exams"] .exam-progress-segment.is-answered,
-body[data-page="exams"] .exam-progress-segment.is-current{
+body[data-page="exams"] .exam-progress-segment.is-answered{
   background: var(--ex-brass);
 }
 
 body[data-page="exams"] .exam-progress-segment.is-current{
-  box-shadow: 0 0 0 2px var(--ex-bg), 0 0 0 4px var(--ex-brass);
-  z-index: 1;
+  background: var(--ex-heading);
+  box-shadow: 0 0 0 2px var(--ex-bg), 0 0 0 4px var(--ex-heading);
+  z-index: 2;
 }
 
 body[data-page="exams"] .exam-progress-segment.is-correct{
@@ -7150,6 +7150,27 @@ body[data-page="exams"] .exam-focus-controls {
   align-items: center;
   justify-content: center;
   gap: 8px;
+}
+
+body[data-page="exams"] .exam-focus-controls .ghost-button {
+  gap: 8px;
+}
+
+body[data-page="exams"] .exam-focus-shortcut {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.55rem;
+  height: 1.35rem;
+  padding: 0 0.3rem;
+  border: 1px solid var(--ex-hair);
+  border-bottom-color: var(--ex-brass-line);
+  border-radius: 5px;
+  background: var(--ex-surface-2);
+  color: var(--ex-heading);
+  font-family: var(--ex-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 body[data-page="exams"] .exam-submit-btn:disabled {
