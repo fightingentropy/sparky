@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getExamClipboardText, getQuestionClipboardText } from "./examClipboard";
+import {
+  getExamClipboardText,
+  getQuestionClipboardText,
+  SPOKEN_REVISION_PREAMBLE
+} from "./examClipboard";
 import type { ExamQuestion } from "./exams/types";
 
 const question: ExamQuestion = {
@@ -25,7 +29,7 @@ describe("exam clipboard text", () => {
     expect(text).not.toContain("Explanation:");
   });
 
-  it("copies the full exam as questions, answers and explanations only", () => {
+  it("copies the spoken revision instructions before the full exam", () => {
     const text = getExamClipboardText([
       { questions: [question] },
       { questions: [{ ...question, number: 13, prompt: "What colour is neutral?", answer: "B" }] }
@@ -33,6 +37,8 @@ describe("exam clipboard text", () => {
 
     expect(text).toBe(
       [
+        SPOKEN_REVISION_PREAMBLE,
+        "",
         "Q12",
         "Which conductor is the protective conductor?",
         "",
@@ -58,5 +64,8 @@ describe("exam clipboard text", () => {
     );
     expect(text).not.toContain("Format:");
     expect(text).not.toContain("Test:");
+    expect(text).toContain(
+      "Remember throughout the session that I always want both the answer and the reason.\n\nHere are the questions:\n\nQ12"
+    );
   });
 });
