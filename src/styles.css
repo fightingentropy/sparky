@@ -6360,6 +6360,99 @@ body[data-page="exams"] .exam-copy-full-icon{
   flex: 0 0 auto;
 }
 
+body[data-page="exams"] .exam-export-wrap{
+  position: relative;
+  display: inline-flex;
+}
+
+body[data-page="exams"] .exam-export-trigger{
+  gap: 8px;
+  white-space: nowrap;
+}
+
+body[data-page="exams"] .exam-export-trigger--saved:not(:disabled){
+  color: var(--ex-good);
+  border-color: var(--ex-good-line);
+  background: var(--ex-good-tint);
+}
+
+body[data-page="exams"] .exam-export-trigger--failed:not(:disabled){
+  color: var(--ex-bad);
+  border-color: var(--ex-bad-line);
+  background: var(--ex-bad-tint);
+}
+
+body[data-page="exams"] .exam-export-trigger--preparing .exam-export-icon{
+  animation: exam-copy-icon-pop 700ms var(--ease) infinite alternate;
+}
+
+body[data-page="exams"] .exam-export-icon{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+body[data-page="exams"] .exam-export-menu{
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 50;
+  width: min(310px, calc(100vw - 24px));
+  padding: 6px;
+  border: 1px solid var(--ex-hair);
+  border-radius: 12px;
+  background: rgba(29, 25, 20, 0.98);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+body[data-page="exams"] .exam-export-menu button{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ex-text);
+  font-family: var(--ex-ui);
+  text-align: left;
+  cursor: pointer;
+}
+
+body[data-page="exams"] .exam-export-menu button:hover,
+body[data-page="exams"] .exam-export-menu button:focus-visible{
+  outline: none;
+  background: var(--ex-hair-soft);
+}
+
+body[data-page="exams"] .exam-export-menu button > span:first-child{
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+body[data-page="exams"] .exam-export-menu strong{
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+body[data-page="exams"] .exam-export-menu small{
+  color: var(--ex-muted);
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+body[data-page="exams"] .exam-export-extension{
+  color: var(--ex-brass);
+  font-family: var(--ex-mono);
+  font-size: 0.74rem;
+}
+
 /* ── Responsive ────────────────────────────────────────────────────────── */
 
 @media (max-width: 980px){
@@ -6615,6 +6708,24 @@ body[data-page="exams"] .exam-q-topic{
 
   body[data-page="exams"] .exam-copy-full-label{
     display: none;
+  }
+
+  body[data-page="exams"] .exam-export-trigger{
+    width: 34px;
+    min-width: 34px;
+    padding: 0;
+  }
+
+  body[data-page="exams"] .exam-export-label{
+    display: none;
+  }
+
+  body[data-page="exams"] .exam-export-menu{
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(max(env(safe-area-inset-bottom), 6px) + 58px);
+    width: auto;
   }
 
   body[data-page="exams"] .exam-jump-btn{

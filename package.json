@@ -21,6 +21,7 @@
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
+    "pdfmake": "^0.3.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "0.182.0"
@@ -28,6 +29,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260504.1",
     "@eslint/js": "^10.0.1",
+    "@types/pdfmake": "^0.3.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/three": "0.182.0",
