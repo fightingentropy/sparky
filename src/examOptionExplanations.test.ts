@@ -39,65 +39,149 @@ function allQuestions(exams: Exam[] = EXAMS): ExamQuestion[] {
 }
 
 describe("exam option explanations", () => {
-  it("builds compact feedback for every option in all 5,029 question records", () => {
+  it("always explains the correct choice without fabricating feedback for unsupported distractors", () => {
     const questions = allQuestions();
-    let feedbackCount = 0;
 
     expect(questions).toHaveLength(5029);
     for (const question of questions) {
       const feedback = buildOptionExplanations(question);
-      expect(Object.keys(feedback)).toEqual(CHOICES);
-      for (const choice of CHOICES) {
-        expect(feedback[choice].length).toBeGreaterThan(20);
-        expect(feedback[choice].length).toBeLessThanOrEqual(160);
-        expect(typeof feedback[choice]).toBe("string");
-        feedbackCount += 1;
+      expect(feedback[question.answer]?.length).toBeGreaterThan(20);
+
+      for (const value of Object.values(feedback)) {
+        expect(typeof value).toBe("string");
+        expect(value.length).toBeLessThanOrEqual(160);
       }
     }
-
-    expect(feedbackCount).toBe(20_116);
   });
 
-  it("uses useful low/high contrasts for comparable numeric distractors", () => {
+  it("never emits circular mismatch text for a distractor", () => {
+    for (const question of allQuestions()) {
+      const feedback = buildOptionExplanations(question);
+      for (const choice of CHOICES) {
+        if (choice === question.answer || !feedback[choice]) continue;
+        expect(feedback[choice]).not.toMatch(
+          /does not match|keyed answer|not the (?:exception|least-likely) choice/i
+        );
+      }
+    }
+  });
+
+  it("uses distinct academic rationales for the PAT visual-inspection distractors", () => {
+    const question = allQuestions([patTestingExam as unknown as Exam]).find(
+      (entry) => entry.prompt ===
+        "The most important check, when assessing the level of safety of an electrical appliance, is:"
+    );
+
+    expect(question).toBeDefined();
+    const feedback = buildOptionExplanations(question!);
+    expect(feedback.A).toContain("current from live parts to earth or accessible surfaces");
+    expect(feedback.B).toContain("high voltage to prove dielectric strength");
+    expect(feedback.C).toContain("finds hidden insulation faults");
+    expect(new Set([feedback.A, feedback.B, feedback.C]).size).toBe(3);
+  });
+
+  it("attaches curated rationales by option meaning after choices are shuffled", () => {
+    const question: ExamQuestion = {
+      number: 2,
+      prompt: "The most important check, when assessing the level of safety of an electrical appliance, is:",
+      options: {
+        A: "Insulation resistance testing",
+        B: "Visual inspection",
+        C: "Flash testing",
+        D: "Earth leakage current testing"
+      },
+      answer: "B",
+      explanation: "Visual inspection finds common visible defects before instrument testing."
+    };
+
+    const feedback = buildOptionExplanations(question);
+    expect(feedback.A).toContain("finds hidden insulation faults");
+    expect(feedback.C).toContain("high voltage to prove dielectric strength");
+    expect(feedback.D).toContain("current from live parts to earth or accessible surfaces");
+  });
+
+  it("describes both sides of a minimum truthfully", () => {
     const question = allQuestions([buildingRegulationsExam as unknown as Exam]).find(
       (entry) => entry.prompt.includes("minimum number of smoke alarms required")
     );
 
     expect(question).toBeDefined();
     const feedback = buildOptionExplanations(question!);
-    expect(feedback.A).toMatch(/^Too low — the keyed result is 2\./);
-    expect(feedback.B).toMatch(/^Too low — the keyed result is 2\./);
-    expect(feedback.C).toContain("smoke alarms on the escape route");
-    expect(feedback.D).toMatch(/^Too high — the keyed result is 2\./);
+    expect(feedback.A).toMatch(/^This is below the required minimum of 2\./);
+    expect(feedback.B).toMatch(/^This is below the required minimum of 2\./);
+    expect(feedback.C).toContain("smoke alarms on the escape route of each storey");
+    expect(feedback.D).toMatch(
+      /^This is above the required minimum of 2, so it is not the minimum value asked for\./
+    );
+    expect(feedback.D).not.toContain("Too high");
   });
 
-  it("uses a source-safe mismatch plus bank rationale for conceptual choices", () => {
+  it("describes a lower maximum against the requested boundary rather than as too low", () => {
+    const question: ExamQuestion = {
+      number: 1,
+      prompt: "What is the maximum permitted length?",
+      options: { A: "6 m", B: "12 m", C: "18 m", D: "24 m" },
+      answer: "B",
+      explanation: "The stated maximum permitted length is 12 m."
+    };
+
+    const feedback = buildOptionExplanations(question);
+    expect(feedback.A).toMatch(
+      /^This is below the permitted maximum of 12 m, so it is not the maximum value asked for\./
+    );
+    expect(feedback.C).toMatch(/^This exceeds the permitted maximum of 12 m\./);
+    expect(feedback.D).toMatch(/^This exceeds the permitted maximum of 12 m\./);
+    expect(feedback.A).not.toContain("Too low");
+  });
+
+  it("distinguishes production and type testing from an in-service condition check", () => {
+    const question = allQuestions([patTestingExam as unknown as Exam]).find(
+      (entry) => entry.prompt === "The most important check on a portable appliance is:"
+    );
+
+    expect(question).toBeDefined();
+    const feedback = buildOptionExplanations(question!);
+    expect(feedback.A).toContain("present condition");
+    expect(feedback.B).toContain("during manufacture");
+    expect(feedback.C).toContain("representative design or sample");
+  });
+
+  it("omits unsupported conceptual distractors instead of restating the answer", () => {
     const question = allQuestions([initialVerificationExam as unknown as Exam]).find(
       (entry) => entry.prompt === "What is the main purpose of an Initial Verification?"
     );
 
     expect(question).toBeDefined();
     const feedback = buildOptionExplanations(question!);
-    expect(feedback.A).toContain(
-      "This does not match the keyed answer, “To confirm an installation is safe to be put…”."
-    );
-    expect(feedback.A).toContain("Initial Verification checks");
-    expect(feedback.B).toMatch(/^Initial Verification checks/);
+    expect(feedback[question!.answer]).toContain("Initial Verification checks");
+    for (const choice of CHOICES) {
+      if (choice !== question!.answer) expect(feedback[choice]).toBeUndefined();
+    }
   });
 
-  it("does not infer low/high semantics for a negative question", () => {
-    const question: ExamQuestion = {
+  it("does not invent explanations for negative or image-dependent distractors", () => {
+    const negativeQuestion: ExamQuestion = {
       number: 1,
       prompt: "Which value is not the stated result?",
       options: { A: "10 V", B: "20 V", C: "30 V", D: "40 V" },
       answer: "C",
       explanation: "The worked result in the source question is 30 V."
     };
+    const imageQuestion: ExamQuestion = {
+      number: 2,
+      prompt: "Identify the item shown.",
+      imageUrls: ["/exam-images/example.png"],
+      options: { A: "Clamp meter", B: "Loop tester", C: "RCD tester", D: "Proving unit" },
+      answer: "A",
+      explanation: "The pictured instrument is a clamp meter."
+    };
 
-    const feedback = buildOptionExplanations(question);
-    expect(feedback.A).toMatch(/^This is not the exception requested/);
-    expect(feedback.A).not.toMatch(/^Too (?:low|high)/);
-    expect(feedback.D).not.toMatch(/^Too (?:low|high)/);
+    expect(buildOptionExplanations(negativeQuestion)).toEqual({
+      C: "The worked result in the source question is 30 V."
+    });
+    expect(buildOptionExplanations(imageQuestion)).toEqual({
+      A: "The pictured instrument is a clamp meter."
+    });
   });
 
   it("describes single choices as incomplete when all listed choices are required", () => {
@@ -115,9 +199,9 @@ describe("exam option explanations", () => {
     };
 
     const feedback = buildOptionExplanations(question);
-    expect(feedback.A).toMatch(/^This is incomplete on its own/);
-    expect(feedback.B).toMatch(/^This is incomplete on its own/);
-    expect(feedback.C).toMatch(/^This is incomplete on its own/);
+    expect(feedback.A).toMatch(/^Every listed item is required/);
+    expect(feedback.B).toMatch(/^Every listed item is required/);
+    expect(feedback.C).toMatch(/^Every listed item is required/);
   });
 
   it("recognizes none-of-the-options wording without inventing option facts", () => {
@@ -135,24 +219,9 @@ describe("exam option explanations", () => {
     };
 
     const feedback = buildOptionExplanations(question);
-    expect(feedback.A).toMatch(/^The keyed answer excludes every listed choice/);
-    expect(feedback.B).toMatch(/^The keyed answer excludes every listed choice/);
-    expect(feedback.C).toMatch(/^The keyed answer excludes every listed choice/);
-  });
-
-  it("uses the image-safe identification fallback when a question depends on media", () => {
-    const question: ExamQuestion = {
-      number: 1,
-      prompt: "Identify the item shown.",
-      imageUrls: ["/exam-images/example.png"],
-      options: { A: "Clamp meter", B: "Loop tester", C: "RCD tester", D: "Proving unit" },
-      answer: "A",
-      explanation: "The pictured instrument is a clamp meter."
-    };
-
-    const feedback = buildOptionExplanations(question);
-    expect(feedback.B).toMatch(/^This does not match the item shown/);
-    expect(feedback.B).toContain("Clamp meter");
+    expect(feedback.A).toMatch(/^None of the listed conditions applies here/);
+    expect(feedback.B).toMatch(/^None of the listed conditions applies here/);
+    expect(feedback.C).toMatch(/^None of the listed conditions applies here/);
   });
 
   it("builds feedback from post-shuffle Periodic Inspection choices", () => {
@@ -175,8 +244,10 @@ describe("exam option explanations", () => {
     const feedback = buildOptionExplanations(question!);
     const rationaleStart = question!.explanation.slice(0, 35);
     expect(feedback[question!.answer]).toContain(rationaleStart);
-    expect(feedback[raw!.answer]).not.toBe(feedback[question!.answer]);
-    expect(feedback[raw!.answer]).toMatch(/^(?:Too (?:low|high)|This does not match)/);
+    for (const [choice, value] of Object.entries(feedback)) {
+      if (choice === question!.answer) continue;
+      expect(value).not.toMatch(/does not match|keyed answer/i);
+    }
   });
 
   it("is deterministic and leaves the source question untouched", () => {
