@@ -10,6 +10,8 @@ const MAX_SOURCE_BYTES = 12 * 1024 * 1024;
 
 type Props = {
   isActive: boolean;
+  colorTheme: "dark" | "light";
+  onColorThemeChange: (value: "dark" | "light") => void;
   reduceMotion: boolean;
   onReduceMotionChange: (value: boolean) => void;
   comfortableText: boolean;
@@ -57,6 +59,8 @@ function processAvatar(file: File): Promise<string> {
 
 export function SettingsPage({
   isActive,
+  colorTheme,
+  onColorThemeChange,
   reduceMotion,
   onReduceMotionChange,
   comfortableText,
@@ -227,6 +231,22 @@ export function SettingsPage({
 
         <section className="settings-section">
           <h3 className="settings-section-title">Preferences</h3>
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-text">
+              <span className="settings-toggle-label">Light mode</span>
+              <span className="settings-hint">Use an off-white canvas with sky-blue surfaces and accents.</span>
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={colorTheme === "light"}
+              aria-label="Light mode"
+              className={`settings-switch${colorTheme === "light" ? " is-on" : ""}`}
+              onClick={() => onColorThemeChange(colorTheme === "light" ? "dark" : "light")}
+            >
+              <span className="settings-switch-knob" aria-hidden="true" />
+            </button>
+          </div>
           <div className="settings-toggle-row">
             <span className="settings-toggle-text">
               <span className="settings-toggle-label">Reduce motion</span>
