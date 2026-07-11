@@ -24,6 +24,11 @@ import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
 import { writeClipboardText } from "./clipboard";
 import { getExamClipboardText, getQuestionClipboardText } from "./examClipboard";
+import {
+  downloadExamMarkdown,
+  downloadExamPdf,
+  getExamExportFilename
+} from "./examExport";
 import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
 
 type Answers = Record<number, ExamChoice>;
@@ -69,6 +74,7 @@ const EXAM_LOCAL_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
 };
 
 type CopyState = "idle" | "copied" | "failed";
+type ExamExportState = "idle" | "preparing" | "saved" | "failed";
 
 function isExamChoice(value: unknown): value is ExamChoice {
   return typeof value === "string" && (LETTERS as string[]).includes(value);
@@ -171,6 +177,8 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   const examMenuRef = useRef<HTMLDivElement>(null);
   const [testMenuOpen, setTestMenuOpen] = useState(false);
   const testMenuRef = useRef<HTMLDivElement>(null);
+  const [examExportMenuOpen, setExamExportMenuOpen] = useState(false);
+  const examExportMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     clearStaleExamProgress();
@@ -222,6 +230,29 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     };
   }, [testMenuOpen]);
 
+  useEffect(() => {
+    if (!examExportMenuOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!examExportMenuRef.current?.contains(event.target as Node)) {
+        setExamExportMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setExamExportMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [examExportMenuOpen]);
+
   const [selectedExamId, setSelectedExamId] = usePersistedState<string>(
     "exam-selected",
     DEFAULT_EXAM_ID,
@@ -272,10 +303,13 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
   const [examInfoOpen, setExamInfoOpen] = useState(false);
   const [retryQuestionNumbers, setRetryQuestionNumbers] = useState<number[] | null>(null);
   const [examCopyState, setExamCopyState] = useState<CopyState>("idle");
+  const [examExportState, setExamExportState] = useState<ExamExportState>("idle");
+  const [examExportMessage, setExamExportMessage] = useState("Export full exam");
   const [viewMode, setViewMode] = useState<ExamViewMode>("all");
   const [focusQuestionIndex, setFocusQuestionIndex] = useState(0);
   const [flaggedQuestionNumbers, setFlaggedQuestionNumbers] = useState<Set<number>>(() => new Set());
   const examCopyTimeoutRef = useRef<number | null>(null);
+  const examExportTimeoutRef = useRef<number | null>(null);
   // Marks each category complete once every one of its tests has been submitted,
   // so the category list can tick a whole exam off (not just its individual tests).
   const [examCompletion, setExamCompletion] = useState<Record<string, boolean>>({});
@@ -285,6 +319,9 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
       if (examCopyTimeoutRef.current !== null) {
         window.clearTimeout(examCopyTimeoutRef.current);
       }
+      if (examExportTimeoutRef.current !== null) {
+        window.clearTimeout(examExportTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -293,13 +330,20 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     setRetryQuestionNumbers(null);
     setExamInfoOpen(false);
     setTestMenuOpen(false);
+    setExamExportMenuOpen(false);
     setExamCopyState("idle");
+    setExamExportState("idle");
+    setExamExportMessage("Export full exam");
     setViewMode("all");
     setFocusQuestionIndex(0);
     setFlaggedQuestionNumbers(new Set());
     if (examCopyTimeoutRef.current !== null) {
       window.clearTimeout(examCopyTimeoutRef.current);
       examCopyTimeoutRef.current = null;
+    }
+    if (examExportTimeoutRef.current !== null) {
+      window.clearTimeout(examExportTimeoutRef.current);
+      examExportTimeoutRef.current = null;
     }
   }, [selectedExamEntry.id, variantIndex]);
 
@@ -630,6 +674,50 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     }
   }
 
+  function showExportFeedback(state: ExamExportState, message: string, duration = 1800) {
+    if (examExportTimeoutRef.current !== null) {
+      window.clearTimeout(examExportTimeoutRef.current);
+      examExportTimeoutRef.current = null;
+    }
+    setExamExportState(state);
+    setExamExportMessage(message);
+    if (state === "preparing") return;
+    examExportTimeoutRef.current = window.setTimeout(() => {
+      setExamExportState("idle");
+      setExamExportMessage("Export full exam");
+      examExportTimeoutRef.current = null;
+    }, duration);
+  }
+
+  function exportFullExamMarkdown() {
+    if (!exam) return;
+    setExamExportMenuOpen(false);
+    try {
+      downloadExamMarkdown(
+        sectionGroups,
+        getExamExportFilename(selectedExamEntry.id, variantIndex + 1, "md")
+      );
+      showExportFeedback("saved", "Markdown downloaded");
+    } catch {
+      showExportFeedback("failed", "Markdown export failed", 2400);
+    }
+  }
+
+  async function exportFullExamPdf() {
+    if (!exam || examExportState === "preparing") return;
+    setExamExportMenuOpen(false);
+    showExportFeedback("preparing", "Preparing PDF");
+    try {
+      await downloadExamPdf(
+        sectionGroups,
+        getExamExportFilename(selectedExamEntry.id, variantIndex + 1, "pdf")
+      );
+      showExportFeedback("saved", "PDF downloaded");
+    } catch {
+      showExportFeedback("failed", "PDF export failed", 2400);
+    }
+  }
+
   const examCopyLabel =
     examCopyState === "copied"
       ? "Copied full exam"
@@ -666,6 +754,59 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
       </span>
       <span className="exam-copy-full-label" aria-hidden="true">{examCopyButtonText}</span>
     </button>
+  );
+  const examExportButtonText = examExportState === "idle" ? "Export exam" : examExportMessage;
+  const fullExamExportMenu = (
+    <div className="exam-export-wrap" ref={examExportMenuRef}>
+      <button
+        type="button"
+        className={`ghost-button exam-export-trigger exam-export-trigger--${examExportState}`}
+        onClick={() => setExamExportMenuOpen((open) => !open)}
+        disabled={!exam || examExportState === "preparing"}
+        aria-haspopup="menu"
+        aria-expanded={examExportMenuOpen}
+        aria-label={examExportMessage}
+        title={examExportMessage}
+      >
+        <span className="sr-only" aria-live="polite">{examExportMessage}</span>
+        <span className="exam-export-icon" aria-hidden="true">
+          {examExportState === "saved" ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12.5l4.4 4.4L19 7.3" />
+            </svg>
+          ) : examExportState === "failed" ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 7l10 10M17 7L7 17" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3v12" />
+              <path d="m7 10 5 5 5-5" />
+              <path d="M5 21h14" />
+            </svg>
+          )}
+        </span>
+        <span className="exam-export-label" aria-hidden="true">{examExportButtonText}</span>
+      </button>
+      {examExportMenuOpen ? (
+        <div className="exam-export-menu" role="menu" aria-label="Export full exam">
+          <button type="button" role="menuitem" onClick={exportFullExamMarkdown}>
+            <span>
+              <strong>Markdown</strong>
+              <small>Questions, answers and explanations</small>
+            </span>
+            <span className="exam-export-extension">.md</span>
+          </button>
+          <button type="button" role="menuitem" onClick={exportFullExamPdf}>
+            <span>
+              <strong>PDF</strong>
+              <small>Print-ready with page numbers</small>
+            </span>
+            <span className="exam-export-extension">.pdf</span>
+          </button>
+        </div>
+      ) : null}
+    </div>
   );
 
   return (
@@ -1011,6 +1152,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               </div>
               <div className="exam-footer-actions">
                 {fullExamCopyButton}
+                {fullExamExportMenu}
                 {retryQuestionNumbers ? (
                   <button type="button" className="ghost-button" onClick={exitRetryMode}>
                     Exit retry
@@ -1035,6 +1177,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
               </div>
               <div className="exam-footer-actions">
                 {fullExamCopyButton}
+                {fullExamExportMenu}
                 <button
                   type="button"
                   className="ghost-button"
