@@ -5479,6 +5479,19 @@ body[data-page="exams"] .exam-tooltip-format{
   font-size: 0.76rem;
 }
 
+body[data-page="exams"] .exam-tooltip-guidance{
+  margin: 4px 0 0;
+  padding-top: 9px;
+  border-top: 1px solid var(--ex-hair);
+  color: var(--ex-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+body[data-page="exams"] .exam-tooltip-guidance strong{
+  color: var(--ex-text);
+}
+
 body[data-page="exams"] .exam-title-menu{
   position: absolute;
   top: calc(100% + 12px);
@@ -6863,16 +6876,6 @@ body[data-page="exams"] .exam-view-toolbar-row {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-}
-
-body[data-page="exams"] .exam-content-notice {
-  padding: 10px 13px;
-  border: 1px solid var(--ex-hair);
-  border-radius: 11px;
-  background: rgba(16, 14, 12, 0.45);
-  color: var(--ex-muted);
-  font-size: 0.78rem;
-  line-height: 1.45;
 }
 
 body[data-page="exams"] .exam-view-switch {

@@ -900,6 +900,10 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                     <span className="exam-tooltip-subtitle">{exam.subtitle}</span>
                     <p className="exam-tooltip-description">{exam.description}</p>
                     <p className="exam-tooltip-format">{exam.format}</p>
+                    <p className="exam-tooltip-guidance">
+                      <strong>Study aid.</strong> Confirm current awarding-body requirements, BS 7671 editions and
+                      official guidance before relying on technical or regulatory wording.
+                    </p>
                   </div>
                 </>
               ) : null}
@@ -983,10 +987,6 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
             </div>
           </div>
         </header>
-
-        <aside className="exam-content-notice" role="note">
-          Study aid: confirm current awarding-body requirements, BS 7671 editions and official guidance before relying on technical or regulatory wording.
-        </aside>
 
         {total > 0 ? (
           <div
