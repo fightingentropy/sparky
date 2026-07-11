@@ -5876,7 +5876,6 @@ body[data-page="exams"] .exam-progress-segment.is-answered{
 
 body[data-page="exams"] .exam-progress-segment.is-current{
   background: var(--ex-heading);
-  box-shadow: 0 0 0 2px var(--ex-bg), 0 0 0 4px var(--ex-heading);
   z-index: 2;
 }
 
