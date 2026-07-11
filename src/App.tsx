@@ -2247,7 +2247,10 @@ export default function App() {
             <path d="M12.7 12.7 17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           </svg>
           <span className="search-placeholder">Search</span>
-          <span className="search-hint">⌘ K</span>
+          <span className="search-hint">
+            <span className="search-hint-command">⌘</span>
+            <span>K</span>
+          </span>
         </button>
 
         <div className="topbar-actions">
