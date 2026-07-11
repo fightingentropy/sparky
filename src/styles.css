@@ -371,7 +371,7 @@ button.dashboard-action { cursor: pointer; }
   --shadow-card: none;
   --shadow-glow: 0 0 0 1px var(--accent-muted);
   --panel-glass: rgba(20, 17, 13, 0.72);
-  --topbar-bg: rgba(22, 19, 15, 0.72);
+  --topbar-bg: #16130f;
   --overlay-bg: rgba(16, 14, 12, 0.98);
   --mobile-bar-bg: rgba(22, 19, 15, 0.96);
   --grid-line: rgba(255, 255, 255, 0.05);
@@ -410,7 +410,7 @@ html[data-theme="light"] {
   --shadow-card: 0 12px 36px rgba(49, 104, 137, 0.08);
   --shadow-glow: 0 0 0 1px var(--accent-muted);
   --panel-glass: rgba(255, 255, 255, 0.82);
-  --topbar-bg: rgba(246, 249, 252, 0.82);
+  --topbar-bg: #f6f9fc;
   --overlay-bg: rgba(255, 255, 255, 0.98);
   --mobile-bar-bg: rgba(246, 249, 252, 0.96);
   --grid-line: rgba(72, 156, 207, 0.10);
@@ -5199,7 +5199,7 @@ body[data-page="exams"]{
   --ex-overlay: rgba(16, 14, 12, 0.98);
   --ex-panel: rgba(16, 14, 12, 0.55);
   --ex-toolbar: rgba(16, 14, 12, 0.58);
-  --ex-bar: rgba(22, 19, 15, 0.72);
+  --ex-bar: #16130f;
   /* Restrained, warm semantic feedback for the post-submit review (kept muted
      so brass remains the only decorative accent). */
   --ex-good: #8fb083;
@@ -6944,7 +6944,7 @@ html[data-theme="light"] body[data-page="exams"] {
   --ex-overlay: rgba(255, 255, 255, 0.98);
   --ex-panel: rgba(255, 255, 255, 0.78);
   --ex-toolbar: rgba(232, 246, 255, 0.82);
-  --ex-bar: rgba(246, 249, 252, 0.84);
+  --ex-bar: #f6f9fc;
 }
 
 html[data-theme="light"] .topbar {
