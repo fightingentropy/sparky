@@ -6177,6 +6177,45 @@ body[data-page="exams"] .exam-option-text{
   word-break: break-word;
 }
 
+body[data-page="exams"] .exam-option-value{
+  min-width: 0;
+}
+
+body[data-page="exams"] .exam-option-feedback{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 7px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ex-hair);
+  color: var(--ex-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  animation: exam-option-feedback-in 140ms var(--ease) both;
+}
+
+body[data-page="exams"] .exam-option-feedback strong{
+  font-family: var(--ex-mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+body[data-page="exams"] .exam-option-feedback.is-correct strong{
+  color: var(--ex-good);
+}
+
+body[data-page="exams"] .exam-option-feedback.is-incorrect strong{
+  color: var(--ex-bad);
+}
+
+@keyframes exam-option-feedback-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 body[data-page="exams"] .exam-option-image{
   max-height: 120px;
   object-fit: contain;
@@ -7021,6 +7060,11 @@ body[data-page="exams"] .exam-q-topic{
     gap: 12px;
     padding: 13px;
     font-size: 0.94rem;
+  }
+
+  body[data-page="exams"] .exam-option-feedback{
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
   }
 
   body[data-page="exams"] .exam-footer{

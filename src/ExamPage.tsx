@@ -25,6 +25,7 @@ import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
 import { writeClipboardText } from "./clipboard";
 import { getExamClipboardText, getQuestionClipboardText } from "./examClipboard";
+import { buildOptionExplanations } from "./examOptionExplanations";
 import {
   downloadExamMarkdown,
   downloadExamPdf,
@@ -1265,8 +1266,13 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
   const isIncorrect = submitted && selected !== undefined && selected !== correct;
   const isUnanswered = submitted && selected === undefined;
   const [copyState, setCopyState] = useState<CopyState>("idle");
-  const [preview, setPreview] = useState(false);
+  const [previewPinned, setPreviewPinned] = useState(false);
+  const [previewHovered, setPreviewHovered] = useState(false);
+  const [previewFocused, setPreviewFocused] = useState(false);
   const copyTimeoutRef = useRef<number | null>(null);
+  const preview = previewPinned || previewHovered || previewFocused;
+  const answerPanelId = `exam-answer-${question.number}`;
+  const optionExplanations = useMemo(() => buildOptionExplanations(question), [question]);
 
   useEffect(() => {
     return () => {
@@ -1304,6 +1310,27 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
         ? `Copy failed for question ${question.number}`
         : `Copy question ${question.number} with options`;
 
+  function togglePinnedPreview(event: React.MouseEvent<HTMLButtonElement>) {
+    if (previewPinned) {
+      setPreviewPinned(false);
+      setPreviewHovered(false);
+      setPreviewFocused(false);
+      event.currentTarget.blur();
+      return;
+    }
+
+    setPreviewPinned(true);
+  }
+
+  function closePreview(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    setPreviewPinned(false);
+    setPreviewHovered(false);
+    setPreviewFocused(false);
+    event.currentTarget.blur();
+  }
+
   return (
     <div
       id={`exam-q-${question.number}`}
@@ -1323,10 +1350,21 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
             <button
               type="button"
               className={`exam-copy-btn exam-preview-btn${preview ? " is-active" : ""}`}
-              onClick={() => setPreview((open) => !open)}
-              aria-pressed={preview}
-              aria-label={preview ? `Hide the answer for question ${question.number}` : `Reveal the answer for question ${question.number}`}
-              title={preview ? "Hide answer" : "Reveal answer"}
+              onPointerEnter={(event) => {
+                if (event.pointerType !== "touch") setPreviewHovered(true);
+              }}
+              onPointerLeave={() => setPreviewHovered(false)}
+              onFocus={() => setPreviewFocused(true)}
+              onBlur={() => setPreviewFocused(false)}
+              onClick={togglePinnedPreview}
+              onKeyDown={closePreview}
+              aria-controls={answerPanelId}
+              aria-expanded={preview}
+              aria-pressed={previewPinned}
+              aria-label={previewPinned
+                ? `Hide the answer for question ${question.number}`
+                : `Preview the answer for question ${question.number}. Hover or focus to reveal; press to keep it open.`}
+              title={previewPinned ? "Hide answer" : "Hover or focus to preview · click to keep open"}
             >
               <span className="exam-copy-icon" aria-hidden="true">
                 {preview ? (
@@ -1405,6 +1443,7 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
           const reveal = submitted || preview;
           const isAnswer = reveal && letter === correct;
           const isWrongPick = submitted && isSelected && letter !== correct;
+          const optionExplanation = reveal ? optionExplanations[letter] : undefined;
           const classes = [
             "exam-option",
             isSelected ? "is-selected" : "",
@@ -1426,7 +1465,7 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
             >
               <span className="exam-option-letter">{letter}</span>
               <span className="exam-option-text">
-                <span>{question.options[letter]}</span>
+                <span className="exam-option-value">{question.options[letter]}</span>
                 {question.optionImageUrls?.[letter] ? (
                   <img
                     className="exam-option-image"
@@ -1434,6 +1473,12 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
                     alt={`Option ${letter} reference`}
                     loading="lazy"
                   />
+                ) : null}
+                {optionExplanation ? (
+                  <span className={`exam-option-feedback ${letter === correct ? "is-correct" : "is-incorrect"}`}>
+                    <strong>{letter === correct ? "Correct" : "Why not"}</strong>
+                    <span>{optionExplanation}</span>
+                  </span>
                 ) : null}
               </span>
               {isSelected && !submitted && !isAnswer ? (
@@ -1449,24 +1494,28 @@ function QuestionCard({ question, selected, submitted, onSelect, flagged, onTogg
           );
         })}
       </div>
-      {submitted || preview ? (
-        <div className="exam-explanation">
-          <span className="exam-explanation-label">
-            {submitted ? "Explanation" : `Answer: ${correct}`}
-          </span>
-          <p>{question.explanation}</p>
-          {question.solutionTables?.length ? (
-            <div className="exam-solution-tables">
-              {question.solutionTables.map((table, index) => (
-                <SolutionTable
-                  key={`${table.source.publication}-${table.source.locator}-${index}`}
-                  table={table}
-                />
-              ))}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+      <div
+        id={answerPanelId}
+        className="exam-explanation"
+        role="region"
+        aria-label={`Answer and explanation for question ${question.number}`}
+        hidden={!submitted && !preview}
+      >
+        <span className="exam-explanation-label">
+          {submitted ? "Explanation" : `Answer: ${correct}`}
+        </span>
+        <p>{question.explanation}</p>
+        {question.solutionTables?.length ? (
+          <div className="exam-solution-tables">
+            {question.solutionTables.map((table, index) => (
+              <SolutionTable
+                key={`${table.source.publication}-${table.source.locator}-${index}`}
+                table={table}
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
