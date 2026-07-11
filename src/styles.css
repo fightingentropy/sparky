@@ -6412,6 +6412,22 @@ body[data-page="exams"] .exam-solution-table-source a:focus-visible{
     flex-direction: column;
   }
 
+  body[data-page="exams"] .exam-solution-table table{
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  body[data-page="exams"] .exam-solution-table th,
+  body[data-page="exams"] .exam-solution-table td{
+    padding: 9px 10px;
+    overflow-wrap: anywhere;
+  }
+
+  body[data-page="exams"] .exam-solution-table th:first-child,
+  body[data-page="exams"] .exam-solution-table td:first-child{
+    width: 62%;
+  }
+
   body[data-page="exams"] .exam-solution-source-meta{
     grid-template-columns: 1fr;
   }

@@ -68,7 +68,7 @@ function makeFocusedLookup(
 ): ExamSolutionTable {
   return {
     title: "Focused standards lookup",
-    columns: ["Question-bank locator", "Answer-specific result"],
+    columns: ["Table reference", "Result used"],
     rows: [[locator, question.options[question.answer]]],
     source: {
       ...source,
