@@ -1072,42 +1072,6 @@ const applets: Applet[] = [
     subtitle: "Start mark from a reference",
     keywords:
       "containment bend start centreline offset reference mark further in out tangent tray trunking bend"
-  },
-  {
-    id: "tool-trunking-opposite-mark",
-    title: "Trunking opposite mark",
-    subtitle: "Opposite mark for a bend",
-    keywords: "trunking opposite mark bend angle tangent adjacent 100mm set out fabrication"
-  },
-  {
-    id: "tool-power",
-    title: "kW / A / V",
-    subtitle: "Single and three-phase power",
-    keywords: "power current voltage kw amps volts three phase power factor electrical calculation"
-  },
-  {
-    id: "tool-vdrop",
-    title: "Voltage drop",
-    subtitle: "Cable voltage-drop check",
-    keywords: "voltage drop cable length current cable size single three phase volt mv amp metre"
-  },
-  {
-    id: "tool-breaker",
-    title: "Breaker sizing",
-    subtitle: "Protective-device starting point",
-    keywords: "breaker mcb rcbo protective device current power circuit rating cable electrical"
-  },
-  {
-    id: "tool-conduit",
-    title: "Conduit fill",
-    subtitle: "Cable space in conduit",
-    keywords: "conduit fill cable diameter count capacity percentage containment install"
-  },
-  {
-    id: "tool-structure",
-    title: "Structural limits",
-    subtitle: "Chases and joist notches",
-    keywords: "structural limits wall chase joist notch building regulations depth electrical cable"
   }
 ];
 
