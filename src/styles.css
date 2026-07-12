@@ -7060,7 +7060,7 @@ body[data-page="exams"] .exam-q-topic{
 
 @media (max-width: 720px) {
   :root {
-    --mobile-tabbar-bottom-pad: max(env(safe-area-inset-bottom) - 32px, 2px);
+    --mobile-tabbar-bottom-pad: 0px;
     --mobile-tabbar-h: calc(48px + var(--mobile-tabbar-bottom-pad));
   }
 
