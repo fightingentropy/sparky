@@ -62,6 +62,7 @@ import { AuthModal } from "./AuthModal";
 import { SettingsPage } from "./SettingsPage";
 import { AccountAvatar } from "./AccountAvatar";
 import { AppBackground } from "./AppBackground";
+import { getLatestExamResume } from "./examProgressSummary";
 
 type PageId = "home" | "cheatsheet" | "learn" | "exams" | "tutorials" | "interactive" | "settings";
 
@@ -124,6 +125,8 @@ const PAGE_NAV_ITEMS: { id: PageId; label: string }[] = [
   { id: "tutorials", label: "Tutorials" },
   { id: "interactive", label: "Interactive" }
 ];
+
+const PRIMARY_NAV_ITEMS = PAGE_NAV_ITEMS.slice(0, 4);
 
 // The primary pages surfaced in the mobile bottom tab bar. The remaining pages
 // (Tutorials, Interactive, Settings) stay reachable from the avatar menu and the
@@ -1270,6 +1273,10 @@ export default function App() {
   const displayName = user ? (user.nickname?.trim() || user.email) : null;
 
   const [page, setPage] = useState<PageId>(getPageFromLocation());
+  const examResume = useMemo(
+    () => (page === "home" ? getLatestExamResume(localStorage, hiddenExamIds) : null),
+    [hiddenExamIds, page]
+  );
   // Track which lazy-loaded pages we have ever activated. We only mount each
   // lazy page after its first activation so its chunk isn't downloaded for
   // users who never visit it. After the first visit it stays mounted so its
@@ -2220,6 +2227,23 @@ export default function App() {
           <strong>Sparky</strong>
         </a>
 
+        <nav className="desktop-primary-nav" aria-label="Primary">
+          {PRIMARY_NAV_ITEMS.map((item) => (
+            <a
+              key={item.id}
+              href={getPageHref(item.id)}
+              className={`desktop-primary-nav-item${page === item.id ? " is-active" : ""}`}
+              aria-current={page === item.id ? "page" : undefined}
+              onClick={(event) => {
+                event.preventDefault();
+                navigateTo(item.id);
+              }}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
         <button
           type="button"
           className="search-field"
@@ -2291,7 +2315,7 @@ export default function App() {
                       key={item.id}
                       role="menuitem"
                       href={getPageHref(item.id)}
-                      className={`nav-menu-item${page === item.id ? " is-active" : ""}`}
+                      className={`nav-menu-item${PRIMARY_NAV_ITEMS.some((primary) => primary.id === item.id) ? " nav-menu-item--primary" : ""}${page === item.id ? " is-active" : ""}`}
                       aria-current={page === item.id ? "page" : undefined}
                       onClick={(event) => {
                         event.preventDefault();
@@ -2380,15 +2404,22 @@ export default function App() {
               <p>Pick up a calculation, revise a topic, or continue with a mock exam without digging through menus.</p>
             </div>
             <div className="dashboard-actions" aria-label="Quick actions">
-              <button type="button" className="dashboard-action dashboard-action--primary" onClick={() => navigateTo("exams")}>
-                <span>Practice</span>
-                <strong>Open mock exams</strong>
+              <button
+                type="button"
+                className="dashboard-action dashboard-action--primary"
+                onClick={() => examResume ? openPracticeExam(examResume.examId) : navigateTo("exams")}
+              >
+                <span>{examResume ? "Continue practice" : "Practice"}</span>
+                <strong>{examResume ? examResume.title : "Open mock exams"}</strong>
+                {examResume ? (
+                  <small>Test {examResume.testNumber} · {examResume.answeredCount} answered</small>
+                ) : null}
               </button>
-              <button type="button" className="dashboard-action" onClick={() => navigateTo("cheatsheet")}>
+              <button type="button" className="dashboard-action dashboard-action--compact" onClick={() => navigateTo("cheatsheet")}>
                 <span>Revise</span>
                 <strong>Browse notes</strong>
               </button>
-              <button type="button" className="dashboard-action" onClick={() => navigateTo("learn")}>
+              <button type="button" className="dashboard-action dashboard-action--compact" onClick={() => navigateTo("learn")}>
                 <span>Plan</span>
                 <strong>Learning guides</strong>
               </button>
@@ -2428,6 +2459,20 @@ export default function App() {
                 </li>
               ))}
             </ul>
+            <label className="mobile-tool-picker">
+              <span>Choose calculator</span>
+              <select
+                value={filteredApplets[activeToolIndex]?.id ?? ""}
+                onChange={(event) => {
+                  const index = filteredApplets.findIndex((applet) => applet.id === event.target.value);
+                  if (index >= 0) scrollToTool(index);
+                }}
+              >
+                {filteredApplets.map((applet) => (
+                  <option key={applet.id} value={applet.id}>{applet.title}</option>
+                ))}
+              </select>
+            </label>
           </section>
 
           <div className="tool-grid" ref={toolGridRef} style={toolGridStyle}>
@@ -4262,40 +4307,6 @@ export default function App() {
               )}
             </div>
           </div>
-        </div>
-      ) : null}
-
-      {page === "home" && filteredApplets.length > 0 ? (
-        <div className="mobile-indicator">
-          <button
-            type="button"
-            className="mobile-nav-btn"
-            aria-label="Previous tool"
-            disabled={activeToolIndex <= 0}
-            onClick={() => scrollToTool(activeToolIndex - 1)}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <div className="mobile-dots">
-            {filteredApplets.map((_, i) => (
-              <button
-                key={filteredApplets[i].id}
-                type="button"
-                className={`mobile-dot${i === activeToolIndex ? " is-active" : ""}`}
-                aria-label={filteredApplets[i].title}
-                onClick={() => scrollToTool(i)}
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            className="mobile-nav-btn"
-            aria-label="Next tool"
-            disabled={activeToolIndex >= filteredApplets.length - 1}
-            onClick={() => scrollToTool(activeToolIndex + 1)}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
         </div>
       ) : null}
 
