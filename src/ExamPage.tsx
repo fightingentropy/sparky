@@ -1212,7 +1212,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
                     className="ghost-button exam-jump-btn"
                     onClick={scrollToFirstUnanswered}
                   >
-                    Next unanswered ({total - answeredCount})
+                    Next <span className="exam-jump-detail">unanswered </span>({total - answeredCount})
                   </button>
                 )}
               </div>
