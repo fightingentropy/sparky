@@ -7776,6 +7776,15 @@ button:active:not(:disabled),
     height: 10px;
   }
 
+  /* Mobile Safari can resolve `bottom: 0` against its smaller toolbar viewport,
+     leaving the collapsed-toolbar area unused. Anchor the bar's own bottom to
+     the dynamic viewport instead so it follows the actual visible screen edge. */
+  body[data-page="exams"] .exam-footer {
+    top: 100dvh;
+    bottom: auto;
+    transform: translateY(-100%);
+  }
+
   body[data-page="exams"] .exam-question {
     gap: 12px;
     padding: 14px;
