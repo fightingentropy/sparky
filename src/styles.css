@@ -7061,7 +7061,7 @@ body[data-page="exams"] .exam-q-topic{
 @media (max-width: 720px) {
   :root {
     --mobile-tabbar-bottom-pad: 0px;
-    --mobile-tabbar-h: calc(48px + var(--mobile-tabbar-bottom-pad));
+    --mobile-tabbar-h: 40px;
   }
 
   /* The redesign's base `.site-shell { position: relative; width: min(...) }` is
@@ -7086,8 +7086,9 @@ body[data-page="exams"] .exam-q-topic{
     display: flex;
     align-items: stretch;
     gap: 2px;
+    height: var(--mobile-tabbar-h);
     padding:
-      6px
+      2px
       calc(env(safe-area-inset-right) + 8px)
       var(--mobile-tabbar-bottom-pad)
       calc(env(safe-area-inset-left) + 8px);
@@ -7108,22 +7109,22 @@ body[data-page="exams"] .exam-q-topic{
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 1px;
     min-width: 0;
-    padding: 2px;
+    padding: 0;
     border: 0;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--muted);
-    font-size: 0.66rem;
+    font-size: 0.58rem;
     font-weight: 650;
     letter-spacing: 0.01em;
     transition: color 160ms var(--ease);
   }
 
   .mobile-tab-icon {
-    width: 23px;
-    height: 23px;
+    width: 20px;
+    height: 20px;
   }
 
   .mobile-tab-label {
