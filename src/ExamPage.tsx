@@ -16,9 +16,9 @@ import {
 import {
   DEFAULT_EXAM_ID,
   EXAM_REGISTRY,
-  getExamEntry,
   getValidExamIds,
-  isKnownExamId
+  isKnownExamId,
+  type ExamId
 } from "./examRegistry";
 import { usePersistedState } from "./usePersistedState";
 import { useAuth } from "./AuthContext";
@@ -181,9 +181,10 @@ type Props = {
     examId: string;
     nonce: number;
   } | null;
+  hiddenExamIds?: readonly ExamId[];
 };
 
-export function ExamPage({ isActive, practiceTarget }: Props) {
+export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props) {
   const { user } = useAuth();
   const [examMenuOpen, setExamMenuOpen] = useState(false);
   const examMenuRef = useRef<HTMLDivElement>(null);
@@ -271,6 +272,12 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     isKnownExamId
   );
 
+  const visibleExamRegistry = useMemo(() => {
+    const hidden = new Set(hiddenExamIds);
+    const visible = EXAM_REGISTRY.filter((entry) => !hidden.has(entry.id));
+    return visible.length > 0 ? visible : [EXAM_REGISTRY[0]];
+  }, [hiddenExamIds]);
+
   useEffect(() => {
     if (!practiceTarget || !isKnownExamId(practiceTarget.examId)) return;
     setSelectedExamId(practiceTarget.examId);
@@ -278,7 +285,12 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     // is bumped each time), so depending on it re-runs exactly when intended.
   }, [practiceTarget, setSelectedExamId]);
 
-  const selectedExamEntry = getExamEntry(selectedExamId);
+  const selectedExamEntry =
+    visibleExamRegistry.find((entry) => entry.id === selectedExamId) ?? visibleExamRegistry[0];
+
+  useEffect(() => {
+    if (selectedExamId !== selectedExamEntry.id) setSelectedExamId(selectedExamEntry.id);
+  }, [selectedExamEntry.id, selectedExamId, setSelectedExamId]);
   const [loadedExam, setLoadedExam] = useState<Exam | null>(null);
 
   useEffect(() => {
@@ -409,7 +421,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     let cancelled = false;
 
     Promise.all(
-      EXAM_REGISTRY.map(async (entry) => {
+      visibleExamRegistry.map(async (entry) => {
         try {
           const loaded = await entry.load();
           const count = getVariantCount(loaded);
@@ -433,7 +445,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [examMenuOpen, progress]);
+  }, [examMenuOpen, progress, visibleExamRegistry]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSaveRef = useRef<
@@ -868,7 +880,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
             <span className="exam-eyebrow">{"PRACTICE EXAM · EAL — City & Guilds aligned"}</span>
             <h1 className="sr-only">{selectedExamEntry.title} practice exam</h1>
             <div className="exam-title-wrap" ref={examMenuRef}>
-              {EXAM_REGISTRY.length > 1 ? (
+              {visibleExamRegistry.length > 1 ? (
                 <div className="exam-title-menu-wrap">
                   <button
                     type="button"
@@ -901,7 +913,7 @@ export function ExamPage({ isActive, practiceTarget }: Props) {
                       role="listbox"
                       aria-label="Mock exam"
                     >
-                      {EXAM_REGISTRY.map((entry) => {
+                      {visibleExamRegistry.map((entry) => {
                         const complete = examCompletion[entry.id] ?? false;
                         return (
                           <button

@@ -83,8 +83,23 @@ export const DEFAULT_EXAM_ID = EXAM_REGISTRY[0].id;
 
 export type ExamId = (typeof EXAM_REGISTRY)[number]["id"];
 
+export const DEFAULT_HIDDEN_EXAM_IDS = [
+  "ecs-health-safety",
+  "level-2-electrical-installation",
+  "level-3-electrical-installation",
+  "am2-installation-assessment"
+] as const satisfies readonly ExamId[];
+
 export function isKnownExamId(value: unknown): value is ExamId {
   return typeof value === "string" && EXAM_REGISTRY.some((exam) => exam.id === value);
+}
+
+export function isExamIdArray(value: unknown): value is ExamId[] {
+  return (
+    Array.isArray(value) &&
+    new Set(value).size === value.length &&
+    value.every(isKnownExamId)
+  );
 }
 
 export function getExamEntry(id: string): ExamRegistryEntry {

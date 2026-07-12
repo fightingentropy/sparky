@@ -5126,6 +5126,11 @@ select:focus,
   box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
 }
 
+.settings-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .settings-account-email {
   min-width: 0;
   overflow: hidden;
