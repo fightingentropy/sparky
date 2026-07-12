@@ -7639,6 +7639,174 @@ button:active:not(:disabled),
   }
 }
 
+/* ── Compact mobile exam workspace ────────────────────────────────────────
+   In standalone iOS mode the exam-specific topbar rules used to zero out the
+   safe-area padding, putting the brand underneath the status bar. The search
+   also occupied a second row, while the 2×2 stat grid consumed nearly as much
+   height as the first question. Keep the controls, but make the phone layout a
+   single safe-area-aware toolbar and a compact four-column summary. */
+@media (max-width: 720px) {
+  body[data-page="exams"] .topbar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    gap: 8px;
+    min-height: 0;
+    padding:
+      calc(env(safe-area-inset-top) + 6px)
+      calc(env(safe-area-inset-right) + 10px)
+      6px
+      calc(env(safe-area-inset-left) + 10px);
+  }
+
+  body[data-page="exams"] .topbar > .brand {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  body[data-page="exams"] .topbar > .search-field {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    min-height: 38px;
+  }
+
+  body[data-page="exams"] .topbar > .topbar-actions {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  body[data-page="exams"] .brand-mark {
+    width: 28px;
+    height: 28px;
+  }
+
+  body[data-page="exams"] .page-exams.is-active {
+    padding-top: 6px;
+  }
+
+  body[data-page="exams"] .page-exams .exam-shell {
+    gap: 12px;
+  }
+
+  body[data-page="exams"] .exam-hero {
+    gap: 10px;
+    padding-top: 2px;
+  }
+
+  body[data-page="exams"] .exam-hero-text {
+    gap: 7px;
+  }
+
+  body[data-page="exams"] .exam-eyebrow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body[data-page="exams"] .exam-hero-text h2,
+  body[data-page="exams"] .exam-title-text {
+    font-size: 1.65rem;
+  }
+
+  body[data-page="exams"] .exam-title-chevron {
+    width: 19px;
+    height: 19px;
+  }
+
+  body[data-page="exams"] .exam-hero-summary {
+    gap: 8px;
+  }
+
+  body[data-page="exams"] .exam-hero-stats {
+    grid-auto-flow: column;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-columns: minmax(0, 1fr);
+    border-radius: 12px;
+  }
+
+  body[data-page="exams"] .exam-stat,
+  body[data-page="exams"] .exam-stat:nth-child(-n + 2),
+  body[data-page="exams"] .exam-stat:nth-child(odd) {
+    gap: 5px;
+    min-height: 58px;
+    padding: 9px 8px;
+    border-top: 0;
+    border-left: 1px solid var(--ex-hair);
+  }
+
+  body[data-page="exams"] .exam-stat:first-child {
+    border-left: 0;
+  }
+
+  body[data-page="exams"] .exam-stat span {
+    overflow: hidden;
+    font-size: 0.54rem;
+    letter-spacing: 0.07em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body[data-page="exams"] .exam-stat strong {
+    font-size: 1.2rem;
+  }
+
+  body[data-page="exams"] .exam-stat-sub {
+    font-size: 0.68rem;
+  }
+
+  body[data-page="exams"] .exam-test-select {
+    min-height: 24px;
+    margin: -2px 0 -3px;
+    padding-inline: 0;
+    font-size: 1rem;
+  }
+
+  body[data-page="exams"] .exam-view-switch {
+    padding: 2px;
+  }
+
+  body[data-page="exams"] .exam-view-switch button {
+    min-height: 30px;
+    padding-inline: 10px;
+    font-size: 0.78rem;
+  }
+
+  body[data-page="exams"] .exam-progress {
+    height: 10px;
+  }
+
+  body[data-page="exams"] .exam-question {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  body[data-page="exams"] .exam-q-prompt {
+    font-size: 1.06rem;
+    line-height: 1.4;
+  }
+
+  body[data-page="exams"] .exam-options {
+    gap: 10px;
+  }
+
+  body[data-page="exams"] .exam-option {
+    gap: 10px;
+    padding: 12px;
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 340px) {
+  body[data-page="exams"] .brand strong {
+    display: none;
+  }
+
+  body[data-page="exams"] .exam-jump-detail {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-transparency: reduce) {
   .dashboard-hero,
   .tool-library,
