@@ -3779,7 +3779,7 @@ body[data-page="interactive"] .ix-3d-wrap {
      the end of the scroll. */
   body[data-page="interactive"] .page-interactive.is-active::after {
     content: "";
-    flex: 0 0 calc(var(--mobile-tabbar-h) + env(safe-area-inset-bottom) + 16px);
+    flex: 0 0 calc(var(--mobile-tabbar-h) + 16px);
   }
 
   /* Stop the save / load controls being crushed onto one line (they were
@@ -7060,7 +7060,8 @@ body[data-page="exams"] .exam-q-topic{
 
 @media (max-width: 720px) {
   :root {
-    --mobile-tabbar-h: 54px;
+    --mobile-tabbar-bottom-pad: max(env(safe-area-inset-bottom) - 26px, 6px);
+    --mobile-tabbar-h: calc(48px + var(--mobile-tabbar-bottom-pad));
   }
 
   /* The redesign's base `.site-shell { position: relative; width: min(...) }` is
@@ -7078,7 +7079,8 @@ body[data-page="exams"] .exam-q-topic{
   .mobile-tabbar {
     position: fixed;
     right: 0;
-    bottom: 0;
+    top: 100dvh;
+    bottom: auto;
     left: 0;
     z-index: 40;
     display: flex;
@@ -7087,8 +7089,9 @@ body[data-page="exams"] .exam-q-topic{
     padding:
       6px
       calc(env(safe-area-inset-right) + 8px)
-      max(env(safe-area-inset-bottom), 6px)
+      var(--mobile-tabbar-bottom-pad)
       calc(env(safe-area-inset-left) + 8px);
+    transform: translateY(-100%);
     background: var(--mobile-bar-bg);
     backdrop-filter: blur(16px) saturate(1.3);
     -webkit-backdrop-filter: blur(16px) saturate(1.3);
@@ -7139,11 +7142,11 @@ body[data-page="exams"] .exam-q-topic{
      it. Only padding-bottom is set, so each page keeps its own side padding.
      Exams is excluded — its tab bar is hidden and it owns the bottom edge. */
   .page-home.is-active .tool-panel {
-    padding-bottom: calc(var(--mobile-tabbar-h) + env(safe-area-inset-bottom) + 18px);
+    padding-bottom: calc(var(--mobile-tabbar-h) + 18px);
   }
 
   body:not([data-page="exams"]) .page.is-active:not(.page-home) {
-    padding-bottom: calc(var(--mobile-tabbar-h) + env(safe-area-inset-bottom) + 14px);
+    padding-bottom: calc(var(--mobile-tabbar-h) + 14px);
   }
 }
 
@@ -7495,7 +7498,7 @@ button:active:not(:disabled),
 @media (max-width: 720px) {
   body[data-page="home"] .page-home.is-active {
     gap: 10px;
-    padding-bottom: calc(var(--mobile-tabbar-h) + env(safe-area-inset-bottom) + 12px);
+    padding-bottom: calc(var(--mobile-tabbar-h) + 12px);
   }
 
   .dashboard-hero {
@@ -7576,7 +7579,7 @@ button:active:not(:disabled),
 
   body[data-page="home"] .page-home.is-active .tool-panel {
     max-height: 66dvh;
-    padding-bottom: calc(var(--mobile-tabbar-h) + env(safe-area-inset-bottom) + 18px);
+    padding-bottom: calc(var(--mobile-tabbar-h) + 18px);
   }
 
   .page-learning.is-active {
