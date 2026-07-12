@@ -7,6 +7,7 @@ import {
 } from "./courseGuides";
 import type { ExamId } from "./examRegistry";
 import { usePersistedState } from "./usePersistedState";
+import { scrollIntoViewSafely } from "./scroll";
 
 type Props = {
   isActive: boolean;
@@ -29,6 +30,7 @@ function isStringArray(value: unknown): value is string[] {
 
 export function LearningPage({ isActive, onOpenExam, onOpenNote }: Props) {
   const [activeFilter, setActiveFilter] = useState<GuideFilter>("all");
+  const [routeExpanded, setRouteExpanded] = useState(false);
   const [expandedGuideIds, setExpandedGuideIds] = useState<Set<string>>(() => new Set());
   const [completedGuideIds, setCompletedGuideIds] = usePersistedState<string[]>(
     "learning-completed-guides",
@@ -40,6 +42,18 @@ export function LearningPage({ isActive, onOpenExam, onOpenNote }: Props) {
     () => COURSE_GUIDES.filter((guide) => activeFilter === "all" || guide.category === activeFilter),
     [activeFilter]
   );
+  const nextGuide = useMemo(
+    () => COURSE_GUIDES.find((guide) => !completedGuideIds.includes(guide.id)) ?? COURSE_GUIDES[0],
+    [completedGuideIds]
+  );
+
+  function continueGuide() {
+    setActiveFilter("all");
+    setExpandedGuideIds((current) => new Set(current).add(nextGuide.id));
+    window.setTimeout(() => {
+      scrollIntoViewSafely(document.getElementById(nextGuide.id), { block: "start" });
+    }, 0);
+  }
 
   function toggleGuide(id: string) {
     setExpandedGuideIds((current) => {
@@ -69,16 +83,40 @@ export function LearningPage({ isActive, onOpenExam, onOpenNote }: Props) {
         <span className="learning-count">{COURSE_GUIDES.length} guides</span>
       </header>
 
-      <ol className="learning-route-strip" aria-label="Qualification route">
-        {["Level 2", "Level 3", "NVQ evidence", "AM2", "ECS card"].map((step) => (
-          <li key={step}>{step}</li>
-        ))}
-      </ol>
+      <button type="button" className="learning-continue-card" onClick={continueGuide}>
+        <span>
+          <small>{completedGuideIds.length > 0 ? "Continue learning" : "Start your route"}</small>
+          <strong>{nextGuide.title}</strong>
+        </span>
+        <span aria-hidden="true">Continue →</span>
+      </button>
 
-      <aside className="content-notice" role="note">
-        <strong>Plan with current sources.</strong>
-        <span>Qualification routes, requirements and regulations can change; confirm course, card and standards requirements with the awarding body and official guidance.</span>
-      </aside>
+      <section className={`learning-route-panel${routeExpanded ? " is-expanded" : ""}`}>
+        <button
+          type="button"
+          className="learning-route-toggle"
+          aria-expanded={routeExpanded}
+          onClick={() => setRouteExpanded((expanded) => !expanded)}
+        >
+          <span>
+            <strong>Your qualification route</strong>
+            <small>Level 2 through ECS card</small>
+          </span>
+          <span aria-hidden="true">{routeExpanded ? "−" : "+"}</span>
+        </button>
+        <div className="learning-route-content">
+          <ol className="learning-route-strip" aria-label="Qualification route">
+            {["Level 2", "Level 3", "NVQ evidence", "AM2", "ECS card"].map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+
+          <aside className="content-notice" role="note">
+            <strong>Plan with current sources.</strong>
+            <span>Qualification routes, requirements and regulations can change; confirm course, card and standards requirements with the awarding body and official guidance.</span>
+          </aside>
+        </div>
+      </section>
 
       <div className="learning-filters" role="group" aria-label="Guide categories">
         {GUIDE_FILTERS.map((filter) => (

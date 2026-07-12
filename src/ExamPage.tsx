@@ -32,6 +32,10 @@ import {
   getExamExportFilename
 } from "./examExport";
 import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
+import {
+  EXAM_PROGRESS_STORAGE_PREFIX,
+  EXAM_UPDATED_STORAGE_PREFIX
+} from "./examProgressSummary";
 
 type Answers = Record<number, ExamChoice>;
 type ReviewFilter = "all" | "missed" | "wrong" | "unanswered" | "correct";
@@ -45,12 +49,6 @@ const REVIEW_FILTER_LABELS: Record<ReviewFilter, string> = {
   unanswered: "Unanswered",
   correct: "Correct"
 };
-// Bumped when exam content or the stored progress shape changes so stale
-// in-progress state is dropped. Per-test memory landed in this version.
-const EXAM_STORAGE_VERSION = "2026-06-per-test";
-const EXAM_PROGRESS_STORAGE_PREFIX = `exam-progress-${EXAM_STORAGE_VERSION}-`;
-const EXAM_UPDATED_STORAGE_PREFIX = `exam-updated-${EXAM_STORAGE_VERSION}-`;
-
 // Each test (variant) of an exam keeps its own answers + completed state, so
 // finishing one test is remembered independently of the others.
 type VariantSlot = { answers: Answers; submitted: boolean };
