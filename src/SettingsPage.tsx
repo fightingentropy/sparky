@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useAuth } from "./AuthContext";
 import { AccountAvatar } from "./AccountAvatar";
 import { ApiError } from "./api";
+import { EXAM_REGISTRY, type ExamId } from "./examRegistry";
 
 const NICKNAME_MAX = 40;
 const AVATAR_PX = 256;
@@ -16,6 +17,8 @@ type Props = {
   onReduceMotionChange: (value: boolean) => void;
   comfortableText: boolean;
   onComfortableTextChange: (value: boolean) => void;
+  hiddenExamIds: readonly ExamId[];
+  onExamVisibilityChange: (examId: ExamId, visible: boolean) => void;
   onRequestAuth: () => void;
 };
 
@@ -65,6 +68,8 @@ export function SettingsPage({
   onReduceMotionChange,
   comfortableText,
   onComfortableTextChange,
+  hiddenExamIds,
+  onExamVisibilityChange,
   onRequestAuth
 }: Props) {
   const { user, updateProfile, logout } = useAuth();
@@ -101,6 +106,8 @@ export function SettingsPage({
   const previewAvatar = avatarDraft === undefined ? user?.avatar ?? null : avatarDraft;
   const trimmedNickname = nickname.trim();
   const dirty = avatarDraft !== undefined || trimmedNickname !== (user?.nickname ?? "");
+  const hiddenExamIdSet = new Set(hiddenExamIds);
+  const visibleExamCount = EXAM_REGISTRY.length - hiddenExamIdSet.size;
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -227,6 +234,34 @@ export function SettingsPage({
               </button>
             </div>
           )}
+        </section>
+
+        <section className="settings-section">
+          <h3 className="settings-section-title">Exam library</h3>
+          <p className="settings-hint">Choose which qualifications appear in the practice-exam selector.</p>
+          {EXAM_REGISTRY.map((exam) => {
+            const visible = !hiddenExamIdSet.has(exam.id);
+            const lastVisibleExam = visible && visibleExamCount <= 1;
+            return (
+              <div className="settings-toggle-row" key={exam.id}>
+                <span className="settings-toggle-text">
+                  <span className="settings-toggle-label">{exam.title}</span>
+                  <span className="settings-hint">{visible ? "Shown in Exams" : "Hidden from Exams"}</span>
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={visible}
+                  aria-label={`Show ${exam.title}`}
+                  className={`settings-switch${visible ? " is-on" : ""}`}
+                  disabled={lastVisibleExam}
+                  onClick={() => onExamVisibilityChange(exam.id, !visible)}
+                >
+                  <span className="settings-switch-knob" aria-hidden="true" />
+                </button>
+              </div>
+            );
+          })}
         </section>
 
         <section className="settings-section">

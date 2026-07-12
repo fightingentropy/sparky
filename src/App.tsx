@@ -37,7 +37,12 @@ import {
   CONTAINMENT_ROD_STORAGE_KEYS,
   clearLegacyContainmentRodStorage
 } from "./calculatorStorage";
-import type { ExamId } from "./examRegistry";
+import {
+  DEFAULT_HIDDEN_EXAM_IDS,
+  EXAM_REGISTRY,
+  isExamIdArray,
+  type ExamId
+} from "./examRegistry";
 // Lazy-load heavy pages so the home/cheat-sheet bundle stays small. The
 // chunks are fetched the first time the user navigates to each page and the
 // component stays mounted thereafter (so per-page state is preserved across
@@ -1235,6 +1240,11 @@ export default function App() {
   const [reduceMotion, setReduceMotion] = usePersistedState<boolean>("pref-reduce-motion", false, isBoolean);
   const [comfortableText, setComfortableText] = usePersistedState<boolean>("pref-comfortable-text", false, isBoolean);
   const [colorTheme, setColorTheme] = usePersistedState<ColorTheme>("pref-color-theme", "dark", isColorTheme);
+  const [hiddenExamIds, setHiddenExamIds] = usePersistedState<ExamId[]>(
+    "pref-hidden-exam-ids-v1",
+    [...DEFAULT_HIDDEN_EXAM_IDS],
+    isExamIdArray
+  );
   const [navMenuOpen, setNavMenuOpen] = useState(false);
   const navMenuRef = useRef<HTMLDivElement | null>(null);
   const navMenuButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -1440,6 +1450,18 @@ export default function App() {
       navigateTo("exams");
     },
     [navigateTo]
+  );
+
+  const setExamVisibility = useCallback(
+    (examId: ExamId, visible: boolean) => {
+      setHiddenExamIds((current) => {
+        const hidden = current.includes(examId);
+        if (visible) return hidden ? current.filter((id) => id !== examId) : current;
+        if (hidden || EXAM_REGISTRY.length - current.length <= 1) return current;
+        return [...current, examId];
+      });
+    },
+    [setHiddenExamIds]
   );
 
   const handleOpenNote = useCallback(
@@ -4052,7 +4074,13 @@ export default function App() {
               onOpenNote={handleOpenNote}
             />
           ) : null}
-          {visitedPages.has("exams") ? <ExamPage isActive={page === "exams"} practiceTarget={examPracticeTarget} /> : null}
+          {visitedPages.has("exams") ? (
+            <ExamPage
+              isActive={page === "exams"}
+              practiceTarget={examPracticeTarget}
+              hiddenExamIds={hiddenExamIds}
+            />
+          ) : null}
           {visitedPages.has("tutorials") ? <TutorialsPage isActive={page === "tutorials"} /> : null}
           {visitedPages.has("interactive") ? <InteractivePage isActive={page === "interactive"} /> : null}
         </Suspense>
@@ -4065,6 +4093,8 @@ export default function App() {
           onReduceMotionChange={setReduceMotion}
           comfortableText={comfortableText}
           onComfortableTextChange={setComfortableText}
+          hiddenExamIds={hiddenExamIds}
+          onExamVisibilityChange={setExamVisibility}
           onRequestAuth={() => setAuthOpen(true)}
         />
       </main>
