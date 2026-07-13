@@ -1301,6 +1301,7 @@ function QuestionCard({
   const copyTimeoutRef = useRef<number | null>(null);
   const previewButtonRef = useRef<HTMLButtonElement>(null);
   const preview = previewPinned || previewHovered || previewFocused;
+  const reveal = submitted || preview;
   const answerPanelId = `exam-answer-${question.number}`;
   const optionExplanations = useMemo(() => buildOptionExplanations(question), [question]);
 
@@ -1502,85 +1503,88 @@ function QuestionCard({
           ))}
         </div>
       ) : null}
-      <div className="exam-options" role="radiogroup" aria-label={`Question ${question.number}`}>
+      <div
+        id={answerPanelId}
+        className="exam-options"
+        role="radiogroup"
+        aria-label={`Question ${question.number}${reveal ? " with answer explanations" : ""}`}
+      >
         {LETTERS.map((letter) => {
           const isSelected = selected === letter;
-          const reveal = submitted || preview;
           const isAnswer = reveal && letter === correct;
           const isWrongPick = submitted && isSelected && letter !== correct;
           const optionExplanation = reveal ? optionExplanations[letter] : undefined;
+          const optionFeedbackId = `exam-option-feedback-${question.number}-${letter}`;
           const classes = [
             "exam-option",
             isSelected ? "is-selected" : "",
             isAnswer ? "is-answer" : "",
-            isWrongPick ? "is-wrong" : ""
+            isWrongPick ? "is-wrong" : "",
+            submitted ? "is-disabled" : ""
           ]
             .filter(Boolean)
             .join(" ");
 
           return (
-            <button
-              key={letter}
-              type="button"
-              className={classes}
-              role="radio"
-              aria-checked={isSelected}
-              disabled={submitted}
-              onClick={() => onSelect(letter)}
-            >
-              <span className="exam-option-letter">{letter}</span>
-              <span className="exam-option-text">
-                <span className="exam-option-value">{question.options[letter]}</span>
-                {question.optionImageUrls?.[letter] ? (
-                  <img
-                    className="exam-option-image"
-                    src={question.optionImageUrls[letter]}
-                    alt={`Option ${letter} reference`}
-                    loading="lazy"
-                  />
+            <div key={letter} className={classes}>
+              <button
+                type="button"
+                className="exam-option-control"
+                role="radio"
+                aria-checked={isSelected}
+                aria-describedby={optionExplanation ? optionFeedbackId : undefined}
+                disabled={submitted}
+                onClick={() => onSelect(letter)}
+              >
+                <span className="exam-option-letter">{letter}</span>
+                <span className="exam-option-text">
+                  <span className="exam-option-value">{question.options[letter]}</span>
+                  {question.optionImageUrls?.[letter] ? (
+                    <img
+                      className="exam-option-image"
+                      src={question.optionImageUrls[letter]}
+                      alt={`Option ${letter} reference`}
+                      loading="lazy"
+                    />
+                  ) : null}
+                </span>
+                {isSelected && !submitted && !isAnswer ? (
+                  <span className="exam-option-check" aria-hidden="true">✓</span>
                 ) : null}
-                {optionExplanation ? (
-                  <span className={`exam-option-feedback ${letter === correct ? "is-correct" : "is-incorrect"}`}>
-                    <strong>{letter === correct ? "Correct" : "Why not here"}</strong>
-                    <span>{optionExplanation}</span>
-                  </span>
+                {isAnswer ? (
+                  <span className="exam-option-mark" aria-hidden="true">✓</span>
                 ) : null}
-              </span>
-              {isSelected && !submitted && !isAnswer ? (
-                <span className="exam-option-check" aria-hidden="true">✓</span>
+                {submitted && isWrongPick ? (
+                  <span className="exam-option-mark exam-option-mark--bad" aria-hidden="true">✕</span>
+                ) : null}
+              </button>
+              {optionExplanation ? (
+                <div
+                  id={optionFeedbackId}
+                  className={`exam-option-feedback ${letter === correct ? "is-correct" : "is-incorrect"}`}
+                >
+                  <strong>{letter === correct ? "Correct answer" : "Why this is wrong"}</strong>
+                  <span>{optionExplanation}</span>
+                </div>
               ) : null}
-              {isAnswer ? (
-                <span className="exam-option-mark" aria-hidden="true">✓</span>
-              ) : null}
-              {submitted && isWrongPick ? (
-                <span className="exam-option-mark exam-option-mark--bad" aria-hidden="true">✕</span>
-              ) : null}
-            </button>
+            </div>
           );
         })}
       </div>
-      <div
-        id={answerPanelId}
-        className="exam-explanation"
-        role="region"
-        aria-label={`Answer and explanation for question ${question.number}`}
-        hidden={!submitted && !preview}
-      >
-        <span className="exam-explanation-label">
-          {submitted ? "Explanation" : `Answer: ${correct}`}
-        </span>
-        <p>{question.explanation}</p>
-        {question.solutionTables?.length ? (
-          <div className="exam-solution-tables">
-            {question.solutionTables.map((table, index) => (
-              <SolutionTable
-                key={`${table.source.publication}-${table.source.locator}-${index}`}
-                table={table}
-              />
-            ))}
-          </div>
-        ) : null}
-      </div>
+      {reveal && question.solutionTables?.length ? (
+        <div
+          className="exam-solution-tables"
+          role="region"
+          aria-label={`Reference material for question ${question.number}`}
+        >
+          {question.solutionTables.map((table, index) => (
+            <SolutionTable
+              key={`${table.source.publication}-${table.source.locator}-${index}`}
+              table={table}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

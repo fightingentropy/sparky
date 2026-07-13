@@ -5979,29 +5979,44 @@ body[data-page="exams"] .exam-options{
 
 body[data-page="exams"] .exam-option{
   display: grid;
+  width: 100%;
+  border: 1px solid var(--ex-hair);
+  border-radius: 13px;
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  overflow: hidden;
+  transition: border-color 180ms var(--ease), background 180ms var(--ease);
+}
+
+body[data-page="exams"] .exam-option-control{
+  display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: start;
   gap: 14px;
   width: 100%;
   padding: 15px;
-  border: 1px solid var(--ex-hair);
-  border-radius: 13px;
-  background: var(--ex-surface);
-  color: var(--ex-text);
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
   text-align: left;
   font-family: var(--ex-ui);
   font-size: 1.02rem;
   line-height: 1.5;
   cursor: pointer;
-  transition: border-color 180ms var(--ease), background 180ms var(--ease);
 }
 
-body[data-page="exams"] .exam-option:hover:not(:disabled){
+body[data-page="exams"] .exam-option:hover:not(.is-disabled){
   border-color: rgba(255, 255, 255, 0.16);
 }
 
-body[data-page="exams"] .exam-option:disabled{
+body[data-page="exams"] .exam-option-control:disabled{
   cursor: default;
+}
+
+body[data-page="exams"] .exam-option-control:focus-visible{
+  outline: 2px solid var(--ex-brass);
+  outline-offset: -2px;
 }
 
 /* Selected (answering) — brass border + faint brass tint + filled badge.
@@ -6072,13 +6087,14 @@ body[data-page="exams"] .exam-option-value{
 body[data-page="exams"] .exam-option-feedback{
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: baseline;
-  gap: 7px;
-  padding-top: 8px;
+  align-items: start;
+  gap: 9px;
+  margin: 0 15px 15px 57px;
+  padding-top: 10px;
   border-top: 1px solid var(--ex-hair);
   color: var(--ex-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
+  font-size: 0.9rem;
+  line-height: 1.55;
   animation: exam-option-feedback-in 140ms var(--ease) both;
 }
 
@@ -6173,7 +6189,6 @@ body[data-page="exams"] .exam-explanation p{
 body[data-page="exams"] .exam-solution-tables{
   display: grid;
   gap: 12px;
-  margin-top: 14px;
 }
 
 body[data-page="exams"] .exam-solution-table{
@@ -7804,9 +7819,17 @@ button:active:not(:disabled),
   }
 
   body[data-page="exams"] .exam-option {
+    font-size: 0.92rem;
+  }
+
+  body[data-page="exams"] .exam-option-control {
     gap: 10px;
     padding: 12px;
     font-size: 0.92rem;
+  }
+
+  body[data-page="exams"] .exam-option-feedback {
+    margin: 0 12px 12px 50px;
   }
 }
 
