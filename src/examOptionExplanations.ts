@@ -1,12 +1,11 @@
 import type { ExamChoice, ExamQuestion } from "./exams/types";
+import { initialVerificationTest5Q01To20 } from "./examRationales/initialVerificationTest5Q01To20";
+import { initialVerificationTest5Q21To40 } from "./examRationales/initialVerificationTest5Q21To40";
+import { initialVerificationTest5Q41To60 } from "./examRationales/initialVerificationTest5Q41To60";
 
 export type ExamOptionExplanations = Record<ExamChoice, string>;
 
 const CHOICES: readonly ExamChoice[] = ["A", "B", "C", "D"];
-const NEGATIVE_QUESTION_PATTERN =
-  /\b(?:not|except|incorrect|false|least\s+likely|mustn['’]t|shouldn['’]t|wouldn['’]t|doesn['’]t|isn['’]t|aren['’]t)\b/i;
-const THRESHOLD_PHRASE_PATTERN =
-  /\b(?:not\s+less\s+than|not\s+(?:more|greater)\s+than|not\s+exceed(?:s|ed|ing)?|at\s+least|at\s+most)\b/gi;
 const ALL_CHOICES_PATTERN =
   /\b(?:all(?:\s+of)?\s+(?:the\s+)?(?:(?:answers|options|statements|choices|measures)\s+)?(?:above|these|listed|shown)|all\s+(?:three|four)|all\s+of\s+them)\b/i;
 const NO_CHOICES_PATTERN =
@@ -26,7 +25,50 @@ type CuratedRationaleSet = {
   options: readonly string[];
   answer: string;
   rationales: Readonly<Record<string, string>>;
-};
+} & (
+  | { sourceIds: readonly ExamRationaleSourceId[]; sourceUrls?: never }
+  | { sourceIds?: never; sourceUrls: readonly string[] }
+);
+
+export const EXAM_RATIONALE_SOURCES = {
+  "hse-maintaining-portable-equipment": {
+    publisher: "Health and Safety Executive",
+    title: "Maintaining portable and transportable electrical equipment",
+    locator: "Visual checks and inspection/testing guidance",
+    url: "https://www.hse.gov.uk/pubns/indg236.htm",
+    verifiedOn: "2026-07-13"
+  },
+  "iet-in-service-inspection": {
+    publisher: "Institution of Engineering and Technology",
+    title: "The all-new 5th edition of the IET Code of Practice for In-Service Inspection and Testing of Electrical Equipment",
+    locator: "Risk assessment and inspection factors",
+    url: "https://electrical.theiet.org/wiring-matters/years/2021/84-march-2021/the-all-new-5th-edition-of-the-iet-code-of-practice-for-in-service-inspection-and-testing-of-electrical-equipment/",
+    verifiedOn: "2026-07-13"
+  },
+  "iet-model-forms-a4": {
+    publisher: "Institution of Engineering and Technology",
+    title: "BS 7671:2018+A4:2026 model forms",
+    locator: "EIC, MEIWC and EICR schedules",
+    url: "https://electrical.theiet.org/bs-7671-18th-edition-wiring-regulations/model-forms/",
+    verifiedOn: "2026-07-13"
+  },
+  "iet-eicr-myths": {
+    publisher: "Institution of Engineering and Technology",
+    title: "EICR Myths",
+    locator: "Purpose, extent and limitations of an EICR",
+    url: "https://electrical.theiet.org/wiring-matters/years/2021/85-may-2021/eicr-myths/",
+    verifiedOn: "2026-07-13"
+  },
+  "mod-sampling-guide": {
+    publisher: "UK Ministry of Defence",
+    title: "PG 2017/02: Inspection, testing and certification of low voltage electrical installations",
+    locator: "Section 9.3.1-9.3.3, sampling and records",
+    url: "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/645736/20170913__PG_02-17__Final_Version_-_O.pdf",
+    verifiedOn: "2026-07-13"
+  }
+} as const;
+
+type ExamRationaleSourceId = keyof typeof EXAM_RATIONALE_SOURCES;
 
 function semanticText(value: string): string {
   return value.normalize("NFKC").replace(/\s+/g, " ").trim().toLocaleLowerCase("en-GB");
@@ -50,7 +92,7 @@ function semanticSignature(prompt: string, options: readonly string[], answer: s
 // - IET Wiring Matters issue 24, inspection/test sequence and flash-test caution
 // Source basis for the certificate rationales below:
 // - IET BS 7671:2018+A4:2026 model EIC, MEIWC and EICR forms
-const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
+const BASE_CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
   {
     prompt: "The most important check, when assessing the level of safety of an electrical appliance, is:",
     options: [
@@ -60,6 +102,7 @@ const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
       "Visual inspection"
     ],
     answer: "Visual inspection",
+    sourceIds: ["hse-maintaining-portable-equipment", "iet-in-service-inspection"],
     rationales: {
       "Earth leakage current testing":
         "Earth-leakage testing measures current from live parts to earth or accessible surfaces. It finds leakage, but not visible damage or unsuitable use.",
@@ -78,6 +121,7 @@ const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
       "Visual inspection"
     ],
     answer: "Visual inspection",
+    sourceIds: ["hse-maintaining-portable-equipment", "iet-in-service-inspection"],
     rationales: {
       "Acceptable values of insulation resistance":
         "A satisfactory insulation reading addresses only insulation; it does not reveal damaged plugs, leads, enclosures or evidence of misuse.",
@@ -96,6 +140,7 @@ const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
       "Visual inspection"
     ],
     answer: "Visual inspection",
+    sourceIds: ["hse-maintaining-portable-equipment", "iet-in-service-inspection"],
     rationales: {
       "Inspection review":
         "Reviewing inspection information does not examine the appliance's present condition, so damage that occurred since the review may be missed.",
@@ -115,6 +160,7 @@ const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
       "Schedule of Electrical Condition"
     ],
     answer: "Electrical Installation Certificate",
+    sourceIds: ["iet-model-forms-a4"],
     rationales: {
       "Electrical Installation Condition Report":
         "An EICR reports on the condition of an existing electrical installation; it is not the certificate for a newly installed circuit.",
@@ -123,7 +169,34 @@ const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
       "Schedule of Electrical Condition":
         "A “Schedule of Electrical Condition” is not the required BS 7671 certificate for this work. An EIC is issued with its inspection and test-result schedules."
     }
+  },
+  {
+    prompt:
+      "Questions 12 to 16 relate to the following scenario. The existing installation in a hotel is to be inspected and tested as a requirement of the local authority for a public entertainment licence application. Previous inspection and testing records exist but two additional socket-outlet circuits have previously been installed for which there are no test results available. What action should be taken with regard to the additional socket-outlet circuits?",
+    options: [
+      "Both should be fully tested to establish their condition for continued service",
+      "Both should be sampled to establish their condition for continued service",
+      "One should be fully inspected to establish its condition for continued service",
+      "One should be sampled to establish its condition for continued service"
+    ],
+    answer: "Both should be fully tested to establish their condition for continued service",
+    sourceIds: ["mod-sampling-guide", "iet-eicr-myths", "iet-model-forms-a4"],
+    rationales: {
+      "Both should be sampled to establish their condition for continued service":
+        "Sampling is not enough here. It relies on good previous records to show that the sample represents the rest, but these are the two circuits with no results. Each circuit needs the full relevant tests.",
+      "One should be fully inspected to establish its condition for continued service":
+        "Checking only one circuit leaves the other with no evidence at all. Inspection also cannot provide measurements such as continuity, insulation resistance, polarity and earth fault loop impedance. Both circuits need inspection and testing.",
+      "One should be sampled to establish its condition for continued service":
+        "This misses one circuit completely and does not fully test the other. With no results for either circuit, neither can be treated as represented by a sample; both need the full relevant inspection and tests."
+    }
   }
+];
+
+export const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
+  ...initialVerificationTest5Q01To20,
+  ...initialVerificationTest5Q21To40,
+  ...initialVerificationTest5Q41To60,
+  ...BASE_CURATED_RATIONALE_SETS
 ];
 
 const CURATED_OPTION_RATIONALES = new Map(
@@ -141,10 +214,6 @@ const CURATED_OPTION_RATIONALES = new Map(
 function fullRationale(explanation: string): string {
   const source = explanation.replace(/\s+/g, " ").trim();
   return source || "This is the recorded correct answer for this question.";
-}
-
-function asksForException(prompt: string): boolean {
-  return NEGATIVE_QUESTION_PATTERN.test(prompt.replace(THRESHOLD_PHRASE_PATTERN, ""));
 }
 
 function normalizeUnit(unit: string): string {
@@ -254,73 +323,15 @@ function structuralOptionExplanation(
     );
   }
 
-  if (ALL_CHOICES_PATTERN.test(candidateText) && !ALL_CHOICES_PATTERN.test(keyedText)) {
-    return withRationale(
-      `This choice is too broad; the applicable answer is “${keyedText}”.`,
-      rationale
-    );
-  }
-
-  if (NO_CHOICES_PATTERN.test(candidateText) && !NO_CHOICES_PATTERN.test(keyedText)) {
-    return withRationale(
-      `This choice wrongly excludes the applicable answer, “${keyedText}”.`,
-      rationale
-    );
-  }
-
   return undefined;
-}
-
-function groundedOptionExplanation(
-  question: ExamQuestion,
-  choice: ExamChoice,
-  rationale: string
-): string {
-  const keyedText = question.options[question.answer].trim();
-  const candidateText = question.options[choice].trim();
-  const candidateNumber = comparableNumber(question.options[choice]);
-  const keyedNumber = comparableNumber(keyedText);
-
-  if (asksForException(question.prompt)) {
-    return withRationale(
-      `“${candidateText}” does not satisfy the exception requested; the answer that does is “${keyedText}”.`,
-      rationale
-    );
-  }
-
-  if (
-    candidateNumber &&
-    keyedNumber &&
-    candidateNumber.unit === keyedNumber.unit &&
-    candidateNumber.value !== keyedNumber.value
-  ) {
-    return withRationale(
-      `${candidateText} differs from the required answer of ${keyedText}.`,
-      rationale
-    );
-  }
-
-  const hasReferenceImage =
-    Boolean(question.imageUrls?.length) ||
-    Object.values(question.optionImageUrls ?? {}).some(Boolean);
-  if (hasReferenceImage) {
-    return withRationale(
-      `“${candidateText}” identifies something other than the referenced image; the identified answer is “${keyedText}”.`,
-      rationale
-    );
-  }
-
-  return withRationale(
-    `“${candidateText}” does not fit the rule or situation described; the applicable answer is “${keyedText}”.`,
-    rationale
-  );
 }
 
 /**
  * Builds feedback for every delivered option without inventing technical
  * claims. The correct choice receives the complete bank explanation. A
- * distractor uses a curated or structurally supported contrast when available;
- * otherwise it is contrasted with the recorded answer and its rationale.
+ * distractor uses a curated or structurally supported contrast when available.
+ * Otherwise it shows the complete authored rationale rather than inventing a
+ * fake option-specific distinction.
  */
 export function buildOptionExplanations(question: ExamQuestion): ExamOptionExplanations {
   const rationale = fullRationale(question.explanation);
@@ -332,7 +343,7 @@ export function buildOptionExplanations(question: ExamQuestion): ExamOptionExpla
       : curatedOptionExplanation(question, choice) ??
         numericOptionExplanation(question, choice, rationale) ??
         structuralOptionExplanation(question, choice, rationale) ??
-        groundedOptionExplanation(question, choice, rationale);
+        rationale;
   }
 
   return result;
