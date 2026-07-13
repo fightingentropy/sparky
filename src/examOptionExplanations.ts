@@ -3,12 +3,10 @@ import type { ExamChoice, ExamQuestion } from "./exams/types";
 export type ExamOptionExplanations = Record<ExamChoice, string>;
 
 const CHOICES: readonly ExamChoice[] = ["A", "B", "C", "D"];
-const MAX_DISTRACTOR_EXPLANATION_LENGTH = 260;
-const MAX_ANSWER_LABEL_LENGTH = 72;
 const NEGATIVE_QUESTION_PATTERN =
   /\b(?:not|except|incorrect|false|least\s+likely|mustn['’]t|shouldn['’]t|wouldn['’]t|doesn['’]t|isn['’]t|aren['’]t)\b/i;
 const THRESHOLD_PHRASE_PATTERN =
-  /\b(?:not\s+less\s+than|not\s+(?:more|greater)\s+than|not\s+exceeding|does\s+not\s+exceed|at\s+least|at\s+most)\b/gi;
+  /\b(?:not\s+less\s+than|not\s+(?:more|greater)\s+than|not\s+exceed(?:s|ed|ing)?|at\s+least|at\s+most)\b/gi;
 const ALL_CHOICES_PATTERN =
   /\b(?:all(?:\s+of)?\s+(?:the\s+)?(?:(?:answers|options|statements|choices|measures)\s+)?(?:above|these|listed|shown)|all\s+(?:three|four)|all\s+of\s+them)\b/i;
 const NO_CHOICES_PATTERN =
@@ -16,7 +14,7 @@ const NO_CHOICES_PATTERN =
 const MINIMUM_QUESTION_PATTERN =
   /\b(?:minimum|smallest|lowest|at\s+least|not\s+less\s+than)\b/i;
 const MAXIMUM_QUESTION_PATTERN =
-  /\b(?:maximum|largest|highest|at\s+most|not\s+(?:more|greater)\s+than|not\s+exceeding|does\s+not\s+exceed)\b/i;
+  /\b(?:maximum|largest|highest|at\s+most|not\s+(?:more|greater)\s+than|not\s+exceed(?:s|ed|ing)?)\b/i;
 
 type ComparableNumber = {
   value: number;
@@ -140,16 +138,6 @@ const CURATED_OPTION_RATIONALES = new Map(
   ])
 );
 
-function truncateAtWord(value: string, maxLength: number): string {
-  const normalized = value.replace(/\s+/g, " ").trim();
-  if (normalized.length <= maxLength) return normalized;
-
-  const slice = normalized.slice(0, Math.max(1, maxLength - 1));
-  const lastSpace = slice.lastIndexOf(" ");
-  const cutoff = lastSpace >= Math.floor(maxLength * 0.6) ? lastSpace : slice.length;
-  return `${slice.slice(0, cutoff).replace(/[\s,;:.!?-]+$/u, "")}…`;
-}
-
 function fullRationale(explanation: string): string {
   const source = explanation.replace(/\s+/g, " ").trim();
   return source || "This is the recorded correct answer for this question.";
@@ -190,11 +178,7 @@ function comparableNumber(option: string): ComparableNumber | null {
 }
 
 function withRationale(prefix: string, rationale: string): string {
-  const remaining = MAX_DISTRACTOR_EXPLANATION_LENGTH - prefix.length - 1;
-  if (remaining < 24) {
-    return truncateAtWord(prefix, MAX_DISTRACTOR_EXPLANATION_LENGTH);
-  }
-  return `${prefix} ${truncateAtWord(rationale, remaining)}`;
+  return `${prefix.trim()} ${rationale.trim()}`.trim();
 }
 
 function curatedOptionExplanation(
@@ -210,9 +194,7 @@ function curatedOptionExplanation(
   const rationale = CURATED_OPTION_RATIONALES
     .get(signature)
     ?.get(semanticText(question.options[choice]));
-  return rationale
-    ? truncateAtWord(rationale, MAX_DISTRACTOR_EXPLANATION_LENGTH)
-    : undefined;
+  return rationale?.trim();
 }
 
 function numericOptionExplanation(
@@ -260,30 +242,28 @@ function structuralOptionExplanation(
 
   if (ALL_CHOICES_PATTERN.test(keyedText) && !ALL_CHOICES_PATTERN.test(candidateText)) {
     return withRationale(
-      `“${truncateAtWord(candidateText, MAX_ANSWER_LABEL_LENGTH)}” is incomplete on its own because every listed item is required.`,
+      `“${candidateText}” is incomplete on its own because every listed item is required.`,
       rationale
     );
   }
 
   if (NO_CHOICES_PATTERN.test(keyedText) && !NO_CHOICES_PATTERN.test(candidateText)) {
     return withRationale(
-      `“${truncateAtWord(candidateText, MAX_ANSWER_LABEL_LENGTH)}” is not valid here because none of the listed conditions applies.`,
+      `“${candidateText}” is not valid here because none of the listed conditions applies.`,
       rationale
     );
   }
 
-  const conciseAnswer = truncateAtWord(keyedText, MAX_ANSWER_LABEL_LENGTH);
-
   if (ALL_CHOICES_PATTERN.test(candidateText) && !ALL_CHOICES_PATTERN.test(keyedText)) {
     return withRationale(
-      `This choice is too broad; the applicable answer is “${conciseAnswer}”.`,
+      `This choice is too broad; the applicable answer is “${keyedText}”.`,
       rationale
     );
   }
 
   if (NO_CHOICES_PATTERN.test(candidateText) && !NO_CHOICES_PATTERN.test(keyedText)) {
     return withRationale(
-      `This choice wrongly excludes the applicable answer, “${conciseAnswer}”.`,
+      `This choice wrongly excludes the applicable answer, “${keyedText}”.`,
       rationale
     );
   }
@@ -297,17 +277,13 @@ function groundedOptionExplanation(
   rationale: string
 ): string {
   const keyedText = question.options[question.answer].trim();
-  const conciseAnswer = truncateAtWord(keyedText, MAX_ANSWER_LABEL_LENGTH);
-  const conciseCandidate = truncateAtWord(
-    question.options[choice].trim(),
-    MAX_ANSWER_LABEL_LENGTH
-  );
+  const candidateText = question.options[choice].trim();
   const candidateNumber = comparableNumber(question.options[choice]);
   const keyedNumber = comparableNumber(keyedText);
 
   if (asksForException(question.prompt)) {
     return withRationale(
-      `“${conciseCandidate}” does not satisfy the exception requested; the answer that does is “${conciseAnswer}”.`,
+      `“${candidateText}” does not satisfy the exception requested; the answer that does is “${keyedText}”.`,
       rationale
     );
   }
@@ -319,7 +295,7 @@ function groundedOptionExplanation(
     candidateNumber.value !== keyedNumber.value
   ) {
     return withRationale(
-      `${conciseCandidate} differs from the required answer of ${conciseAnswer}.`,
+      `${candidateText} differs from the required answer of ${keyedText}.`,
       rationale
     );
   }
@@ -329,13 +305,13 @@ function groundedOptionExplanation(
     Object.values(question.optionImageUrls ?? {}).some(Boolean);
   if (hasReferenceImage) {
     return withRationale(
-      `“${conciseCandidate}” identifies something other than the referenced image; the identified answer is “${conciseAnswer}”.`,
+      `“${candidateText}” identifies something other than the referenced image; the identified answer is “${keyedText}”.`,
       rationale
     );
   }
 
   return withRationale(
-    `“${conciseCandidate}” does not fit the rule or situation described; the applicable answer is “${conciseAnswer}”.`,
+    `“${candidateText}” does not fit the rule or situation described; the applicable answer is “${keyedText}”.`,
     rationale
   );
 }
