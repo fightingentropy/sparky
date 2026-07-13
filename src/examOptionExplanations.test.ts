@@ -10,7 +10,12 @@ import level3ElectricalInstallationExam from "./exam-data/level-3-electrical-ins
 import patTestingExam from "./exam-data/pat-testing.json";
 import periodicInspectionExam from "./exam-data/periodic-inspection.json";
 import specialLocationsExam from "./exam-data/special-locations.json";
-import { buildOptionExplanations } from "./examOptionExplanations";
+import { applyExamExplanationEnhancements } from "./examExplanationEnhancements";
+import {
+  buildOptionExplanations,
+  CURATED_RATIONALE_SETS,
+  EXAM_RATIONALE_SOURCES
+} from "./examOptionExplanations";
 import { getQuestionsForVariant } from "./examUtils";
 import type { Exam, ExamQuestion } from "./exams/types";
 
@@ -55,6 +60,9 @@ describe("exam option explanations", () => {
         expect(value.length).toBeGreaterThan(20);
         if (choice !== question.answer) {
           expect(value).not.toMatch(/…|\.\.\./);
+          expect(value).not.toMatch(
+            /does not fit the rule or situation described|the applicable answer is|does not satisfy the exception requested|differs from the required answer|identifies something other than the referenced image/i
+          );
           distractorCount += 1;
         }
       }
@@ -63,7 +71,7 @@ describe("exam option explanations", () => {
     expect(distractorCount).toBe(15_087);
   });
 
-  it("keeps complete long rationales and option labels in wrong-answer feedback", () => {
+  it("keeps the complete authored rationale when no safe option-specific reason exists", () => {
     const explanation =
       "This complete rationale deliberately exceeds the former distractor limit. " +
       "It explains the governing rule, how it applies to the situation, and why the recorded answer follows from that rule without dropping any supporting detail. ".repeat(3).trim();
@@ -91,24 +99,18 @@ describe("exam option explanations", () => {
     const feedback = buildOptionExplanations(question);
     expect(feedback.A).toBe(explanation);
     for (const choice of ["B", "C", "D"] as const) {
-      expect(feedback[choice]).toContain(`“${wrongOptions[choice]}”`);
-      expect(feedback[choice]).toContain(`“${correctOption}”`);
-      expect(feedback[choice]).toContain(explanation);
+      expect(feedback[choice]).toBe(explanation);
       expect(feedback[choice]).not.toContain("…");
     }
   });
 
-  it("never describes a distractor as merely differing from a keyed answer", () => {
+  it("never generates a placeholder comparison instead of an explanation", () => {
     for (const question of allQuestions()) {
       const feedback = buildOptionExplanations(question);
-      const rationale = question.explanation.replace(/\s+/g, " ").trim();
       for (const choice of CHOICES) {
         if (choice === question.answer) continue;
-        const generatedContrast = feedback[choice].endsWith(rationale)
-          ? feedback[choice].slice(0, -rationale.length)
-          : feedback[choice];
-        expect(generatedContrast).not.toMatch(
-          /keyed answer|this is not (?:the|an) answer|wrong because it is wrong/i
+        expect(feedback[choice]).not.toMatch(
+          /does not fit the rule or situation described|the applicable answer is|does not satisfy the exception requested|differs from the required answer|identifies something other than the referenced image|this is not (?:the|an) answer|wrong because it is wrong/i
         );
       }
     }
@@ -238,26 +240,23 @@ describe("exam option explanations", () => {
     expect(feedback.C).toContain("representative design or sample");
   });
 
-  it("grounds conceptual distractors in the recorded answer and rationale", () => {
+  it("uses the authored teaching rationale for conceptual distractors without inventing facts", () => {
     const question = allQuestions([initialVerificationExam as unknown as Exam]).find(
       (entry) => entry.prompt === "What is the main purpose of an Initial Verification?"
     );
 
     expect(question).toBeDefined();
     const feedback = buildOptionExplanations(question!);
-    expect(feedback[question!.answer]).toContain("Initial Verification checks");
-    const distractorFeedback: string[] = [];
+    const rationale = question!.explanation.replace(/\s+/g, " ").trim();
+    expect(feedback[question!.answer]).toBe(rationale);
     for (const choice of CHOICES) {
       if (choice === question!.answer) continue;
-      expect(feedback[choice]).toContain("applicable answer");
-      expect(feedback[choice]).toContain("To confirm an installation is safe");
-      expect(feedback[choice]).toContain(`“${question!.options[choice]}”`);
-      distractorFeedback.push(feedback[choice]);
+      expect(feedback[choice]).toBe(rationale);
+      expect(feedback[choice]).not.toMatch(/does not fit|applicable answer/i);
     }
-    expect(new Set(distractorFeedback).size).toBe(3);
   });
 
-  it("uses source-safe contrasts for negative and image-dependent distractors", () => {
+  it("does not fabricate contrasts for negative or image-dependent distractors", () => {
     const negativeQuestion: ExamQuestion = {
       number: 1,
       prompt: "Which value is not the stated result?",
@@ -277,17 +276,90 @@ describe("exam option explanations", () => {
     const negativeFeedback = buildOptionExplanations(negativeQuestion);
     expect(negativeFeedback.C).toBe("The worked result in the source question is 30 V.");
     for (const choice of ["A", "B", "D"] as const) {
-      expect(negativeFeedback[choice]).toContain("does not satisfy the exception requested");
-      expect(negativeFeedback[choice]).toContain(`“${negativeQuestion.options[choice]}”`);
-      expect(negativeFeedback[choice]).toContain("“30 V”");
+      expect(negativeFeedback[choice]).toBe("The worked result in the source question is 30 V.");
     }
 
     const imageFeedback = buildOptionExplanations(imageQuestion);
     expect(imageFeedback.A).toBe("The pictured instrument is a clamp meter.");
     for (const choice of ["B", "C", "D"] as const) {
-      expect(imageFeedback[choice]).toContain("identifies something other than the referenced image");
-      expect(imageFeedback[choice]).toContain(`“${imageQuestion.options[choice]}”`);
-      expect(imageFeedback[choice]).toContain("“Clamp meter”");
+      expect(imageFeedback[choice]).toBe("The pictured instrument is a clamp meter.");
+    }
+  });
+
+  it("gives each unrecorded hotel circuit distractor a researched practical reason", () => {
+    const enhancedExam = applyExamExplanationEnhancements(
+      initialVerificationExam as unknown as Exam
+    );
+    const question = allQuestions([enhancedExam]).find((entry) =>
+      entry.prompt.includes("What action should be taken with regard to the additional socket-outlet circuits?")
+    );
+
+    expect(question).toBeDefined();
+    const feedback = buildOptionExplanations(question!);
+    expect(feedback.A).toContain("neither has evidence on which sampling can be based");
+    expect(feedback.B).toContain("Sampling is not enough here");
+    expect(feedback.B).toContain("Each circuit needs the full relevant tests");
+    expect(feedback.C).toContain("Inspection also cannot provide measurements");
+    expect(feedback.C).toContain("continuity, insulation resistance, polarity and earth fault loop impedance");
+    expect(feedback.D).toContain("misses one circuit completely");
+    expect(feedback.D).toContain("does not fully test the other");
+    expect(new Set([feedback.B, feedback.C, feedback.D]).size).toBe(3);
+    expect(`${feedback.B} ${feedback.C} ${feedback.D}`).not.toMatch(
+      /does not fit|applicable answer/i
+    );
+  });
+
+  it("keeps an auditable source record for curated electrical rationales", () => {
+    expect(EXAM_RATIONALE_SOURCES["mod-sampling-guide"]).toMatchObject({
+      publisher: "UK Ministry of Defence",
+      locator: "Section 9.3.1-9.3.3, sampling and records",
+      verifiedOn: "2026-07-13"
+    });
+    expect(EXAM_RATIONALE_SOURCES["iet-eicr-myths"].url).toMatch(/^https:\/\/electrical\.theiet\.org\//);
+    expect(EXAM_RATIONALE_SOURCES["iet-model-forms-a4"].url).toMatch(/^https:\/\/electrical\.theiet\.org\//);
+  });
+
+  it("provides a distinct reviewed reason for every distractor in Initial Verification test 5", () => {
+    const enhancedExam = applyExamExplanationEnhancements(
+      initialVerificationExam as unknown as Exam
+    );
+    const variant = enhancedExam.sections
+      .flatMap((section) => section.variants)
+      .find((entry) => entry.id === "quiz-29749");
+    let reviewedDistractors = 0;
+
+    expect(variant?.questions).toHaveLength(60);
+    for (const question of variant!.questions) {
+      const feedback = buildOptionExplanations(question);
+      const wrongReasons = CHOICES
+        .filter((choice) => choice !== question.answer)
+        .map((choice) => feedback[choice]);
+
+      expect(new Set(wrongReasons).size, `Q${question.number}: ${question.prompt}`).toBe(3);
+      for (const reason of wrongReasons) {
+        expect(reason).not.toBe(question.explanation.replace(/\s+/g, " ").trim());
+        expect(reason).not.toMatch(
+          /does not fit the rule|applicable answer|exception requested|differs from the required answer|wrong because/i
+        );
+        reviewedDistractors += 1;
+      }
+    }
+
+    expect(reviewedDistractors).toBe(180);
+  });
+
+  it("attaches official or manufacturer source URLs to all 60 reviewed questions", () => {
+    const sourcedSets = CURATED_RATIONALE_SETS.filter(
+      (entry): entry is typeof entry & { sourceUrls: readonly string[] } =>
+        "sourceUrls" in entry && Array.isArray(entry.sourceUrls)
+    );
+
+    expect(sourcedSets).toHaveLength(60);
+    for (const entry of sourcedSets) {
+      expect(entry.sourceUrls.length).toBeGreaterThan(0);
+      for (const sourceUrl of entry.sourceUrls) {
+        expect(sourceUrl).toMatch(/^https:\/\//);
+      }
     }
   });
 
