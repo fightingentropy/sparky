@@ -7484,6 +7484,10 @@ button:active:not(:disabled),
   transform: scale(0.97);
 }
 
+body[data-page="exams"] .exam-option-control:active:not(:disabled) {
+  transform: none;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .dashboard-action:hover { transform: translateY(-1px); }
   .tutorial-load-btn:hover img { transform: scale(1.015); }
