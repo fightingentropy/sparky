@@ -39,28 +39,37 @@ function allQuestions(exams: Exam[] = EXAMS): ExamQuestion[] {
 }
 
 describe("exam option explanations", () => {
-  it("always explains the correct choice without fabricating feedback for unsupported distractors", () => {
+  it("shows the full correct explanation and feedback for all 15,087 distractors", () => {
     const questions = allQuestions();
+    let distractorCount = 0;
 
     expect(questions).toHaveLength(5029);
     for (const question of questions) {
       const feedback = buildOptionExplanations(question);
-      expect(feedback[question.answer]?.length).toBeGreaterThan(20);
+      expect(Object.keys(feedback)).toEqual(CHOICES);
+      expect(feedback[question.answer]).toBe(question.explanation.replace(/\s+/g, " ").trim());
 
-      for (const value of Object.values(feedback)) {
+      for (const choice of CHOICES) {
+        const value = feedback[choice];
         expect(typeof value).toBe("string");
-        expect(value.length).toBeLessThanOrEqual(160);
+        expect(value.length).toBeGreaterThan(20);
+        if (choice !== question.answer) {
+          expect(value.length).toBeLessThanOrEqual(260);
+          distractorCount += 1;
+        }
       }
     }
+
+    expect(distractorCount).toBe(15_087);
   });
 
-  it("never emits circular mismatch text for a distractor", () => {
+  it("never describes a distractor as merely differing from a keyed answer", () => {
     for (const question of allQuestions()) {
       const feedback = buildOptionExplanations(question);
       for (const choice of CHOICES) {
-        if (choice === question.answer || !feedback[choice]) continue;
+        if (choice === question.answer) continue;
         expect(feedback[choice]).not.toMatch(
-          /does not match|keyed answer|not the (?:exception|least-likely) choice/i
+          /keyed answer|this is not (?:the|an) answer|wrong because it is wrong/i
         );
       }
     }
@@ -100,6 +109,21 @@ describe("exam option explanations", () => {
     expect(feedback.D).toContain("current from live parts to earth or accessible surfaces");
   });
 
+  it("explains every certificate choice in the swimming-pool scenario", () => {
+    const question = allQuestions([initialVerificationExam as unknown as Exam]).find(
+      (entry) => entry.prompt.includes(
+        "What document must be completed following inspection and testing?"
+      )
+    );
+
+    expect(question).toBeDefined();
+    const feedback = buildOptionExplanations(question!);
+    expect(feedback.A).toBe(question!.explanation);
+    expect(feedback.B).toContain("condition of an existing electrical installation");
+    expect(feedback.C).toContain("does not provide a new circuit");
+    expect(feedback.D).toContain("not the required BS 7671 certificate");
+  });
+
   it("describes both sides of a minimum truthfully", () => {
     const question = allQuestions([buildingRegulationsExam as unknown as Exam]).find(
       (entry) => entry.prompt.includes("minimum number of smoke alarms required")
@@ -107,11 +131,11 @@ describe("exam option explanations", () => {
 
     expect(question).toBeDefined();
     const feedback = buildOptionExplanations(question!);
-    expect(feedback.A).toMatch(/^This is below the required minimum of 2\./);
-    expect(feedback.B).toMatch(/^This is below the required minimum of 2\./);
+    expect(feedback.A).toMatch(/^0 is below the required minimum of 2\./);
+    expect(feedback.B).toMatch(/^1 is below the required minimum of 2\./);
     expect(feedback.C).toContain("smoke alarms on the escape route of each storey");
     expect(feedback.D).toMatch(
-      /^This is above the required minimum of 2, so it is not the minimum value asked for\./
+      /^4 is above the required minimum of 2, so it is not the minimum value asked for\./
     );
     expect(feedback.D).not.toContain("Too high");
   });
@@ -127,11 +151,24 @@ describe("exam option explanations", () => {
 
     const feedback = buildOptionExplanations(question);
     expect(feedback.A).toMatch(
-      /^This is below the permitted maximum of 12 m, so it is not the maximum value asked for\./
+      /^6 m is below the permitted maximum of 12 m, so it is not the maximum value asked for\./
     );
-    expect(feedback.C).toMatch(/^This exceeds the permitted maximum of 12 m\./);
-    expect(feedback.D).toMatch(/^This exceeds the permitted maximum of 12 m\./);
+    expect(feedback.C).toMatch(/^18 m exceeds the permitted maximum of 12 m\./);
+    expect(feedback.D).toMatch(/^24 m exceeds the permitted maximum of 12 m\./);
     expect(feedback.A).not.toContain("Too low");
+  });
+
+  it("treats 'not less than' as a minimum rather than an exception", () => {
+    const question = allQuestions([specialLocationsExam as unknown as Exam]).find(
+      (entry) => entry.prompt.includes("Radiant heaters used in the vicinity of livestock")
+    );
+
+    expect(question).toBeDefined();
+    const feedback = buildOptionExplanations(question!);
+    expect(feedback.B).toMatch(/^1\.5 m is above the required minimum of 0\.5 m/);
+    expect(feedback.C).toMatch(/^2\.5 m is above the required minimum of 0\.5 m/);
+    expect(feedback.D).toMatch(/^1\.0 m is above the required minimum of 0\.5 m/);
+    expect(`${feedback.B} ${feedback.C} ${feedback.D}`).not.toContain("exception requested");
   });
 
   it("distinguishes production and type testing from an in-service condition check", () => {
@@ -146,7 +183,7 @@ describe("exam option explanations", () => {
     expect(feedback.C).toContain("representative design or sample");
   });
 
-  it("omits unsupported conceptual distractors instead of restating the answer", () => {
+  it("grounds conceptual distractors in the recorded answer and rationale", () => {
     const question = allQuestions([initialVerificationExam as unknown as Exam]).find(
       (entry) => entry.prompt === "What is the main purpose of an Initial Verification?"
     );
@@ -154,12 +191,18 @@ describe("exam option explanations", () => {
     expect(question).toBeDefined();
     const feedback = buildOptionExplanations(question!);
     expect(feedback[question!.answer]).toContain("Initial Verification checks");
+    const distractorFeedback: string[] = [];
     for (const choice of CHOICES) {
-      if (choice !== question!.answer) expect(feedback[choice]).toBeUndefined();
+      if (choice === question!.answer) continue;
+      expect(feedback[choice]).toContain("applicable answer");
+      expect(feedback[choice]).toContain("To confirm an installation is safe");
+      expect(feedback[choice]).toContain(`“${question!.options[choice]}”`);
+      distractorFeedback.push(feedback[choice]);
     }
+    expect(new Set(distractorFeedback).size).toBe(3);
   });
 
-  it("does not invent explanations for negative or image-dependent distractors", () => {
+  it("uses source-safe contrasts for negative and image-dependent distractors", () => {
     const negativeQuestion: ExamQuestion = {
       number: 1,
       prompt: "Which value is not the stated result?",
@@ -176,12 +219,21 @@ describe("exam option explanations", () => {
       explanation: "The pictured instrument is a clamp meter."
     };
 
-    expect(buildOptionExplanations(negativeQuestion)).toEqual({
-      C: "The worked result in the source question is 30 V."
-    });
-    expect(buildOptionExplanations(imageQuestion)).toEqual({
-      A: "The pictured instrument is a clamp meter."
-    });
+    const negativeFeedback = buildOptionExplanations(negativeQuestion);
+    expect(negativeFeedback.C).toBe("The worked result in the source question is 30 V.");
+    for (const choice of ["A", "B", "D"] as const) {
+      expect(negativeFeedback[choice]).toContain("does not satisfy the exception requested");
+      expect(negativeFeedback[choice]).toContain(`“${negativeQuestion.options[choice]}”`);
+      expect(negativeFeedback[choice]).toContain("“30 V”");
+    }
+
+    const imageFeedback = buildOptionExplanations(imageQuestion);
+    expect(imageFeedback.A).toBe("The pictured instrument is a clamp meter.");
+    for (const choice of ["B", "C", "D"] as const) {
+      expect(imageFeedback[choice]).toContain("identifies something other than the referenced image");
+      expect(imageFeedback[choice]).toContain(`“${imageQuestion.options[choice]}”`);
+      expect(imageFeedback[choice]).toContain("“Clamp meter”");
+    }
   });
 
   it("describes single choices as incomplete when all listed choices are required", () => {
@@ -199,9 +251,9 @@ describe("exam option explanations", () => {
     };
 
     const feedback = buildOptionExplanations(question);
-    expect(feedback.A).toMatch(/^Every listed item is required/);
-    expect(feedback.B).toMatch(/^Every listed item is required/);
-    expect(feedback.C).toMatch(/^Every listed item is required/);
+    expect(feedback.A).toContain("incomplete on its own because every listed item is required");
+    expect(feedback.B).toContain("incomplete on its own because every listed item is required");
+    expect(feedback.C).toContain("incomplete on its own because every listed item is required");
   });
 
   it("recognizes none-of-the-options wording without inventing option facts", () => {
@@ -219,9 +271,9 @@ describe("exam option explanations", () => {
     };
 
     const feedback = buildOptionExplanations(question);
-    expect(feedback.A).toMatch(/^None of the listed conditions applies here/);
-    expect(feedback.B).toMatch(/^None of the listed conditions applies here/);
-    expect(feedback.C).toMatch(/^None of the listed conditions applies here/);
+    expect(feedback.A).toContain("not valid here because none of the listed conditions applies");
+    expect(feedback.B).toContain("not valid here because none of the listed conditions applies");
+    expect(feedback.C).toContain("not valid here because none of the listed conditions applies");
   });
 
   it("builds feedback from post-shuffle Periodic Inspection choices", () => {

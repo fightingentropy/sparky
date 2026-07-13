@@ -1,15 +1,22 @@
 import type { ExamChoice, ExamQuestion } from "./exams/types";
 
-export type ExamOptionExplanations = Partial<Record<ExamChoice, string>>;
+export type ExamOptionExplanations = Record<ExamChoice, string>;
 
 const CHOICES: readonly ExamChoice[] = ["A", "B", "C", "D"];
-const MAX_EXPLANATION_LENGTH = 160;
+const MAX_DISTRACTOR_EXPLANATION_LENGTH = 260;
+const MAX_ANSWER_LABEL_LENGTH = 72;
+const NEGATIVE_QUESTION_PATTERN =
+  /\b(?:not|except|incorrect|false|least\s+likely|mustn['’]t|shouldn['’]t|wouldn['’]t|doesn['’]t|isn['’]t|aren['’]t)\b/i;
+const THRESHOLD_PHRASE_PATTERN =
+  /\b(?:not\s+less\s+than|not\s+(?:more|greater)\s+than|not\s+exceeding|does\s+not\s+exceed|at\s+least|at\s+most)\b/gi;
 const ALL_CHOICES_PATTERN =
   /\b(?:all(?:\s+of)?\s+(?:the\s+)?(?:(?:answers|options|statements|choices|measures)\s+)?(?:above|these|listed|shown)|all\s+(?:three|four)|all\s+of\s+them)\b/i;
 const NO_CHOICES_PATTERN =
   /\b(?:none(?:\s+of)?\s+(?:the\s+)?(?:(?:answers|options|statements|choices|measures)\s+)?(?:above|these|listed|shown)|none\s+of\s+them)\b/i;
-const MINIMUM_QUESTION_PATTERN = /\b(?:minimum|smallest|lowest)\b/i;
-const MAXIMUM_QUESTION_PATTERN = /\b(?:maximum|largest|highest)\b/i;
+const MINIMUM_QUESTION_PATTERN =
+  /\b(?:minimum|smallest|lowest|at\s+least|not\s+less\s+than)\b/i;
+const MAXIMUM_QUESTION_PATTERN =
+  /\b(?:maximum|largest|highest|at\s+most|not\s+(?:more|greater)\s+than|not\s+exceeding|does\s+not\s+exceed)\b/i;
 
 type ComparableNumber = {
   value: number;
@@ -43,6 +50,8 @@ function semanticSignature(prompt: string, options: readonly string[], answer: s
 // Source basis for the PAT rationales below:
 // - HSE PAT FAQ and HSG107, paragraphs 40 and 47
 // - IET Wiring Matters issue 24, inspection/test sequence and flash-test caution
+// Source basis for the certificate rationales below:
+// - IET BS 7671:2018+A4:2026 model EIC, MEIWC and EICR forms
 const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
   {
     prompt: "The most important check, when assessing the level of safety of an electrical appliance, is:",
@@ -97,6 +106,25 @@ const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
       "Type testing":
         "Type testing validates a representative design or sample. It does not establish the current condition of each appliance in service."
     }
+  },
+  {
+    prompt:
+      "Questions 5 to 11 relate to the following scenario. Refurbishment of a leisure centre with a swimming pool is taking place. An additional lighting circuit is to be installed. The new lights will be at a height of 2.4m above the pool. What document must be completed following inspection and testing?",
+    options: [
+      "Electrical Installation Certificate",
+      "Electrical Installation Condition Report",
+      "Minor Electrical Installation Works Certificate",
+      "Schedule of Electrical Condition"
+    ],
+    answer: "Electrical Installation Certificate",
+    rationales: {
+      "Electrical Installation Condition Report":
+        "An EICR reports on the condition of an existing electrical installation; it is not the certificate for a newly installed circuit.",
+      "Minor Electrical Installation Works Certificate":
+        "A Minor Works Certificate is only for work that does not provide a new circuit. This job adds a lighting circuit, so an EIC is required.",
+      "Schedule of Electrical Condition":
+        "A “Schedule of Electrical Condition” is not the required BS 7671 certificate for this work. An EIC is issued with its inspection and test-result schedules."
+    }
   }
 ];
 
@@ -122,14 +150,13 @@ function truncateAtWord(value: string, maxLength: number): string {
   return `${slice.slice(0, cutoff).replace(/[\s,;:.!?-]+$/u, "")}…`;
 }
 
-function conciseRationale(explanation: string): string {
-  // A few imported rows retain a source-editor marker after an answer echo.
-  // Keeping the text after the marker gives useful reasoning without changing
-  // or supplementing the question bank's technical claim.
-  const afterExplanationMarker = explanation.match(/\bExplanation:\s*(.+)$/i)?.[1];
-  const source = (afterExplanationMarker ?? explanation).replace(/\s+/g, " ").trim();
-  if (!source) return "This is the recorded correct answer for this question.";
-  return truncateAtWord(source, MAX_EXPLANATION_LENGTH);
+function fullRationale(explanation: string): string {
+  const source = explanation.replace(/\s+/g, " ").trim();
+  return source || "This is the recorded correct answer for this question.";
+}
+
+function asksForException(prompt: string): boolean {
+  return NEGATIVE_QUESTION_PATTERN.test(prompt.replace(THRESHOLD_PHRASE_PATTERN, ""));
 }
 
 function normalizeUnit(unit: string): string {
@@ -163,8 +190,10 @@ function comparableNumber(option: string): ComparableNumber | null {
 }
 
 function withRationale(prefix: string, rationale: string): string {
-  const remaining = MAX_EXPLANATION_LENGTH - prefix.length - 1;
-  if (remaining < 24) return truncateAtWord(prefix, MAX_EXPLANATION_LENGTH);
+  const remaining = MAX_DISTRACTOR_EXPLANATION_LENGTH - prefix.length - 1;
+  if (remaining < 24) {
+    return truncateAtWord(prefix, MAX_DISTRACTOR_EXPLANATION_LENGTH);
+  }
   return `${prefix} ${truncateAtWord(rationale, remaining)}`;
 }
 
@@ -181,7 +210,9 @@ function curatedOptionExplanation(
   const rationale = CURATED_OPTION_RATIONALES
     .get(signature)
     ?.get(semanticText(question.options[choice]));
-  return rationale ? truncateAtWord(rationale, MAX_EXPLANATION_LENGTH) : undefined;
+  return rationale
+    ? truncateAtWord(rationale, MAX_DISTRACTOR_EXPLANATION_LENGTH)
+    : undefined;
 }
 
 function numericOptionExplanation(
@@ -204,15 +235,15 @@ function numericOptionExplanation(
 
   if (MINIMUM_QUESTION_PATTERN.test(question.prompt)) {
     const prefix = candidateNumber.value < keyedNumber.value
-      ? `This is below the required minimum of ${keyedText}.`
-      : `This is above the required minimum of ${keyedText}, so it is not the minimum value asked for.`;
+      ? `${question.options[choice]} is below the required minimum of ${keyedText}.`
+      : `${question.options[choice]} is above the required minimum of ${keyedText}, so it is not the minimum value asked for.`;
     return withRationale(prefix, rationale);
   }
 
   if (MAXIMUM_QUESTION_PATTERN.test(question.prompt)) {
     const prefix = candidateNumber.value > keyedNumber.value
-      ? `This exceeds the permitted maximum of ${keyedText}.`
-      : `This is below the permitted maximum of ${keyedText}, so it is not the maximum value asked for.`;
+      ? `${question.options[choice]} exceeds the permitted maximum of ${keyedText}.`
+      : `${question.options[choice]} is below the permitted maximum of ${keyedText}, so it is not the maximum value asked for.`;
     return withRationale(prefix, rationale);
   }
 
@@ -229,14 +260,30 @@ function structuralOptionExplanation(
 
   if (ALL_CHOICES_PATTERN.test(keyedText) && !ALL_CHOICES_PATTERN.test(candidateText)) {
     return withRationale(
-      "Every listed item is required, so this choice is incomplete on its own.",
+      `“${truncateAtWord(candidateText, MAX_ANSWER_LABEL_LENGTH)}” is incomplete on its own because every listed item is required.`,
       rationale
     );
   }
 
   if (NO_CHOICES_PATTERN.test(keyedText) && !NO_CHOICES_PATTERN.test(candidateText)) {
     return withRationale(
-      "None of the listed conditions applies here, so this individual choice is not valid.",
+      `“${truncateAtWord(candidateText, MAX_ANSWER_LABEL_LENGTH)}” is not valid here because none of the listed conditions applies.`,
+      rationale
+    );
+  }
+
+  const conciseAnswer = truncateAtWord(keyedText, MAX_ANSWER_LABEL_LENGTH);
+
+  if (ALL_CHOICES_PATTERN.test(candidateText) && !ALL_CHOICES_PATTERN.test(keyedText)) {
+    return withRationale(
+      `This choice is too broad; the applicable answer is “${conciseAnswer}”.`,
+      rationale
+    );
+  }
+
+  if (NO_CHOICES_PATTERN.test(candidateText) && !NO_CHOICES_PATTERN.test(keyedText)) {
+    return withRationale(
+      `This choice wrongly excludes the applicable answer, “${conciseAnswer}”.`,
       rationale
     );
   }
@@ -244,28 +291,72 @@ function structuralOptionExplanation(
   return undefined;
 }
 
+function groundedOptionExplanation(
+  question: ExamQuestion,
+  choice: ExamChoice,
+  rationale: string
+): string {
+  const keyedText = question.options[question.answer].trim();
+  const conciseAnswer = truncateAtWord(keyedText, MAX_ANSWER_LABEL_LENGTH);
+  const conciseCandidate = truncateAtWord(
+    question.options[choice].trim(),
+    MAX_ANSWER_LABEL_LENGTH
+  );
+  const candidateNumber = comparableNumber(question.options[choice]);
+  const keyedNumber = comparableNumber(keyedText);
+
+  if (asksForException(question.prompt)) {
+    return withRationale(
+      `“${conciseCandidate}” does not satisfy the exception requested; the answer that does is “${conciseAnswer}”.`,
+      rationale
+    );
+  }
+
+  if (
+    candidateNumber &&
+    keyedNumber &&
+    candidateNumber.unit === keyedNumber.unit &&
+    candidateNumber.value !== keyedNumber.value
+  ) {
+    return withRationale(
+      `${conciseCandidate} differs from the required answer of ${conciseAnswer}.`,
+      rationale
+    );
+  }
+
+  const hasReferenceImage =
+    Boolean(question.imageUrls?.length) ||
+    Object.values(question.optionImageUrls ?? {}).some(Boolean);
+  if (hasReferenceImage) {
+    return withRationale(
+      `“${conciseCandidate}” identifies something other than the referenced image; the identified answer is “${conciseAnswer}”.`,
+      rationale
+    );
+  }
+
+  return withRationale(
+    `“${conciseCandidate}” does not fit the rule or situation described; the applicable answer is “${conciseAnswer}”.`,
+    rationale
+  );
+}
+
 /**
- * Builds only feedback that can explain an option from information we actually
- * have. The correct choice always receives the bank rationale. Distractors get
- * feedback only when there is an option-specific curated rationale or a safe,
- * structurally supported contrast; unsupported distractors are deliberately
- * omitted instead of receiving circular "it is not the answer" text.
+ * Builds feedback for every delivered option without inventing technical
+ * claims. The correct choice receives the complete bank explanation. A
+ * distractor uses a curated or structurally supported contrast when available;
+ * otherwise it is contrasted with the recorded answer and its rationale.
  */
 export function buildOptionExplanations(question: ExamQuestion): ExamOptionExplanations {
-  const rationale = conciseRationale(question.explanation);
-  const result: ExamOptionExplanations = {
-    [question.answer]: rationale
-  };
+  const rationale = fullRationale(question.explanation);
+  const result = {} as ExamOptionExplanations;
 
   for (const choice of CHOICES) {
-    if (choice === question.answer) continue;
-
-    const explanation =
-      curatedOptionExplanation(question, choice) ??
-      numericOptionExplanation(question, choice, rationale) ??
-      structuralOptionExplanation(question, choice, rationale);
-
-    if (explanation) result[choice] = explanation;
+    result[choice] = choice === question.answer
+      ? rationale
+      : curatedOptionExplanation(question, choice) ??
+        numericOptionExplanation(question, choice, rationale) ??
+        structuralOptionExplanation(question, choice, rationale) ??
+        groundedOptionExplanation(question, choice, rationale);
   }
 
   return result;
