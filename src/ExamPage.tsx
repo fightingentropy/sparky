@@ -1563,7 +1563,7 @@ function QuestionCard({
                   id={optionFeedbackId}
                   className={`exam-option-feedback ${letter === correct ? "is-correct" : "is-incorrect"}`}
                 >
-                  <strong>{letter === correct ? "Correct answer" : "Why this is wrong"}</strong>
+                  <strong>{letter === correct ? "CORRECT:" : "WRONG:"}</strong>
                   <span>{optionExplanation}</span>
                 </div>
               ) : null}

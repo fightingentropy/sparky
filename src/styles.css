@@ -6087,15 +6087,22 @@ body[data-page="exams"] .exam-option-value{
 body[data-page="exams"] .exam-option-feedback{
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
+  align-items: baseline;
   gap: 9px;
+  min-width: 0;
   margin: 0 15px 15px 57px;
   padding-top: 10px;
   border-top: 1px solid var(--ex-hair);
   color: var(--ex-muted);
   font-size: 0.9rem;
   line-height: 1.55;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   animation: exam-option-feedback-in 140ms var(--ease) both;
+}
+
+body[data-page="exams"] .exam-option-feedback > span{
+  min-width: 0;
 }
 
 body[data-page="exams"] .exam-option-feedback strong{
@@ -6957,17 +6964,6 @@ body[data-page="exams"] .exam-test-switch{
 body[data-page="exams"] .exam-explanation p,
 body[data-page="exams"] .exam-q-topic{
     overflow-wrap: anywhere;
-  }
-
-  body[data-page="exams"] .exam-option{
-    gap: 12px;
-    padding: 13px;
-    font-size: 0.94rem;
-  }
-
-  body[data-page="exams"] .exam-option-feedback{
-    grid-template-columns: minmax(0, 1fr);
-    gap: 3px;
   }
 
   body[data-page="exams"] .exam-footer{

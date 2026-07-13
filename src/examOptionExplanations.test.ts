@@ -54,7 +54,7 @@ describe("exam option explanations", () => {
         expect(typeof value).toBe("string");
         expect(value.length).toBeGreaterThan(20);
         if (choice !== question.answer) {
-          expect(value.length).toBeLessThanOrEqual(260);
+          expect(value).not.toMatch(/…|\.\.\./);
           distractorCount += 1;
         }
       }
@@ -63,12 +63,51 @@ describe("exam option explanations", () => {
     expect(distractorCount).toBe(15_087);
   });
 
+  it("keeps complete long rationales and option labels in wrong-answer feedback", () => {
+    const explanation =
+      "This complete rationale deliberately exceeds the former distractor limit. " +
+      "It explains the governing rule, how it applies to the situation, and why the recorded answer follows from that rule without dropping any supporting detail. ".repeat(3).trim();
+    const correctOption =
+      "The complete applicable answer with every qualification that must remain visible to the learner";
+    const wrongOptions = {
+      B: "A distractor whose full wording is intentionally longer than the former answer-label limit",
+      C: "Another distractor whose complete wording must appear without an inserted ellipsis or cutoff",
+      D: "The final deliberately long distractor used to verify that every explanation remains complete"
+    } as const;
+    const question: ExamQuestion = {
+      number: 1,
+      prompt: "Which complete answer applies in this situation?",
+      options: { A: correctOption, ...wrongOptions },
+      answer: "A",
+      explanation
+    };
+
+    expect(explanation.length).toBeGreaterThan(260);
+    expect(correctOption.length).toBeGreaterThan(72);
+    for (const option of Object.values(wrongOptions)) {
+      expect(option.length).toBeGreaterThan(72);
+    }
+
+    const feedback = buildOptionExplanations(question);
+    expect(feedback.A).toBe(explanation);
+    for (const choice of ["B", "C", "D"] as const) {
+      expect(feedback[choice]).toContain(`“${wrongOptions[choice]}”`);
+      expect(feedback[choice]).toContain(`“${correctOption}”`);
+      expect(feedback[choice]).toContain(explanation);
+      expect(feedback[choice]).not.toContain("…");
+    }
+  });
+
   it("never describes a distractor as merely differing from a keyed answer", () => {
     for (const question of allQuestions()) {
       const feedback = buildOptionExplanations(question);
+      const rationale = question.explanation.replace(/\s+/g, " ").trim();
       for (const choice of CHOICES) {
         if (choice === question.answer) continue;
-        expect(feedback[choice]).not.toMatch(
+        const generatedContrast = feedback[choice].endsWith(rationale)
+          ? feedback[choice].slice(0, -rationale.length)
+          : feedback[choice];
+        expect(generatedContrast).not.toMatch(
           /keyed answer|this is not (?:the|an) answer|wrong because it is wrong/i
         );
       }
@@ -156,6 +195,22 @@ describe("exam option explanations", () => {
     expect(feedback.C).toMatch(/^18 m exceeds the permitted maximum of 12 m\./);
     expect(feedback.D).toMatch(/^24 m exceeds the permitted maximum of 12 m\./);
     expect(feedback.A).not.toContain("Too low");
+  });
+
+  it("treats 'must not exceed' as a maximum rather than an exception", () => {
+    const question: ExamQuestion = {
+      number: 1,
+      prompt: "The nominal voltage must not exceed which value?",
+      options: { A: "230 V", B: "400 V", C: "500 V", D: "690 V" },
+      answer: "C",
+      explanation: "The stated maximum nominal voltage is 500 V."
+    };
+
+    const feedback = buildOptionExplanations(question);
+    expect(feedback.A).toMatch(/^230 V is below the permitted maximum of 500 V/);
+    expect(feedback.B).toMatch(/^400 V is below the permitted maximum of 500 V/);
+    expect(feedback.D).toMatch(/^690 V exceeds the permitted maximum of 500 V/);
+    expect(`${feedback.A} ${feedback.B} ${feedback.D}`).not.toContain("exception requested");
   });
 
   it("treats 'not less than' as a minimum rather than an exception", () => {
