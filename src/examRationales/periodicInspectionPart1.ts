@@ -4816,6 +4816,19 @@ function specificScenarioReason(
   }
 
   if (
+    /if an eicr for a rented dwelling identifies a c1 or c2 item/.test(
+      question,
+    )
+  ) {
+    if (/3 months/.test(choice)) {
+      return "That would leave a known C2 or required investigation outstanding for about 90 days, well beyond the normal limit of 28 days. Any shorter period stated in the report applies, and a C1 must be made safe immediately.";
+    }
+    if (/12 months/.test(choice)) {
+      return "A year-long delay is not allowed for a known safety finding. Required work is normally due within 28 days or the report's shorter period, while a C1 must be made safe immediately.";
+    }
+  }
+
+  if (
     /remedial or investigative work within|complete remedial work within|remedial completion within/.test(
       question,
     )
