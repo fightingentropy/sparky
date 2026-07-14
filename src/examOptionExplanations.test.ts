@@ -422,6 +422,30 @@ describe("exam option explanations", () => {
     );
   });
 
+  it("keeps rented-sector deadline distractors concise instead of repeating the answer rationale", () => {
+    const enhancedExam = applyExamExplanationEnhancements(
+      periodicInspectionExam as unknown as Exam,
+    );
+    const question = allQuestions([enhancedExam]).find((entry) =>
+      entry.prompt.startsWith(
+        "If an EICR for a rented dwelling identifies a C1 or C2 item",
+      ),
+    );
+
+    expect(question).toBeDefined();
+    const feedback = buildOptionExplanations(question!);
+    expect(feedback.A).toContain("outstanding for about 90 days");
+    expect(feedback.D).toContain("A year-long delay is not allowed");
+    for (const choice of ["A", "D"] as const) {
+      expect(feedback[choice]).toContain("28 days");
+      expect(feedback[choice]).toContain("C1 must be made safe immediately");
+      expect(feedback[choice]).not.toContain(
+        "For rented dwellings covered by the 2020 regulations",
+      );
+      expect(feedback[choice].match(/28 days/g)).toHaveLength(1);
+    }
+  });
+
   it("keeps an auditable source record for curated electrical rationales", () => {
     expect(EXAM_RATIONALE_SOURCES["mod-sampling-guide"]).toMatchObject({
       publisher: "UK Ministry of Defence",
