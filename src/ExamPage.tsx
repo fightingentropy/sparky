@@ -25,7 +25,7 @@ import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
 import { writeClipboardText } from "./clipboard";
 import { getExamClipboardText, getQuestionClipboardText } from "./examClipboard";
-import { buildOptionExplanations } from "./examOptionExplanations";
+import { buildOptionFeedback } from "./examOptionExplanations";
 import {
   downloadExamMarkdown,
   downloadExamPdf,
@@ -1303,7 +1303,7 @@ function QuestionCard({
   const preview = previewPinned || previewHovered || previewFocused;
   const reveal = submitted || preview;
   const answerPanelId = `exam-answer-${question.number}`;
-  const optionExplanations = useMemo(() => buildOptionExplanations(question), [question]);
+  const optionFeedback = useMemo(() => buildOptionFeedback(question), [question]);
 
   useEffect(() => {
     return () => {
@@ -1513,7 +1513,8 @@ function QuestionCard({
           const isSelected = selected === letter;
           const isAnswer = reveal && letter === correct;
           const isWrongPick = submitted && isSelected && letter !== correct;
-          const optionExplanation = reveal ? optionExplanations[letter] : undefined;
+          const feedback = reveal ? optionFeedback[letter] : undefined;
+          const optionExplanation = feedback?.kind === "fallback" ? undefined : feedback?.text;
           const optionFeedbackId = `exam-option-feedback-${question.number}-${letter}`;
           const classes = [
             "exam-option",
@@ -1548,9 +1549,6 @@ function QuestionCard({
                     />
                   ) : null}
                 </span>
-                {isSelected && !submitted && !isAnswer ? (
-                  <span className="exam-option-check" aria-hidden="true">✓</span>
-                ) : null}
                 {isAnswer ? (
                   <span className="exam-option-mark" aria-hidden="true">✓</span>
                 ) : null}
