@@ -10,3 +10,7 @@ package-lock.json
 .env.local
 .env.*.local
 .wrangler/
+ios/Sparky.xcodeproj/
+ios/build/
+ios/DerivedData/
+ios/Screenshots/

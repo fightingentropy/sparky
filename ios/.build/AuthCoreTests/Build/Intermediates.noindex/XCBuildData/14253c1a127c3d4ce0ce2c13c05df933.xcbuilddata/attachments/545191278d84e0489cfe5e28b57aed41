@@ -1,0 +1,269 @@
+{
+  "" : {
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Sparky-primary.dia",
+    "emit-module-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Sparky-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Sparky-primary-emit-module.dia",
+    "pch" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Sparky-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Sparky-primary.swiftdeps"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/App/AppRouter.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AppRouter.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AppRouter.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AppRouter.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AppRouter.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AppRouter.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AppRouter.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AppRouter.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AppRouter~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/App/RootView.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/RootView.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/RootView.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/RootView.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/RootView.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/RootView.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/RootView.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/RootView.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/RootView~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/App/SparkyApp.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyApp.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyApp.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyApp.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyApp.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyApp.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyApp.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyApp.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyApp~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Components/CopyButton.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CopyButton.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CopyButton.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CopyButton.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CopyButton.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CopyButton.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CopyButton.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CopyButton.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CopyButton~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Components/ExamImageView.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamImageView.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamImageView.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamImageView.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamImageView.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamImageView.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamImageView.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamImageView.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamImageView~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Components/LoadingStateView.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LoadingStateView.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LoadingStateView.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LoadingStateView.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LoadingStateView.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LoadingStateView.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LoadingStateView.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LoadingStateView.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LoadingStateView~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Components/StudyComponents.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyComponents.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyComponents.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyComponents.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyComponents.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyComponents.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyComponents.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyComponents.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyComponents~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Design/SparkyTheme.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyTheme.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyTheme.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyTheme.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyTheme.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyTheme.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyTheme.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyTheme.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/SparkyTheme~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Features/Exams/ExamsView.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamsView.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamsView.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamsView.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamsView.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamsView.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamsView.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamsView.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamsView~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Features/Learn/LearnView.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LearnView.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LearnView.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LearnView.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LearnView.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LearnView.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LearnView.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LearnView.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/LearnView~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Features/More/MoreView.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/MoreView.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/MoreView.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/MoreView.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/MoreView.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/MoreView.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/MoreView.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/MoreView.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/MoreView~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Features/Notes/NotesView.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/NotesView.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/NotesView.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/NotesView.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/NotesView.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/NotesView.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/NotesView.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/NotesView.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/NotesView~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Features/Tools/CalculatorEngine.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CalculatorEngine.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CalculatorEngine.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CalculatorEngine.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CalculatorEngine.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CalculatorEngine.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CalculatorEngine.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CalculatorEngine.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/CalculatorEngine~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Features/Tools/ToolsView.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ToolsView.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ToolsView.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ToolsView.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ToolsView.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ToolsView.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ToolsView.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ToolsView.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ToolsView~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Models/AuthModels.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthModels.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthModels.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthModels.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthModels.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthModels.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthModels.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthModels.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthModels~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Models/ContentModels.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentModels.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentModels.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentModels.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentModels.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentModels.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentModels.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentModels.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentModels~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Models/ExamModels.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamModels.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamModels.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamModels.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamModels.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamModels.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamModels.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamModels.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ExamModels~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Services/AuthAPIClient.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthAPIClient.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthAPIClient.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthAPIClient.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthAPIClient.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthAPIClient.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthAPIClient.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthAPIClient.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthAPIClient~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Services/AuthStore.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthStore.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthStore.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthStore.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthStore.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthStore.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthStore.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthStore.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/AuthStore~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Services/ContentStore.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentStore.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentStore.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentStore.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentStore.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentStore.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentStore.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentStore.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ContentStore~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Services/KeychainTokenStore.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/KeychainTokenStore.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/KeychainTokenStore.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/KeychainTokenStore.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/KeychainTokenStore.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/KeychainTokenStore.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/KeychainTokenStore.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/KeychainTokenStore.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/KeychainTokenStore~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Services/ProgressStore.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ProgressStore.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ProgressStore.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ProgressStore.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ProgressStore.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ProgressStore.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ProgressStore.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ProgressStore.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/ProgressStore~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Services/StudyStateStore.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyStateStore.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyStateStore.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyStateStore.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyStateStore.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyStateStore.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyStateStore.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyStateStore.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/StudyStateStore~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Utilities/Haptics.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Haptics.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Haptics.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Haptics.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Haptics.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Haptics.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Haptics.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Haptics.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Haptics~partial.swiftmodule"
+  },
+  "/Users/erlinhoxha/Developer/sparky/ios/Sparky/Utilities/Keyboard.swift" : {
+    "const-values" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Keyboard.swiftconstvalues",
+    "dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Keyboard.d",
+    "diagnostics" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Keyboard.dia",
+    "index-unit-output-path" : "/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Keyboard.o",
+    "llvm-bc" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Keyboard.bc",
+    "object" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Keyboard.o",
+    "swift-dependencies" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Keyboard.swiftdeps",
+    "swiftmodule" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/Sparky.build/Debug-iphonesimulator/Sparky.build/Objects-normal/arm64/Keyboard~partial.swiftmodule"
+  }
+}

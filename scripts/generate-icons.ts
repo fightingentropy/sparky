@@ -1,15 +1,30 @@
 import sharp from "sharp";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const iconsDir = join(here, "..", "public", "icons");
+const iosAppIconDir = join(
+  here,
+  "..",
+  "ios",
+  "Sparky",
+  "Resources",
+  "Assets.xcassets",
+  "AppIcon.appiconset"
+);
 
-async function render(svgPath: string, outPath: string, size: number) {
+async function render(svgPath: string, outPath: string, size: number, opaque = false) {
   const svg = await readFile(svgPath);
-  const buffer = await sharp(svg, { density: 512 })
-    .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  let pipeline = sharp(svg, { density: 512 }).resize(size, size, {
+    fit: "contain",
+    background: { r: 0, g: 0, b: 0, alpha: 0 },
+  });
+  if (opaque) {
+    pipeline = pipeline.flatten({ background: "#1b1d20" }).removeAlpha();
+  }
+  const buffer = await pipeline
     .png({ compressionLevel: 9 })
     .toBuffer();
   await writeFile(outPath, buffer);
@@ -26,3 +41,8 @@ await render(iconSvg, join(iconsDir, "icon-192.png"), 192);
 await render(iconSvg, join(iconsDir, "icon-512.png"), 512);
 await render(iconSvg, join(iconsDir, "apple-touch-icon.png"), 180);
 await render(maskableSvg, join(iconsDir, "maskable-512.png"), 512);
+
+// iOS applies its own icon mask, so use the opaque, full-bleed maskable source
+// rather than the already-rounded web icon.
+await mkdir(iosAppIconDir, { recursive: true });
+await render(maskableSvg, join(iosAppIconDir, "AppIcon.png"), 1024, true);

@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'SparkyTests' in project 'Sparky'
+➜ Explicit dependency on target 'Sparky' in project 'Sparky'
+Target 'Sparky' in project 'Sparky' (no dependencies)

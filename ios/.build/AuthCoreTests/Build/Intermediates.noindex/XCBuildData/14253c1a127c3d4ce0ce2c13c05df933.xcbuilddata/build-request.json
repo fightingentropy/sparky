@@ -1,0 +1,75 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildAndRun"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "853b68b5c3642b11aeeebe060208cd7c470a5a555a607453b34627737c32c904"
+    },
+    {
+      "guid" : "853b68b5c3642b11aeeebe060208cd7c35fe49091e0a3ffcaab13d0b6b5cf61f"
+    }
+  ],
+  "containerPath" : "/Users/erlinhoxha/Developer/sparky/ios/Sparky.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "arm64",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : false,
+      "hostTargetedPlatform" : null,
+      "platform" : "iphonesimulator",
+      "sdk" : "iphonesimulator26.5",
+      "sdkVariant" : "iphonesimulator",
+      "supportedArchitectures" : [
+        "arm64"
+      ],
+      "targetArchitecture" : "arm64"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Products",
+      "derivedDataPath" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests",
+      "indexDataStoreFolderPath" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Debug",
+    "overrides" : {
+      "commandLine" : {
+        "table" : {
+          "CODE_SIGNING_ALLOWED" : "NO"
+        }
+      },
+      "synthesized" : {
+        "table" : {
+          "ASSETCATALOG_FILTER_FOR_DEVICE_MODEL" : "iPhone18,1",
+          "ASSETCATALOG_FILTER_FOR_DEVICE_OS_VERSION" : "26.5",
+          "ASSETCATALOG_FILTER_FOR_THINNING_DEVICE_CONFIGURATION" : "iPhone18,1",
+          "BUILD_ACTIVE_RESOURCES_ONLY" : "YES",
+          "CLANG_COVERAGE_MAPPING" : "YES",
+          "CLANG_PROFILE_DATA_DIRECTORY" : "/Users/erlinhoxha/Developer/sparky/ios/.build/AuthCoreTests/Build/ProfileData",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES",
+          "TARGET_DEVICE_IDENTIFIER" : "FBA14CF8-2A90-4805-9C7E-DB0A3C5B0002",
+          "TARGET_DEVICE_MODEL" : "iPhone18,1",
+          "TARGET_DEVICE_OS_VERSION" : "26.5",
+          "TARGET_DEVICE_PLATFORM_NAME" : "iphonesimulator",
+          "TOOLCHAINS" : "com.apple.dt.toolchain.Metal.32023.883 $(inherited)"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "test",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

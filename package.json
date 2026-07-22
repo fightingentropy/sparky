@@ -16,7 +16,9 @@
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "check": "bun run lint && bun run test && bun run build",
-    "icons": "bun run scripts/generate-icons.ts"
+    "icons": "bun run scripts/generate-icons.ts",
+    "ios:content": "bun run scripts/export-ios-content.ts",
+    "ios:project": "bun run ios:content && cd ios && xcodegen generate"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
