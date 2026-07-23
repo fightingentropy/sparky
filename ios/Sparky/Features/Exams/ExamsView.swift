@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 import UIKit
 
 struct ExamsView: View {
@@ -394,6 +395,16 @@ private struct ExamSessionView: View {
     @State private var showingNavigator = false
     @State private var showingSubmitConfirmation = false
     @State private var showingResetConfirmation = false
+    @State private var copiedFullExam = false
+    @State private var copyFeedbackToken = UUID()
+    @State private var exportDocument: ExamActionFileDocument?
+    @State private var exportContentType: UTType = .sparkyMarkdown
+    @State private var exportFilename = ""
+    @State private var isPresentingExporter = false
+    @State private var isPreparingPDF = false
+    @State private var exportErrorMessage: String?
+
+    private static let websiteBaseURL = URL(string: "https://electrics.pages.dev/")!
 
     private var questions: [ExamQuestion] { test.questions }
     private var progress: ExamVariantProgress {
@@ -418,7 +429,6 @@ private struct ExamSessionView: View {
                             if progress.submitted {
                                 resultBanner
                             }
-                            ExamActionBar(exam: exam, test: test)
                             questionHeader(question)
                             QuestionCard(
                                 question: question,
@@ -457,17 +467,15 @@ private struct ExamSessionView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     showingNavigator = true
                 } label: {
                     Image(systemName: "square.grid.3x3")
                 }
                 .accessibilityLabel("Question navigator")
-            }
 
-            if let question, !progress.submitted {
-                ToolbarItem(placement: .topBarTrailing) {
+                if let question, !progress.submitted {
                     Button {
                         _ = progressStore.toggleFlag(
                             question.number,
@@ -481,6 +489,14 @@ private struct ExamSessionView: View {
                     .tint(progress.flaggedQuestions.contains(question.number) ? Color.sparkyAccent : nil)
                     .accessibilityLabel(progress.flaggedQuestions.contains(question.number) ? "Remove flag" : "Flag question")
                 }
+
+                ExamActionsMenu(
+                    copied: copiedFullExam,
+                    isPreparingPDF: isPreparingPDF,
+                    onCopy: copyFullExam,
+                    onExportMarkdown: prepareMarkdownExport,
+                    onExportPDF: preparePDFExport
+                )
             }
         }
         .safeAreaInset(edge: .bottom) { examControls }
@@ -492,6 +508,29 @@ private struct ExamSessionView: View {
                 currentIndex: $currentIndex
             )
             .presentationDetents([.medium, .large])
+        }
+        .fileExporter(
+            isPresented: $isPresentingExporter,
+            document: exportDocument,
+            contentType: exportContentType,
+            defaultFilename: exportFilename
+        ) { result in
+            handleExportCompletion(result)
+        }
+        .alert(
+            "Couldn’t export exam",
+            isPresented: Binding(
+                get: { exportErrorMessage != nil },
+                set: { isPresented in
+                    if !isPresented {
+                        exportErrorMessage = nil
+                    }
+                }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(exportErrorMessage ?? "Please try again.")
         }
         .confirmationDialog(
             "Submit \(test.title)?",
@@ -655,6 +694,95 @@ private struct ExamSessionView: View {
         progressStore.submit(examID: exam.id, testID: test.id)
         Haptics.success()
         currentIndex = 0
+    }
+
+    private func copyFullExam() {
+        UIPasteboard.general.string = ExamExport.fullExamClipboardText(test: test)
+        Haptics.success()
+        UIAccessibility.post(notification: .announcement, argument: "Full exam copied")
+
+        copiedFullExam = true
+        let token = UUID()
+        copyFeedbackToken = token
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.4))
+            guard copyFeedbackToken == token else { return }
+            copiedFullExam = false
+        }
+    }
+
+    private func prepareMarkdownExport() {
+        let markdown = ExamExport.markdownText(test: test, baseURL: Self.websiteBaseURL)
+        Task { @MainActor in
+            await Task.yield()
+            presentExporter(
+                data: Data(markdown.utf8),
+                type: .sparkyMarkdown,
+                filename: ExamExport.filename(
+                    examID: exam.id,
+                    testNumber: test.index + 1,
+                    extension: .markdown
+                )
+            )
+        }
+    }
+
+    private func preparePDFExport() {
+        guard !isPreparingPDF else { return }
+        isPreparingPDF = true
+
+        Task { @MainActor in
+            await Task.yield()
+            let data = ExamExport.pdfData(
+                test: test,
+                imageData: ExamImageResource.data(for: test),
+                baseURL: Self.websiteBaseURL
+            )
+
+            isPreparingPDF = false
+            guard !data.isEmpty else {
+                exportErrorMessage = "The PDF could not be created. Please try again."
+                return
+            }
+
+            await Task.yield()
+            presentExporter(
+                data: data,
+                type: .pdf,
+                filename: ExamExport.filename(
+                    examID: exam.id,
+                    testNumber: test.index + 1,
+                    extension: .pdf
+                )
+            )
+        }
+    }
+
+    private func presentExporter(data: Data, type: UTType, filename: String) {
+        exportDocument = ExamActionFileDocument(data: data)
+        exportContentType = type
+        exportFilename = filename
+        isPresentingExporter = true
+    }
+
+    private func handleExportCompletion(_ result: Result<URL, Error>) {
+        switch result {
+        case .success:
+            Haptics.success()
+        case .failure(let error):
+            guard !isCancellation(error) else { return }
+            exportErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func isCancellation(_ error: Error) -> Bool {
+        if error is CancellationError {
+            return true
+        }
+
+        let cocoaError = error as NSError
+        return cocoaError.domain == NSCocoaErrorDomain
+            && cocoaError.code == NSUserCancelledError
     }
 }
 
