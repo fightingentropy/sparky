@@ -418,6 +418,7 @@ private struct ExamSessionView: View {
                             if progress.submitted {
                                 resultBanner
                             }
+                            ExamActionBar(exam: exam, test: test)
                             questionHeader(question)
                             QuestionCard(
                                 question: question,
@@ -465,7 +466,7 @@ private struct ExamSessionView: View {
                 .accessibilityLabel("Question navigator")
             }
 
-            if let question {
+            if let question, !progress.submitted {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         _ = progressStore.toggleFlag(
@@ -722,10 +723,7 @@ private struct QuestionCard: View {
     }
 
     private var clipboardText: String {
-        let options = ExamChoice.allCases
-            .map { "\($0.rawValue). \(question.options[$0])" }
-            .joined(separator: "\n")
-        return "Question \(question.number)\n\(question.prompt)\n\n\(options)"
+        ExamExport.questionClipboardText(question)
     }
 }
 
@@ -918,7 +916,9 @@ private struct QuestionNavigatorSheet: View {
             case .unanswered: progress.answers[question.number] == nil
             case .flagged: progress.flaggedQuestions.contains(question.number)
             case .wrong:
-                progress.submitted && progress.answers[question.number] != question.answer
+                progress.submitted
+                    && progress.answers[question.number] != nil
+                    && progress.answers[question.number] != question.answer
             }
         }
     }
@@ -1005,6 +1005,9 @@ private struct QuestionNavigatorSheet: View {
 
     private func statusText(_ question: ExamQuestion) -> String {
         if progress.submitted {
+            if progress.answers[question.number] == nil {
+                return "unanswered"
+            }
             return progress.answers[question.number] == question.answer ? "correct" : "incorrect"
         }
         return progress.answers[question.number] == nil ? "unanswered" : "answered"
