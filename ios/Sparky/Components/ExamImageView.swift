@@ -6,18 +6,7 @@ struct ExamImageView: View {
     var maxHeight: CGFloat = 260
 
     private var image: UIImage? {
-        let normalized = path.removingPercentEncoding ?? path
-        let fileName = URL(fileURLWithPath: normalized).lastPathComponent
-        let base = (fileName as NSString).deletingPathExtension
-        let ext = (fileName as NSString).pathExtension
-
-        let candidates = [
-            Bundle.main.url(forResource: base, withExtension: ext, subdirectory: "exam-images"),
-            Bundle.main.url(forResource: base, withExtension: ext)
-        ]
-
-        guard let url = candidates.compactMap({ $0 }).first else { return nil }
-        return UIImage(contentsOfFile: url.path)
+        ExamImageResource.image(for: path)
     }
 
     var body: some View {
@@ -47,4 +36,3 @@ struct ExamImageView: View {
         }
     }
 }
-
