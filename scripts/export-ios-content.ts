@@ -7,11 +7,14 @@ import { COURSE_GUIDES } from "../src/courseGuides";
 import { applyExamExplanationEnhancements } from "../src/examExplanationEnhancements";
 import { buildOptionFeedback } from "../src/examOptionExplanations";
 import { applyExamSolutionTables } from "../src/examSolutionTables";
+import { buildFundamentalInspectionExam } from "../src/fundamentalInspectionExam";
+import { buildInitialVerificationExam } from "../src/initialVerificationExam";
 import {
   getSectionQuestionsForVariant,
   getVariantCount,
 } from "../src/examUtils";
 import type { Exam, ExamQuestion } from "../src/exams/types";
+import { PRIMARY_EXAM_IDS } from "../src/examTaxonomy";
 import { TUTORIALS } from "../src/tutorials";
 
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -320,6 +323,7 @@ async function main(): Promise<void> {
 
   const exportedExams: ExportedExam[] = [];
   const seenExamIds = new Set<string>();
+  let enhancedInitialVerification: Exam | undefined;
 
   for (const fileName of examFileNames) {
     const sourcePath = join(EXAM_SOURCE_DIR, fileName);
@@ -335,16 +339,60 @@ async function main(): Promise<void> {
     const enhancedExam = applyExamSolutionTables(
       applyExamExplanationEnhancements(sourceExam),
     );
+    if (enhancedExam.id === "initial-verification") {
+      enhancedInitialVerification = enhancedExam;
+      continue;
+    }
     const exportedExam = makeExportedExam(enhancedExam);
     exportedExams.push(exportedExam);
     await writeCompactJson(join(EXAM_OUTPUT_DIR, fileName), exportedExam);
   }
 
-  await removeStaleExamExports(new Set(examFileNames));
+  if (!enhancedInitialVerification) {
+    fail("initial-verification source exam is required to build the focused exams");
+  }
 
+  const initialVerificationExam = buildInitialVerificationExam(
+    enhancedInitialVerification,
+  );
+  const exportedInitialVerificationExam = makeExportedExam(
+    initialVerificationExam,
+  );
+  exportedExams.push(exportedInitialVerificationExam);
+  await writeCompactJson(
+    join(EXAM_OUTPUT_DIR, "initial-verification.json"),
+    exportedInitialVerificationExam,
+  );
+
+  const fundamentalExam = buildFundamentalInspectionExam(enhancedInitialVerification);
+  if (seenExamIds.has(fundamentalExam.id)) {
+    fail(`duplicate exam id ${fundamentalExam.id}`);
+  }
+  const fundamentalFileName = `${fundamentalExam.id}.json`;
+  seenExamIds.add(fundamentalExam.id);
+  const exportedFundamentalExam = makeExportedExam(fundamentalExam);
+  exportedExams.push(exportedFundamentalExam);
+  await writeCompactJson(
+    join(EXAM_OUTPUT_DIR, fundamentalFileName),
+    exportedFundamentalExam,
+  );
+
+  await removeStaleExamExports(new Set([...examFileNames, fundamentalFileName]));
+
+  const primaryOrder = new Map(
+    PRIMARY_EXAM_IDS.map((examId, index) => [examId, index]),
+  );
   const indexEntries = exportedExams
     .map(makeExamIndexEntry)
-    .sort((left, right) => left.title.localeCompare(right.title, "en-GB"));
+    .sort((left, right) => {
+      const leftOrder = primaryOrder.get(left.id);
+      const rightOrder = primaryOrder.get(right.id);
+      if (leftOrder !== undefined || rightOrder !== undefined) {
+        return (leftOrder ?? Number.MAX_SAFE_INTEGER) -
+          (rightOrder ?? Number.MAX_SAFE_INTEGER);
+      }
+      return left.title.localeCompare(right.title, "en-GB");
+    });
 
   await Promise.all([
     writeCompactJson(join(CONTENT_OUTPUT_DIR, "course-guides.json"), COURSE_GUIDES),
