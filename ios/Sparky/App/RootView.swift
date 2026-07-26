@@ -6,35 +6,66 @@ struct RootView: View {
     let studyState: StudyStateStore
     let router: AppRouter
 
+    @AppStorage(NavigationPreferences.storageKey)
+    private var hiddenTabsStorage = NavigationPreferences.defaultStorageValue
+
+    private var visibleTabs: [AppTab] {
+        NavigationPreferences.visibleTabs(from: hiddenTabsStorage)
+    }
+
     var body: some View {
         @Bindable var router = router
 
         TabView(selection: $router.selectedTab) {
+            ForEach(visibleTabs) { tab in
+                tabContent(tab)
+                    .tag(tab)
+                    .tabItem { Label(tab.title, systemImage: tab.systemImage) }
+            }
+        }
+        .onChange(of: router.selectedTab) { _, _ in Haptics.selection() }
+        .onChange(of: hiddenTabsStorage) { _, _ in selectVisibleTabIfNeeded() }
+        .onAppear { selectVisibleTabIfNeeded() }
+        .sheet(isPresented: $router.isPresentingSettings) {
+            NavigationStack {
+                SettingsView(
+                    contentStore: contentStore,
+                    studyState: studyState,
+                    progressStore: progressStore
+                )
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { router.isPresentingSettings = false }
+                            .fontWeight(.semibold)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func tabContent(_ tab: AppTab) -> some View {
+        switch tab {
+        case .tools:
             ToolsView(studyState: studyState)
-                .tag(AppTab.tools)
-                .tabItem { Label("Tools", systemImage: "wrench.adjustable") }
-
+        case .notes:
             NotesView()
-                .tag(AppTab.notes)
-                .tabItem { Label("Notes", systemImage: "doc.text") }
-
+        case .learn:
             LearnView()
-                .tag(AppTab.learn)
-                .tabItem { Label("Learn", systemImage: "graduationcap") }
-
+        case .exams:
             ExamsView(contentStore: contentStore, progressStore: progressStore)
-                .tag(AppTab.exams)
-                .tabItem { Label("Exams", systemImage: "checklist") }
-
+        case .more:
             MoreView(
                 contentStore: contentStore,
                 tutorials: contentStore.tutorials,
                 studyState: studyState,
                 progressStore: progressStore
             )
-                .tag(AppTab.more)
-                .tabItem { Label("More", systemImage: "ellipsis.circle") }
         }
-        .onChange(of: router.selectedTab) { _, _ in Haptics.selection() }
+    }
+
+    private func selectVisibleTabIfNeeded() {
+        guard !visibleTabs.contains(router.selectedTab) else { return }
+        router.selectedTab = visibleTabs[0]
     }
 }
