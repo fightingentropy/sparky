@@ -1,6 +1,9 @@
 import type { Exam } from "./exams/types";
 import { applyExamExplanationEnhancements } from "./examExplanationEnhancements";
 import { applyExamSolutionTables } from "./examSolutionTables";
+import { buildFundamentalInspectionExam } from "./fundamentalInspectionExam";
+import { buildInitialVerificationExam } from "./initialVerificationExam";
+import { PRIMARY_EXAM_TITLES } from "./examTaxonomy";
 import eighteenthEditionUrl from "./exam-data/18th-edition.json?url";
 import am2InstallationAssessmentUrl from "./exam-data/am2-installation-assessment.json?url";
 import buildingRegulationsUrl from "./exam-data/building-regulations.json?url";
@@ -36,6 +39,8 @@ const EXAM_ASSET_URLS = {
 type ExamAssetId = keyof typeof EXAM_ASSET_URLS;
 
 const examCache = new Map<ExamAssetId, Promise<Exam>>();
+let fundamentalExamCache: Promise<Exam> | undefined;
+let initialVerificationExamCache: Promise<Exam> | undefined;
 
 function loadExamAsset(id: ExamAssetId): Promise<Exam> {
   const cached = examCache.get(id);
@@ -65,18 +70,41 @@ function makeExamEntry<T extends ExamAssetId>(id: T, title: string): ExamRegistr
   };
 }
 
+function loadFundamentalInspectionExam(): Promise<Exam> {
+  fundamentalExamCache ??= loadExamAsset("initial-verification").then(
+    buildFundamentalInspectionExam
+  );
+  return fundamentalExamCache;
+}
+
+function loadInitialVerificationExam(): Promise<Exam> {
+  initialVerificationExamCache ??= loadExamAsset("initial-verification").then(
+    buildInitialVerificationExam
+  );
+  return initialVerificationExamCache;
+}
+
 export const EXAM_REGISTRY = [
+  makeExamEntry("building-regulations", PRIMARY_EXAM_TITLES["building-regulations"]),
+  makeExamEntry("18th-edition", PRIMARY_EXAM_TITLES["18th-edition"]),
+  {
+    id: "fundamental-inspection-testing",
+    title: PRIMARY_EXAM_TITLES["fundamental-inspection-testing"],
+    load: loadFundamentalInspectionExam
+  },
+  makeExamEntry("pat-testing", PRIMARY_EXAM_TITLES["pat-testing"]),
+  makeExamEntry("periodic-inspection", PRIMARY_EXAM_TITLES["periodic-inspection"]),
+  {
+    id: "initial-verification",
+    title: PRIMARY_EXAM_TITLES["initial-verification"],
+    load: loadInitialVerificationExam
+  },
   makeExamEntry("ecs-health-safety", "ECS Health & Safety"),
   makeExamEntry("level-2-electrical-installation", "Level 2 Electrical Installation"),
   makeExamEntry("level-3-electrical-installation", "Level 3 Electrical Installation"),
-  makeExamEntry("18th-edition", "18th Edition (BS 7671)"),
-  makeExamEntry("building-regulations", "Building Regulations & Part P"),
-  makeExamEntry("pat-testing", "Pat Testing"),
   makeExamEntry("special-locations", "Special Locations"),
-  makeExamEntry("am2-installation-assessment", "AM2 / AM2E — Installation Electrician EPA"),
-  makeExamEntry("initial-verification", "Initial Verification"),
-  makeExamEntry("periodic-inspection", "Periodic Inspection & Condition Reporting"),
-  makeExamEntry("inspection-design-2396", "Inspection & Design 2396")
+  makeExamEntry("inspection-design-2396", "Inspection & Design 2396"),
+  makeExamEntry("am2-installation-assessment", "AM2 / AM2E — Installation Electrician EPA")
 ] as const satisfies readonly ExamRegistryEntry[];
 
 export const DEFAULT_EXAM_ID = EXAM_REGISTRY[0].id;
@@ -87,6 +115,8 @@ export const DEFAULT_HIDDEN_EXAM_IDS = [
   "ecs-health-safety",
   "level-2-electrical-installation",
   "level-3-electrical-installation",
+  "special-locations",
+  "inspection-design-2396",
   "am2-installation-assessment"
 ] as const satisfies readonly ExamId[];
 

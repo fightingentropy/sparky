@@ -7,12 +7,12 @@ final class ContentStoreTests: XCTestCase {
         let store = try ContentStore(contentDirectory: contentDirectory)
 
         XCTAssertEqual(store.catalog.schemaVersion, 1)
-        XCTAssertEqual(store.catalog.examCount, 11)
-        XCTAssertEqual(store.catalog.exams.count, 11)
-        XCTAssertEqual(store.catalog.variantCount, 103)
-        XCTAssertEqual(store.catalog.questionCount, 4_289)
+        XCTAssertEqual(store.catalog.examCount, 12)
+        XCTAssertEqual(store.catalog.exams.count, 12)
+        XCTAssertEqual(store.catalog.variantCount, 97)
+        XCTAssertEqual(store.catalog.questionCount, 4_005)
         XCTAssertEqual(store.notes.count, 43)
-        XCTAssertEqual(store.guides.count, 12)
+        XCTAssertEqual(store.guides.count, 13)
         XCTAssertEqual(store.tutorials.count, 7)
 
         XCTAssertNotNil(store.note(id: "cheat-core-formulas"))
@@ -22,6 +22,58 @@ final class ContentStoreTests: XCTestCase {
         let swatches = store.notes.flatMap { $0.legend ?? [] }.compactMap(\.swatch)
         XCTAssertTrue(swatches.contains { if case .color = $0 { true } else { false } })
         XCTAssertTrue(swatches.contains { if case .colors = $0 { true } else { false } })
+    }
+
+    @MainActor
+    func testLoadsFundamentalExam() throws {
+        let store = try ContentStore(contentDirectory: contentDirectory)
+        let primaryIDs = [
+            "building-regulations",
+            "18th-edition",
+            "fundamental-inspection-testing",
+            "pat-testing",
+            "periodic-inspection",
+            "initial-verification"
+        ]
+
+        XCTAssertEqual(Array(store.catalog.exams.prefix(primaryIDs.count)).map(\.id), primaryIDs)
+
+        let index = try XCTUnwrap(store.examIndex(id: "fundamental-inspection-testing"))
+        let exam = try store.loadExam(id: index.id)
+        let test = try XCTUnwrap(exam.tests.first)
+
+        XCTAssertEqual(exam.title, "Fundamental Inspection and Testing")
+        XCTAssertEqual(exam.tests.count, 1)
+        XCTAssertEqual(test.questionCount, 30)
+        XCTAssertEqual(test.questions.map(\.number), Array(1...30))
+        XCTAssertTrue(exam.format.contains("60 minutes"))
+        XCTAssertTrue(exam.format.contains("Guidance Note 3"))
+    }
+
+    @MainActor
+    func testLoadsFocusedInitialVerificationExam() throws {
+        let store = try ContentStore(contentDirectory: contentDirectory)
+        let index = try XCTUnwrap(store.examIndex(id: "initial-verification"))
+        let exam = try store.loadExam(id: index.id)
+        let test = try XCTUnwrap(exam.tests.first)
+
+        XCTAssertEqual(exam.title, "Initial Verification")
+        XCTAssertEqual(exam.tests.count, 1)
+        XCTAssertEqual(test.questionCount, 55)
+        XCTAssertEqual(test.questions.map(\.number), Array(1...55))
+        XCTAssertTrue(exam.format.contains("90 minutes"))
+        XCTAssertTrue(exam.format.contains("Guidance Note 3"))
+
+        let questionText = test.questions
+            .map {
+                let options = $0.options.ordered.map { $0.text }.joined(separator: " ")
+                return "\($0.prompt) \(options) \($0.explanation)"
+            }
+            .joined(separator: " ")
+            .lowercased()
+        XCTAssertFalse(questionText.contains("periodic"))
+        XCTAssertFalse(questionText.contains("eicr"))
+        XCTAssertFalse(questionText.contains("condition report"))
     }
 
     @MainActor
@@ -95,6 +147,20 @@ final class ContentStoreTests: XCTestCase {
             validExamIDs: validIDs
         )
         XCTAssertEqual(defaults, ExamLibraryPreferences.defaultHiddenExamIDs)
+        XCTAssertEqual(
+            ExamLibraryPreferences.visibleExams(
+                in: store.catalog,
+                storageValue: "not-json"
+            ).map(\.id),
+            [
+                "building-regulations",
+                "18th-edition",
+                "fundamental-inspection-testing",
+                "pat-testing",
+                "periodic-inspection",
+                "initial-verification"
+            ]
+        )
 
         let stored = ExamLibraryPreferences.storageValue(
             for: ["18th-edition", "removed-exam"]

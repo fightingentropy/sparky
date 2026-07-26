@@ -444,6 +444,7 @@ final class ExamProgressSyncService {
     private nonisolated static let remoteResetCutoffs: [String: Date] = {
         let common = Date(timeIntervalSince1970: 1_779_829_260) // 2026-05-26 21:01 UTC
         let periodic = Date(timeIntervalSince1970: 1_780_790_400) // 2026-06-07 00:00 UTC
+        let initialVerification = Date(timeIntervalSince1970: 1_785_091_200) // 2026-07-26 18:40 UTC
         return [
             "level-2-electrical-installation": common,
             "level-3-electrical-installation": common,
@@ -451,7 +452,8 @@ final class ExamProgressSyncService {
             "18th-edition": common,
             "special-locations": common,
             "pat-testing": common,
-            "initial-verification": common,
+            "fundamental-inspection-testing": common,
+            "initial-verification": initialVerification,
             "inspection-design-2396": common,
             "periodic-inspection": periodic,
             "am2-installation-assessment": common,

@@ -26,15 +26,37 @@ import level3ElectricalInstallationExam from "./exam-data/level-3-electrical-ins
 import patTestingExam from "./exam-data/pat-testing.json";
 import periodicInspectionExam from "./exam-data/periodic-inspection.json";
 import specialLocationsExam from "./exam-data/special-locations.json";
+import { applyExamExplanationEnhancements } from "./examExplanationEnhancements";
+import { applyExamSolutionTables } from "./examSolutionTables";
+import {
+  buildFundamentalInspectionExam,
+  FUNDAMENTAL_BLUEPRINT_COUNTS
+} from "./fundamentalInspectionExam";
+import {
+  buildInitialVerificationExam,
+  INITIAL_VERIFICATION_BLUEPRINT_COUNTS
+} from "./initialVerificationExam";
+import { PRIMARY_EXAM_TITLES } from "./examTaxonomy";
+
+const initialVerificationSource = applyExamSolutionTables(
+  applyExamExplanationEnhancements(initialVerificationExam as unknown as Exam)
+);
+const fundamentalInspectionExam = buildFundamentalInspectionExam(
+  initialVerificationSource
+);
+const focusedInitialVerificationExam = buildInitialVerificationExam(
+  initialVerificationSource
+);
 
 const EXAMS: Exam[] = [
   level2ElectricalInstallationExam,
   level3ElectricalInstallationExam,
   buildingRegulationsExam,
   eighteenthEditionExam,
+  fundamentalInspectionExam,
   specialLocationsExam,
   patTestingExam,
-  initialVerificationExam,
+  focusedInitialVerificationExam,
   inspectionDesign2396Exam,
   periodicInspectionExam,
   am2Exam,
@@ -48,6 +70,7 @@ const expectedExamOrder = [
   "level-3-electrical-installation",
   "building-regulations",
   "18th-edition",
+  "fundamental-inspection-testing",
   "special-locations",
   "pat-testing",
   "initial-verification",
@@ -67,10 +90,10 @@ const expectedPerAttempt: Record<string, number[]> = {
     60, 60, 60, 60, 60, 59, 60, 59, 60, 60, 59, 59, 60, 60, 59, 60, 60, 60, 59, 60, 60, 59, 60, 60,
     60
   ],
+  "fundamental-inspection-testing": [30],
   "special-locations": [30],
   "pat-testing": [50, 50, 50, 30],
-  // variant 5 dropped a duplicate question (90 -> 89).
-  "initial-verification": [40, 40, 40, 40, 60, 89, 30, 30],
+  "initial-verification": [55],
   // variant 3 dropped three duplicate questions (30 -> 27).
   "inspection-design-2396": [30, 30, 30, 27, 30, 30, 30, 30, 30, 30, 30, 30, 30, 18],
   "periodic-inspection": repeat(40, 5),
@@ -91,7 +114,6 @@ const sourceExamIds = new Set([
   "18th-edition",
   "special-locations",
   "pat-testing",
-  "initial-verification",
   "inspection-design-2396",
   "am2-installation-assessment",
   "ecs-health-safety"
@@ -130,6 +152,51 @@ function isBareReference(value: string): boolean {
 describe("exam data", () => {
   it("exposes the canonical exams in the expected order", () => {
     expect(EXAMS.map((exam) => exam.id)).toEqual(expectedExamOrder);
+  });
+
+  it("uses the exact published names for all six primary exams", () => {
+    for (const [examId, title] of Object.entries(PRIMARY_EXAM_TITLES)) {
+      expect(EXAMS.find((exam) => exam.id === examId)?.title).toBe(title);
+    }
+  });
+
+  it("builds Fundamental as a separate 30-question single-phase mock", () => {
+    expect(Object.values(FUNDAMENTAL_BLUEPRINT_COUNTS).reduce((sum, count) => sum + count, 0))
+      .toBe(30);
+    expect(getVariantCount(fundamentalInspectionExam)).toBe(1);
+    expect(getQuestionsForVariant(fundamentalInspectionExam, 0)).toHaveLength(30);
+    expect(fundamentalInspectionExam.format).toContain("60 minutes");
+    expect(fundamentalInspectionExam.format).toContain("Guidance Note 3");
+    expect(
+      getQuestionsForVariant(fundamentalInspectionExam, 0).map((question) => question.prompt)
+    ).not.toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/\bthree[- ]phase\b|\b3[- ]phase\b|periodic inspection|EICR/i)
+      ])
+    );
+  });
+
+  it("builds a focused 55-question Initial Verification mock", () => {
+    expect(
+      Object.values(INITIAL_VERIFICATION_BLUEPRINT_COUNTS)
+        .reduce((sum, count) => sum + count, 0)
+    ).toBe(55);
+    expect(Object.values(INITIAL_VERIFICATION_BLUEPRINT_COUNTS)).toEqual([
+      7, 3, 8, 7, 11, 13, 5, 1
+    ]);
+    expect(getVariantCount(focusedInitialVerificationExam)).toBe(1);
+    const questions = getQuestionsForVariant(focusedInitialVerificationExam, 0);
+    expect(questions).toHaveLength(55);
+    expect(focusedInitialVerificationExam.format).toContain("90 minutes");
+    expect(focusedInitialVerificationExam.format).toContain("Guidance Note 3");
+    expect(focusedInitialVerificationExam.passPercent).toBe(0.6);
+    expect(JSON.stringify(questions)).not.toMatch(
+      /\bperiodic\b|\bEICR\b|condition report|classification code|next inspection/i
+    );
+    expect(JSON.stringify(questions)).not.toMatch(
+      /Questions \d+ (?:to|and) \d+|Figure \d+/i
+    );
+    expect(JSON.stringify(questions)).toMatch(/\bthree[- ]phase\b/i);
   });
 
   it("has valid variants, sections, questions, media and scoring bands", () => {
@@ -310,7 +377,8 @@ describe("exam data", () => {
       "18th-edition": "source-mock-18th-edition",
       "special-locations": "source-mock-special-locations",
       "pat-testing": "source-mock-pat",
-      "initial-verification": "source-mock-2391",
+      "fundamental-inspection-testing": "fundamental-inspection-testing",
+      "initial-verification": "initial-verification",
       "inspection-design-2396": "source-mock-2396",
       "am2-installation-assessment": "source-mock-am2",
       "ecs-health-safety": "source-mock-ecs-health-safety"
@@ -342,13 +410,11 @@ describe("exam data", () => {
       ],
       "pat-testing": [{ variant: 0, length: 50, firstPrompt: "Class I equipment:" }],
       "initial-verification": [
-        { variant: 0, length: 40, firstPrompt: "What is the main purpose of an Initial Verification?" },
-        { variant: 1, length: 40, firstPrompt: "Increasing the length of the cable will not affect the:" },
-        { variant: 4, length: 60, firstPrompt: "What needs to be verified during the inspection of a new installation?" },
         {
-          variant: 5,
-          length: 89,
-          firstPrompt: "On completion of a new installation, the Electrical Installation Certificate would 'not' be signed by the:"
+          variant: 0,
+          length: 55,
+          firstPrompt:
+            "How many voltage measurements are required to confirm that a three-phase four-wire installation is safely isolated?"
         }
       ],
       "inspection-design-2396": [
@@ -379,13 +445,6 @@ describe("exam data", () => {
       }
     }
 
-    const initial = EXAMS.find((entry) => entry.id === "initial-verification");
-    expect(initial).toBeDefined();
-    const repairedQuestion = getQuestionsForVariant(initial!, 1)[11];
-    expect(repairedQuestion.prompt).toBe("Prior to energising, polarity should be tested using?");
-    expect(repairedQuestion.options[repairedQuestion.answer]).toBe(
-      "A continuity tester or low-resistance ohmmeter"
-    );
   });
 
   it("keeps source image questions renderable", () => {
@@ -412,6 +471,7 @@ describe("exam data", () => {
       "18th-edition": 0.6,
       "special-locations": 0.6,
       "pat-testing": 0.8,
+      "fundamental-inspection-testing": 0.6,
       "initial-verification": 0.6,
       "inspection-design-2396": 0.6,
       "periodic-inspection": 0.75,

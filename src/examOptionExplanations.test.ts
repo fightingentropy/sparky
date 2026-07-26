@@ -11,6 +11,9 @@ import patTestingExam from "./exam-data/pat-testing.json";
 import periodicInspectionExam from "./exam-data/periodic-inspection.json";
 import specialLocationsExam from "./exam-data/special-locations.json";
 import { applyExamExplanationEnhancements } from "./examExplanationEnhancements";
+import { applyExamSolutionTables } from "./examSolutionTables";
+import { buildFundamentalInspectionExam } from "./fundamentalInspectionExam";
+import { buildInitialVerificationExam } from "./initialVerificationExam";
 import {
   buildOptionFeedback,
   buildOptionExplanations,
@@ -20,12 +23,21 @@ import {
 import { getQuestionsForVariant } from "./examUtils";
 import type { Exam, ExamQuestion } from "./exams/types";
 
+const initialVerificationSource = applyExamSolutionTables(
+  applyExamExplanationEnhancements(initialVerificationExam as unknown as Exam)
+);
+const fundamentalInspectionExam = buildFundamentalInspectionExam(initialVerificationSource);
+const focusedInitialVerificationExam = buildInitialVerificationExam(
+  initialVerificationSource
+);
+
 const EXAMS = [
   eighteenthEditionExam,
   am2Exam,
   buildingRegulationsExam,
   ecsHealthSafetyExam,
-  initialVerificationExam,
+  fundamentalInspectionExam,
+  focusedInitialVerificationExam,
   inspectionDesign2396Exam,
   level2ElectricalInstallationExam,
   level3ElectricalInstallationExam,
@@ -45,11 +57,11 @@ function allQuestions(exams: Exam[] = EXAMS): ExamQuestion[] {
 }
 
 describe("exam option explanations", () => {
-  it("shows the full correct explanation and feedback for all 15,087 distractors", () => {
+  it("shows the full correct explanation and feedback for all 14,235 distractors", () => {
     const questions = allQuestions();
     let distractorCount = 0;
 
-    expect(questions).toHaveLength(5029);
+    expect(questions).toHaveLength(4745);
     for (const question of questions) {
       const feedback = buildOptionExplanations(question);
       expect(Object.keys(feedback)).toEqual(CHOICES);
@@ -71,7 +83,7 @@ describe("exam option explanations", () => {
       }
     }
 
-    expect(distractorCount).toBe(15_087);
+    expect(distractorCount).toBe(14_235);
   });
 
   it("keeps the complete authored rationale when no safe option-specific reason exists", () => {
@@ -530,7 +542,7 @@ describe("exam option explanations", () => {
     }
   });
 
-  it("fully reviews every delivered option in all 11 exam banks", () => {
+  it("fully reviews every delivered option in all 12 exam banks", () => {
     const enhancedExams = EXAMS.map(applyExamExplanationEnhancements);
     let questionCount = 0;
     let distractorCount = 0;
@@ -565,8 +577,8 @@ describe("exam option explanations", () => {
       }
     }
 
-    expect(questionCount).toBe(5_029);
-    expect(distractorCount).toBe(15_087);
+    expect(questionCount).toBe(4_745);
+    expect(distractorCount).toBe(14_235);
   });
 
   it("describes single choices as incomplete when all listed choices are required", () => {
