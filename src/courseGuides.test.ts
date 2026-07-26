@@ -9,6 +9,7 @@ const expectedGuidedExamIds = [
   "18th-edition",
   "special-locations",
   "pat-testing",
+  "fundamental-inspection-testing",
   "initial-verification",
   "inspection-design-2396",
   "periodic-inspection",

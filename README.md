@@ -7,7 +7,7 @@ The iOS app includes:
 - five site calculators with saved calculation history
 - searchable, saveable technical notes
 - guided learning routes and seven tutorials
-- 11 exam subjects, 103 tests, and 4,289 deterministic served questions
+- 12 exam subjects, 97 tests, and 4,005 deterministic served questions
 - per-option answer feedback, question flags, scores, and offline progress
 - native navigation, Dynamic Type, haptics, and light/dark appearances
 
