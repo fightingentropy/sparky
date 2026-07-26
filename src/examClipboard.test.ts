@@ -67,5 +67,11 @@ describe("exam clipboard text", () => {
     expect(text).toContain(
       "Remember throughout the session that I always want both the answer and the reason.\n\nHere are the questions:\n\nQ12"
     );
+    expect(text).toContain(
+      "Read the question and every option, then pause and wait for my answer before revealing anything."
+    );
+    expect(text).toContain(
+      "Do not give the correct option, hint at it, or explain it until I have answered or said that I do not know."
+    );
   });
 });
