@@ -120,6 +120,25 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertEqual(visible.map(\.id), [store.catalog.exams[0].id])
     }
 
+    func testNavigationPreferencesCanShowOnlyExamsAndLaunchThere() {
+        let stored = NavigationPreferences.storageValue(
+            for: [.tools, .notes, .learn, .more]
+        )
+
+        XCTAssertEqual(NavigationPreferences.visibleTabs(from: stored), [.exams])
+        XCTAssertEqual(NavigationPreferences.preferredTab(from: stored), .exams)
+    }
+
+    func testNavigationPreferencesIgnoreUnknownTabsAndKeepASafeDestination() {
+        XCTAssertEqual(
+            NavigationPreferences.hiddenTabs(from: #"["notes","removed-tab"]"#),
+            [.notes]
+        )
+
+        let allHidden = NavigationPreferences.storageValue(for: Set(AppTab.allCases))
+        XCTAssertEqual(NavigationPreferences.visibleTabs(from: allHidden), [.tools])
+    }
+
     private var contentDirectory: URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()

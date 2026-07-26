@@ -38,17 +38,6 @@ struct ExamsView: View {
 
                 ScrollView {
                     LazyVStack(spacing: 16) {
-                        examHero
-
-                        HStack {
-                            SparkySectionHeader(
-                                eyebrow: "Practice bank",
-                                title: "Choose a qualification",
-                                detail: "\(visibleQuestionCount.formatted()) focused questions"
-                            )
-                            Spacer()
-                        }
-
                         ForEach(filteredExams) { exam in
                             NavigationLink(value: exam.id) {
                                 ExamCatalogCard(
@@ -89,48 +78,6 @@ struct ExamsView: View {
             .onAppear { openPendingExamIfNeeded() }
             .onChange(of: router.pendingExamID) { _, _ in openPendingExamIfNeeded() }
         }
-    }
-
-    private var examHero: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 7) {
-                    SparkyEyebrow(text: "EAL · City & Guilds aligned")
-                    Text("Practice with purpose.")
-                        .font(.largeTitle.weight(.bold))
-                        .foregroundStyle(Color.sparkyText)
-                        .tracking(-1)
-                    Text("Focused mock tests with reviewed feedback for every option.")
-                        .font(.subheadline)
-                        .foregroundStyle(Color.sparkyMuted)
-                }
-                Spacer(minLength: 8)
-                Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 44))
-                    .foregroundStyle(Color.sparkyAccent)
-            }
-
-            HStack(spacing: 10) {
-                MetricTile(label: "Exam banks", value: "\(visibleExams.count)", symbol: "books.vertical")
-                MetricTile(label: "Mock tests", value: "\(visibleTestCount)", symbol: "checklist")
-                MetricTile(label: "Questions", value: compactQuestionCount, symbol: "questionmark.circle")
-            }
-        }
-        .sparkyCard(padding: 18)
-    }
-
-    private var compactQuestionCount: String {
-        visibleQuestionCount >= 1_000
-            ? String(format: "%.1fk", Double(visibleQuestionCount) / 1_000)
-            : "\(visibleQuestionCount)"
-    }
-
-    private var visibleTestCount: Int {
-        visibleExams.reduce(0) { $0 + $1.testCount }
-    }
-
-    private var visibleQuestionCount: Int {
-        visibleExams.reduce(0) { $0 + $1.questionCount }
     }
 
     private func completedTests(for exam: ExamIndexEntry) -> Int {

@@ -3,6 +3,10 @@ import { useAuth } from "./AuthContext";
 import { AccountAvatar } from "./AccountAvatar";
 import { ApiError } from "./api";
 import { EXAM_REGISTRY, type ExamId } from "./examRegistry";
+import {
+  NAVIGATION_ITEMS,
+  type NavigationPageId
+} from "./navigationPreferences";
 
 const NICKNAME_MAX = 40;
 const AVATAR_PX = 256;
@@ -17,6 +21,8 @@ type Props = {
   onReduceMotionChange: (value: boolean) => void;
   comfortableText: boolean;
   onComfortableTextChange: (value: boolean) => void;
+  hiddenNavigationPageIds: readonly NavigationPageId[];
+  onNavigationVisibilityChange: (pageId: NavigationPageId, visible: boolean) => void;
   hiddenExamIds: readonly ExamId[];
   onExamVisibilityChange: (examId: ExamId, visible: boolean) => void;
   onRequestAuth: () => void;
@@ -68,6 +74,8 @@ export function SettingsPage({
   onReduceMotionChange,
   comfortableText,
   onComfortableTextChange,
+  hiddenNavigationPageIds,
+  onNavigationVisibilityChange,
   hiddenExamIds,
   onExamVisibilityChange,
   onRequestAuth
@@ -106,6 +114,8 @@ export function SettingsPage({
   const previewAvatar = avatarDraft === undefined ? user?.avatar ?? null : avatarDraft;
   const trimmedNickname = nickname.trim();
   const dirty = avatarDraft !== undefined || trimmedNickname !== (user?.nickname ?? "");
+  const hiddenNavigationPageIdSet = new Set(hiddenNavigationPageIds);
+  const visibleNavigationPageCount = NAVIGATION_ITEMS.length - hiddenNavigationPageIdSet.size;
   const hiddenExamIdSet = new Set(hiddenExamIds);
   const visibleExamCount = EXAM_REGISTRY.length - hiddenExamIdSet.size;
 
@@ -234,6 +244,34 @@ export function SettingsPage({
               </button>
             </div>
           )}
+        </section>
+
+        <section className="settings-section">
+          <h3 className="settings-section-title">Navigation</h3>
+          <p className="settings-hint">Choose which main pages appear in the navigation bar. Hidden pages keep their data and can be shown again here.</p>
+          {NAVIGATION_ITEMS.map((item) => {
+            const visible = !hiddenNavigationPageIdSet.has(item.id);
+            const lastVisiblePage = visible && visibleNavigationPageCount <= 1;
+            return (
+              <div className="settings-toggle-row" key={item.id}>
+                <span className="settings-toggle-text">
+                  <span className="settings-toggle-label">{item.label}</span>
+                  <span className="settings-hint">{visible ? "Shown in navigation" : "Hidden from navigation"}</span>
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={visible}
+                  aria-label={`Show ${item.label} in navigation`}
+                  className={`settings-switch${visible ? " is-on" : ""}`}
+                  disabled={lastVisiblePage}
+                  onClick={() => onNavigationVisibilityChange(item.id, !visible)}
+                >
+                  <span className="settings-switch-knob" aria-hidden="true" />
+                </button>
+              </div>
+            );
+          })}
         </section>
 
         <section className="settings-section">

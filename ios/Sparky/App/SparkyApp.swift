@@ -7,7 +7,7 @@ struct SparkyApp: App {
     @State private var contentError: String?
     @State private var progressStore = ProgressStore()
     @State private var studyState = StudyStateStore()
-    @State private var router = AppRouter(selectedTab: Self.previewTab)
+    @State private var router = AppRouter(selectedTab: Self.initialTab)
     @State private var authStore = AuthStore()
     @State private var progressSyncController = ProgressSyncController()
     @State private var didRestoreAccount = false
@@ -149,17 +149,23 @@ struct SparkyApp: App {
     }
 #endif
 
-    private static var previewTab: AppTab {
+    private static var initialTab: AppTab {
         let arguments = ProcessInfo.processInfo.arguments
-        guard let marker = arguments.firstIndex(of: "-sparkyPreviewTab"),
-              arguments.indices.contains(marker + 1) else { return .tools }
-        switch arguments[marker + 1].lowercased() {
-        case "notes": return .notes
-        case "learn": return .learn
-        case "exams": return .exams
-        case "more": return .more
-        default: return .tools
+        if let marker = arguments.firstIndex(of: "-sparkyPreviewTab"),
+           arguments.indices.contains(marker + 1) {
+            switch arguments[marker + 1].lowercased() {
+            case "notes": return .notes
+            case "learn": return .learn
+            case "exams": return .exams
+            case "more": return .more
+            default: return .tools
+            }
         }
+
+        let stored = UserDefaults.standard.string(
+            forKey: NavigationPreferences.storageKey
+        ) ?? NavigationPreferences.defaultStorageValue
+        return NavigationPreferences.preferredTab(from: stored)
     }
 
     private static var previewExamID: String? {
