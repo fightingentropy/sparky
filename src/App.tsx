@@ -62,7 +62,6 @@ import { AuthModal } from "./AuthModal";
 import { SettingsPage } from "./SettingsPage";
 import { AccountAvatar } from "./AccountAvatar";
 import { AppBackground } from "./AppBackground";
-import { getLatestExamResume } from "./examProgressSummary";
 
 type PageId = "home" | "cheatsheet" | "learn" | "exams" | "tutorials" | "interactive" | "settings";
 
@@ -1273,10 +1272,6 @@ export default function App() {
   const displayName = user ? (user.nickname?.trim() || user.email) : null;
 
   const [page, setPage] = useState<PageId>(getPageFromLocation());
-  const examResume = useMemo(
-    () => (page === "home" ? getLatestExamResume(localStorage, hiddenExamIds) : null),
-    [hiddenExamIds, page]
-  );
   // Track which lazy-loaded pages we have ever activated. We only mount each
   // lazy page after its first activation so its chunk isn't downloaded for
   // users who never visit it. After the first visit it stays mounted so its
@@ -2397,43 +2392,6 @@ export default function App() {
 
       <main className="workspace">
         <section className={`page page-home ${page === "home" ? "is-active" : ""}`}>
-          <header className="dashboard-hero">
-            <div className="dashboard-intro">
-              <span className="dashboard-kicker">UK electrician's workspace</span>
-              <h1>Tools, revision and practice in one place.</h1>
-              <p>Pick up a calculation, revise a topic, or continue with a mock exam without digging through menus.</p>
-            </div>
-            <div className="dashboard-actions" aria-label="Quick actions">
-              <button
-                type="button"
-                className="dashboard-action dashboard-action--primary"
-                onClick={() => examResume ? openPracticeExam(examResume.examId) : navigateTo("exams")}
-              >
-                <span>{examResume ? "Continue practice" : "Practice"}</span>
-                <strong>{examResume ? examResume.title : "Open mock exams"}</strong>
-                {examResume ? (
-                  <small>Test {examResume.testNumber} · {examResume.answeredCount} answered</small>
-                ) : null}
-              </button>
-              <button type="button" className="dashboard-action dashboard-action--compact" onClick={() => navigateTo("cheatsheet")}>
-                <span>Revise</span>
-                <strong>Browse notes</strong>
-              </button>
-              <button type="button" className="dashboard-action dashboard-action--compact" onClick={() => navigateTo("learn")}>
-                <span>Plan</span>
-                <strong>Learning guides</strong>
-              </button>
-              <div className="dashboard-action dashboard-action--status">
-                <span>Recent calculation</span>
-                {historyEntries[0] ? (
-                  <strong>{historyEntries[0].tool}: {historyEntries[0].value}</strong>
-                ) : (
-                  <strong>Start with a tool below</strong>
-                )}
-              </div>
-            </div>
-          </header>
-
           <section className="tool-library" aria-labelledby="tool-library-title">
             <div className="tool-library-head">
               <div>

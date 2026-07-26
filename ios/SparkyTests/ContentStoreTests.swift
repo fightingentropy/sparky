@@ -67,6 +67,59 @@ final class ContentStoreTests: XCTestCase {
         }
     }
 
+    @MainActor
+    func testExamLibraryPreferencesHideOnlySelectedBanks() throws {
+        let store = try ContentStore(contentDirectory: contentDirectory)
+        let stored = ExamLibraryPreferences.storageValue(
+            for: ["18th-edition", "periodic-inspection"]
+        )
+
+        let visible = ExamLibraryPreferences.visibleExams(
+            in: store.catalog,
+            storageValue: stored
+        )
+
+        XCTAssertEqual(visible.count, store.catalog.exams.count - 2)
+        XCTAssertFalse(visible.contains { $0.id == "18th-edition" })
+        XCTAssertFalse(visible.contains { $0.id == "periodic-inspection" })
+        XCTAssertTrue(visible.contains { $0.id == "initial-verification" })
+    }
+
+    @MainActor
+    func testExamLibraryPreferencesUseFocusedDefaultsAndIgnoreUnknownIDs() throws {
+        let store = try ContentStore(contentDirectory: contentDirectory)
+        let validIDs = Set(store.catalog.exams.map(\.id))
+
+        let defaults = ExamLibraryPreferences.hiddenExamIDs(
+            from: "not-json",
+            validExamIDs: validIDs
+        )
+        XCTAssertEqual(defaults, ExamLibraryPreferences.defaultHiddenExamIDs)
+
+        let stored = ExamLibraryPreferences.storageValue(
+            for: ["18th-edition", "removed-exam"]
+        )
+        let decoded = ExamLibraryPreferences.hiddenExamIDs(
+            from: stored,
+            validExamIDs: validIDs
+        )
+        XCTAssertEqual(decoded, ["18th-edition"])
+    }
+
+    @MainActor
+    func testExamLibraryPreferencesNeverReturnAnEmptyLibrary() throws {
+        let store = try ContentStore(contentDirectory: contentDirectory)
+        let allIDs = Set(store.catalog.exams.map(\.id))
+        let stored = ExamLibraryPreferences.storageValue(for: allIDs)
+
+        let visible = ExamLibraryPreferences.visibleExams(
+            in: store.catalog,
+            storageValue: stored
+        )
+
+        XCTAssertEqual(visible.map(\.id), [store.catalog.exams[0].id])
+    }
+
     private var contentDirectory: URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
