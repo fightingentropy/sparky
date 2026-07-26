@@ -5,9 +5,11 @@ const LETTERS: ExamChoice[] = ["A", "B", "C", "D"];
 export const SPOKEN_REVISION_PREAMBLE = [
   "We are doing a spoken multiple-choice revision test on UK electrical installation, Building Regulations, BS 7671 and PAT testing.",
   "",
-  "When I read a question and its answer options:",
+  "For each question:",
   "",
-  "Listen carefully and identify every option before answering.",
+  "Read the question and every option, then pause and wait for my answer before revealing anything.",
+  "Do not give the correct option, hint at it, or explain it until I have answered or said that I do not know.",
+  "After I answer, listen carefully and identify every option before responding.",
   "Give the correct option first, including its letter and wording.",
   "Immediately explain why it is correct in simple language.",
   "Briefly explain why the other options are wrong when useful.",
