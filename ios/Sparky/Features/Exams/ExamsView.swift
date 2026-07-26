@@ -7,15 +7,24 @@ struct ExamsView: View {
     let progressStore: ProgressStore
 
     @Environment(AppRouter.self) private var router
+    @AppStorage(ExamLibraryPreferences.storageKey)
+    private var hiddenExamIDsStorage = ExamLibraryPreferences.defaultStorageValue
     @State private var searchText = ""
     @State private var path: [String] = []
 
+    private var visibleExams: [ExamIndexEntry] {
+        ExamLibraryPreferences.visibleExams(
+            in: contentStore.catalog,
+            storageValue: hiddenExamIDsStorage
+        )
+    }
+
     private var filteredExams: [ExamIndexEntry] {
         guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return contentStore.catalog.exams
+            return visibleExams
         }
         let query = searchText.localizedLowercase
-        return contentStore.catalog.exams.filter {
+        return visibleExams.filter {
             $0.title.localizedLowercase.contains(query) ||
             $0.subtitle.localizedLowercase.contains(query) ||
             $0.description.localizedLowercase.contains(query)
@@ -35,7 +44,7 @@ struct ExamsView: View {
                             SparkySectionHeader(
                                 eyebrow: "Practice bank",
                                 title: "Choose a qualification",
-                                detail: "\(contentStore.catalog.questionCount.formatted()) questions"
+                                detail: "\(visibleQuestionCount.formatted()) focused questions"
                             )
                             Spacer()
                         }
@@ -102,8 +111,8 @@ struct ExamsView: View {
             }
 
             HStack(spacing: 10) {
-                MetricTile(label: "Exam banks", value: "\(contentStore.catalog.examCount)", symbol: "books.vertical")
-                MetricTile(label: "Mock tests", value: "\(contentStore.catalog.variantCount)", symbol: "checklist")
+                MetricTile(label: "Exam banks", value: "\(visibleExams.count)", symbol: "books.vertical")
+                MetricTile(label: "Mock tests", value: "\(visibleTestCount)", symbol: "checklist")
                 MetricTile(label: "Questions", value: compactQuestionCount, symbol: "questionmark.circle")
             }
         }
@@ -111,9 +120,17 @@ struct ExamsView: View {
     }
 
     private var compactQuestionCount: String {
-        contentStore.catalog.questionCount >= 1_000
-            ? String(format: "%.1fk", Double(contentStore.catalog.questionCount) / 1_000)
-            : "\(contentStore.catalog.questionCount)"
+        visibleQuestionCount >= 1_000
+            ? String(format: "%.1fk", Double(visibleQuestionCount) / 1_000)
+            : "\(visibleQuestionCount)"
+    }
+
+    private var visibleTestCount: Int {
+        visibleExams.reduce(0) { $0 + $1.testCount }
+    }
+
+    private var visibleQuestionCount: Int {
+        visibleExams.reduce(0) { $0 + $1.questionCount }
     }
 
     private func completedTests(for exam: ExamIndexEntry) -> Int {

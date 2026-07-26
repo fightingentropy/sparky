@@ -11,24 +11,14 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* ── Dashboard, calculator library and expandable notes ─────────────────── */
+/* ── Calculator library and expandable notes ────────────────────────────── */
 
-.dashboard-hero,
 .tool-library,
 .content-notice {
   border: 1px solid var(--border);
   background: var(--panel-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-}
-
-.dashboard-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
-  gap: 24px;
-  margin-bottom: 18px;
-  padding: clamp(22px, 4vw, 40px);
-  border-radius: 24px;
 }
 
 .dashboard-kicker {
@@ -42,7 +32,6 @@
   text-transform: uppercase;
 }
 
-.dashboard-intro h1,
 .notes-header h1 {
   margin: 0;
   color: var(--text-strong);
@@ -50,59 +39,6 @@
   line-height: 1.02;
   letter-spacing: -0.045em;
 }
-
-.dashboard-intro p {
-  max-width: 56ch;
-  margin: 16px 0 0;
-  color: var(--muted-strong);
-  font-size: 1.03rem;
-  line-height: 1.6;
-}
-
-.dashboard-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.dashboard-action {
-  display: grid;
-  align-content: space-between;
-  gap: 18px;
-  min-height: 112px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  background: var(--fill);
-  color: var(--text);
-  text-align: left;
-  transition: border-color 160ms var(--ease), background-color 160ms var(--ease), transform 160ms var(--ease);
-}
-
-button.dashboard-action { cursor: pointer; }
-
-.dashboard-action:hover,
-.dashboard-action:focus-visible {
-  border-color: var(--accent-line-strong);
-  background: var(--accent-soft);
-  outline: none;
-}
-
-.dashboard-action:focus-visible { transform: translateY(-1px); }
-
-.dashboard-action span {
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.dashboard-action strong { font-size: 0.96rem; line-height: 1.25; }
-
-.dashboard-action--primary {
-  border-color: var(--accent-line);
-  background: var(--accent-soft);
-}
-
-.dashboard-action--status { cursor: default; }
 
 .tool-library {
   margin-bottom: 18px;
@@ -307,9 +243,6 @@ button.dashboard-action { cursor: pointer; }
 }
 
 @media (max-width: 760px) {
-  .dashboard-hero { grid-template-columns: 1fr; gap: 18px; padding: 20px; border-radius: 18px; }
-  .dashboard-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .dashboard-action { min-height: 96px; padding: 13px; }
   .tool-library { padding: 16px; border-radius: 16px; }
   .tool-library-head,
   .notes-header { align-items: stretch; flex-direction: column; }
@@ -317,7 +250,6 @@ button.dashboard-action { cursor: pointer; }
   .notes-search { flex-basis: auto; width: 100%; }
   .tool-library-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tool-library-item { min-height: 72px; }
-  .dashboard-intro h1,
   .notes-header h1 { font-size: 2rem; }
 }
 
@@ -4581,8 +4513,6 @@ select:focus,
 
   button:active,
   [role="button"]:active,
-  .dashboard-action:hover,
-  .dashboard-action:focus-visible,
   .tutorial-load-btn:hover img,
   .tutorial-load-btn:focus-visible img,
   .tool-tooltip,
@@ -5033,8 +4963,6 @@ select:focus,
 
 .reduce-motion button:active,
 .reduce-motion [role="button"]:active,
-.reduce-motion .dashboard-action:hover,
-.reduce-motion .dashboard-action:focus-visible,
 .reduce-motion .tutorial-load-btn:hover img,
 .reduce-motion .tutorial-load-btn:focus-visible img,
 .reduce-motion .tool-tooltip,
@@ -7175,7 +7103,6 @@ html[data-theme="light"] .topbar {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
-html[data-theme="light"] .dashboard-action,
 html[data-theme="light"] .tool-library-item,
 html[data-theme="light"] .search-field,
 html[data-theme="light"] .topbar-icon-button,
@@ -7329,7 +7256,7 @@ body[data-page="home"] .page-home.is-active {
 }
 
 body[data-page="home"] .page-home.is-active {
-  grid-template-rows: auto auto auto;
+  grid-template-rows: auto auto;
   gap: 18px;
 }
 
@@ -7392,12 +7319,6 @@ body[data-page="home"] .tool-grid {
 }
 
 .desktop-primary-nav-item:active { transform: scale(0.97); }
-
-.dashboard-action small {
-  color: var(--muted-strong);
-  font-size: 0.72rem;
-  line-height: 1.3;
-}
 
 .tool-library-item {
   transition: background-color 160ms var(--ease), border-color 160ms var(--ease), transform 120ms var(--ease);
@@ -7463,7 +7384,6 @@ body[data-page="exams"] .exam-option-control:active:not(:disabled) {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .dashboard-action:hover { transform: translateY(-1px); }
   .tutorial-load-btn:hover img { transform: scale(1.015); }
   body[data-page="exams"] .exam-progress-segment:hover { transform: scaleY(1.18); }
 }
@@ -7495,38 +7415,8 @@ body[data-page="exams"] .exam-option-control:active:not(:disabled) {
     padding-bottom: calc(var(--mobile-tabbar-h) + 12px);
   }
 
-  .dashboard-hero {
-    gap: 12px;
-    margin-bottom: 0;
-    padding: 15px;
-  }
-
   .dashboard-kicker {
     margin-bottom: 5px;
-  }
-
-  .dashboard-intro h1 {
-    font-size: 1.72rem;
-    line-height: 1.04;
-  }
-
-  .dashboard-intro p {
-    display: none;
-  }
-
-  .dashboard-actions {
-    display: block;
-  }
-
-  .dashboard-action--primary {
-    min-height: 76px;
-    padding: 12px 14px;
-    gap: 5px;
-  }
-
-  .dashboard-action--compact,
-  .dashboard-action--status {
-    display: none;
   }
 
   .tool-library {
@@ -7822,7 +7712,6 @@ body[data-page="exams"] .exam-option-control:active:not(:disabled) {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .dashboard-hero,
   .tool-library,
   .content-notice,
   .topbar,
@@ -7837,7 +7726,6 @@ body[data-page="exams"] .exam-option-control:active:not(:disabled) {
 }
 
 @media (prefers-contrast: more) {
-  .dashboard-hero,
   .tool-library,
   .content-notice,
   .topbar,

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MoreView: View {
+    let contentStore: ContentStore
     let tutorials: [Tutorial]
     let studyState: StudyStateStore
     let progressStore: ProgressStore
@@ -39,12 +40,16 @@ struct MoreView: View {
                         .buttonStyle(.plain)
 
                         NavigationLink {
-                            SettingsView(studyState: studyState, progressStore: progressStore)
+                            SettingsView(
+                                contentStore: contentStore,
+                                studyState: studyState,
+                                progressStore: progressStore
+                            )
                         } label: {
                             MoreDestinationCard(
                                 eyebrow: "Your app",
                                 title: "Settings",
-                                detail: "Appearance, haptics and local study data",
+                                detail: "Exam library, appearance and local study data",
                                 symbol: "gearshape.fill"
                             )
                         }
@@ -259,17 +264,34 @@ private struct CalculationHistoryView: View {
 }
 
 private struct SettingsView: View {
+    let contentStore: ContentStore
     let studyState: StudyStateStore
     let progressStore: ProgressStore
 
     @AppStorage("appAppearance") private var appearance = AppAppearance.system.rawValue
     @AppStorage("hapticsEnabled") private var hapticsEnabled = true
     @AppStorage("comfortableText") private var comfortableText = false
+    @AppStorage(ExamLibraryPreferences.storageKey)
+    private var hiddenExamIDsStorage = ExamLibraryPreferences.defaultStorageValue
     @State private var showingResetConfirmation = false
     @State private var showingExamResetConfirmation = false
 
     var body: some View {
         Form {
+            Section {
+                ForEach(contentStore.catalog.exams) { exam in
+                    Toggle(
+                        exam.title,
+                        isOn: examVisibilityBinding(for: exam.id)
+                    )
+                    .disabled(isLastVisibleExam(exam.id))
+                }
+            } header: {
+                Text("Exam library")
+            } footer: {
+                Text("Choose which qualifications appear in Exams. Hidden categories keep their saved progress and can be shown again here.")
+            }
+
             Section("Appearance") {
                 Picker("Theme", selection: $appearance) {
                     ForEach(AppAppearance.allCases) { option in
@@ -329,6 +351,39 @@ private struct SettingsView: View {
         } message: {
             Text("This removes every answer, flag and submitted result stored on this device.")
         }
+    }
+
+    private var hiddenExamIDs: Set<String> {
+        ExamLibraryPreferences.hiddenExamIDs(
+            from: hiddenExamIDsStorage,
+            validExamIDs: Set(contentStore.catalog.exams.map(\.id))
+        )
+    }
+
+    private var visibleExamCount: Int {
+        contentStore.catalog.exams.count - hiddenExamIDs.count
+    }
+
+    private func examVisibilityBinding(for examID: String) -> Binding<Bool> {
+        Binding(
+            get: { !hiddenExamIDs.contains(examID) },
+            set: { isVisible in
+                var updated = hiddenExamIDs
+                if isVisible {
+                    updated.remove(examID)
+                } else if visibleExamCount > 1 {
+                    updated.insert(examID)
+                }
+                hiddenExamIDsStorage = ExamLibraryPreferences.storageValue(
+                    for: updated
+                )
+                Haptics.selection()
+            }
+        )
+    }
+
+    private func isLastVisibleExam(_ examID: String) -> Bool {
+        !hiddenExamIDs.contains(examID) && visibleExamCount <= 1
     }
 
     private var appVersion: String {

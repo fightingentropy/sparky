@@ -27,6 +27,7 @@ struct RootView: View {
                 .tabItem { Label("Exams", systemImage: "checklist") }
 
             MoreView(
+                contentStore: contentStore,
                 tutorials: contentStore.tutorials,
                 studyState: studyState,
                 progressStore: progressStore

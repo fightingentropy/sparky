@@ -46,6 +46,15 @@ open ios/Sparky.xcodeproj
 
 Select the `Sparky` scheme and an iPhone simulator, then Run. The deployment target is iOS 17.
 
+### Codex verification workflow
+
+When working on Sparky in Codex:
+
+1. Build and run automated tests with `xcodebuild`.
+2. Launch the build in Codex's integrated iOS simulator.
+3. Verify the exact changed UI and interaction in the integrated simulator.
+4. If the integrated simulator is unavailable, report the blocker. Do not install or use Apple's standalone Simulator app without explicit approval.
+
 Run the native tests with:
 
 ```sh
