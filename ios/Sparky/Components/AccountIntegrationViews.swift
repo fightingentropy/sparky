@@ -6,15 +6,26 @@ struct SparkyAccountToolbarItem: View {
     @Environment(ProgressStore.self) private var progressStore
     @Environment(ProgressSyncController.self) private var syncController
     @Environment(ContentStore.self) private var contentStore
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
-        AccountToolbarButton(authStore: authStore) {
-            ProgressSyncStatusCard(
-                controller: syncController,
-                store: progressStore,
-                catalog: contentStore.catalog,
-                authStore: authStore
-            )
+        HStack(spacing: 12) {
+            Button {
+                router.isPresentingSettings = true
+                Haptics.selection()
+            } label: {
+                Image(systemName: "gearshape")
+            }
+            .accessibilityLabel("Settings")
+
+            AccountToolbarButton(authStore: authStore) {
+                ProgressSyncStatusCard(
+                    controller: syncController,
+                    store: progressStore,
+                    catalog: contentStore.catalog,
+                    authStore: authStore
+                )
+            }
         }
     }
 }

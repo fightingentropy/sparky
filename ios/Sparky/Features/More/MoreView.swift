@@ -263,7 +263,7 @@ private struct CalculationHistoryView: View {
     }
 }
 
-private struct SettingsView: View {
+struct SettingsView: View {
     let contentStore: ContentStore
     let studyState: StudyStateStore
     let progressStore: ProgressStore
@@ -271,6 +271,8 @@ private struct SettingsView: View {
     @AppStorage("appAppearance") private var appearance = AppAppearance.system.rawValue
     @AppStorage("hapticsEnabled") private var hapticsEnabled = true
     @AppStorage("comfortableText") private var comfortableText = false
+    @AppStorage(NavigationPreferences.storageKey)
+    private var hiddenTabsStorage = NavigationPreferences.defaultStorageValue
     @AppStorage(ExamLibraryPreferences.storageKey)
     private var hiddenExamIDsStorage = ExamLibraryPreferences.defaultStorageValue
     @State private var showingResetConfirmation = false
@@ -278,6 +280,20 @@ private struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section {
+                ForEach(AppTab.allCases) { tab in
+                    Toggle(
+                        tab.title,
+                        isOn: tabVisibilityBinding(for: tab)
+                    )
+                    .disabled(isLastVisibleTab(tab))
+                }
+            } header: {
+                Text("Navigation")
+            } footer: {
+                Text("Choose which pages appear in the bottom tab bar. Keep at least one page visible; Settings remains available from the gear button.")
+            }
+
             Section {
                 ForEach(contentStore.catalog.exams) { exam in
                     Toggle(
@@ -358,6 +374,34 @@ private struct SettingsView: View {
             from: hiddenExamIDsStorage,
             validExamIDs: Set(contentStore.catalog.exams.map(\.id))
         )
+    }
+
+    private var hiddenTabs: Set<AppTab> {
+        NavigationPreferences.hiddenTabs(from: hiddenTabsStorage)
+    }
+
+    private var visibleTabCount: Int {
+        AppTab.allCases.count - hiddenTabs.count
+    }
+
+    private func tabVisibilityBinding(for tab: AppTab) -> Binding<Bool> {
+        Binding(
+            get: { !hiddenTabs.contains(tab) },
+            set: { isVisible in
+                var updated = hiddenTabs
+                if isVisible {
+                    updated.remove(tab)
+                } else if visibleTabCount > 1 {
+                    updated.insert(tab)
+                }
+                hiddenTabsStorage = NavigationPreferences.storageValue(for: updated)
+                Haptics.selection()
+            }
+        )
+    }
+
+    private func isLastVisibleTab(_ tab: AppTab) -> Bool {
+        !hiddenTabs.contains(tab) && visibleTabCount <= 1
     }
 
     private var visibleExamCount: Int {

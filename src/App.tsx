@@ -62,8 +62,16 @@ import { AuthModal } from "./AuthModal";
 import { SettingsPage } from "./SettingsPage";
 import { AccountAvatar } from "./AccountAvatar";
 import { AppBackground } from "./AppBackground";
+import {
+  NAVIGATION_ITEMS,
+  NAVIGATION_VISIBILITY_STORAGE_KEY,
+  isNavigationPageIdArray,
+  preferredLandingPage,
+  visibleNavigationItems,
+  type NavigationPageId
+} from "./navigationPreferences";
 
-type PageId = "home" | "cheatsheet" | "learn" | "exams" | "tutorials" | "interactive" | "settings";
+type PageId = NavigationPageId | "tutorials" | "interactive" | "settings";
 
 type LegendItem = {
   label: string;
@@ -114,24 +122,21 @@ function isColorTheme(value: unknown): value is ColorTheme {
   return value === "dark" || value === "light";
 }
 
-const DEFAULT_PAGE: PageId = "home";
+const DEFAULT_PAGE: NavigationPageId = "home";
 
 const PAGE_NAV_ITEMS: { id: PageId; label: string }[] = [
-  { id: "home", label: "Tools" },
-  { id: "cheatsheet", label: "Notes" },
-  { id: "learn", label: "Learn" },
-  { id: "exams", label: "Exams" },
+  ...NAVIGATION_ITEMS,
   { id: "tutorials", label: "Tutorials" },
   { id: "interactive", label: "Interactive" }
 ];
 
-const PRIMARY_NAV_ITEMS = PAGE_NAV_ITEMS.slice(0, 4);
+const PRIMARY_NAV_ITEMS = NAVIGATION_ITEMS;
 
 // The primary pages surfaced in the mobile bottom tab bar. The remaining pages
 // (Tutorials, Interactive, Settings) stay reachable from the avatar menu and the
 // command palette, both of which list every page. The bar is hidden on the exams
 // page, which has its own fixed bottom action bar.
-const MOBILE_TAB_ITEMS: { id: PageId; label: string; icon: ReactNode }[] = [
+const MOBILE_TAB_ITEMS: { id: NavigationPageId; label: string; icon: ReactNode }[] = [
   {
     id: "home",
     label: "Tools",
@@ -1247,6 +1252,11 @@ export default function App() {
     [...DEFAULT_HIDDEN_EXAM_IDS],
     isExamIdArray
   );
+  const [hiddenNavigationPageIds, setHiddenNavigationPageIds] = usePersistedState<NavigationPageId[]>(
+    NAVIGATION_VISIBILITY_STORAGE_KEY,
+    [],
+    isNavigationPageIdArray
+  );
   const [navMenuOpen, setNavMenuOpen] = useState(false);
   const navMenuRef = useRef<HTMLDivElement | null>(null);
   const navMenuButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -1270,8 +1280,34 @@ export default function App() {
   }, [colorTheme]);
 
   const displayName = user ? (user.nickname?.trim() || user.email) : null;
+  const visiblePrimaryNavItems = useMemo(
+    () => visibleNavigationItems(hiddenNavigationPageIds),
+    [hiddenNavigationPageIds]
+  );
+  const visibleNavigationPageIdSet = useMemo(
+    () => new Set(visiblePrimaryNavItems.map((item) => item.id)),
+    [visiblePrimaryNavItems]
+  );
+  const visibleMobileTabItems = useMemo(
+    () => MOBILE_TAB_ITEMS.filter((item) => visibleNavigationPageIdSet.has(item.id)),
+    [visibleNavigationPageIdSet]
+  );
+  const landingPage = visiblePrimaryNavItems[0].id;
 
-  const [page, setPage] = useState<PageId>(getPageFromLocation());
+  const [page, setPage] = useState<PageId>(() => {
+    const requestedPage = getPageFromLocation();
+    if (requestedPage === DEFAULT_PAGE && !visibleNavigationPageIdSet.has(DEFAULT_PAGE)) {
+      return preferredLandingPage(hiddenNavigationPageIds);
+    }
+    return requestedPage;
+  });
+  const initialLandingRedirectedRef = useRef(false);
+  useEffect(() => {
+    if (initialLandingRedirectedRef.current) return;
+    initialLandingRedirectedRef.current = true;
+    if (getPageFromLocation() !== DEFAULT_PAGE || page === DEFAULT_PAGE) return;
+    window.history.replaceState(null, "", getPageHref(page));
+  }, [page]);
   // Track which lazy-loaded pages we have ever activated. We only mount each
   // lazy page after its first activation so its chunk isn't downloaded for
   // users who never visit it. After the first visit it stays mounted so its
@@ -1464,6 +1500,18 @@ export default function App() {
       });
     },
     [setHiddenExamIds]
+  );
+
+  const setNavigationVisibility = useCallback(
+    (pageId: NavigationPageId, visible: boolean) => {
+      setHiddenNavigationPageIds((current) => {
+        const hidden = current.includes(pageId);
+        if (visible) return hidden ? current.filter((id) => id !== pageId) : current;
+        if (hidden || NAVIGATION_ITEMS.length - current.length <= 1) return current;
+        return [...current, pageId];
+      });
+    },
+    [setHiddenNavigationPageIds]
   );
 
   const handleOpenNote = useCallback(
@@ -2177,11 +2225,11 @@ export default function App() {
         <header className="topbar">
         <a
           className="brand"
-          href={getPageHref("home")}
-          aria-label="Go to Tools dashboard"
+          href={getPageHref(landingPage)}
+          aria-label={`Go to ${visiblePrimaryNavItems[0].label}`}
           onClick={(event) => {
             event.preventDefault();
-            navigateTo("home");
+            navigateTo(landingPage);
           }}
         >
           <svg
@@ -2223,7 +2271,7 @@ export default function App() {
         </a>
 
         <nav className="desktop-primary-nav" aria-label="Primary">
-          {PRIMARY_NAV_ITEMS.map((item) => (
+          {visiblePrimaryNavItems.map((item) => (
             <a
               key={item.id}
               href={getPageHref(item.id)}
@@ -4096,6 +4144,8 @@ export default function App() {
           onReduceMotionChange={setReduceMotion}
           comfortableText={comfortableText}
           onComfortableTextChange={setComfortableText}
+          hiddenNavigationPageIds={hiddenNavigationPageIds}
+          onNavigationVisibilityChange={setNavigationVisibility}
           hiddenExamIds={hiddenExamIds}
           onExamVisibilityChange={setExamVisibility}
           onRequestAuth={() => setAuthOpen(true)}
@@ -4269,7 +4319,7 @@ export default function App() {
       ) : null}
 
       <nav className="mobile-tabbar" aria-label="Primary">
-        {MOBILE_TAB_ITEMS.map((item) => (
+        {visibleMobileTabItems.map((item) => (
           <button
             key={item.id}
             type="button"
