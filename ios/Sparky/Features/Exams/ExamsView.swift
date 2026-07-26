@@ -48,10 +48,6 @@ struct ExamsView: View {
                             }
                             .buttonStyle(.plain)
                         }
-
-                        StudyNotice(
-                            message: "Exam wording is a study aid. Confirm the required BS 7671 edition, awarding-body rules and current official guidance before assessment or site work."
-                        )
                     }
                     .padding(.horizontal, SparkyLayout.pageInset)
                     .padding(.bottom, 28)
