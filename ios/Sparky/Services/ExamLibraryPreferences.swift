@@ -1,13 +1,15 @@
 import Foundation
 
 enum ExamLibraryPreferences {
-    static let storageKey = "sparky.hidden-exam-ids.v1"
+    static let storageKey = "sparky.hidden-exam-ids.v2"
 
-    // Keep the first-run native library aligned with the focused web library.
+    // Keep the first-run native library focused on the six primary exams.
     static let defaultHiddenExamIDs: Set<String> = [
         "ecs-health-safety",
         "level-2-electrical-installation",
         "level-3-electrical-installation",
+        "special-locations",
+        "inspection-design-2396",
         "am2-installation-assessment"
     ]
 

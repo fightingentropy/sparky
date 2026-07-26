@@ -157,13 +157,20 @@ private struct ExamCatalogCard: View {
     }
 
     private var examSymbol: String {
-        let title = exam.title.localizedLowercase
-        if title.contains("inspection") { return "magnifyingglass.circle" }
-        if title.contains("health") { return "cross.case" }
-        if title.contains("building") { return "house" }
-        if title.contains("18th") { return "book.closed" }
-        if title.contains("pat") { return "powerplug" }
-        return "checklist"
+        switch exam.id {
+        case "building-regulations":
+            return "house"
+        case "18th-edition":
+            return "book.closed"
+        case "fundamental-inspection-testing", "initial-verification", "periodic-inspection":
+            return "magnifyingglass.circle"
+        case "pat-testing":
+            return "powerplug"
+        case "ecs-health-safety":
+            return "cross.case"
+        default:
+            return "checklist"
+        }
     }
 }
 

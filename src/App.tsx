@@ -994,60 +994,87 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
   "cheat-key-definitions": [{ examId: "level-2-electrical-installation", label: "Level 2" }],
   "cheat-protection-devices": [
     { examId: "level-2-electrical-installation", label: "Level 2" },
-    { examId: "18th-edition", label: "18th Edition" }
+    { examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }
   ],
   "cheat-regulations": [
-    { examId: "building-regulations", label: "Building regs" },
-    { examId: "18th-edition", label: "18th Edition" }
+    { examId: "building-regulations", label: "Building Regulations" },
+    { examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }
   ],
   "cheat-safe-zones": [
-    { examId: "building-regulations", label: "Building regs" },
-    { examId: "18th-edition", label: "18th Edition" }
+    { examId: "building-regulations", label: "Building Regulations" },
+    { examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }
   ],
-  "cheat-structural-limits": [{ examId: "building-regulations", label: "Building regs" }],
+  "cheat-structural-limits": [{ examId: "building-regulations", label: "Building Regulations" }],
   "cheat-site-math": [{ examId: "level-2-electrical-installation", label: "Level 2" }],
-  "cheat-course-earthing-systems": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-earthing-bonding-sizing": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-supplementary-bonding": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-disconnection-times": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-zs-tables": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-rcd-types": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-where-rcd-required": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-consumer-unit": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-cable-design-sequence": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-correction-factors": [{ examId: "18th-edition", label: "18th Edition" }],
+  "cheat-course-earthing-systems": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-earthing-bonding-sizing": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-supplementary-bonding": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-disconnection-times": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-zs-tables": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-rcd-types": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-where-rcd-required": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-consumer-unit": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-cable-design-sequence": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-correction-factors": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
   "cheat-course-cable-resistance": [
-    { examId: "initial-verification", label: "Initial verification" },
+    { examId: "fundamental-inspection-testing", label: "Fundamental Inspection and Testing" },
+    { examId: "initial-verification", label: "Initial Verification" },
     { examId: "level-2-electrical-installation", label: "Level 2" }
   ],
-  "cheat-course-volt-drop": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-final-circuit-specs": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-iv-test-sequence": [{ examId: "initial-verification", label: "Initial verification" }],
-  "cheat-course-test-methods": [{ examId: "initial-verification", label: "Initial verification" }],
-  "cheat-course-ir-detail": [{ examId: "initial-verification", label: "Initial verification" }],
-  "cheat-course-pat-testing": [{ examId: "pat-testing", label: "PAT testing" }],
-  "cheat-course-eicr-codes": [{ examId: "periodic-inspection", label: "Periodic / EICR" }],
-  "cheat-course-eicr-procedure": [{ examId: "periodic-inspection", label: "Periodic / EICR" }],
-  "cheat-course-bathroom-zones": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-iv-inspection-checklist": [{ examId: "initial-verification", label: "Initial verification" }],
+  "cheat-course-volt-drop": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-final-circuit-specs": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-iv-test-sequence": [
+    { examId: "fundamental-inspection-testing", label: "Fundamental Inspection and Testing" },
+    { examId: "initial-verification", label: "Initial Verification" }
+  ],
+  "cheat-course-test-methods": [
+    { examId: "fundamental-inspection-testing", label: "Fundamental Inspection and Testing" },
+    { examId: "initial-verification", label: "Initial Verification" }
+  ],
+  "cheat-course-ir-detail": [
+    { examId: "fundamental-inspection-testing", label: "Fundamental Inspection and Testing" },
+    { examId: "initial-verification", label: "Initial Verification" }
+  ],
+  "cheat-course-pat-testing": [
+    { examId: "pat-testing", label: "Portable Appliance Testing" }
+  ],
+  "cheat-course-eicr-codes": [
+    { examId: "periodic-inspection", label: "Periodic Inspection and Testing (Condition Reporting)" }
+  ],
+  "cheat-course-eicr-procedure": [
+    { examId: "periodic-inspection", label: "Periodic Inspection and Testing (Condition Reporting)" }
+  ],
+  "cheat-course-bathroom-zones": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-iv-inspection-checklist": [
+    { examId: "fundamental-inspection-testing", label: "Fundamental Inspection and Testing" },
+    { examId: "initial-verification", label: "Initial Verification" }
+  ],
   "cheat-course-safe-isolation": [
-    { examId: "initial-verification", label: "Initial verification" },
+    { examId: "fundamental-inspection-testing", label: "Fundamental Inspection and Testing" },
+    { examId: "initial-verification", label: "Initial Verification" },
     { examId: "am2-installation-assessment", label: "AM2" }
   ],
-  "cheat-course-instruments-gs38": [{ examId: "initial-verification", label: "Initial verification" }],
-  "cheat-course-rcd-trip-times": [{ examId: "initial-verification", label: "Initial verification" }],
-  "cheat-course-supply-intake": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-adiabatic-pfc": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-three-phase-basics": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-special-cables-fp200": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-buried-cables-outbuildings": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-conduit-sizing": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-diversity": [{ examId: "18th-edition", label: "18th Edition" }],
-  "cheat-course-eic-paperwork": [
-    { examId: "initial-verification", label: "Initial verification" },
-    { examId: "periodic-inspection", label: "Periodic / EICR" }
+  "cheat-course-instruments-gs38": [
+    { examId: "fundamental-inspection-testing", label: "Fundamental Inspection and Testing" },
+    { examId: "initial-verification", label: "Initial Verification" }
   ],
-  "cheat-course-protective-measures": [{ examId: "18th-edition", label: "18th Edition" }]
+  "cheat-course-rcd-trip-times": [
+    { examId: "fundamental-inspection-testing", label: "Fundamental Inspection and Testing" },
+    { examId: "initial-verification", label: "Initial Verification" }
+  ],
+  "cheat-course-supply-intake": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-adiabatic-pfc": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-three-phase-basics": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-special-cables-fp200": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-buried-cables-outbuildings": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-conduit-sizing": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-diversity": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }],
+  "cheat-course-eic-paperwork": [
+    { examId: "fundamental-inspection-testing", label: "Fundamental Inspection and Testing" },
+    { examId: "initial-verification", label: "Initial Verification" },
+    { examId: "periodic-inspection", label: "Periodic Inspection and Testing (Condition Reporting)" }
+  ],
+  "cheat-course-protective-measures": [{ examId: "18th-edition", label: "Wiring Regulations (18th Edition)" }]
 };
 
 const applets: Applet[] = [
@@ -1248,7 +1275,7 @@ export default function App() {
   const [comfortableText, setComfortableText] = usePersistedState<boolean>("pref-comfortable-text", false, isBoolean);
   const [colorTheme, setColorTheme] = usePersistedState<ColorTheme>("pref-color-theme", "dark", isColorTheme);
   const [hiddenExamIds, setHiddenExamIds] = usePersistedState<ExamId[]>(
-    "pref-hidden-exam-ids-v1",
+    "pref-hidden-exam-ids-v2",
     [...DEFAULT_HIDDEN_EXAM_IDS],
     isExamIdArray
   );

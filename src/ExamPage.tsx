@@ -56,6 +56,7 @@ type ExamProgress = { variants: Record<string, VariantSlot>; current: number };
 const EMPTY_ANSWERS: Answers = {};
 const EMPTY_PROGRESS: ExamProgress = { variants: {}, current: 0 };
 const PERIODIC_INSPECTION_RESET_AT = Date.UTC(2026, 5, 7, 0, 0);
+const INITIAL_VERIFICATION_RESET_AT = Date.UTC(2026, 6, 26, 18, 40);
 const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
   "level-2-electrical-installation": Date.UTC(2026, 4, 26, 21, 1),
   "level-3-electrical-installation": Date.UTC(2026, 4, 26, 21, 1),
@@ -63,14 +64,16 @@ const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
   "18th-edition": Date.UTC(2026, 4, 26, 21, 1),
   "special-locations": Date.UTC(2026, 4, 26, 21, 1),
   "pat-testing": Date.UTC(2026, 4, 26, 21, 1),
-  "initial-verification": Date.UTC(2026, 4, 26, 21, 1),
+  "fundamental-inspection-testing": Date.UTC(2026, 4, 26, 21, 1),
+  "initial-verification": INITIAL_VERIFICATION_RESET_AT,
   "inspection-design-2396": Date.UTC(2026, 4, 26, 21, 1),
   "periodic-inspection": PERIODIC_INSPECTION_RESET_AT,
   "am2-installation-assessment": Date.UTC(2026, 4, 26, 21, 1),
   "ecs-health-safety": Date.UTC(2026, 4, 26, 21, 1)
 };
 const EXAM_LOCAL_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
-  "periodic-inspection": PERIODIC_INSPECTION_RESET_AT
+  "periodic-inspection": PERIODIC_INSPECTION_RESET_AT,
+  "initial-verification": INITIAL_VERIFICATION_RESET_AT
 };
 
 type CopyState = "idle" | "copied" | "failed";
@@ -875,7 +878,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
       <div className="exam-shell">
         <header className="exam-hero">
           <div className="exam-hero-text">
-            <span className="exam-eyebrow">{"PRACTICE EXAM · EAL — City & Guilds aligned"}</span>
+            <span className="exam-eyebrow">PRACTICE EXAM</span>
             <h1 className="sr-only">{selectedExamEntry.title} practice exam</h1>
             <div className="exam-title-wrap" ref={examMenuRef}>
               {visibleExamRegistry.length > 1 ? (

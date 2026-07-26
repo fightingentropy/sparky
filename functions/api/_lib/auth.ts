@@ -1,4 +1,5 @@
 import { verifyJWT } from "./crypto";
+export { VALID_EXAM_IDS } from "./validExamIds";
 
 export interface Env {
   DB: D1Database;
@@ -59,22 +60,6 @@ export function normalizeAvatar(input: unknown): FieldResult {
   if (!AVATAR_DATA_URL.test(input)) return { ok: false, error: "Unsupported image format" };
   return { ok: true, value: input };
 }
-
-// Allowed exam IDs. Mirror of EXAM_REGISTRY in src/examRegistry.ts. Kept here
-// so the server can reject unknown examIds without importing client code.
-export const VALID_EXAM_IDS = new Set([
-  "level-2-electrical-installation",
-  "level-3-electrical-installation",
-  "building-regulations",
-  "18th-edition",
-  "special-locations",
-  "pat-testing",
-  "initial-verification",
-  "inspection-design-2396",
-  "periodic-inspection",
-  "am2-installation-assessment",
-  "ecs-health-safety",
-]);
 
 const VALID_CHOICES = new Set(["A", "B", "C", "D"]);
 const MAX_ANSWERS_ENTRIES = 250;

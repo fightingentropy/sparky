@@ -205,13 +205,13 @@ export const COURSE_GUIDES: CourseGuide[] = [
   },
   {
     id: "18th-edition-bs7671-study",
-    title: "18th Edition BS 7671 Study Guide",
+    title: "Wiring Regulations (18th Edition) Study Guide",
     kicker: "Regulations",
     category: "reference",
     summary:
       "A structured approach to using BS 7671 as a working document instead of memorising isolated regulation snippets.",
     examId: "18th-edition",
-    examLabel: "18th Edition",
+    examLabel: "Wiring Regulations (18th Edition)",
     noteLinks: [
       { noteId: "cheat-course-where-rcd-required", label: "Where RCDs are required" },
       { noteId: "cheat-course-zs-tables", label: "Zs tables" },
@@ -261,13 +261,13 @@ export const COURSE_GUIDES: CourseGuide[] = [
   },
   {
     id: "part-p-building-regulations",
-    title: "Part P and Building Regulations Guide",
+    title: "Building Regulations Guide",
     kicker: "Domestic compliance",
     category: "qualification",
     summary:
       "A domestic-work guide covering Part P scope, LABC interaction, notifiable work and the certificate trail.",
     examId: "building-regulations",
-    examLabel: "Building regs",
+    examLabel: "Building Regulations",
     noteLinks: [
       { noteId: "cheat-regulations", label: "Regulations and scope" },
       { noteId: "cheat-safe-zones", label: "Safe zones" },
@@ -316,31 +316,87 @@ export const COURSE_GUIDES: CourseGuide[] = [
     ]
   },
   {
-    id: "2391-inspection-testing",
-    title: "2391 Inspection and Testing Guide",
-    kicker: "Initial + periodic",
+    id: "fundamental-inspection-testing",
+    title: "Fundamental Inspection and Testing Guide",
+    kicker: "Single phase",
     category: "assessment",
     summary:
-      "The structure behind 2391-50, 2391-51 and 2391-52, with the theory and practical areas candidates must be sharp on.",
-    examId: "initial-verification",
-    examLabel: "Initial verification",
+      "A single-phase inspection-and-testing foundation covering safe isolation, initial inspection, dead and live tests, commissioning and certification.",
+    examId: "fundamental-inspection-testing",
+    examLabel: "Fundamental Inspection and Testing",
     noteLinks: [
       { noteId: "cheat-course-iv-test-sequence", label: "Initial verification sequence" },
       { noteId: "cheat-course-test-methods", label: "Test methods" },
       { noteId: "cheat-course-safe-isolation", label: "Safe isolation" }
     ],
     facts: [
-      { label: "Combined course", value: "C&G 2391-52" },
-      { label: "Separate routes", value: "2391-50 initial, 2391-51 periodic" },
-      { label: "Hard part", value: "Sequencing plus judgement" }
+      { label: "Scope", value: "Typical single-phase installations" },
+      { label: "Theory exam", value: "30 questions in 60 minutes" },
+      { label: "Permitted book", value: "IET Guidance Note 3" }
+    ],
+    sections: [
+      {
+        title: "Exact exam boundary",
+        items: [
+          "The qualification covers initial verification of typical single-phase installations.",
+          "The mock covers safe isolation, requirements, inspection, safe testing, dead tests, live tests and documentation.",
+          "Three-phase verification belongs in Initial Verification, not this Fundamental exam."
+        ]
+      },
+      {
+        title: "Practical sequence",
+        items: [
+          "Prove safe isolation before inspection and pre-energised testing.",
+          "Complete continuity, insulation resistance and polarity evidence before energising.",
+          "Then complete the required live and functional tests safely and record the results."
+        ]
+      },
+      {
+        title: "Paperwork",
+        items: [
+          "Know when an Electrical Installation Certificate or Minor Electrical Installation Works Certificate applies.",
+          "The certificate must be supported by the relevant inspection and test schedules.",
+          "Read the scenario carefully so the certificate matches the work actually carried out."
+        ]
+      }
+    ],
+    pitfalls: [
+      "Including three-phase or periodic-inspection questions in Fundamental practice.",
+      "Treating open book as a substitute for knowing the test sequence.",
+      "Mixing up dead tests, live tests and the order in which they are completed."
+    ],
+    nextActions: [
+      "Run the 30-question Fundamental mock in 60 minutes.",
+      "Practise the safe-isolation and dead/live sequence from memory.",
+      "Use Guidance Note 3 to check every weak topic after the mock."
+    ]
+  },
+  {
+    id: "2391-inspection-testing",
+    title: "Initial Verification Guide",
+    kicker: "Initial verification",
+    category: "assessment",
+    summary:
+      "Deeper single- and three-phase verification, kept separate from Fundamental and Periodic Inspection.",
+    examId: "initial-verification",
+    examLabel: "Initial Verification",
+    noteLinks: [
+      { noteId: "cheat-course-iv-test-sequence", label: "Initial verification sequence" },
+      { noteId: "cheat-course-test-methods", label: "Test methods" },
+      { noteId: "cheat-course-safe-isolation", label: "Safe isolation" }
+    ],
+    facts: [
+      { label: "Scope", value: "Single- and three-phase installations" },
+      { label: "Theory exam", value: "55 questions in 90 minutes" },
+      { label: "Permitted book", value: "IET Guidance Note 3" }
     ],
     sections: [
       {
         title: "Coverage",
         items: [
           "Initial verification: inspect and test new work before it is put into service.",
-          "Periodic inspection: assess an existing installation and report whether it is safe for continued use.",
-          "The course links safe isolation, dead testing, live testing, instruments, certification and defect judgement."
+          "The Level 3 scope extends beyond Fundamental into both single- and three-phase installations.",
+          "The course links safe isolation, dead testing, live testing, instruments, certification and commissioning."
         ]
       },
       {
@@ -354,32 +410,32 @@ export const COURSE_GUIDES: CourseGuide[] = [
       {
         title: "Exam readiness",
         items: [
-          "Use the exact 2391 mocks as the benchmark for difficulty.",
+          "Use the practice test to build depth; the target theory exam is 55 questions in 90 minutes.",
           "Do not accept obvious distractor elimination as competence; you should be able to explain why the other options fail.",
-          "Revise initial and periodic together because many questions test the boundary between them."
+          "Keep the boundary clear: new work is Initial Verification; an existing installation's continuing condition belongs in Periodic Inspection."
         ]
       }
     ],
     pitfalls: [
       "Putting live tests before dead-test evidence is complete.",
       "Testing sensitive equipment without linking or disconnecting it.",
-      "Using initial-verification rules blindly on an existing occupied installation."
+      "Confusing an Initial Verification certificate with an EICR for an existing installation."
     ],
     nextActions: [
-      "Alternate 2391 mocks with the Initial Verification notes.",
+      "Run Initial Verification practice alongside the Initial Verification notes.",
       "Build a one-page dead/live sequence from memory, then check it.",
       "When wrong, classify the error as sequence, instrument, value, safety or paperwork."
     ]
   },
   {
     id: "periodic-inspection-eicr",
-    title: "Periodic Inspection and EICR Guide",
+    title: "Periodic Inspection and Testing (Condition Reporting) Guide",
     kicker: "Condition reporting",
     category: "assessment",
     summary:
       "A judgement guide for existing installations: extent, limitations, sampling, coding and defensible EICR outcomes.",
     examId: "periodic-inspection",
-    examLabel: "Periodic / EICR",
+    examLabel: "Periodic Inspection and Testing (Condition Reporting)",
     noteLinks: [
       { noteId: "cheat-course-eicr-procedure", label: "EICR procedure" },
       { noteId: "cheat-course-eicr-codes", label: "EICR codes" },
@@ -422,7 +478,7 @@ export const COURSE_GUIDES: CourseGuide[] = [
       "Copying a code without explaining the actual risk on that installation."
     ],
     nextActions: [
-      "Use the merged Periodic / EICR exam as the hard judgement bank.",
+      "Use the Periodic Inspection and Testing (Condition Reporting) exam as the hard judgement bank.",
       "For every wrong code, write the risk that would justify the correct code.",
       "Practise turning observations into professional report wording."
     ]
@@ -485,16 +541,16 @@ export const COURSE_GUIDES: CourseGuide[] = [
   },
   {
     id: "pat-eet-equipment",
-    title: "PAT and EET Practical Guide",
+    title: "Portable Appliance Testing Guide",
     kicker: "Equipment testing",
     category: "qualification",
     summary:
-      "A compact guide to C&G 2377-77, the IET Code of Practice, tester types, equipment classes, labels and records.",
+      "A compact guide to the IET Code of Practice, tester types, equipment classes, labels and records.",
     examId: "pat-testing",
-    examLabel: "PAT testing",
+    examLabel: "Portable Appliance Testing",
     noteLinks: [{ noteId: "cheat-course-pat-testing", label: "PAT classes and pass criteria" }],
     facts: [
-      { label: "Course", value: "C&G 2377-77 EET/PAT" },
+      { label: "Scope", value: "Electrical equipment testing (EET/PAT)" },
       { label: "Key document", value: "IET CoP 5th Edition" },
       { label: "Tester groups", value: "Basic, advanced, computerised, medical" }
     ],
