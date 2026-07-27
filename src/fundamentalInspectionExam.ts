@@ -75,6 +75,9 @@ const FUNDAMENTAL_MOCK_1: FundamentalBlueprint = {
   ]
 };
 
+const FUNDAMENTAL_HOMEWORK_VARIANT_ID =
+  "fundamental-inspection-testing-homework";
+
 function validateBlueprint(blueprint: FundamentalBlueprint): void {
   for (const [topic, expectedCount] of Object.entries(FUNDAMENTAL_BLUEPRINT_COUNTS)) {
     const questions = blueprint[topic as keyof FundamentalBlueprint];
@@ -101,6 +104,23 @@ function findQuestion(
   );
 }
 
+function findSourceVariantQuestions(
+  sourceExam: Exam,
+  variantId: string
+): ExamQuestion[] {
+  for (const section of sourceExam.sections) {
+    const variant = section.variants.find((candidate) => candidate.id === variantId);
+    if (variant) {
+      return variant.questions.map((question, index) => ({
+        ...question,
+        number: index + 1
+      }));
+    }
+  }
+
+  throw new Error(`Fundamental source variant ${variantId} was not found`);
+}
+
 export function buildFundamentalInspectionExam(initialVerificationExam: Exam): Exam {
   if (initialVerificationExam.id !== "initial-verification") {
     throw new Error(
@@ -119,14 +139,19 @@ export function buildFundamentalInspectionExam(initialVerificationExam: Exam): E
     throw new Error("Fundamental mock contains duplicate questions");
   }
 
+  const homeworkQuestions = findSourceVariantQuestions(
+    initialVerificationExam,
+    FUNDAMENTAL_HOMEWORK_VARIANT_ID
+  );
+
   return {
     id: "fundamental-inspection-testing",
     title: PRIMARY_EXAM_TITLES["fundamental-inspection-testing"],
-    subtitle: "30-question single-phase mock exam",
+    subtitle: "Two Fundamental Inspection and Testing practice papers",
     description:
-      "A Fundamental Inspection and Testing mock for typical single-phase installations, covering safe isolation, inspection, dead and live testing, commissioning and certification.",
+      "Two Fundamental Inspection and Testing practice papers covering safe isolation, inspection, dead and live testing, commissioning, certification and core installation knowledge.",
     format:
-      "30 questions • 60 minutes • Open book (IET Guidance Note 3) • Pass at 60%+.",
+      "Two rotating papers: one 30-question focused mock and one 40-question homework paper • 60 minutes • Open book (IET Guidance Note 3) • Pass at 60%+.",
     passPercent: 0.6,
     sections: [
       {
@@ -136,6 +161,10 @@ export function buildFundamentalInspectionExam(initialVerificationExam: Exam): E
           {
             id: "fundamental-mock-1",
             questions
+          },
+          {
+            id: FUNDAMENTAL_HOMEWORK_VARIANT_ID,
+            questions: homeworkQuestions
           }
         ]
       }

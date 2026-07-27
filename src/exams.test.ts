@@ -83,20 +83,20 @@ const expectedExamOrder = [
 const expectedPerAttempt: Record<string, number[]> = {
   "level-2-electrical-installation": repeat(30, 5),
   "level-3-electrical-installation": repeat(30, 5),
-  "building-regulations": repeat(20, 7),
+  "building-regulations": repeat(20, 8),
   // variants 0-4 are the original five source mocks; 5-24 are Mock 6-25 (some
   // 59 where a broken/duplicate source row was dropped).
   "18th-edition": [
     60, 60, 60, 60, 60, 59, 60, 59, 60, 60, 59, 59, 60, 60, 59, 60, 60, 60, 59, 60, 60, 59, 60, 60,
-    60
+    60, 56
   ],
-  "fundamental-inspection-testing": [30],
+  "fundamental-inspection-testing": [30, 40],
   "special-locations": [30],
-  "pat-testing": [50, 50, 50, 30],
-  "initial-verification": [55],
+  "pat-testing": [50, 50, 50, 30, 35],
+  "initial-verification": [55, 43],
   // variant 3 dropped three duplicate questions (30 -> 27).
   "inspection-design-2396": [30, 30, 30, 27, 30, 30, 30, 30, 30, 30, 30, 30, 30, 18],
-  "periodic-inspection": repeat(40, 5),
+  "periodic-inspection": [40, 40, 40, 40, 40, 23],
   "am2-installation-assessment": repeat(30, 2),
   // variants 0-14 are the original ECS set (3 full mocks, 1 older mock, 11 topic
   // tests); 15-26 are ECS Test 4-15 (Test 4 is 48 where two broken source rows
@@ -160,11 +160,12 @@ describe("exam data", () => {
     }
   });
 
-  it("builds Fundamental as a separate 30-question single-phase mock", () => {
+  it("adds the Fundamental homework paper alongside the focused single-phase mock", () => {
     expect(Object.values(FUNDAMENTAL_BLUEPRINT_COUNTS).reduce((sum, count) => sum + count, 0))
       .toBe(30);
-    expect(getVariantCount(fundamentalInspectionExam)).toBe(1);
+    expect(getVariantCount(fundamentalInspectionExam)).toBe(2);
     expect(getQuestionsForVariant(fundamentalInspectionExam, 0)).toHaveLength(30);
+    expect(getQuestionsForVariant(fundamentalInspectionExam, 1)).toHaveLength(40);
     expect(fundamentalInspectionExam.format).toContain("60 minutes");
     expect(fundamentalInspectionExam.format).toContain("Guidance Note 3");
     expect(
@@ -176,7 +177,7 @@ describe("exam data", () => {
     );
   });
 
-  it("builds a focused 55-question Initial Verification mock", () => {
+  it("adds the Initial Verification homework paper alongside the focused mock", () => {
     expect(
       Object.values(INITIAL_VERIFICATION_BLUEPRINT_COUNTS)
         .reduce((sum, count) => sum + count, 0)
@@ -184,9 +185,10 @@ describe("exam data", () => {
     expect(Object.values(INITIAL_VERIFICATION_BLUEPRINT_COUNTS)).toEqual([
       7, 3, 8, 7, 11, 13, 5, 1
     ]);
-    expect(getVariantCount(focusedInitialVerificationExam)).toBe(1);
+    expect(getVariantCount(focusedInitialVerificationExam)).toBe(2);
     const questions = getQuestionsForVariant(focusedInitialVerificationExam, 0);
     expect(questions).toHaveLength(55);
+    expect(getQuestionsForVariant(focusedInitialVerificationExam, 1)).toHaveLength(43);
     expect(focusedInitialVerificationExam.format).toContain("90 minutes");
     expect(focusedInitialVerificationExam.format).toContain("Guidance Note 3");
     expect(focusedInitialVerificationExam.passPercent).toBe(0.6);
@@ -492,7 +494,7 @@ describe("exam data", () => {
     const exam = EXAMS.find((entry) => entry.id === "periodic-inspection");
     expect(exam).toBeDefined();
     const questions = getQuestionsForVariant(exam!, 0);
-    expect(getVariantCount(exam!)).toBe(5);
+    expect(getVariantCount(exam!)).toBe(6);
     expect(questions).toHaveLength(40);
     expect(questions[0].prompt).toBe(
       "If an EICR for a rented dwelling identifies a C1 or C2 item, or requires further investigation, the landlord under the 2020 private rented sector electrical safety duties must normally arrange the required remedial or investigative work within:"

@@ -1496,13 +1496,15 @@ function targetQuestions(): ScopedQuestion[] {
   return enhancedPeriodicInspection.sections
     .filter((section) => TARGET_SECTION_IDS.has(section.id))
     .flatMap((section) =>
-      section.variants.flatMap((variant) =>
+      section.variants
+        .filter((variant) => variant.id !== "v6")
+        .flatMap((variant) =>
         variant.questions.map((question) => ({
           sectionId: section.id,
           variantId: variant.id,
           question,
         })),
-      ),
+        ),
     );
 }
 

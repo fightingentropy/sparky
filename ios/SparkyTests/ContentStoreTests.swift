@@ -9,8 +9,8 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertEqual(store.catalog.schemaVersion, 1)
         XCTAssertEqual(store.catalog.examCount, 12)
         XCTAssertEqual(store.catalog.exams.count, 12)
-        XCTAssertEqual(store.catalog.variantCount, 97)
-        XCTAssertEqual(store.catalog.questionCount, 4_005)
+        XCTAssertEqual(store.catalog.variantCount, 103)
+        XCTAssertEqual(store.catalog.questionCount, 4_222)
         XCTAssertEqual(store.notes.count, 43)
         XCTAssertEqual(store.guides.count, 13)
         XCTAssertEqual(store.tutorials.count, 7)
@@ -41,11 +41,16 @@ final class ContentStoreTests: XCTestCase {
         let index = try XCTUnwrap(store.examIndex(id: "fundamental-inspection-testing"))
         let exam = try store.loadExam(id: index.id)
         let test = try XCTUnwrap(exam.tests.first)
+        let homework = try XCTUnwrap(
+            exam.tests.first { $0.id == "fundamental-inspection-testing-homework" }
+        )
 
         XCTAssertEqual(exam.title, "Fundamental Inspection and Testing")
-        XCTAssertEqual(exam.tests.count, 1)
+        XCTAssertEqual(exam.tests.count, 2)
         XCTAssertEqual(test.questionCount, 30)
         XCTAssertEqual(test.questions.map(\.number), Array(1...30))
+        XCTAssertEqual(homework.questionCount, 40)
+        XCTAssertEqual(homework.questions.map(\.number), Array(1...40))
         XCTAssertTrue(exam.format.contains("60 minutes"))
         XCTAssertTrue(exam.format.contains("Guidance Note 3"))
     }
@@ -56,11 +61,16 @@ final class ContentStoreTests: XCTestCase {
         let index = try XCTUnwrap(store.examIndex(id: "initial-verification"))
         let exam = try store.loadExam(id: index.id)
         let test = try XCTUnwrap(exam.tests.first)
+        let homework = try XCTUnwrap(
+            exam.tests.first { $0.id == "initial-verification-homework" }
+        )
 
         XCTAssertEqual(exam.title, "Initial Verification")
-        XCTAssertEqual(exam.tests.count, 1)
+        XCTAssertEqual(exam.tests.count, 2)
         XCTAssertEqual(test.questionCount, 55)
         XCTAssertEqual(test.questions.map(\.number), Array(1...55))
+        XCTAssertEqual(homework.questionCount, 43)
+        XCTAssertEqual(homework.questions.map(\.number), Array(1...43))
         XCTAssertTrue(exam.format.contains("90 minutes"))
         XCTAssertTrue(exam.format.contains("Guidance Note 3"))
 
