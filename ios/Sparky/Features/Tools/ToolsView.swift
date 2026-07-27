@@ -43,7 +43,6 @@ private enum ToolKind: String, CaseIterable, Identifiable {
 struct ToolsView: View {
     let studyState: StudyStateStore
 
-    @Environment(AppRouter.self) private var router
     @AppStorage("selectedTool") private var selectedToolRaw = ToolKind.rod.rawValue
     @State private var showingHistory = false
 
@@ -59,7 +58,6 @@ struct ToolsView: View {
 
                 ScrollView {
                     LazyVStack(spacing: 18) {
-                        quickActions
                         toolPicker
                         selectedCalculator
                     }
@@ -95,20 +93,6 @@ struct ToolsView: View {
                     ToolHistorySheet(studyState: studyState)
                 }
                 .presentationDetents([.medium, .large])
-            }
-        }
-    }
-
-    private var quickActions: some View {
-        HStack(spacing: 10) {
-            QuickAction(title: "Practice", subtitle: "Mock exams", symbol: "checklist") {
-                router.selectedTab = .exams
-            }
-            QuickAction(title: "Revise", subtitle: "Quick notes", symbol: "bookmark") {
-                router.selectedTab = .notes
-            }
-            QuickAction(title: "Plan", subtitle: "Learning", symbol: "graduationcap") {
-                router.selectedTab = .learn
             }
         }
     }
@@ -174,38 +158,6 @@ struct ToolsView: View {
         case .bendStart:
             BendStartCalculator(studyState: studyState)
         }
-    }
-}
-
-private struct QuickAction: View {
-    let title: String
-    let subtitle: String
-    let symbol: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                Image(systemName: symbol)
-                    .foregroundStyle(Color.sparkyAccent)
-                Spacer(minLength: 0)
-                Text(title)
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(Color.sparkyText)
-                Text(subtitle)
-                    .font(.caption2)
-                    .foregroundStyle(Color.sparkyMuted)
-            }
-            .frame(maxWidth: .infinity, minHeight: 88, alignment: .leading)
-            .padding(12)
-            .background(Color.sparkySurface)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(Color.sparkyBorder, lineWidth: 1)
-            }
-        }
-        .buttonStyle(.plain)
     }
 }
 

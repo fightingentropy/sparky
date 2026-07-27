@@ -102,6 +102,9 @@ const INITIAL_VERIFICATION_MOCK_1: InitialVerificationBlueprint = {
   practicalTestingKnowledge: [["quiz-29751", 15]]
 };
 
+const INITIAL_VERIFICATION_HOMEWORK_VARIANT_ID =
+  "initial-verification-homework";
+
 function validateBlueprint(blueprint: InitialVerificationBlueprint): void {
   for (
     const [topic, expectedCount]
@@ -133,6 +136,23 @@ function findQuestion(
   );
 }
 
+function findSourceVariantQuestions(
+  sourceExam: Exam,
+  variantId: string
+): ExamQuestion[] {
+  for (const section of sourceExam.sections) {
+    const variant = section.variants.find((candidate) => candidate.id === variantId);
+    if (variant) {
+      return variant.questions.map((question, index) => ({
+        ...question,
+        number: index + 1
+      }));
+    }
+  }
+
+  throw new Error(`Initial Verification source variant ${variantId} was not found`);
+}
+
 export function buildInitialVerificationExam(sourceExam: Exam): Exam {
   if (sourceExam.id !== "initial-verification") {
     throw new Error(
@@ -154,14 +174,19 @@ export function buildInitialVerificationExam(sourceExam: Exam): Exam {
     throw new Error("Initial Verification mock contains duplicate questions");
   }
 
+  const homeworkQuestions = findSourceVariantQuestions(
+    sourceExam,
+    INITIAL_VERIFICATION_HOMEWORK_VARIANT_ID
+  );
+
   return {
     id: "initial-verification",
     title: PRIMARY_EXAM_TITLES["initial-verification"],
-    subtitle: "55-question Initial Verification mock exam",
+    subtitle: "Two Initial Verification practice papers",
     description:
-      "A focused Initial Verification mock covering safe isolation, inspection, pre-energised and energised testing, commissioning and certification for single- and three-phase installations.",
+      "Two Initial Verification practice papers covering safe isolation, inspection, pre-energised and energised testing, commissioning and certification for single- and three-phase installations.",
     format:
-      "55 questions • 90 minutes • Open book (IET Guidance Note 3) • Pass at 60%+.",
+      "Two rotating papers: one 55-question focused mock and one 43-question homework paper • 90 minutes • Open book (IET Guidance Note 3) • Pass at 60%+.",
     passPercent: 0.6,
     sections: [
       {
@@ -171,6 +196,10 @@ export function buildInitialVerificationExam(sourceExam: Exam): Exam {
           {
             id: "initial-verification-mock-1",
             questions
+          },
+          {
+            id: INITIAL_VERIFICATION_HOMEWORK_VARIANT_ID,
+            questions: homeworkQuestions
           }
         ]
       }
