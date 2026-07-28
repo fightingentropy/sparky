@@ -31,7 +31,7 @@ final class CalculatorEngineTests: XCTestCase {
         XCTAssertEqual(unistrut.rightAllowance, "50")
         XCTAssertEqual(unistrut.gap, "50")
 
-        XCTAssertEqual(Engine.Defaults.containmentBendCut.insideAngle, "90")
+        XCTAssertEqual(Engine.Defaults.containmentBendCut.bendAngle, "90")
         XCTAssertEqual(Engine.Defaults.containmentBendCut.cuts, "1")
         XCTAssertEqual(Engine.Defaults.containmentBendCut.width, "100")
 
@@ -191,19 +191,19 @@ final class CalculatorEngineTests: XCTestCase {
 
     func testContainmentBendCutCalculatesTwoCutTrayExample() {
         let result = Engine.containmentBendCut(
-            insideAngle: "67",
+            bendAngle: "67",
             cuts: "2",
             width: "300"
         )
 
         XCTAssertNil(result.validationMessage)
-        XCTAssertEqual(result.insideAngleValue, "67 deg")
-        XCTAssertEqual(result.totalBendValue, "113 deg")
-        XCTAssertEqual(result.bendPerCutValue, "56.5 deg")
-        XCTAssertEqual(result.calculationAngleValue, "28.25 deg")
+        XCTAssertEqual(result.bendAngleValue, "67 deg")
+        XCTAssertEqual(result.totalBendValue, "67 deg")
+        XCTAssertEqual(result.bendPerCutValue, "33.5 deg")
+        XCTAssertEqual(result.calculationAngleValue, "16.75 deg")
         XCTAssertEqual(result.trayWidthValue, "300 mm")
-        XCTAssertEqual(result.setbackValue, "161.2 mm")
-        XCTAssertEqual(result.roundedSetbackValue, "161 mm")
+        XCTAssertEqual(result.setbackValue, "90.3 mm")
+        XCTAssertEqual(result.roundedSetbackValue, "90 mm")
         XCTAssertEqual(result.cutsLabel, "2 cuts")
     }
 
@@ -219,7 +219,7 @@ final class CalculatorEngineTests: XCTestCase {
     }
 
     func testContainmentBendCutReturnsPlaceholdersForIncompleteInput() {
-        let result = Engine.containmentBendCut(insideAngle: "", cuts: "", width: "")
+        let result = Engine.containmentBendCut(bendAngle: "", cuts: "", width: "")
 
         XCTAssertNil(result.validationMessage)
         XCTAssertEqual(result.setbackValue, "-- mm")
@@ -227,15 +227,15 @@ final class CalculatorEngineTests: XCTestCase {
     }
 
     func testContainmentBendCutValidatesAngleAndCutCount() {
-        let angle = Engine.containmentBendCut(insideAngle: "180", cuts: "2", width: "300")
+        let angle = Engine.containmentBendCut(bendAngle: "180", cuts: "2", width: "300")
         XCTAssertEqual(
             angle.validationMessage,
-            "Inside angle must be greater than 0 and less than 180 degrees."
+            "Bend angle must be greater than 0 and less than 180 degrees."
         )
 
         for cuts in ["0", "2.5"] {
             let result = Engine.containmentBendCut(
-                insideAngle: "67",
+                bendAngle: "67",
                 cuts: cuts,
                 width: "300"
             )
@@ -248,13 +248,13 @@ final class CalculatorEngineTests: XCTestCase {
 
     func testContainmentBendCutDistinguishesNegativeAndZeroWidths() {
         let negative = Engine.containmentBendCut(
-            insideAngle: "67",
+            bendAngle: "67",
             cuts: "2",
             width: "-300"
         )
         XCTAssertEqual(negative.validationMessage, "Width cannot be negative.")
 
-        let zero = Engine.containmentBendCut(insideAngle: "67", cuts: "2", width: "0")
+        let zero = Engine.containmentBendCut(bendAngle: "67", cuts: "2", width: "0")
         XCTAssertEqual(zero.validationMessage, "Width must be greater than 0 mm.")
     }
 

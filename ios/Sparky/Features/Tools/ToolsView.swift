@@ -1,8 +1,6 @@
 import SwiftUI
 
 private enum ToolKind: String, CaseIterable, Identifiable {
-    case rod
-    case unistrut
     case bendCut
     case angleDrop
     case bendStart
@@ -11,8 +9,6 @@ private enum ToolKind: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .rod: "Containment rod"
-        case .unistrut: "Unistrut length"
         case .bendCut: "Bend cut"
         case .angleDrop: "Angle drop"
         case .bendStart: "Bend start"
@@ -21,8 +17,6 @@ private enum ToolKind: String, CaseIterable, Identifiable {
 
     var subtitle: String {
         switch self {
-        case .rod: "Threaded rod cut length"
-        case .unistrut: "Support rail cut length"
         case .bendCut: "Tray or trunking marks"
         case .angleDrop: "Drop and developed length"
         case .bendStart: "Offset start mark"
@@ -31,8 +25,6 @@ private enum ToolKind: String, CaseIterable, Identifiable {
 
     var symbol: String {
         switch self {
-        case .rod: "arrow.up.and.down"
-        case .unistrut: "ruler"
         case .bendCut: "angle"
         case .angleDrop: "triangle"
         case .bendStart: "move.3d"
@@ -43,11 +35,11 @@ private enum ToolKind: String, CaseIterable, Identifiable {
 struct ToolsView: View {
     let studyState: StudyStateStore
 
-    @AppStorage("selectedTool") private var selectedToolRaw = ToolKind.rod.rawValue
+    @AppStorage("selectedTool") private var selectedToolRaw = ToolKind.bendCut.rawValue
     @State private var showingHistory = false
 
     private var selectedTool: ToolKind {
-        get { ToolKind(rawValue: selectedToolRaw) ?? .rod }
+        get { ToolKind(rawValue: selectedToolRaw) ?? .bendCut }
         nonmutating set { selectedToolRaw = newValue.rawValue }
     }
 
@@ -101,7 +93,7 @@ struct ToolsView: View {
         VStack(alignment: .leading, spacing: 12) {
             SparkySectionHeader(
                 eyebrow: "Calculator library",
-                title: "5 site and design tools",
+                title: "3 site and design tools",
                 detail: "Offline"
             )
 
@@ -147,10 +139,6 @@ struct ToolsView: View {
     @ViewBuilder
     private var selectedCalculator: some View {
         switch selectedTool {
-        case .rod:
-            ContainmentRodCalculator(studyState: studyState)
-        case .unistrut:
-            UnistrutCalculator(studyState: studyState)
         case .bendCut:
             BendCutCalculator(studyState: studyState)
         case .angleDrop:
@@ -433,12 +421,12 @@ private struct UnistrutCalculator: View {
 private struct BendCutCalculator: View {
     let studyState: StudyStateStore
 
-    @AppStorage("bendCut.inside") private var inside = "90"
+    @AppStorage("bendCut.angle") private var angle = "90"
     @AppStorage("bendCut.cuts") private var cuts = "1"
     @AppStorage("bendCut.width") private var width = "100"
 
     private var result: CalculatorEngine.ContainmentBendCutResult {
-        CalculatorEngine.containmentBendCut(insideAngle: inside, cuts: cuts, width: width)
+        CalculatorEngine.containmentBendCut(bendAngle: angle, cuts: cuts, width: width)
     }
 
     var body: some View {
@@ -450,16 +438,16 @@ private struct BendCutCalculator: View {
             )
 
             LazyVGrid(columns: [.init(.flexible()), .init(.flexible())], spacing: 12) {
-                SparkyField(title: "Inside angle", text: $inside, unit: "°")
+                SparkyField(title: "Total bend angle", text: $angle, unit: "°")
                 SparkyField(title: "Number of cuts", text: $cuts)
                 SparkyField(title: "Containment width", text: $width, unit: "mm")
             }
 
             ScrollView(.horizontal) {
                 HStack {
-                    PresetButton(title: "90° · 1 cut") { inside = "90"; cuts = "1"; width = "100" }
-                    PresetButton(title: "67° · 2 cuts") { inside = "67"; cuts = "2"; width = "300" }
-                    PresetButton(title: "90° · 300 mm") { inside = "90"; cuts = "1"; width = "300" }
+                    PresetButton(title: "90° · 1 cut") { angle = "90"; cuts = "1"; width = "100" }
+                    PresetButton(title: "67° · 2 cuts") { angle = "67"; cuts = "2"; width = "300" }
+                    PresetButton(title: "90° · 300 mm") { angle = "90"; cuts = "1"; width = "300" }
                 }
             }
             .scrollIndicators(.hidden)
@@ -486,14 +474,14 @@ private struct BendCutCalculator: View {
             .background(Color.sparkyAccentSoft)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-            FormulaDisclosure(text: "Total bend = 180° − inside angle\nCut mark = tan(bend per cut ÷ 2) × width")
+            FormulaDisclosure(text: "Bend per cut = total bend angle ÷ cuts\nCut mark = tan(bend per cut ÷ 2) × containment width")
         }
         .sparkyCard(padding: 17)
     }
 
     private func reset() {
         let values = CalculatorEngine.Defaults.containmentBendCut
-        inside = values.insideAngle
+        angle = values.bendAngle
         cuts = values.cuts
         width = values.width
         Haptics.selection()
