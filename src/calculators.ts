@@ -64,7 +64,7 @@ export const DEFAULT_TRUNKING_OPPOSITE_VALUES = {
 // to spread a sharp turn over several gentler cuts (see the presets). Seeded with
 // a plain 90° right-angle bend in 100 mm trunking; the 300 mm tray jobs are presets.
 export const DEFAULT_TRAY_BEND_CUT_VALUES = {
-  insideAngle: "90",
+  bendAngle: "90",
   cuts: "1",
   width: "100"
 } as const;
@@ -121,7 +121,7 @@ export type TrunkingOppositeResult = {
 
 export type TrayBendCutResult = {
   validationMessage: string | null;
-  insideAngleValue: string;
+  bendAngleValue: string;
   totalBendValue: string;
   bendPerCutValue: string;
   calculationAngleValue: string;
@@ -203,7 +203,7 @@ export const formulas = {
   trunkingOpposite:
     "Calculation angle = desired bend angle / 2\nOpposite = tan(calculation angle) x adjacent\nFor 100 mm trunking: opposite = tan(A / 2) x 100",
   trayBendCut:
-    "Total bend = 180 - inside angle\nBend per cut = total bend / number of cuts\nCut mark = tan(bend per cut / 2) x width",
+    "Bend per cut = total bend angle / number of cuts\nCut mark = tan(bend per cut / 2) x containment width",
   power:
     "Single-phase: P = V x I x PF\nThree-phase: P = sqrt(3) x V x I x PF",
   vdrop:
@@ -538,23 +538,22 @@ export function calcTrunkingOppositeMark(
   };
 }
 
-// Segmented ("cut twice") tray bend. You measure the inside angle of the corner
-// the tray has to wrap; the tray therefore has to turn through 180 − that angle.
-// Splitting the turn across N notch cuts, each cut is marked back from centre by
-// tan(half the per-cut turn) × width — the single-cut case (N = 1) reduces
-// to the same tan(A/2) × side the 100 mm trunking mark uses.
+// Segmented ("cut twice") tray bend. Enter the total angle the containment needs
+// to turn. Splitting the turn across N notch cuts, each cut is marked back from
+// centre by tan(half the per-cut turn) × width. With one cut, this is exactly
+// tan(angle / 2) × containment width.
 export function calcTrayBendCut(
-  insideAngleStr: string,
+  bendAngleStr: string,
   cutsStr: string,
   widthStr: string
 ): TrayBendCutResult {
-  const insideAngle = Number.parseFloat(insideAngleStr);
+  const bendAngle = Number.parseFloat(bendAngleStr);
   const cuts = Number.parseFloat(cutsStr);
   const width = Number.parseFloat(widthStr);
 
   const empty: TrayBendCutResult = {
     validationMessage: null,
-    insideAngleValue: "-- deg",
+    bendAngleValue: "-- deg",
     totalBendValue: "-- deg",
     bendPerCutValue: "-- deg",
     calculationAngleValue: "-- deg",
@@ -564,10 +563,10 @@ export function calcTrayBendCut(
     cutsLabel: "-- cuts"
   };
 
-  if (Number.isFinite(insideAngle) && (insideAngle <= 0 || insideAngle >= 180)) {
+  if (Number.isFinite(bendAngle) && (bendAngle <= 0 || bendAngle >= 180)) {
     return {
       ...empty,
-      validationMessage: "Inside angle must be greater than 0 and less than 180 degrees."
+      validationMessage: "Bend angle must be greater than 0 and less than 180 degrees."
     };
   }
 
@@ -585,7 +584,7 @@ export function calcTrayBendCut(
     };
   }
 
-  if (!Number.isFinite(insideAngle) || !Number.isFinite(cuts) || !Number.isFinite(width)) {
+  if (!Number.isFinite(bendAngle) || !Number.isFinite(cuts) || !Number.isFinite(width)) {
     return empty;
   }
 
@@ -596,7 +595,7 @@ export function calcTrayBendCut(
     };
   }
 
-  const totalBend = 180 - insideAngle;
+  const totalBend = bendAngle;
   const bendPerCut = totalBend / cuts;
   const calculationAngle = bendPerCut / 2;
   const calculationAngleRadians = (calculationAngle * Math.PI) / 180;
@@ -608,7 +607,7 @@ export function calcTrayBendCut(
 
   return {
     validationMessage: null,
-    insideAngleValue: `${formatNumber(insideAngle)} deg`,
+    bendAngleValue: `${formatNumber(bendAngle)} deg`,
     totalBendValue: `${formatNumber(totalBend)} deg`,
     bendPerCutValue: `${formatNumber(bendPerCut)} deg`,
     calculationAngleValue: `${formatNumber(calculationAngle)} deg`,

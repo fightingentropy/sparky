@@ -263,19 +263,18 @@ describe("calcTrayBendCut", () => {
   it("calculates the two-cut 67 degree / 300 mm tray example", () => {
     const result = calcTrayBendCut("67", "2", "300");
     expect(result.validationMessage).toBeNull();
-    expect(result.insideAngleValue).toBe("67 deg");
-    expect(result.totalBendValue).toBe("113 deg");
-    expect(result.bendPerCutValue).toBe("56.5 deg");
-    expect(result.calculationAngleValue).toBe("28.25 deg");
+    expect(result.bendAngleValue).toBe("67 deg");
+    expect(result.totalBendValue).toBe("67 deg");
+    expect(result.bendPerCutValue).toBe("33.5 deg");
+    expect(result.calculationAngleValue).toBe("16.75 deg");
     expect(result.trayWidthValue).toBe("300 mm");
-    expect(result.setbackValue).toBe("161.2 mm");
-    expect(result.roundedSetbackValue).toBe("161 mm");
+    expect(result.setbackValue).toBe("90.3 mm");
+    expect(result.roundedSetbackValue).toBe("90 mm");
     expect(result.cutsLabel).toBe("2 cuts");
   });
 
   it("reduces to a single tan(half angle) x width mark for one cut", () => {
-    // One cut through a 90 degree inside corner turns the tray 90 degrees:
-    // tan(45) x 300 = 300.
+    // tan(90 / 2) x 300 = 300.
     const result = calcTrayBendCut("90", "1", "300");
     expect(result.totalBendValue).toBe("90 deg");
     expect(result.bendPerCutValue).toBe("90 deg");
@@ -291,10 +290,10 @@ describe("calcTrayBendCut", () => {
     expect(result.roundedSetbackValue).toBe("-- mm");
   });
 
-  it("rejects invalid inside angles", () => {
+  it("rejects invalid bend angles", () => {
     const result = calcTrayBendCut("180", "2", "300");
     expect(result.validationMessage).toBe(
-      "Inside angle must be greater than 0 and less than 180 degrees."
+      "Bend angle must be greater than 0 and less than 180 degrees."
     );
     expect(result.setbackValue).toBe("-- mm");
   });

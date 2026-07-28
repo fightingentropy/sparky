@@ -64,12 +64,12 @@ public enum CalculatorEngine {
     }
 
     public struct ContainmentBendCutInput: Equatable {
-        public var insideAngle: String
+        public var bendAngle: String
         public var cuts: String
         public var width: String
 
-        public init(insideAngle: String, cuts: String, width: String) {
-            self.insideAngle = insideAngle
+        public init(bendAngle: String, cuts: String, width: String) {
+            self.bendAngle = bendAngle
             self.cuts = cuts
             self.width = width
         }
@@ -148,7 +148,7 @@ public enum CalculatorEngine {
         )
 
         public static let containmentBendCut = ContainmentBendCutInput(
-            insideAngle: "90",
+            bendAngle: "90",
             cuts: "1",
             width: "100"
         )
@@ -192,7 +192,7 @@ public enum CalculatorEngine {
 
     public struct ContainmentBendCutResult: Equatable {
         public let validationMessage: String?
-        public let insideAngleValue: String
+        public let bendAngleValue: String
         public let totalBendValue: String
         public let bendPerCutValue: String
         public let calculationAngleValue: String
@@ -382,25 +382,25 @@ public enum CalculatorEngine {
         _ input: ContainmentBendCutInput
     ) -> ContainmentBendCutResult {
         containmentBendCut(
-            insideAngle: input.insideAngle,
+            bendAngle: input.bendAngle,
             cuts: input.cuts,
             width: input.width
         )
     }
 
     public static func containmentBendCut(
-        insideAngle: String,
+        bendAngle: String,
         cuts: String,
         width: String
     ) -> ContainmentBendCutResult {
-        let parsedInsideAngle = parseNumber(insideAngle)
+        let parsedBendAngle = parseNumber(bendAngle)
         let parsedCuts = parseNumber(cuts)
         let parsedWidth = parseNumber(width)
 
-        if let insideAngle = finite(parsedInsideAngle),
-           insideAngle <= 0 || insideAngle >= 180 {
+        if let bendAngle = finite(parsedBendAngle),
+           bendAngle <= 0 || bendAngle >= 180 {
             return emptyContainmentBendCut(
-                validationMessage: "Inside angle must be greater than 0 and less than 180 degrees."
+                validationMessage: "Bend angle must be greater than 0 and less than 180 degrees."
             )
         }
 
@@ -414,7 +414,7 @@ public enum CalculatorEngine {
             return emptyContainmentBendCut(validationMessage: "Width cannot be negative.")
         }
 
-        guard let insideAngle = finite(parsedInsideAngle),
+        guard let bendAngle = finite(parsedBendAngle),
               let cuts = finite(parsedCuts),
               let width = finite(parsedWidth) else {
             return emptyContainmentBendCut()
@@ -426,7 +426,7 @@ public enum CalculatorEngine {
             )
         }
 
-        let totalBend = 180 - insideAngle
+        let totalBend = bendAngle
         let bendPerCut = totalBend / cuts
         let calculationAngle = bendPerCut / 2
         let calculationAngleRadians = degreesToRadians(calculationAngle)
@@ -438,7 +438,7 @@ public enum CalculatorEngine {
 
         return ContainmentBendCutResult(
             validationMessage: nil,
-            insideAngleValue: "\(formatNumber(insideAngle)) deg",
+            bendAngleValue: "\(formatNumber(bendAngle)) deg",
             totalBendValue: "\(formatNumber(totalBend)) deg",
             bendPerCutValue: "\(formatNumber(bendPerCut)) deg",
             calculationAngleValue: "\(formatNumber(calculationAngle)) deg",
@@ -694,7 +694,7 @@ public enum CalculatorEngine {
     ) -> ContainmentBendCutResult {
         ContainmentBendCutResult(
             validationMessage: validationMessage,
-            insideAngleValue: "-- deg",
+            bendAngleValue: "-- deg",
             totalBendValue: "-- deg",
             bendPerCutValue: "-- deg",
             calculationAngleValue: "-- deg",
