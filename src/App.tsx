@@ -1079,20 +1079,6 @@ const NOTE_PRACTICE_LINKS: Record<string, PracticeLink[]> = {
 
 const applets: Applet[] = [
   {
-    id: "tool-containment-rod",
-    title: "Containment rod",
-    subtitle: "Threaded rod cut length",
-    keywords:
-      "containment rod threaded rod trapeze ceiling drop unistrut overall height buffer cut length support"
-  },
-  {
-    id: "tool-unistrut-length",
-    title: "Unistrut length",
-    subtitle: "Support rail cut length",
-    keywords:
-      "unistrut channel support trapeze rail containment width allowance gap cut length strut"
-  },
-  {
     id: "tool-tray-bend-cut",
     title: "Containment bend cut",
     subtitle: "Notch marks, tray or trunking",
@@ -1125,7 +1111,7 @@ const toolHints = {
   trunkingOpposite:
     "Calculation angle = desired bend angle / 2. Opposite = tan(calculation angle) x adjacent. Use adjacent 100 mm for 100 mm trunking.",
   trayBendCut:
-    "Total bend = 180 - inside angle. Bend per cut = total bend / cuts. Each cut mark = tan(bend per cut / 2) x width.",
+    "Bend per cut = total bend angle / cuts. Each cut mark = tan(bend per cut / 2) x containment width.",
   power: "Single-phase: P = V x I x PF. Three-phase: P = sqrt(3) x V x I x PF.",
   vdrop: "Single-phase: Vd = 2 x I x L x rho / A. Three-phase: Vd = sqrt(3) x I x L x rho / A.",
   breaker: "Rounds design current up to the next standard breaker size.",
@@ -1436,9 +1422,9 @@ export default function App() {
     DEFAULT_TRUNKING_OPPOSITE_VALUES.adjacent
   );
 
-  const [trayBendInsideAngle, setTrayBendInsideAngle] = usePersistedState<string>(
-    "tbc-inside-angle",
-    DEFAULT_TRAY_BEND_CUT_VALUES.insideAngle
+  const [trayBendAngle, setTrayBendAngle] = usePersistedState<string>(
+    "tbc-bend-angle",
+    DEFAULT_TRAY_BEND_CUT_VALUES.bendAngle
   );
   const [trayBendCuts, setTrayBendCuts] = usePersistedState<string>(
     "tbc-cuts",
@@ -1724,13 +1710,13 @@ export default function App() {
   }
 
   function clearTrayBendCut() {
-    setTrayBendInsideAngle("");
+    setTrayBendAngle("");
     setTrayBendCuts("");
     setTrayBendWidth("");
   }
 
-  function applyTrayBendCutPreset(insideAngle: string, cuts: string, width: string) {
-    setTrayBendInsideAngle(insideAngle);
+  function applyTrayBendCutPreset(bendAngle: string, cuts: string, width: string) {
+    setTrayBendAngle(bendAngle);
     setTrayBendCuts(cuts);
     setTrayBendWidth(width);
   }
@@ -1833,8 +1819,8 @@ export default function App() {
   );
 
   const trayBendCutResult = useMemo(() =>
-    calcTrayBendCut(trayBendInsideAngle, trayBendCuts, trayBendWidth),
-    [trayBendCuts, trayBendInsideAngle, trayBendWidth]
+    calcTrayBendCut(trayBendAngle, trayBendCuts, trayBendWidth),
+    [trayBendAngle, trayBendCuts, trayBendWidth]
   );
 
   const powerResult = useMemo(() =>
@@ -2876,7 +2862,7 @@ export default function App() {
                 <div className="tool-form">
                   <div className="field-row">
                     <label className="field">
-                      <span>Inside angle</span>
+                      <span>Total bend angle</span>
                       <div className="input-wrap">
                         <input
                           type="number"
@@ -2885,12 +2871,12 @@ export default function App() {
                           max="179.9"
                           step="0.1"
                           aria-invalid={
-                            trayBendCutResult.validationMessage?.includes("Inside angle")
+                            trayBendCutResult.validationMessage?.includes("Bend angle")
                               ? true
                               : undefined
                           }
-                          value={trayBendInsideAngle}
-                          onChange={(e) => setTrayBendInsideAngle(e.target.value)}
+                          value={trayBendAngle}
+                          onChange={(e) => setTrayBendAngle(e.target.value)}
                         />
                         <span className="suffix">deg</span>
                       </div>
@@ -2935,7 +2921,7 @@ export default function App() {
                   </label>
 
                   <p className="field-note">
-                    Measure the inside angle of the corner; the run turns through 180 - that angle. One cut is a single notch — add cuts only to split a sharp turn into gentler ones. Each cut is marked tan(half its bend) x width on each side of centre.
+                    Enter the total angle you want the containment to turn. One cut uses tan(angle / 2) x width. Add cuts only to split that turn into gentler bends; each mark then uses half the per-cut angle.
                   </p>
 
                   <PresetButtons
