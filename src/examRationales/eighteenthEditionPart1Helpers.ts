@@ -124,7 +124,7 @@ function numericValue(text: string): NumericValue | undefined {
     .replace(/,/g, "")
     .replace(/(\d)\s*o\s*C\b/gi, "$1 °C")
     .match(
-      /(-?(?:\d+(?:\.\d+)?|\.\d+))\s*(mA|A|mV|V|kV|ms|s|min|mm²|mm2|mm|cm|m²|m2|m|MΩ|kΩ|Ω|ohms?|°C|%|litres?|kW|W|Hz)?\b/i,
+      /(-?(?:\d+(?:\.\d+)?|\.\d+))\s*(mA|A|mV|V|kV|ms|s|min|pt|mm²|mm2|mm|cm|m²|m2|m|MΩ|kΩ|Ω|ohms?|°C|%|litres?|kW|W|Hz)?\b/i,
     );
   if (!match) return;
   let value = Number(match[1]);
@@ -217,6 +217,46 @@ function ipReason(
 
 const PURPOSES: readonly [RegExp, string][] = [
   [
+    /^TN-S$/i,
+    "uses a source earth with neutral and protective conductors kept separate throughout, rather than an independent installation electrode",
+  ],
+  [
+    /^TN-C$/i,
+    "combines the neutral and protective functions in one PEN conductor throughout, rather than using an independent installation electrode",
+  ],
+  [
+    /^TN-C-S$/i,
+    "uses a combined PEN conductor for part of the supply and separates neutral and protective conductors later, rather than relying on an independent installation electrode",
+  ],
+  [
+    /^TT$/i,
+    "connects the installation's exposed-conductive-parts to an earth electrode independent of the source earthing conductor",
+  ],
+  [
+    /under no circumstances.*PME/i,
+    "is too absolute because Section 722 permits PME for EV charging when one of its specified protective arrangements is satisfied",
+  ],
+  [
+    /cannot be installed under any circumstances/i,
+    "is too absolute because an ordinary socket-outlet is permitted outside the bathroom zones when it is at least 3 m from the boundary of zone 1",
+  ],
+  [
+    /^Type AC$/i,
+    "responds to sinusoidal AC residual current only, so it does not cover the pulsating DC waveform stated",
+  ],
+  [
+    /^Type A$/i,
+    "responds to sinusoidal AC and pulsating DC residual currents, which is the waveform capability described in the stem",
+  ],
+  [
+    /^Type F$/i,
+    "also covers composite residual currents associated with single-phase frequency-controlled equipment, beyond the Type A duty asked for",
+  ],
+  [
+    /^Type B$/i,
+    "also detects smooth DC and additional higher-frequency residual currents, beyond the Type A duty asked for",
+  ],
+  [
     /\bRCD\b|residual current/i,
     "detects imbalance between live-conductor currents and provides residual-current protection",
   ],
@@ -235,6 +275,18 @@ const PURPOSES: readonly [RegExp, string][] = [
   [
     /supplementary bonding/i,
     "limits potential differences between simultaneously accessible conductive parts; it is not a substitute for the measure asked about",
+  ],
+  [
+    /\binsulation\b/i,
+    "covers live parts to provide basic protection or separates conductors electrically; it is not itself an energised conductor or earthing terminal",
+  ],
+  [
+    /main earthing terminal|\bMET\b/i,
+    "is the installation's principal terminal for connecting protective conductors and does not carry normal load current as a live part",
+  ],
+  [
+    /bonding conductor/i,
+    "connects conductive parts for equipotential bonding and is not intended to be energised during normal operation",
   ],
   [
     /main bonding/i,
@@ -295,6 +347,10 @@ const PURPOSES: readonly [RegExp, string][] = [
   [
     /emergency switching/i,
     "rapidly removes a danger in an emergency; it is a different duty from routine control or maintenance isolation",
+  ],
+  [
+    /safety services/i,
+    "maintains essential functions when the normal supply fails; it does not divide ordinary circuits or prevent indirect energisation between them",
   ],
   [
     /isolation|isolator/i,
@@ -837,6 +893,141 @@ function questionSpecificTeaching(
 ): string | undefined {
   const prompt = question.prompt;
 
+  if (/When is through-wiring of a luminaire permitted/i.test(prompt)) {
+    if (/under any circumstance/i.test(option)) {
+      return `A blanket prohibition is incorrect because through-wiring is permitted where the luminaire is specifically designed with suitable terminals, space and temperature performance.`;
+    }
+    if (/single core/i.test(option)) {
+      return `Using single-core conductors does not prove that the luminaire has suitable terminal capacity, internal space or temperature rating for through-wiring.`;
+    }
+    return `Conduit can protect the incoming wiring, but it does not make the luminaire's terminals and internal construction suitable for through-wiring.`;
+  }
+  if (/Can a semiconductor device be used as an isolating device/i.test(prompt)) {
+    if (/mechanical protection/i.test(option)) {
+      return `Mechanical protection can prevent physical damage but cannot create the physical contact separation and dependable off-state required for isolation.`;
+    }
+    if (/forms part of an installation/i.test(option)) {
+      return `Being incorporated into an installation does not change a semiconductor's leakage and failure characteristics, so it still cannot provide isolation.`;
+    }
+    return `Additional insulation around a semiconductor does not make its electronic off-state equivalent to the reliable contact separation required for isolation.`;
+  }
+  if (/Which design consideration requires sufficient space/i.test(prompt)) {
+    if (/mutual detrimental influence/i.test(option)) {
+      return `Preventing mutual detrimental influence controls harmful interaction between electrical or other services; it does not establish the working space needed for replacement.`;
+    }
+    if (/harmful effects/i.test(option)) {
+      return `Prevention of harmful effects addresses risks such as heat, fire or mechanical damage, not the physical access needed to remove and replace equipment.`;
+    }
+    return `Additions and alterations require the existing installation to remain suitable, but that duty is not the definition of providing access space around each item of equipment.`;
+  }
+  if (/How are low-voltage generating sets treated by BS 7671/i.test(prompt)) {
+    if (/not included/i.test(option)) {
+      return `Saying generating sets are not included overlooks the BS 7671 requirements for low-voltage generation, alternative supplies, switching and earthing.`;
+    }
+    if (/excluded/i.test(option)) {
+      return `Low-voltage generating sets are not one of the specialist exclusions from BS 7671 when they supply an installation within its voltage limits.`;
+    }
+    return `Treating every low-voltage generating set as outside BS 7671 would omit the installation requirements that govern its connection and protective measures.`;
+  }
+  if (/Diversity is sometimes applied when determining/i.test(prompt)) {
+    if (/compatibility/i.test(option)) {
+      return `Compatibility checks whether connected equipment and the supply can operate together without harmful interaction; diversity does not establish that relationship.`;
+    }
+    if (/maintainability/i.test(option)) {
+      return `Maintainability concerns safe access, replacement and continued service, whereas diversity estimates simultaneous loading for maximum demand.`;
+    }
+    return `External influences describe environmental and usage conditions that affect equipment selection; diversity is a loading allowance, not an influence classification.`;
+  }
+  if (/Storage batteries are used as an alternative electrical source/i.test(prompt)) {
+    if (/undervoltage/i.test(option)) {
+      return `Undervoltage is an abnormal supply condition that protection may detect; it is not a service for which a storage battery acts as the alternative source.`;
+    }
+    if (/maintainability/i.test(option)) {
+      return `Maintainability is a design objective concerning safe upkeep and replacement, not an electrical load supplied by a storage battery.`;
+    }
+    return `High-frequency oscillations are an electromagnetic disturbance, not an essential function that needs an alternative battery supply after normal-source failure.`;
+  }
+  if (/three cases that makes protection against transient overvoltages mandatory/i.test(prompt)) {
+    if (/safety service/i.test(option)) {
+      return `Failure of a safety service is expressly listed because a transient overvoltage could disable equipment needed to protect life or property.`;
+    }
+    if (/injury|human life/i.test(option)) {
+      return `Serious injury or loss of human life is expressly listed, so surge protection cannot be omitted where that consequence is foreseeable.`;
+    }
+    return `Significant financial or data loss is expressly listed as a consequence that makes transient-overvoltage protection mandatory.`;
+  }
+  if (/Protection intended to prevent a dangerous current passing through/i.test(prompt)) {
+    if (/thermal effects/i.test(option)) {
+      return `Protection against thermal effects limits burns, fire and overheating; it is not the measure that controls touch current after an insulation fault.`;
+    }
+    if (/voltage disturbances/i.test(option)) {
+      return `Protection against voltage disturbances addresses overvoltage or undervoltage effects on equipment and safety, not the touch-current path created by a fault.`;
+    }
+    return `Overcurrent protection limits overload and short-circuit current in conductors, whereas the definition in the stem specifically concerns shock after a fault.`;
+  }
+  if (/functional earthing conductor is identified by which colour/i.test(prompt)) {
+    if (/^cream$/i.test(option)) {
+      return `Cream was allowed only during the BS EN 60445 transition; for an Amendment 2 installation after September 2020, pink is the applicable colour.`;
+    }
+    if (/green and yellow/i.test(option)) {
+      return `Green-and-yellow is reserved for protective conductors and must not identify a conductor whose sole purpose is functional earthing.`;
+    }
+    return `Green alone is not a permitted BS 7671 identification for either a protective conductor or a functional earthing conductor.`;
+  }
+  if (/If alternative sources of supply are present/i.test(prompt)) {
+    if (/no requirement/i.test(option)) {
+      return `Doing nothing could leave a person believing the installation is dead while an alternative source continues to energise it.`;
+    }
+    if (/barrier/i.test(option)) {
+      return `A barrier can restrict access to live parts but does not tell the person isolating the installation that another source can energise the conductors.`;
+    }
+    return `A warning confined to the documentation may not be visible at the point where isolation is attempted, so each relevant isolation point needs the notice.`;
+  }
+  if (/When shall overcurrent detection be provided for a neutral conductor/i.test(prompt)) {
+    if (/BS ?3036/i.test(option)) {
+      return `The use of a BS 3036 fuse does not by itself establish that neutral current can exceed its permitted value; the expected load-current content is the relevant issue.`;
+    }
+    if (/IT system/i.test(option)) {
+      return `An IT earthing arrangement does not automatically require neutral overcurrent detection; the neutral loading and line-device arrangement still have to justify it.`;
+    }
+    return `Never is unsafe because triplen harmonic currents can add in the neutral and make its current exceed the line-conductor current.`;
+  }
+  if (/cannot be used as a wiring system for a safety service/i.test(prompt)) {
+    if (/fire resistant cables/i.test(option)) {
+      return `A correctly selected fire-resistant cable can maintain circuit integrity for the period required by the safety service.`;
+    }
+    if (/maintaining the necessary fire and mechanical protection/i.test(option)) {
+      return `A wiring system specifically proven to maintain the necessary fire and mechanical protection satisfies the defining circuit-integrity duty.`;
+    }
+    return `Mineral-insulated cable can provide the heat resistance and mechanical robustness needed for a safety-service circuit when correctly selected and installed.`;
+  }
+  if (/not one of the supply or load characteristics assessed when checking installation compatibility/i.test(prompt)) {
+    if (/harmonic currents/i.test(option)) {
+      return `Harmonic currents are assessed because nonlinear loads can overheat neutrals, transformers and capacitors or disturb other connected equipment.`;
+    }
+    if (/DC feedback/i.test(option)) {
+      return `DC feedback is assessed because exported direct-current components can impair protective devices, transformers and the public supply.`;
+    }
+    return `Transient overvoltages are assessed because connected equipment must withstand them or be protected by a coordinated SPD arrangement.`;
+  }
+  if (/Who issues an Electrical Installation Certificate after initial verification/i.test(prompt)) {
+    if (/landlord and the tenant/i.test(option)) {
+      return `Landlord and tenant are property roles; neither wording identifies the competent people who sign for design, construction and inspection or the person who ordered the work.`;
+    }
+    if (/designer and the tenant/i.test(option)) {
+      return `The designer may sign the design declaration, but this omits construction and inspection responsibility and names the tenant instead of the person ordering the work.`;
+    }
+    return `Naming only the installer omits the separate design and inspection declarations where different people hold those responsibilities, so the issuer description is incomplete.`;
+  }
+  if (/not a top-level heading on the model Schedule of Inspections/i.test(prompt)) {
+    if (/basic protection/i.test(option)) {
+      return `Basic protection is an explicit top-level heading used to record the inspection outcome for insulation, barriers and enclosures.`;
+    }
+    if (/additional protection/i.test(option)) {
+      return `Additional protection is an explicit top-level heading covering the relevant supplementary protective measures.`;
+    }
+    return `Distribution equipment is an explicit top-level heading covering assemblies, devices, accessibility, identification and related installation checks.`;
+  }
   if (/BS EN 60228 relates to/i.test(prompt)) {
     if (/trunking|ducting/i.test(option))
       return `BS EN 50085 covers cable-trunking and cable-ducting systems.`;
