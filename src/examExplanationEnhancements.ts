@@ -6,11 +6,13 @@ import { periodicInspectionPart2Corrections } from "./examCorrections/periodicIn
 import { periodicInspectionPart3Corrections } from "./examCorrections/periodicInspectionPart3";
 import { periodicInspectionPart4Corrections } from "./examCorrections/periodicInspectionPart4";
 import type { ExamQuestionCorrection } from "./examCorrections/types";
+import { wiringRegulationsHomeworkCorrections } from "./examCorrections/wiringRegulationsHomework";
 import type { Exam, ExamQuestion } from "./exams/types";
 
-export const EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
+const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
   ...eighteenthEditionCorrections,
   ...eighteenthEditionPart2Corrections,
+  ...wiringRegulationsHomeworkCorrections,
   ...ecsHealthSafetyCorrections,
   ...periodicInspectionCorrections,
   ...periodicInspectionPart2Corrections,
@@ -9223,7 +9225,21 @@ export const EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
     explanation:
       "For TT fault protection, RA × IΔn must not exceed 50 V. With RA = 173 Ω, 100 mA gives 17.3 V and complies; 300 mA gives 51.9 V, so the next larger listed rating already exceeds the limit.",
   },
-] as const;
+];
+
+const REMOVED_EXAM_VARIANT_IDS = new Set([
+  "quiz-29714",
+  "quiz-29719",
+  "quiz-29722",
+  "quiz-29723",
+]);
+
+export const EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] =
+  ALL_EXAM_QUESTION_CORRECTIONS.filter(
+    (correction) =>
+      !correction.variantId ||
+      !REMOVED_EXAM_VARIANT_IDS.has(correction.variantId),
+  );
 
 export const EXAM_EXPLANATION_OVERRIDES = {
   "During the construction of an installation, insulation resistance tests have been carried out between live conductors and earth on the individual circuits and the L to E results are shown below. What is the expected value of insulation resistance L to E when the whole installation is tested?":

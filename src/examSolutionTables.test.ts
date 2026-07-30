@@ -18,7 +18,7 @@ describe("exam solution tables", () => {
       (question) => question.solutionTables?.length
     );
 
-    expect(referencedQuestions).toHaveLength(75);
+    expect(referencedQuestions).toHaveLength(73);
     for (const question of referencedQuestions) {
       const table = question.solutionTables?.[0];
       expect(table?.rows).toHaveLength(1);
