@@ -184,7 +184,6 @@ describe("exam explanation enhancements", () => {
     const correctionFactorQ59 = getQuestion(eighteenthEdition, "quiz-29706", 59);
     const scopeQ49 = getQuestion(eighteenthEdition, "quiz-29713", 49);
     const scopeQ35 = getQuestion(eighteenthEdition, "quiz-29725", 35);
-    const monitoringQuestion = getQuestion(eighteenthEdition, "quiz-29723", 35);
     const type1Ct2Question = getQuestion(eighteenthEdition, "quiz-29726", 27);
 
     expect(ringQuestion?.answer).toBe("D");
@@ -194,8 +193,6 @@ describe("exam explanation enhancements", () => {
     expect(correctionFactorQ59?.options.D).toBe("0.91");
     expect(scopeQ49?.answer).toBe("A");
     expect(scopeQ35?.options.C).toContain("agricultural and horticultural");
-    expect(monitoringQuestion?.prompt).toContain("insulation monitoring device");
-    expect(monitoringQuestion?.options.D).toContain("resistance falls below");
     expect(type1Ct2Question?.prompt).toContain(
       "minimum impulse discharge current Iimp (10/350 µs)"
     );

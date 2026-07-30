@@ -37,6 +37,7 @@ import { periodicInspectionEicrPart1 } from "./examRationales/periodicInspection
 import { periodicInspectionEicrPart2 } from "./examRationales/periodicInspectionEicrPart2";
 import { periodicInspectionEicrPart3 } from "./examRationales/periodicInspectionEicrPart3";
 import { specialLocations } from "./examRationales/specialLocations";
+import { wiringRegulationsHomework } from "./examRationales/wiringRegulationsHomework";
 
 export type ExamOptionExplanations = Record<ExamChoice, string>;
 
@@ -273,6 +274,7 @@ export const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
   ...eighteenthEditionQ29719To29721,
   ...eighteenthEditionQ29722To29724,
   ...eighteenthEditionQ29725To29727,
+  ...wiringRegulationsHomework,
   ...initialVerificationTest1,
   ...initialVerificationTest2,
   ...initialVerificationTest3,

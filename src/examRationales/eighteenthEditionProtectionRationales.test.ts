@@ -35,10 +35,9 @@ describe("18th Edition fault-protection distractor teaching", () => {
     expect(feedback.D).toContain("double or reinforced insulation");
   });
 
-  it.each([
-    ["quiz-29708", 59],
-    ["quiz-29714", 59],
-  ])("explains the public-street constraints in %s Q%i", (variantId, number) => {
+  it.each([["quiz-29708", 59]])(
+    "explains the public-street constraints in %s Q%i",
+    (variantId, number) => {
     const feedback = buildOptionExplanations(question(variantId, number));
 
     expect(feedback.A).toContain("Wet ground, public access and nearby metalwork");
@@ -47,5 +46,6 @@ describe("18th Edition fault-protection distractor teaching", () => {
     expect(feedback.C).toContain("Section 714 does not permit");
     expect(feedback.D).toContain("one item supplied from its own isolating source");
     expect(feedback.D).toContain("public distribution circuit");
-  });
+    },
+  );
 });

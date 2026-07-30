@@ -1,7 +1,7 @@
 import { buildReviewedPart1Sets } from "./eighteenthEditionPart1Helpers";
 
 export const eighteenthEditionQ29711To29715 = buildReviewedPart1Sets(
-  ["quiz-29711", "quiz-29712", "quiz-29713", "quiz-29714", "quiz-29715"],
+  ["quiz-29711", "quiz-29712", "quiz-29713", "quiz-29715"],
   [
     "quiz-29703",
     "quiz-29704",

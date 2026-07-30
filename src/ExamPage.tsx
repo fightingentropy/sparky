@@ -57,11 +57,12 @@ const EMPTY_ANSWERS: Answers = {};
 const EMPTY_PROGRESS: ExamProgress = { variants: {}, current: 0 };
 const PERIODIC_INSPECTION_RESET_AT = Date.UTC(2026, 5, 7, 0, 0);
 const INITIAL_VERIFICATION_RESET_AT = Date.UTC(2026, 6, 26, 18, 40);
+const WIRING_REGULATIONS_RESET_AT = Date.UTC(2026, 6, 30, 20, 20);
 const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
   "level-2-electrical-installation": Date.UTC(2026, 4, 26, 21, 1),
   "level-3-electrical-installation": Date.UTC(2026, 4, 26, 21, 1),
   "building-regulations": Date.UTC(2026, 4, 26, 21, 1),
-  "18th-edition": Date.UTC(2026, 4, 26, 21, 1),
+  "18th-edition": WIRING_REGULATIONS_RESET_AT,
   "special-locations": Date.UTC(2026, 4, 26, 21, 1),
   "pat-testing": Date.UTC(2026, 4, 26, 21, 1),
   "fundamental-inspection-testing": Date.UTC(2026, 4, 26, 21, 1),
@@ -72,6 +73,7 @@ const EXAM_REMOTE_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
   "ecs-health-safety": Date.UTC(2026, 4, 26, 21, 1)
 };
 const EXAM_LOCAL_PROGRESS_RESET_AT: Partial<Record<string, number>> = {
+  "18th-edition": WIRING_REGULATIONS_RESET_AT,
   "periodic-inspection": PERIODIC_INSPECTION_RESET_AT,
   "initial-verification": INITIAL_VERIFICATION_RESET_AT
 };

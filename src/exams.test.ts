@@ -9,7 +9,7 @@ import {
   getScoringRanges,
   getVariantCount
 } from "./examUtils";
-import type { Exam } from "./exams/types";
+import type { Exam, ExamQuestion } from "./exams/types";
 // Static data fixture for the tests. The app loads exams lazily at runtime via
 // examRegistry.ts (fetch by ?url); these direct JSON imports exist only here so
 // the test bank stays out of production code. (There used to be a parallel
@@ -84,11 +84,10 @@ const expectedPerAttempt: Record<string, number[]> = {
   "level-2-electrical-installation": repeat(30, 5),
   "level-3-electrical-installation": repeat(30, 5),
   "building-regulations": repeat(20, 8),
-  // variants 0-4 are the original five source mocks; 5-24 are Mock 6-25 (some
-  // 59 where a broken/duplicate source row was dropped).
+  // Four later papers that repeated roughly 87-93% of an earlier full mock were
+  // removed. The final 56-question variant is the Access Training source paper.
   "18th-edition": [
-    60, 60, 60, 60, 60, 59, 60, 59, 60, 60, 59, 59, 60, 60, 59, 60, 60, 60, 59, 60, 60, 59, 60, 60,
-    60, 56
+    60, 60, 60, 60, 60, 59, 60, 59, 60, 60, 59, 60, 60, 59, 60, 60, 59, 59, 60, 60, 60, 56
   ],
   "fundamental-inspection-testing": [30, 40],
   "special-locations": [30],
@@ -149,6 +148,16 @@ function isBareReference(value: string): boolean {
   );
 }
 
+function normalizedQuestionSignature(question: ExamQuestion): string {
+  const normalize = (value: string) =>
+    value.normalize("NFKC").replace(/\s+/g, " ").trim().toLowerCase();
+  return JSON.stringify({
+    prompt: normalize(question.prompt),
+    options: Object.values(question.options).map(normalize).sort(),
+    answer: normalize(question.options[question.answer]),
+  });
+}
+
 describe("exam data", () => {
   it("exposes the canonical exams in the expected order", () => {
     expect(EXAMS.map((exam) => exam.id)).toEqual(expectedExamOrder);
@@ -158,6 +167,59 @@ describe("exam data", () => {
     for (const [examId, title] of Object.entries(PRIMARY_EXAM_TITLES)) {
       expect(EXAMS.find((exam) => exam.id === examId)?.title).toBe(title);
     }
+  });
+
+  it("keeps the Wiring Regulations bank free of later near-copy full papers", () => {
+    const exam = eighteenthEditionExam as unknown as Exam;
+    const variants = exam.sections.flatMap((section) => section.variants);
+    const removedIds = ["quiz-29714", "quiz-29719", "quiz-29722", "quiz-29723"];
+
+    expect(variants).toHaveLength(22);
+    expect(variants.map((variant) => variant.id)).not.toEqual(
+      expect.arrayContaining(removedIds),
+    );
+
+    for (let left = 0; left < variants.length; left += 1) {
+      const leftSignatures = new Set(
+        variants[left].questions.map(normalizedQuestionSignature),
+      );
+      for (let right = left + 1; right < variants.length; right += 1) {
+        const rightSignatures = new Set(
+          variants[right].questions.map(normalizedQuestionSignature),
+        );
+        const shared = [...leftSignatures].filter((signature) =>
+          rightSignatures.has(signature),
+        ).length;
+        const overlap = shared / Math.min(leftSignatures.size, rightSignatures.size);
+        expect(
+          overlap,
+          `${variants[left].id} and ${variants[right].id} repeat ${shared} full questions`,
+        ).toBeLessThan(0.8);
+      }
+    }
+  });
+
+  it("serves the complete repaired Access Training paper as Wiring Regulations Test 22", () => {
+    const enhanced = applyExamExplanationEnhancements(
+      eighteenthEditionExam as unknown as Exam,
+    );
+    const variants = enhanced.sections.flatMap((section) => section.variants);
+    const accessPaper = variants.at(21);
+
+    expect(accessPaper?.id).toBe("wiring-regulations-homework");
+    expect(accessPaper?.questions).toHaveLength(56);
+    expect(accessPaper?.questions.map((question) => question.number)).toEqual(
+      Array.from({ length: 56 }, (_, index) => index + 1),
+    );
+    expect(
+      accessPaper?.questions.some((question) =>
+        /the applicable answer for the stated conditions/i.test(question.explanation),
+      ),
+    ).toBe(false);
+    expect(accessPaper?.questions.find((question) => question.number === 35)?.answer).toBe("B");
+    expect(accessPaper?.questions.find((question) => question.number === 35)?.options.B).toBe(
+      "Pink",
+    );
   });
 
   it("adds the Fundamental homework paper alongside the focused single-phase mock", () => {

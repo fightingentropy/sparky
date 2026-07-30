@@ -445,11 +445,12 @@ final class ExamProgressSyncService {
         let common = Date(timeIntervalSince1970: 1_779_829_260) // 2026-05-26 21:01 UTC
         let periodic = Date(timeIntervalSince1970: 1_780_790_400) // 2026-06-07 00:00 UTC
         let initialVerification = Date(timeIntervalSince1970: 1_785_091_200) // 2026-07-26 18:40 UTC
+        let wiringRegulations = Date(timeIntervalSince1970: 1_785_442_800) // 2026-07-30 20:20 UTC
         return [
             "level-2-electrical-installation": common,
             "level-3-electrical-installation": common,
             "building-regulations": common,
-            "18th-edition": common,
+            "18th-edition": wiringRegulations,
             "special-locations": common,
             "pat-testing": common,
             "fundamental-inspection-testing": common,

@@ -48,7 +48,6 @@ const EXAMS = [
 
 const CHOICES = ["A", "B", "C", "D"] as const;
 const IMPORTED_HOMEWORK_VARIANTS = new Set([
-  "18th-edition/wiring-regulations-homework",
   "building-regulations/building-regulations-homework",
   "fundamental-inspection-testing/fundamental-inspection-testing-homework",
   "initial-verification/initial-verification-homework",
@@ -65,11 +64,11 @@ function allQuestions(exams: Exam[] = EXAMS): ExamQuestion[] {
 }
 
 describe("exam option explanations", () => {
-  it("shows the full correct explanation and feedback for all 14,886 distractors", () => {
+  it("shows the full correct explanation and feedback for all 14,169 distractors", () => {
     const questions = allQuestions();
     let distractorCount = 0;
 
-    expect(questions).toHaveLength(4962);
+    expect(questions).toHaveLength(4723);
     for (const question of questions) {
       const feedback = buildOptionExplanations(question);
       expect(Object.keys(feedback)).toEqual(CHOICES);
@@ -91,7 +90,7 @@ describe("exam option explanations", () => {
       }
     }
 
-    expect(distractorCount).toBe(14_886);
+    expect(distractorCount).toBe(14_169);
   });
 
   it("keeps the complete authored rationale when no safe option-specific reason exists", () => {
@@ -520,7 +519,7 @@ describe("exam option explanations", () => {
         "sourceUrls" in entry && Array.isArray(entry.sourceUrls),
     );
 
-    expect(sourcedSets).toHaveLength(4941);
+    expect(sourcedSets).toHaveLength(4812);
     for (const entry of sourcedSets) {
       expect(entry.sourceUrls.length).toBeGreaterThan(0);
       for (const sourceUrl of entry.sourceUrls) {
@@ -592,8 +591,8 @@ describe("exam option explanations", () => {
       }
     }
 
-    expect(questionCount).toBe(4_962);
-    expect(distractorCount).toBe(14_886);
+    expect(questionCount).toBe(4_723);
+    expect(distractorCount).toBe(14_169);
   });
 
   it("describes single choices as incomplete when all listed choices are required", () => {
