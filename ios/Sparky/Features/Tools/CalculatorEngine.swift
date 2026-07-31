@@ -8,11 +8,6 @@ import Foundation
 public enum CalculatorEngine {
     public static let epsilon = 1e-9
 
-    public enum ContainmentBendDirection: String, CaseIterable {
-        case out
-        case `in`
-    }
-
     public struct ContainmentRodInput: Equatable {
         public var overallHeight: String
         public var topOfUnistrut: String
@@ -109,25 +104,6 @@ public enum CalculatorEngine {
         }
     }
 
-    public struct ContainmentBendStartInput: Equatable {
-        public var referenceStart: String
-        public var centrelineOffset: String
-        public var angle: String
-        public var direction: ContainmentBendDirection
-
-        public init(
-            referenceStart: String,
-            centrelineOffset: String,
-            angle: String,
-            direction: ContainmentBendDirection
-        ) {
-            self.referenceStart = referenceStart
-            self.centrelineOffset = centrelineOffset
-            self.angle = angle
-            self.direction = direction
-        }
-    }
-
     public enum Defaults {
         public static let containmentRod = ContainmentRodInput(
             overallHeight: "3165",
@@ -164,13 +140,6 @@ public enum CalculatorEngine {
             bottomBend: false,
             bendHeight: "5"
         )
-
-        public static let containmentBendStart = ContainmentBendStartInput(
-            referenceStart: "2000",
-            centrelineOffset: "50",
-            angle: "60",
-            direction: .out
-        )
     }
 
     public struct ContainmentRodResult: Equatable {
@@ -206,12 +175,6 @@ public enum CalculatorEngine {
         public let angledLengthValue: String
         public let offsetValue: String
         public let totalLengthValue: String
-    }
-
-    public struct ContainmentBendStartResult: Equatable {
-        public let validationMessage: String?
-        public let forwardOffsetValue: String
-        public let newStartValue: String
     }
 
     // MARK: - Shared formatting
@@ -519,60 +482,6 @@ public enum CalculatorEngine {
         )
     }
 
-    // MARK: - Containment bend start
-
-    public static func containmentBendStart(
-        _ input: ContainmentBendStartInput
-    ) -> ContainmentBendStartResult {
-        containmentBendStart(
-            referenceStart: input.referenceStart,
-            centrelineOffset: input.centrelineOffset,
-            angle: input.angle,
-            direction: input.direction
-        )
-    }
-
-    public static func containmentBendStart(
-        referenceStart: String,
-        centrelineOffset: String,
-        angle: String,
-        direction: ContainmentBendDirection
-    ) -> ContainmentBendStartResult {
-        let parsedReferenceStart = parseNumber(referenceStart)
-        let parsedCentrelineOffset = parseNumber(centrelineOffset)
-        let parsedAngle = parseNumber(angle)
-
-        if [parsedReferenceStart, parsedCentrelineOffset].contains(where: isFiniteAndNegative) {
-            return emptyContainmentBendStart(validationMessage: "Distances cannot be negative.")
-        }
-
-        if let angle = finite(parsedAngle), angle <= 0 || angle >= 180 {
-            return emptyContainmentBendStart(
-                validationMessage: "Bend angle must be greater than 0 and less than 180 degrees."
-            )
-        }
-
-        guard let referenceStart = finite(parsedReferenceStart),
-              let centrelineOffset = finite(parsedCentrelineOffset),
-              let angle = finite(parsedAngle) else {
-            return emptyContainmentBendStart()
-        }
-
-        let tangent = tan(degreesToRadians(angle / 2))
-        guard tangent.isFinite else { return emptyContainmentBendStart() }
-
-        let forwardOffset = centrelineOffset * tangent
-        let newStart = direction == .out
-            ? referenceStart + forwardOffset
-            : referenceStart - forwardOffset
-
-        return ContainmentBendStartResult(
-            validationMessage: nil,
-            forwardOffsetValue: formatMeasure(forwardOffset, unit: "mm"),
-            newStartValue: formatMeasure(newStart, unit: "mm")
-        )
-    }
-
     // MARK: - Private helpers
 
     /// Foundation's scanner has the useful prefix-parsing behaviour of
@@ -710,16 +619,6 @@ public enum CalculatorEngine {
             angledLengthValue: "--",
             offsetValue: "--",
             totalLengthValue: "--"
-        )
-    }
-
-    private static func emptyContainmentBendStart(
-        validationMessage: String? = nil
-    ) -> ContainmentBendStartResult {
-        ContainmentBendStartResult(
-            validationMessage: validationMessage,
-            forwardOffsetValue: "-- mm",
-            newStartValue: "-- mm"
         )
     }
 }

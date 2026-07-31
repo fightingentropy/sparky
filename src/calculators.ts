@@ -73,7 +73,6 @@ export const DEFAULT_TRAY_BEND_CUT_VALUES = {
 export type PhaseType = "single" | "three";
 export type PowerTarget = "power" | "current" | "voltage";
 export type BreakerInputMode = "current" | "power";
-export type ContainmentBendDirection = "out" | "in";
 
 export type UnistrutContainmentRow = {
   id: number;
@@ -102,12 +101,6 @@ export type AngleResult = {
   angledLengthValue: string;
   offsetValue: string;
   totalLengthValue: string;
-};
-
-export type ContainmentBendStartResult = {
-  validationMessage: string | null;
-  forwardOffsetValue: string;
-  newStartValue: string;
 };
 
 export type TrunkingOppositeResult = {
@@ -198,8 +191,6 @@ export const formulas = {
     "Length = total widths + left allowance + right allowance + (gaps x gap size)\nRounded up to nearest 50 mm",
   angle:
     "Angled piece = drop / sin(angle)\nHorizontal offset = angled piece x cos(angle)\nTotal = top straight + angled + bottom straight + allowance",
-  containmentBendStart:
-    "Forward offset = centreline offset x tan(bend angle / 2)\nFurther out: new bend start = reference bend start + forward offset\nFurther in: new bend start = reference bend start - forward offset",
   trunkingOpposite:
     "Calculation angle = desired bend angle / 2\nOpposite = tan(calculation angle) x adjacent\nFor 100 mm trunking: opposite = tan(A / 2) x 100",
   trayBendCut:
@@ -415,67 +406,6 @@ export function calcAngle(
     angledLengthValue: formatMeasure(angledLength, unit),
     offsetValue: formatMeasure(offset, unit),
     totalLengthValue: formatMeasure(totalLength, unit)
-  };
-}
-
-export function calcContainmentBendStart(
-  referenceStartStr: string,
-  centrelineOffsetStr: string,
-  angleStr: string,
-  direction: ContainmentBendDirection
-): ContainmentBendStartResult {
-  const referenceStart = Number.parseFloat(referenceStartStr);
-  const centrelineOffset = Number.parseFloat(centrelineOffsetStr);
-  const angle = Number.parseFloat(angleStr);
-
-  const empty: ContainmentBendStartResult = {
-    validationMessage: null,
-    forwardOffsetValue: "-- mm",
-    newStartValue: "-- mm"
-  };
-
-  if (
-    (Number.isFinite(referenceStart) && referenceStart < 0) ||
-    (Number.isFinite(centrelineOffset) && centrelineOffset < 0)
-  ) {
-    return {
-      validationMessage: "Distances cannot be negative.",
-      forwardOffsetValue: "-- mm",
-      newStartValue: "-- mm"
-    };
-  }
-
-  if (Number.isFinite(angle) && (angle <= 0 || angle >= 180)) {
-    return {
-      validationMessage: "Bend angle must be greater than 0 and less than 180 degrees.",
-      forwardOffsetValue: "-- mm",
-      newStartValue: "-- mm"
-    };
-  }
-
-  if (
-    !Number.isFinite(referenceStart) ||
-    !Number.isFinite(centrelineOffset) ||
-    !Number.isFinite(angle)
-  ) {
-    return empty;
-  }
-
-  const halfAngleRadians = ((angle / 2) * Math.PI) / 180;
-  const tangent = Math.tan(halfAngleRadians);
-
-  if (!Number.isFinite(tangent)) return empty;
-
-  const forwardOffset = centrelineOffset * tangent;
-  const newStart =
-    direction === "out"
-      ? referenceStart + forwardOffset
-      : referenceStart - forwardOffset;
-
-  return {
-    validationMessage: null,
-    forwardOffsetValue: formatMeasure(forwardOffset, "mm"),
-    newStartValue: formatMeasure(newStart, "mm")
   };
 }
 
