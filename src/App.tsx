@@ -1657,12 +1657,6 @@ export default function App() {
     setTrayBendWidth("");
   }
 
-  function applyTrayBendCutPreset(bendAngle: string, cuts: string, width: string) {
-    setTrayBendAngle(bendAngle);
-    setTrayBendCuts(cuts);
-    setTrayBendWidth(width);
-  }
-
   function applyPowerPreset(target: PowerTarget, phase: PhaseType, valueA: string, valueB: string, pf = "0.95") {
     setPowerTarget(target);
     setPowerPhase(phase);
@@ -2850,15 +2844,6 @@ export default function App() {
                   <p className="field-note">
                     Enter the total angle you want the containment to turn. One cut uses tan(angle / 2) x width. Add cuts only to split that turn into gentler bends; each mark then uses half the per-cut angle.
                   </p>
-
-                  <PresetButtons
-                    ariaLabel="Containment bend cut presets"
-                    presets={[
-                      { label: "90° / 1 cut", onSelect: () => applyTrayBendCutPreset("90", "1", "300") },
-                      { label: "67° / 2 cuts", onSelect: () => applyTrayBendCutPreset("67", "2", "300") },
-                      { label: "90° / 100 mm", onSelect: () => applyTrayBendCutPreset("90", "1", "100") }
-                    ]}
-                  />
 
                   {trayBendCutResult.validationMessage ? (
                     <p className="field-error" role="alert">
