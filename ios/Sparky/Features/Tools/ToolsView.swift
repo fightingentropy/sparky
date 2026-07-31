@@ -437,15 +437,6 @@ private struct BendCutCalculator: View {
                 SparkyField(title: "Containment width", text: $width, unit: "mm")
             }
 
-            ScrollView(.horizontal) {
-                HStack {
-                    PresetButton(title: "90° · 1 cut") { angle = "90"; cuts = "1"; width = "100" }
-                    PresetButton(title: "67° · 2 cuts") { angle = "67"; cuts = "2"; width = "300" }
-                    PresetButton(title: "90° · 300 mm") { angle = "90"; cuts = "1"; width = "300" }
-                }
-            }
-            .scrollIndicators(.hidden)
-
             if let message = result.validationMessage {
                 ValidationCallout(message: message)
             }
