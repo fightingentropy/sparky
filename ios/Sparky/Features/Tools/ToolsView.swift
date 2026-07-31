@@ -3,7 +3,6 @@ import SwiftUI
 private enum ToolKind: String, CaseIterable, Identifiable {
     case bendCut
     case angleDrop
-    case bendStart
 
     var id: String { rawValue }
 
@@ -11,7 +10,6 @@ private enum ToolKind: String, CaseIterable, Identifiable {
         switch self {
         case .bendCut: "Bend cut"
         case .angleDrop: "Angle drop"
-        case .bendStart: "Bend start"
         }
     }
 
@@ -19,7 +17,6 @@ private enum ToolKind: String, CaseIterable, Identifiable {
         switch self {
         case .bendCut: "Tray or trunking marks"
         case .angleDrop: "Drop and developed length"
-        case .bendStart: "Offset start mark"
         }
     }
 
@@ -27,7 +24,6 @@ private enum ToolKind: String, CaseIterable, Identifiable {
         switch self {
         case .bendCut: "angle"
         case .angleDrop: "triangle"
-        case .bendStart: "move.3d"
         }
     }
 }
@@ -93,7 +89,7 @@ struct ToolsView: View {
         VStack(alignment: .leading, spacing: 12) {
             SparkySectionHeader(
                 eyebrow: "Calculator library",
-                title: "3 site and design tools",
+                title: "2 site and design tools",
                 detail: "Offline"
             )
 
@@ -143,8 +139,6 @@ struct ToolsView: View {
             BendCutCalculator(studyState: studyState)
         case .angleDrop:
             AngleDropCalculator(studyState: studyState)
-        case .bendStart:
-            BendStartCalculator(studyState: studyState)
         }
     }
 }
@@ -572,79 +566,6 @@ private struct AngleDropCalculator: View {
         drop = values.drop; angle = values.angle; unit = values.unit
         top = values.topStraight; bottom = values.bottomStraight; allowance = values.allowance
         topBend = values.topBend; bottomBend = values.bottomBend; bendHeight = values.bendHeight
-        Haptics.selection()
-    }
-}
-
-private struct BendStartCalculator: View {
-    let studyState: StudyStateStore
-
-    @AppStorage("bendStart.reference") private var reference = "2000"
-    @AppStorage("bendStart.offset") private var offset = "50"
-    @AppStorage("bendStart.angle") private var angle = "60"
-    @AppStorage("bendStart.direction") private var directionRaw = CalculatorEngine.ContainmentBendDirection.out.rawValue
-
-    private var direction: CalculatorEngine.ContainmentBendDirection {
-        CalculatorEngine.ContainmentBendDirection(rawValue: directionRaw) ?? .out
-    }
-
-    private var result: CalculatorEngine.ContainmentBendStartResult {
-        CalculatorEngine.containmentBendStart(
-            referenceStart: reference,
-            centrelineOffset: offset,
-            angle: angle,
-            direction: direction
-        )
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            CalculatorHeader(
-                title: "Containment bend start",
-                detail: "Start mark from a known reference",
-                onReset: reset
-            )
-
-            Picker("Direction", selection: $directionRaw) {
-                Text("Further out").tag(CalculatorEngine.ContainmentBendDirection.out.rawValue)
-                Text("Further in").tag(CalculatorEngine.ContainmentBendDirection.in.rawValue)
-            }
-            .pickerStyle(.segmented)
-
-            LazyVGrid(columns: [.init(.flexible()), .init(.flexible())], spacing: 12) {
-                SparkyField(title: "Reference start", text: $reference, unit: "mm")
-                SparkyField(title: "Centreline offset", text: $offset, unit: "mm")
-                SparkyField(title: "Bend angle", text: $angle, unit: "°")
-            }
-
-            if let message = result.validationMessage {
-                ValidationCallout(message: message)
-            }
-
-            VStack(spacing: 12) {
-                SparkyResultRow(label: "New bend start", value: result.newStartValue, emphasized: true)
-                Divider().overlay(Color.sparkyBorder)
-                SparkyResultRow(label: "Forward offset", value: result.forwardOffsetValue)
-                SparkyResultRow(label: "Direction", value: direction == .out ? "Further out" : "Further in")
-                CopyButton(value: result.newStartValue, label: "Copy new start") {
-                    studyState.recordCalculation(tool: "Bend start", value: result.newStartValue)
-                }
-            }
-            .padding(15)
-            .background(Color.sparkyAccentSoft)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-
-            FormulaDisclosure(text: "Forward offset = centreline offset × tan(angle ÷ 2)\nAdd when further out; subtract when further in")
-        }
-        .sparkyCard(padding: 17)
-    }
-
-    private func reset() {
-        let values = CalculatorEngine.Defaults.containmentBendStart
-        reference = values.referenceStart
-        offset = values.centrelineOffset
-        angle = values.angle
-        directionRaw = values.direction.rawValue
         Haptics.selection()
     }
 }
