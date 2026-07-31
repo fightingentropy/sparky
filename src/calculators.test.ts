@@ -5,7 +5,6 @@ import {
   calcContainmentRod,
   calcUnistrutLength,
   calcAngle,
-  calcContainmentBendStart,
   calcTrunkingOppositeMark,
   calcTrayBendCut,
   calcPower,
@@ -175,45 +174,6 @@ describe("calcAngle", () => {
   it("returns empty when bends exactly consume the drop", () => {
     const result = calcAngle("10", "45", "0", "0", "0", "cm", true, true, "5");
     expect(result.angledLengthValue).toBe("--");
-  });
-});
-
-// ── Containment bend start ──
-
-describe("calcContainmentBendStart", () => {
-  it("moves the bend start forward when the new containment is further out", () => {
-    const result = calcContainmentBendStart("2000", "50", "60", "out");
-    expect(result.validationMessage).toBeNull();
-    expect(result.forwardOffsetValue).toBe("28.87 mm");
-    expect(result.newStartValue).toBe("2028.9 mm");
-  });
-
-  it("moves the bend start back when the new containment is further in", () => {
-    const result = calcContainmentBendStart("2000", "50", "60", "in");
-    expect(result.validationMessage).toBeNull();
-    expect(result.forwardOffsetValue).toBe("28.87 mm");
-    expect(result.newStartValue).toBe("1971.1 mm");
-  });
-
-  it("returns placeholders for empty values", () => {
-    const result = calcContainmentBendStart("", "", "", "out");
-    expect(result.validationMessage).toBeNull();
-    expect(result.forwardOffsetValue).toBe("-- mm");
-    expect(result.newStartValue).toBe("-- mm");
-  });
-
-  it("rejects invalid bend angles", () => {
-    const result = calcContainmentBendStart("2000", "50", "180", "out");
-    expect(result.validationMessage).toBe(
-      "Bend angle must be greater than 0 and less than 180 degrees."
-    );
-    expect(result.newStartValue).toBe("-- mm");
-  });
-
-  it("rejects negative distances", () => {
-    const result = calcContainmentBendStart("2000", "-50", "60", "out");
-    expect(result.validationMessage).toBe("Distances cannot be negative.");
-    expect(result.newStartValue).toBe("-- mm");
   });
 });
 

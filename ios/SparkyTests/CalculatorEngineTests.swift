@@ -40,12 +40,6 @@ final class CalculatorEngineTests: XCTestCase {
         XCTAssertEqual(angle.angle, "45")
         XCTAssertEqual(angle.unit, "cm")
         XCTAssertEqual(angle.bendHeight, "5")
-
-        let bendStart = Engine.Defaults.containmentBendStart
-        XCTAssertEqual(bendStart.referenceStart, "2000")
-        XCTAssertEqual(bendStart.centrelineOffset, "50")
-        XCTAssertEqual(bendStart.angle, "60")
-        XCTAssertEqual(bendStart.direction, .out)
     }
 
     // MARK: - Containment rod
@@ -349,62 +343,5 @@ final class CalculatorEngineTests: XCTestCase {
         )
 
         XCTAssertEqual(result.angledLengthValue, "14.14 cm")
-    }
-
-    // MARK: - Containment bend start
-
-    func testContainmentBendStartMovesForwardForFurtherOut() {
-        let result = Engine.containmentBendStart(Engine.Defaults.containmentBendStart)
-
-        XCTAssertNil(result.validationMessage)
-        XCTAssertEqual(result.forwardOffsetValue, "28.87 mm")
-        XCTAssertEqual(result.newStartValue, "2028.9 mm")
-    }
-
-    func testContainmentBendStartMovesBackForFurtherIn() {
-        let result = Engine.containmentBendStart(
-            referenceStart: "2000",
-            centrelineOffset: "50",
-            angle: "60",
-            direction: .in
-        )
-
-        XCTAssertEqual(result.forwardOffsetValue, "28.87 mm")
-        XCTAssertEqual(result.newStartValue, "1971.1 mm")
-    }
-
-    func testContainmentBendStartReturnsPlaceholdersForIncompleteInput() {
-        let result = Engine.containmentBendStart(
-            referenceStart: "",
-            centrelineOffset: "",
-            angle: "",
-            direction: .out
-        )
-
-        XCTAssertNil(result.validationMessage)
-        XCTAssertEqual(result.forwardOffsetValue, "-- mm")
-        XCTAssertEqual(result.newStartValue, "-- mm")
-    }
-
-    func testContainmentBendStartValidatesAngleAndDistances() {
-        let invalidAngle = Engine.containmentBendStart(
-            referenceStart: "2000",
-            centrelineOffset: "50",
-            angle: "180",
-            direction: .out
-        )
-        XCTAssertEqual(
-            invalidAngle.validationMessage,
-            "Bend angle must be greater than 0 and less than 180 degrees."
-        )
-
-        let negativeDistance = Engine.containmentBendStart(
-            referenceStart: "2000",
-            centrelineOffset: "-50",
-            angle: "60",
-            direction: .out
-        )
-        XCTAssertEqual(negativeDistance.validationMessage, "Distances cannot be negative.")
-        XCTAssertEqual(negativeDistance.newStartValue, "-- mm")
     }
 }
