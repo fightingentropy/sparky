@@ -1,9 +1,16 @@
+import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
 
+import { CHEAT_SHEET_SECTIONS } from "../src/cheatSheetSections";
+import {
+  CALCULATOR_DEFINITIONS,
+  CONTENT_MANIFEST_SCHEMA_VERSION,
+  CONTENT_SCHEMA_VERSION,
+} from "../src/contentSchema";
 import { COURSE_GUIDES } from "../src/courseGuides";
+import { applyExamContentSource } from "../src/examContentSource";
 import { applyExamExplanationEnhancements } from "../src/examExplanationEnhancements";
 import { buildOptionFeedback } from "../src/examOptionExplanations";
 import { applyExamSolutionTables } from "../src/examSolutionTables";
@@ -18,19 +25,12 @@ import { PRIMARY_EXAM_IDS } from "../src/examTaxonomy";
 import { TUTORIALS } from "../src/tutorials";
 
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const APP_SOURCE_PATH = join(ROOT_DIR, "src", "App.tsx");
 const EXAM_SOURCE_DIR = join(ROOT_DIR, "src", "exam-data");
-const CONTENT_OUTPUT_DIR = join(
-  ROOT_DIR,
-  "ios",
-  "Sparky",
-  "Resources",
-  "Content",
-);
+const EXAM_IMAGE_DIR = join(ROOT_DIR, "public", "exam-images");
+const CONTENT_OUTPUT_DIR = process.env.SPARKY_CONTENT_OUTPUT_DIR
+  ? resolve(process.env.SPARKY_CONTENT_OUTPUT_DIR)
+  : join(ROOT_DIR, "ios", "Sparky", "Resources", "Content");
 const EXAM_OUTPUT_DIR = join(CONTENT_OUTPUT_DIR, "exams");
-
-type JsonPrimitive = string | number | boolean | null;
-type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
 type ExportedQuestion = ExamQuestion & {
   optionFeedback: ReturnType<typeof buildOptionFeedback>;
@@ -57,149 +57,6 @@ type ExportedExam = Omit<Exam, "sections"> & {
 
 function fail(message: string): never {
   throw new Error(`[export-ios-content] ${message}`);
-}
-
-function unwrapExpression(expression: ts.Expression): ts.Expression {
-  let current = expression;
-
-  while (
-    ts.isParenthesizedExpression(current) ||
-    ts.isAsExpression(current) ||
-    ts.isTypeAssertionExpression(current) ||
-    ts.isSatisfiesExpression(current) ||
-    ts.isNonNullExpression(current)
-  ) {
-    current = current.expression;
-  }
-
-  return current;
-}
-
-function propertyNameText(name: ts.PropertyName, path: string): string {
-  if (
-    ts.isIdentifier(name) ||
-    ts.isStringLiteral(name) ||
-    ts.isNumericLiteral(name)
-  ) {
-    return name.text;
-  }
-
-  return fail(`${path} uses a computed or unsupported property name`);
-}
-
-/**
- * Decode JSON-compatible syntax from the TypeScript AST without evaluating it.
- * Any executable or referential syntax is deliberately rejected.
- */
-function literalJsonValue(expression: ts.Expression, path: string): JsonValue {
-  const node = unwrapExpression(expression);
-
-  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
-    return node.text;
-  }
-
-  if (ts.isNumericLiteral(node)) {
-    const value = Number(node.text);
-    return Number.isFinite(value) ? value : fail(`${path} is not a finite number`);
-  }
-
-  if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
-  if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
-  if (node.kind === ts.SyntaxKind.NullKeyword) return null;
-
-  if (ts.isPrefixUnaryExpression(node)) {
-    if (
-      (node.operator === ts.SyntaxKind.PlusToken ||
-        node.operator === ts.SyntaxKind.MinusToken) &&
-      ts.isNumericLiteral(node.operand)
-    ) {
-      const value = Number(node.operand.text);
-      return node.operator === ts.SyntaxKind.MinusToken ? -value : value;
-    }
-    return fail(`${path} uses an unsupported unary expression`);
-  }
-
-  if (ts.isArrayLiteralExpression(node)) {
-    return node.elements.map((element, index) => {
-      if (ts.isSpreadElement(element) || ts.isOmittedExpression(element)) {
-        return fail(`${path}[${index}] uses a spread or omitted value`);
-      }
-      return literalJsonValue(element, `${path}[${index}]`);
-    });
-  }
-
-  if (ts.isObjectLiteralExpression(node)) {
-    const result: Record<string, JsonValue> = {};
-
-    for (const property of node.properties) {
-      if (!ts.isPropertyAssignment(property)) {
-        return fail(`${path} contains a spread, method, or shorthand property`);
-      }
-
-      const key = propertyNameText(property.name, path);
-      if (Object.hasOwn(result, key)) {
-        return fail(`${path} contains duplicate property ${JSON.stringify(key)}`);
-      }
-      result[key] = literalJsonValue(property.initializer, `${path}.${key}`);
-    }
-
-    return result;
-  }
-
-  return fail(
-    `${path} must contain literals only (found ${ts.SyntaxKind[node.kind]})`,
-  );
-}
-
-function findVariableInitializer(
-  sourceFile: ts.SourceFile,
-  variableName: string,
-): ts.Expression {
-  let initializer: ts.Expression | undefined;
-
-  function visit(node: ts.Node): void {
-    if (initializer) return;
-
-    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
-      if (node.name.text === variableName) initializer = node.initializer;
-    }
-
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-  return initializer ?? fail(`could not find ${variableName} in ${APP_SOURCE_PATH}`);
-}
-
-async function extractCheatSheetSections(): Promise<JsonValue[]> {
-  const source = await readFile(APP_SOURCE_PATH, "utf8");
-  const sourceFile = ts.createSourceFile(
-    APP_SOURCE_PATH,
-    source,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TSX,
-  );
-
-  const parseDiagnostics = (
-    sourceFile as ts.SourceFile & {
-      readonly parseDiagnostics?: readonly ts.Diagnostic[];
-    }
-  ).parseDiagnostics ?? [];
-  if (parseDiagnostics.length > 0) {
-    const diagnostics = parseDiagnostics
-      .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, " "))
-      .join("; ");
-    return fail(`could not parse App.tsx: ${diagnostics}`);
-  }
-
-  const value = literalJsonValue(
-    findVariableInitializer(sourceFile, "cheatSheetSections"),
-    "cheatSheetSections",
-  );
-  return Array.isArray(value)
-    ? value
-    : fail("cheatSheetSections is not an array literal");
 }
 
 function makeDeliveryTests(exam: Exam): ExportedTest[] {
@@ -292,6 +149,179 @@ async function writeCompactJson(path: string, value: unknown): Promise<void> {
   await writeFile(path, `${serialized}\n`, "utf8");
 }
 
+function requireNonEmpty(value: string, context: string): void {
+  if (value.trim() === "") fail(`${context} must not be empty`);
+}
+
+function requireUniqueIds(
+  entries: readonly { id: string }[],
+  context: string,
+): void {
+  const seen = new Set<string>();
+  for (const entry of entries) {
+    requireNonEmpty(entry.id, `${context} id`);
+    if (seen.has(entry.id)) fail(`${context} has duplicate id ${entry.id}`);
+    seen.add(entry.id);
+  }
+}
+
+function validateStudyCollections(): void {
+  requireUniqueIds(CHEAT_SHEET_SECTIONS, "cheat sheets");
+  requireUniqueIds(COURSE_GUIDES, "course guides");
+  requireUniqueIds(TUTORIALS, "tutorials");
+  requireUniqueIds(CALCULATOR_DEFINITIONS, "calculator definitions");
+
+  for (const section of CHEAT_SHEET_SECTIONS) {
+    requireNonEmpty(section.title, `${section.id} title`);
+    requireNonEmpty(section.summary, `${section.id} summary`);
+    const normalizedItems = section.items.map((item) => item.trim().toLocaleLowerCase("en-GB"));
+    if (normalizedItems.some((item) => item === "")) {
+      fail(`${section.id} contains an empty item`);
+    }
+    if (new Set(normalizedItems).size !== normalizedItems.length) {
+      fail(`${section.id} contains duplicate items`);
+    }
+  }
+}
+
+async function validateImage(imageUrl: string, context: string): Promise<void> {
+  if (
+    !imageUrl.startsWith("/exam-images/") ||
+    imageUrl.includes("..") ||
+    imageUrl.includes("?") ||
+    imageUrl.includes("#")
+  ) {
+    fail(`${context} has unsupported image path ${JSON.stringify(imageUrl)}`);
+  }
+
+  const fileName = imageUrl.slice("/exam-images/".length);
+  if (fileName === "" || fileName.includes("/")) {
+    fail(`${context} has invalid image path ${JSON.stringify(imageUrl)}`);
+  }
+
+  try {
+    await readFile(join(EXAM_IMAGE_DIR, fileName));
+  } catch {
+    fail(`${context} references missing image ${imageUrl}`);
+  }
+}
+
+async function validateExportedExam(exam: ExportedExam): Promise<void> {
+  requireNonEmpty(exam.id, "exam id");
+  requireNonEmpty(exam.title, `${exam.id} title`);
+  if (!(exam.passPercent > 0 && exam.passPercent <= 1)) {
+    fail(`${exam.id} has invalid pass percentage ${exam.passPercent}`);
+  }
+  if (!exam.contentSources?.length) {
+    fail(`${exam.id} has no content source record`);
+  }
+  requireUniqueIds(exam.contentSources, `${exam.id} content sources`);
+  const sourceIds = new Set(exam.contentSources.map((source) => source.id));
+  for (const source of exam.contentSources) {
+    requireNonEmpty(source.documentIdentifier, `${source.id} document identifier`);
+    requireNonEmpty(source.edition, `${source.id} edition`);
+    requireNonEmpty(source.recordedOn, `${source.id} recorded date`);
+    requireNonEmpty(source.locator, `${source.id} locator`);
+  }
+
+  requireUniqueIds(exam.tests, `${exam.id} tests`);
+  for (const test of exam.tests) {
+    if (test.questionCount <= 0) fail(`${exam.id}/${test.id} has no questions`);
+    if (test.questionCount !== test.sections.reduce((sum, section) => sum + section.questions.length, 0)) {
+      fail(`${exam.id}/${test.id} questionCount does not match its sections`);
+    }
+
+    requireUniqueIds(test.sections, `${exam.id}/${test.id} sections`);
+    const seenQuestionNumbers = new Set<number>();
+    const imageChecks: Promise<void>[] = [];
+    for (const section of test.sections) {
+      requireNonEmpty(section.title, `${exam.id}/${test.id}/${section.id} title`);
+      requireNonEmpty(
+        section.sourceVariantId,
+        `${exam.id}/${test.id}/${section.id} source variant id`,
+      );
+
+      for (const question of section.questions) {
+        const context = `${exam.id}/${test.id}/${section.id}/question-${question.number}`;
+        if (!Number.isInteger(question.number) || question.number <= 0) {
+          fail(`${context} has an invalid question number`);
+        }
+        if (seenQuestionNumbers.has(question.number)) {
+          fail(`${exam.id}/${test.id} has duplicate question number ${question.number}`);
+        }
+        seenQuestionNumbers.add(question.number);
+        requireNonEmpty(question.prompt, `${context} prompt`);
+        requireNonEmpty(question.explanation, `${context} explanation`);
+
+        const choices = ["A", "B", "C", "D"] as const;
+        const optionKeys = Object.keys(question.options).sort();
+        if (optionKeys.join("") !== choices.join("")) {
+          fail(`${context} must contain exactly options A, B, C and D`);
+        }
+        if (!choices.includes(question.answer)) {
+          fail(`${context} has invalid answer ${question.answer}`);
+        }
+        const optionSignatures = choices.map((choice) => {
+          const text = question.options[choice].trim();
+          requireNonEmpty(text, `${context} option ${choice}`);
+          const image = question.optionImageUrls?.[choice] ?? "";
+          return `${text.toLocaleLowerCase("en-GB")}\u0000${image}`;
+        });
+        if (new Set(optionSignatures).size !== choices.length) {
+          fail(`${context} contains duplicate answer options`);
+        }
+        if (!question.sourceIds?.length || question.sourceIds.some((id) => !sourceIds.has(id))) {
+          fail(`${context} has a missing or unknown source id`);
+        }
+        for (const choice of choices) {
+          requireNonEmpty(
+            question.optionFeedback[choice].text,
+            `${context} feedback ${choice}`,
+          );
+        }
+        for (const imageUrl of question.imageUrls ?? []) {
+          imageChecks.push(validateImage(imageUrl, context));
+        }
+        for (const imageUrl of Object.values(question.optionImageUrls ?? {})) {
+          if (imageUrl) imageChecks.push(validateImage(imageUrl, context));
+        }
+      }
+    }
+    if (seenQuestionNumbers.size !== test.questionCount) {
+      fail(`${exam.id}/${test.id} has an inconsistent set of question numbers`);
+    }
+    await Promise.all(imageChecks);
+  }
+}
+
+function sha256(value: string | Uint8Array): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+async function writeContentManifest(relativePaths: readonly string[]): Promise<void> {
+  const sortedPaths = [...relativePaths].sort((left, right) => left.localeCompare(right, "en-GB"));
+  if (new Set(sortedPaths).size !== sortedPaths.length) {
+    fail("content manifest contains duplicate file paths");
+  }
+
+  const files = await Promise.all(
+    sortedPaths.map(async (path) => {
+      const contents = await readFile(join(CONTENT_OUTPUT_DIR, path));
+      return { path, bytes: contents.byteLength, sha256: sha256(contents) };
+    }),
+  );
+  const contentHash = sha256(
+    files.map((file) => `${file.path}\u0000${file.sha256}\n`).join(""),
+  );
+
+  await writeCompactJson(join(CONTENT_OUTPUT_DIR, "content-manifest.json"), {
+    schemaVersion: CONTENT_MANIFEST_SCHEMA_VERSION,
+    contentSchemaVersion: CONTENT_SCHEMA_VERSION,
+    contentHash,
+    files,
+  });
+}
+
 async function removeStaleExamExports(expectedNames: Set<string>): Promise<void> {
   const outputEntries = await readdir(EXAM_OUTPUT_DIR, { withFileTypes: true });
   await Promise.all(
@@ -310,10 +340,9 @@ async function removeStaleExamExports(expectedNames: Set<string>): Promise<void>
 async function main(): Promise<void> {
   await mkdir(EXAM_OUTPUT_DIR, { recursive: true });
 
-  const [cheatSheetSections, examSourceEntries] = await Promise.all([
-    extractCheatSheetSections(),
-    readdir(EXAM_SOURCE_DIR, { withFileTypes: true }),
-  ]);
+  validateStudyCollections();
+  const cheatSheetSections = CHEAT_SHEET_SECTIONS;
+  const examSourceEntries = await readdir(EXAM_SOURCE_DIR, { withFileTypes: true });
   const examFileNames = examSourceEntries
     .filter((entry) => entry.isFile() && extname(entry.name) === ".json")
     .map((entry) => entry.name)
@@ -322,6 +351,7 @@ async function main(): Promise<void> {
   if (examFileNames.length === 0) fail(`no exam JSON found in ${EXAM_SOURCE_DIR}`);
 
   const exportedExams: ExportedExam[] = [];
+  const examOutputs = new Map<string, ExportedExam>();
   const seenExamIds = new Set<string>();
   let enhancedInitialVerification: Exam | undefined;
 
@@ -336,8 +366,8 @@ async function main(): Promise<void> {
     if (seenExamIds.has(sourceExam.id)) fail(`duplicate exam id ${sourceExam.id}`);
     seenExamIds.add(sourceExam.id);
 
-    const enhancedExam = applyExamSolutionTables(
-      applyExamExplanationEnhancements(sourceExam),
+    const enhancedExam = applyExamContentSource(
+      applyExamSolutionTables(applyExamExplanationEnhancements(sourceExam)),
     );
     if (enhancedExam.id === "initial-verification") {
       enhancedInitialVerification = enhancedExam;
@@ -345,26 +375,25 @@ async function main(): Promise<void> {
     }
     const exportedExam = makeExportedExam(enhancedExam);
     exportedExams.push(exportedExam);
-    await writeCompactJson(join(EXAM_OUTPUT_DIR, fileName), exportedExam);
+    examOutputs.set(fileName, exportedExam);
   }
 
   if (!enhancedInitialVerification) {
     fail("initial-verification source exam is required to build the focused exams");
   }
 
-  const initialVerificationExam = buildInitialVerificationExam(
-    enhancedInitialVerification,
+  const initialVerificationExam = applyExamContentSource(
+    buildInitialVerificationExam(enhancedInitialVerification),
   );
   const exportedInitialVerificationExam = makeExportedExam(
     initialVerificationExam,
   );
   exportedExams.push(exportedInitialVerificationExam);
-  await writeCompactJson(
-    join(EXAM_OUTPUT_DIR, "initial-verification.json"),
-    exportedInitialVerificationExam,
-  );
+  examOutputs.set("initial-verification.json", exportedInitialVerificationExam);
 
-  const fundamentalExam = buildFundamentalInspectionExam(enhancedInitialVerification);
+  const fundamentalExam = applyExamContentSource(
+    buildFundamentalInspectionExam(enhancedInitialVerification),
+  );
   if (seenExamIds.has(fundamentalExam.id)) {
     fail(`duplicate exam id ${fundamentalExam.id}`);
   }
@@ -372,12 +401,15 @@ async function main(): Promise<void> {
   seenExamIds.add(fundamentalExam.id);
   const exportedFundamentalExam = makeExportedExam(fundamentalExam);
   exportedExams.push(exportedFundamentalExam);
-  await writeCompactJson(
-    join(EXAM_OUTPUT_DIR, fundamentalFileName),
-    exportedFundamentalExam,
-  );
+  examOutputs.set(fundamentalFileName, exportedFundamentalExam);
 
   await removeStaleExamExports(new Set([...examFileNames, fundamentalFileName]));
+  await Promise.all(exportedExams.map(validateExportedExam));
+  await Promise.all(
+    [...examOutputs].map(([fileName, exam]) =>
+      writeCompactJson(join(EXAM_OUTPUT_DIR, fileName), exam),
+    ),
+  );
 
   const primaryOrder = new Map(
     PRIMARY_EXAM_IDS.map((examId, index) => [examId, index]),
@@ -398,11 +430,15 @@ async function main(): Promise<void> {
     writeCompactJson(join(CONTENT_OUTPUT_DIR, "course-guides.json"), COURSE_GUIDES),
     writeCompactJson(join(CONTENT_OUTPUT_DIR, "tutorials.json"), TUTORIALS),
     writeCompactJson(
+      join(CONTENT_OUTPUT_DIR, "calculators.json"),
+      CALCULATOR_DEFINITIONS,
+    ),
+    writeCompactJson(
       join(CONTENT_OUTPUT_DIR, "cheat-sheet.json"),
       cheatSheetSections,
     ),
     writeCompactJson(join(CONTENT_OUTPUT_DIR, "exam-index.json"), {
-      schemaVersion: 1,
+      schemaVersion: CONTENT_SCHEMA_VERSION,
       examCount: indexEntries.length,
       variantCount: indexEntries.reduce(
         (count, exam) => count + exam.variantCount,
@@ -415,6 +451,16 @@ async function main(): Promise<void> {
       exams: indexEntries,
     }),
   ]);
+
+  const contentPaths = [
+    "calculators.json",
+    "cheat-sheet.json",
+    "course-guides.json",
+    "exam-index.json",
+    "tutorials.json",
+    ...[...examOutputs.keys()].map((fileName) => `exams/${fileName}`),
+  ];
+  await writeContentManifest(contentPaths);
 
   const questionCount = indexEntries.reduce(
     (count, exam) => count + exam.questionCount,

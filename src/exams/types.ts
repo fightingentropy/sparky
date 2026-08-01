@@ -1,3 +1,5 @@
+import type { ContentSource } from "../contentSchema";
+
 export type ExamChoice = "A" | "B" | "C" | "D";
 
 export type ExamSolutionTable = {
@@ -26,6 +28,7 @@ export type ExamQuestion = {
   explanation: string;
   solutionTables?: ExamSolutionTable[];
   preserveChoices?: boolean;
+  sourceIds?: string[];
 };
 
 export type ExamVariant = {
@@ -54,4 +57,5 @@ export type Exam = {
   sections: ExamSection[];
   scoring: ScoringBand[];
   priorities: string[];
+  contentSources?: ContentSource[];
 };
