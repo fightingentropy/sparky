@@ -3,6 +3,8 @@ import SwiftUI
 @main
 @MainActor
 struct SparkyApp: App {
+    @UIApplicationDelegateAdaptor(SparkyAppDelegate.self) private var appDelegate
+
     @State private var contentStore: ContentStore?
     @State private var contentError: String?
     @State private var progressStore = ProgressStore()
