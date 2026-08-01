@@ -8,6 +8,7 @@ import {
   CALCULATOR_DEFINITIONS,
   CONTENT_MANIFEST_SCHEMA_VERSION,
   CONTENT_SCHEMA_VERSION,
+  type ContentSource,
 } from "../src/contentSchema";
 import { COURSE_GUIDES } from "../src/courseGuides";
 import { applyExamContentSource } from "../src/examContentSource";
@@ -33,6 +34,7 @@ const CONTENT_OUTPUT_DIR = process.env.SPARKY_CONTENT_OUTPUT_DIR
 const EXAM_OUTPUT_DIR = join(CONTENT_OUTPUT_DIR, "exams");
 
 type ExportedQuestion = ExamQuestion & {
+  id: string;
   optionFeedback: ReturnType<typeof buildOptionFeedback>;
 };
 
@@ -57,6 +59,15 @@ type ExportedExam = Omit<Exam, "sections"> & {
 
 function fail(message: string): never {
   throw new Error(`[export-ios-content] ${message}`);
+}
+
+function deliveredQuestionId(
+  examId: string,
+  sourceVariantId: string,
+  sectionId: string,
+  questionNumber: number,
+): string {
+  return `${examId}/${sourceVariantId}/${sectionId}/question-${questionNumber}`;
 }
 
 function makeDeliveryTests(exam: Exam): ExportedTest[] {
@@ -84,6 +95,12 @@ function makeDeliveryTests(exam: Exam): ExportedTest[] {
         sourceVariantId: sourceVariant.id,
         questions: questions.map((question) => ({
           ...question,
+          id: deliveredQuestionId(
+            exam.id,
+            sourceVariant.id,
+            section.id,
+            question.number,
+          ),
           optionFeedback: buildOptionFeedback(question),
         })),
       };
@@ -170,6 +187,22 @@ function validateStudyCollections(): void {
   requireUniqueIds(COURSE_GUIDES, "course guides");
   requireUniqueIds(TUTORIALS, "tutorials");
   requireUniqueIds(CALCULATOR_DEFINITIONS, "calculator definitions");
+  const calculatorSources = CALCULATOR_DEFINITIONS.flatMap((calculator) => [
+    calculator.source,
+    ...(calculator.additionalSources ?? []),
+  ]);
+  const calculatorSourceIDs = calculatorSources.map(({ id }) => id);
+  if (new Set(calculatorSourceIDs).size !== calculatorSourceIDs.length) {
+    fail("calculator definitions contain duplicate source ids");
+  }
+  for (const calculator of CALCULATOR_DEFINITIONS) {
+    for (const source of [
+      calculator.source,
+      ...(calculator.additionalSources ?? []),
+    ]) {
+      validateContentSource(source, `calculator ${calculator.id} source ${source.id}`);
+    }
+  }
 
   for (const section of CHEAT_SHEET_SECTIONS) {
     requireNonEmpty(section.title, `${section.id} title`);
@@ -206,6 +239,77 @@ async function validateImage(imageUrl: string, context: string): Promise<void> {
   }
 }
 
+function validateContentSource(source: ContentSource, context: string): void {
+  const textFields = [
+    "id",
+    "jurisdiction",
+    "documentIdentifier",
+    "edition",
+    "amendment",
+    "effectiveDate",
+    "recordedOn",
+    "locator",
+    "sectionOrTable",
+    "profileVersion",
+    "contentVersion",
+    "sourceHash",
+  ] as const satisfies readonly (keyof ContentSource)[];
+  for (const field of textFields) {
+    requireNonEmpty(source[field], `${context} ${field}`);
+  }
+
+  if (!(["law", "standard", "guidance", "exam-convention"] as const).includes(source.classification)) {
+    fail(`${context} has unsupported classification ${JSON.stringify(source.classification)}`);
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(source.recordedOn)) {
+    fail(`${context} has invalid recordedOn ${JSON.stringify(source.recordedOn)}`);
+  }
+
+  const expectedHashPattern =
+    source.sourceHashScope === "repository-file"
+      ? /^sha256:[0-9a-f]{64}$/
+      : source.sourceHashScope === "citation-record" ||
+          source.sourceHashScope === "provenance-record"
+        ? /^fnv1a64:[0-9a-f]{16}$/
+        : null;
+  if (!expectedHashPattern || !expectedHashPattern.test(source.sourceHash)) {
+    fail(
+      `${context} has invalid ${JSON.stringify(source.sourceHashScope)} hash ${JSON.stringify(source.sourceHash)}`,
+    );
+  }
+  if (
+    typeof source.needsLicensedConfirmation !== "boolean" ||
+    typeof source.needsEditorialConfirmation !== "boolean"
+  ) {
+    fail(`${context} must record licensed and editorial confirmation flags`);
+  }
+  if (
+    /unconfirmed/i.test(
+      [source.jurisdiction, source.edition, source.amendment, source.effectiveDate].join(" "),
+    ) &&
+    !source.needsEditorialConfirmation
+  ) {
+    fail(`${context} contains unconfirmed metadata without an editorial-confirmation flag`);
+  }
+  if (
+    (source.needsLicensedConfirmation || source.needsEditorialConfirmation) &&
+    !source.limitations?.trim()
+  ) {
+    fail(`${context} requires confirmation but does not explain the limitation`);
+  }
+  if (source.sourceUrl) {
+    let parsedURL: URL;
+    try {
+      parsedURL = new URL(source.sourceUrl);
+    } catch {
+      fail(`${context} has invalid source URL ${JSON.stringify(source.sourceUrl)}`);
+    }
+    if (parsedURL.protocol !== "https:") {
+      fail(`${context} source URL must use HTTPS`);
+    }
+  }
+}
+
 async function validateExportedExam(exam: ExportedExam): Promise<void> {
   requireNonEmpty(exam.id, "exam id");
   requireNonEmpty(exam.title, `${exam.id} title`);
@@ -218,13 +322,11 @@ async function validateExportedExam(exam: ExportedExam): Promise<void> {
   requireUniqueIds(exam.contentSources, `${exam.id} content sources`);
   const sourceIds = new Set(exam.contentSources.map((source) => source.id));
   for (const source of exam.contentSources) {
-    requireNonEmpty(source.documentIdentifier, `${source.id} document identifier`);
-    requireNonEmpty(source.edition, `${source.id} edition`);
-    requireNonEmpty(source.recordedOn, `${source.id} recorded date`);
-    requireNonEmpty(source.locator, `${source.id} locator`);
+    validateContentSource(source, `${exam.id} source ${source.id}`);
   }
 
   requireUniqueIds(exam.tests, `${exam.id} tests`);
+  const seenQuestionIds = new Set<string>();
   for (const test of exam.tests) {
     if (test.questionCount <= 0) fail(`${exam.id}/${test.id} has no questions`);
     if (test.questionCount !== test.sections.reduce((sum, section) => sum + section.questions.length, 0)) {
@@ -243,6 +345,20 @@ async function validateExportedExam(exam: ExportedExam): Promise<void> {
 
       for (const question of section.questions) {
         const context = `${exam.id}/${test.id}/${section.id}/question-${question.number}`;
+        const expectedQuestionId = deliveredQuestionId(
+          exam.id,
+          section.sourceVariantId,
+          section.id,
+          question.number,
+        );
+        requireNonEmpty(question.id, `${context} id`);
+        if (question.id !== expectedQuestionId) {
+          fail(`${context} has unstable delivered id ${JSON.stringify(question.id)}`);
+        }
+        if (seenQuestionIds.has(question.id)) {
+          fail(`${exam.id} has duplicate delivered question id ${question.id}`);
+        }
+        seenQuestionIds.add(question.id);
         if (!Number.isInteger(question.number) || question.number <= 0) {
           fail(`${context} has an invalid question number`);
         }
@@ -261,23 +377,51 @@ async function validateExportedExam(exam: ExportedExam): Promise<void> {
         if (!choices.includes(question.answer)) {
           fail(`${context} has invalid answer ${question.answer}`);
         }
+        const optionImageEntries = Object.entries(question.optionImageUrls ?? {});
+        if (optionImageEntries.some(([choice]) => !choices.includes(choice as (typeof choices)[number]))) {
+          fail(`${context} contains an option image for an unknown choice`);
+        }
+        if (optionImageEntries.some(([, imageUrl]) => typeof imageUrl !== "string" || imageUrl === "")) {
+          fail(`${context} contains an empty option image path`);
+        }
+
         const optionSignatures = choices.map((choice) => {
           const text = question.options[choice].trim();
           requireNonEmpty(text, `${context} option ${choice}`);
           const image = question.optionImageUrls?.[choice] ?? "";
-          return `${text.toLocaleLowerCase("en-GB")}\u0000${image}`;
+          return `${text.normalize("NFKC").replace(/\s+/g, " ").toLocaleLowerCase("en-GB")}\u0000${image}`;
         });
         if (new Set(optionSignatures).size !== choices.length) {
           fail(`${context} contains duplicate answer options`);
         }
-        if (!question.sourceIds?.length || question.sourceIds.some((id) => !sourceIds.has(id))) {
+        if (
+          !question.sourceIds?.length ||
+          new Set(question.sourceIds).size !== question.sourceIds.length ||
+          question.sourceIds.some((id) => !sourceIds.has(id))
+        ) {
           fail(`${context} has a missing or unknown source id`);
+        }
+        const feedbackKeys = Object.keys(question.optionFeedback).sort();
+        if (feedbackKeys.join("") !== choices.join("")) {
+          fail(`${context} must contain feedback for exactly options A, B, C and D`);
+        }
+        const correctFeedbackChoices = choices.filter(
+          (choice) => question.optionFeedback[choice].kind === "correct",
+        );
+        if (
+          correctFeedbackChoices.length !== 1 ||
+          correctFeedbackChoices[0] !== question.answer
+        ) {
+          fail(`${context} must mark exactly the keyed answer as correct`);
         }
         for (const choice of choices) {
           requireNonEmpty(
             question.optionFeedback[choice].text,
             `${context} feedback ${choice}`,
           );
+        }
+        if (new Set(question.imageUrls ?? []).size !== (question.imageUrls ?? []).length) {
+          fail(`${context} contains duplicate question image references`);
         }
         for (const imageUrl of question.imageUrls ?? []) {
           imageChecks.push(validateImage(imageUrl, context));

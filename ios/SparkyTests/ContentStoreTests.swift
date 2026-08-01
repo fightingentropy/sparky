@@ -7,10 +7,10 @@ final class ContentStoreTests: XCTestCase {
         let store = try ContentStore(contentDirectory: contentDirectory)
 
         XCTAssertEqual(store.manifest.schemaVersion, 1)
-        XCTAssertEqual(store.manifest.contentSchemaVersion, 2)
+        XCTAssertEqual(store.manifest.contentSchemaVersion, 3)
         XCTAssertEqual(store.manifest.contentHash.count, 64)
         XCTAssertEqual(store.manifest.files.count, 17)
-        XCTAssertEqual(store.catalog.schemaVersion, 2)
+        XCTAssertEqual(store.catalog.schemaVersion, 3)
         XCTAssertEqual(store.catalog.examCount, 12)
         XCTAssertEqual(store.catalog.exams.count, 12)
         XCTAssertEqual(store.catalog.variantCount, 99)
@@ -24,6 +24,10 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertNotNil(store.guide(id: "becoming-an-electrician-route"))
         XCTAssertNotNil(store.tutorial(id: "internal-90-trunking"))
         XCTAssertEqual(store.calculator(id: "tray-bend-cut")?.algorithmVersion, 2)
+        XCTAssertEqual(
+            store.calculator(id: "structural-limits")?.additionalSources?.first?.classification,
+            .examConvention
+        )
 
         let swatches = store.notes.flatMap { $0.legend ?? [] }.compactMap(\.swatch)
         XCTAssertTrue(swatches.contains { if case .color = $0 { true } else { false } })
@@ -61,6 +65,51 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertTrue(exam.format.contains("Guidance Note 3"))
         XCTAssertEqual(exam.contentSources?.first?.classification, .examConvention)
         XCTAssertEqual(test.questions.first?.sourceIDs, exam.contentSources?.map(\.id))
+    }
+
+    @MainActor
+    func testEveryNativeQuestionDecodesStableIdentityAndCompleteProvenance() throws {
+        let store = try ContentStore(contentDirectory: contentDirectory)
+        var deliveredQuestionIDs = Set<String>()
+
+        for indexedExam in store.catalog.exams {
+            let exam = try store.loadExam(id: indexedExam.id)
+            let sources = try XCTUnwrap(exam.contentSources)
+            let sourceIDs = sources.map(\.id)
+
+            XCTAssertFalse(sources.isEmpty, exam.id)
+            XCTAssertEqual(Set(sourceIDs).count, sourceIDs.count, exam.id)
+
+            for source in sources {
+                XCTAssertFalse(source.jurisdiction.isEmpty, source.id)
+                XCTAssertFalse(source.documentIdentifier.isEmpty, source.id)
+                XCTAssertFalse(source.edition.isEmpty, source.id)
+                XCTAssertFalse(source.amendment.isEmpty, source.id)
+                XCTAssertFalse(source.effectiveDate.isEmpty, source.id)
+                XCTAssertFalse(source.sectionOrTable.isEmpty, source.id)
+                XCTAssertFalse(source.profileVersion.isEmpty, source.id)
+                XCTAssertFalse(source.contentVersion.isEmpty, source.id)
+                XCTAssertNotNil(
+                    source.sourceHash.range(
+                        of: "^(sha256:[0-9a-f]{64}|fnv1a64:[0-9a-f]{16})$",
+                        options: .regularExpression
+                    ),
+                    source.id
+                )
+            }
+
+            for test in exam.tests {
+                for question in test.questions {
+                    XCTAssertTrue(deliveredQuestionIDs.insert(question.id).inserted, question.id)
+                    let questionSourceIDs = try XCTUnwrap(question.sourceIDs)
+                    XCTAssertFalse(questionSourceIDs.isEmpty, question.id)
+                    XCTAssertEqual(Set(questionSourceIDs).count, questionSourceIDs.count, question.id)
+                    XCTAssertTrue(Set(questionSourceIDs).isSubset(of: Set(sourceIDs)), question.id)
+                }
+            }
+        }
+
+        XCTAssertEqual(deliveredQuestionIDs.count, store.catalog.questionCount)
     }
 
     @MainActor

@@ -122,6 +122,7 @@ struct ExamSolutionTable: Codable, Hashable, Sendable {
 }
 
 struct ExamQuestion: Codable, Hashable, Identifiable, Sendable {
+    let id: String
     let number: Int
     let prompt: String
     let imageURLs: [String]?
@@ -134,9 +135,8 @@ struct ExamQuestion: Codable, Hashable, Identifiable, Sendable {
     let optionFeedback: ExamOptionFeedbackMap
     var sourceIDs: [String]? = nil
 
-    var id: Int { number }
-
     private enum CodingKeys: String, CodingKey {
+        case id
         case number
         case prompt
         case imageURLs = "imageUrls"

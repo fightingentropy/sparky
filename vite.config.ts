@@ -1,53 +1,11 @@
-import { createHash } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+import { contentCacheVersion } from "./scripts/content-cache-version";
+
 const ROOT_DIR = import.meta.dirname;
-
-function contentSourceFiles(path: string): string[] {
-  return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
-    const entryPath = join(path, entry.name);
-    if (entry.isDirectory()) return contentSourceFiles(entryPath);
-    return entry.isFile() ? [entryPath] : [];
-  });
-}
-
-function contentCacheVersion(): string {
-  const roots = [
-    "src/exam-data",
-    "src/examCorrections",
-    "src/examRationales"
-  ].map((path) => resolve(ROOT_DIR, path));
-  const files = [
-    ...roots.flatMap(contentSourceFiles),
-    ...[
-      "src/cheatSheetSections.ts",
-      "src/contentSchema.ts",
-      "src/courseGuides.ts",
-      "src/examContentSource.ts",
-      "src/examExplanationEnhancements.ts",
-      "src/examOptionExplanations.ts",
-      "src/examSolutionTables.ts",
-      "src/fundamentalInspectionExam.ts",
-      "src/initialVerificationExam.ts",
-      "src/tutorials.ts"
-    ].map((path) => resolve(ROOT_DIR, path))
-  ].sort((left, right) => left.localeCompare(right, "en-GB"));
-
-  const hash = createHash("sha256");
-  for (const file of files) {
-    hash.update(relative(ROOT_DIR, file));
-    hash.update("\0");
-    hash.update(readFileSync(file));
-    hash.update("\n");
-  }
-  return hash.digest("hex").slice(0, 16);
-}
-
-const CONTENT_CACHE_VERSION = contentCacheVersion();
+const CONTENT_CACHE_VERSION = contentCacheVersion(ROOT_DIR);
 
 export default defineConfig({
   plugins: [

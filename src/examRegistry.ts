@@ -75,14 +75,14 @@ function makeExamEntry<T extends ExamAssetId>(id: T, title: string): ExamRegistr
 
 function loadFundamentalInspectionExam(): Promise<Exam> {
   fundamentalExamCache ??= loadExamAsset("initial-verification").then(
-    buildFundamentalInspectionExam
+    (sourceExam) => applyExamContentSource(buildFundamentalInspectionExam(sourceExam))
   );
   return fundamentalExamCache;
 }
 
 function loadInitialVerificationExam(): Promise<Exam> {
   initialVerificationExamCache ??= loadExamAsset("initial-verification").then(
-    buildInitialVerificationExam
+    (sourceExam) => applyExamContentSource(buildInitialVerificationExam(sourceExam))
   );
   return initialVerificationExamCache;
 }
