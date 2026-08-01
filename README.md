@@ -7,7 +7,7 @@ The iOS app includes:
 - five site calculators with saved calculation history
 - searchable, saveable technical notes
 - guided learning routes and seven tutorials
-- 12 exam subjects, 97 tests, and 4,005 deterministic served questions
+- 12 exam subjects, 99 tests, and 3,983 deterministic served questions
 - per-option answer feedback, question flags, scores, and offline progress
 - native navigation, Dynamic Type, haptics, and light/dark appearances
 
@@ -55,16 +55,28 @@ When working on Sparky in Codex:
 3. Verify the exact changed UI and interaction in the integrated simulator.
 4. If the integrated simulator is unavailable, report the blocker. Do not install or use Apple's standalone Simulator app without explicit approval.
 
-Run the native tests with:
+Run the native tests with the newest available iPhone simulator:
 
 ```sh
-cd ios
-xcodebuild test -project Sparky.xcodeproj -scheme Sparky \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+bun run test:ios
 ```
 
-The web TypeScript data remains the content source of truth. To refresh only the bundled iOS JSON:
+Exam JSON and dedicated typed content modules are the source of truth. The exporter validates IDs, answer choices, provenance, image references and schema invariants, then writes a SHA-256 manifest that the native app verifies before decoding any study content. Refresh the bundled iOS JSON with:
 
 ```sh
 bun run ios:content
 ```
+
+Check that the committed export is exactly reproducible without rewriting it:
+
+```sh
+bun run check:content
+```
+
+The mandatory local/CI gate validates generated content, lints/tests/builds the web app, regenerates the Xcode project, and runs the Swift unit tests:
+
+```sh
+bun run check
+```
+
+Calculator source classification, edition/date, units, precision, rounding and limitations are recorded in `src/contentSchema.ts`. Question-bank provenance is classified as exam convention unless a question carries a more specific verified source citation; always check the current official publication for safety-critical work.

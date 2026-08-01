@@ -8,6 +8,7 @@ struct AccountToolbarButton<SyncStatusContent: View>: View {
     let authStore: AuthStore
     private let syncStatus: SyncStatusContent
 
+    @Environment(AppRouter.self) private var router
     @State private var isPresentingAccount = false
 
     init(
@@ -19,9 +20,25 @@ struct AccountToolbarButton<SyncStatusContent: View>: View {
     }
 
     var body: some View {
-        Button {
-            isPresentingAccount = true
-            Haptics.selection()
+        Menu {
+            Button {
+                isPresentingAccount = true
+                Haptics.selection()
+            } label: {
+                Label(
+                    authStore.user == nil ? "Sign in" : "Profile",
+                    systemImage: "person.crop.circle"
+                )
+            }
+
+            Divider()
+
+            Button {
+                router.isPresentingSettings = true
+                Haptics.selection()
+            } label: {
+                Label("Settings", systemImage: "gearshape")
+            }
         } label: {
             AccountAvatarView(
                 avatarDataURL: authStore.user?.avatar,
@@ -30,8 +47,8 @@ struct AccountToolbarButton<SyncStatusContent: View>: View {
             )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(authStore.user == nil ? "Sign in to Sparky" : "Open account")
-        .accessibilityHint("Opens account and profile settings")
+        .accessibilityLabel(authStore.user == nil ? "Profile menu" : "Profile menu for \(authStore.user?.displayName ?? "your account")")
+        .accessibilityHint("Shows profile and app settings")
         .sheet(isPresented: $isPresentingAccount) {
             AccountSheetView(authStore: authStore) {
                 syncStatus

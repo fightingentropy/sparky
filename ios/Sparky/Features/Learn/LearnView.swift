@@ -1,10 +1,15 @@
 import SwiftUI
 
+private enum LearnRoute: Hashable {
+    case guide(String)
+    case inspectionTraining
+}
+
 struct LearnView: View {
     @Environment(ContentStore.self) private var contentStore
     @Environment(StudyStateStore.self) private var studyState
 
-    @State private var path: [String] = []
+    @State private var path: [LearnRoute] = []
     @State private var selectedFilter: GuideFilter = .all
 
     private var completedCount: Int {
@@ -41,6 +46,8 @@ struct LearnView: View {
                         )
 
                         QualificationRouteCard()
+
+                        InspectionTrainingFeaturedCard()
 
                         GuideFilterBar(selection: $selectedFilter)
 
@@ -84,15 +91,20 @@ struct LearnView: View {
                     SparkyAccountToolbarItem()
                 }
             }
-            .navigationDestination(for: String.self) { guideID in
-                if let guide = contentStore.guide(id: guideID) {
-                    GuideDetailView(guide: guide)
-                } else {
-                    ContentUnavailableView(
-                        "Guide unavailable",
-                        systemImage: "book.closed",
-                        description: Text("This learning guide could not be loaded.")
-                    )
+            .navigationDestination(for: LearnRoute.self) { route in
+                switch route {
+                case let .guide(guideID):
+                    if let guide = contentStore.guide(id: guideID) {
+                        GuideDetailView(guide: guide)
+                    } else {
+                        ContentUnavailableView(
+                            "Guide unavailable",
+                            systemImage: "book.closed",
+                            description: Text("This learning guide could not be loaded.")
+                        )
+                    }
+                case .inspectionTraining:
+                    InspectionTrainingHomeView()
                 }
             }
         }
@@ -128,7 +140,7 @@ private struct LearnOverview: View {
             }
 
             if let nextGuide {
-                NavigationLink(value: nextGuide.id) {
+                NavigationLink(value: LearnRoute.guide(nextGuide.id)) {
                     HStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(isComplete ? "Review your knowledge" : hasStarted ? "Continue learning" : "Start your route")
@@ -169,6 +181,53 @@ private struct LearnOverview: View {
                 .foregroundStyle(Color.sparkyMuted)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+}
+
+private struct InspectionTrainingFeaturedCard: View {
+    var body: some View {
+        NavigationLink(value: LearnRoute.inspectionTraining) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top, spacing: 13) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 15, style: .continuous)
+                            .fill(Color.sparkyAccentSoft)
+                        Image(systemName: "waveform.path.ecg.rectangle")
+                            .font(.title2.weight(.semibold))
+                            .foregroundStyle(Color.sparkyAccent)
+                    }
+                    .frame(width: 52, height: 52)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        SparkyEyebrow(text: "Interactive test lab")
+                        Text("Inspection & Testing")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(Color.sparkyText)
+                        Text("Set up a virtual tester, place the probes and interpret the result across five guided labs.")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.sparkyMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Spacer(minLength: 0)
+                }
+
+                HStack(spacing: 8) {
+                    Label("5 labs", systemImage: "square.grid.2x2")
+                    Label("Saves progress", systemImage: "arrow.clockwise")
+                    Spacer(minLength: 0)
+                    Image(systemName: "arrow.right")
+                        .font(.caption.bold())
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.sparkyAccent)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .sparkyCard(padding: 17)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Opens the practical inspection and testing trainer")
     }
 }
 
@@ -307,7 +366,7 @@ private struct GuideCard: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
-            NavigationLink(value: guide.id) {
+            NavigationLink(value: LearnRoute.guide(guide.id)) {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(alignment: .center, spacing: 9) {
                         Label(guide.category.title, systemImage: guide.category.symbolName)

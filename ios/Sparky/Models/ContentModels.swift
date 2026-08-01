@@ -1,5 +1,56 @@
 import Foundation
 
+enum ContentSourceClassification: String, Codable, Hashable, Sendable {
+    case law
+    case standard
+    case guidance
+    case examConvention = "exam-convention"
+}
+
+struct ContentSource: Codable, Hashable, Identifiable, Sendable {
+    let id: String
+    let classification: ContentSourceClassification
+    let documentIdentifier: String
+    let edition: String
+    let recordedOn: String
+    let locator: String
+    let sourceURL: URL?
+    let limitations: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case classification
+        case documentIdentifier
+        case edition
+        case recordedOn
+        case locator
+        case sourceURL = "sourceUrl"
+        case limitations
+    }
+}
+
+struct CalculatorDefinition: Codable, Hashable, Identifiable, Sendable {
+    let id: String
+    let algorithmVersion: Int
+    let units: [String]
+    let precision: String
+    let roundingRule: String
+    let source: ContentSource
+}
+
+struct ContentManifestFile: Codable, Hashable, Sendable {
+    let path: String
+    let bytes: Int
+    let sha256: String
+}
+
+struct ContentManifest: Codable, Hashable, Sendable {
+    let schemaVersion: Int
+    let contentSchemaVersion: Int
+    let contentHash: String
+    let files: [ContentManifestFile]
+}
+
 enum GuideCategory: String, Codable, CaseIterable, Hashable, Sendable {
     case route
     case qualification
