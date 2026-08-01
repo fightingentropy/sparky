@@ -1,7 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const serviceWorkerPath = resolve(import.meta.dirname, "..", "dist", "sw.js");
+import { contentCacheVersion } from "./content-cache-version";
+
+const rootDir = resolve(import.meta.dirname, "..");
+const serviceWorkerPath = resolve(rootDir, "dist", "sw.js");
 const serviceWorker = await readFile(serviceWorkerPath, "utf8");
 const runtimeRouteStart = serviceWorker.indexOf("cleanupOutdatedCaches");
 if (runtimeRouteStart < 0) {
@@ -22,11 +25,22 @@ for (const lazyAsset of [
   }
 }
 
+const expectedContentVersion = contentCacheVersion(rootDir);
 for (const cachePrefix of ["exam-data", "exam-images", "lazy-pages"]) {
-  const versionedCache = new RegExp(`cacheName:["']${cachePrefix}-[0-9a-f]{16}["']`);
-  if (!versionedCache.test(serviceWorker)) {
-    throw new Error(`dist/sw.js is missing a content-versioned ${cachePrefix} cache`);
+  const cachePattern = new RegExp(`cacheName:["']${cachePrefix}-([0-9a-f]{16})["']`, "g");
+  const versions = [...serviceWorker.matchAll(cachePattern)].map((match) => match[1]);
+  if (versions.length !== 1) {
+    throw new Error(
+      `dist/sw.js must contain exactly one content-versioned ${cachePrefix} cache; found ${versions.length}`,
+    );
+  }
+  if (versions[0] !== expectedContentVersion) {
+    throw new Error(
+      `dist/sw.js has stale ${cachePrefix} cache version ${versions[0]}; expected ${expectedContentVersion}`,
+    );
   }
 }
 
-console.log("Verified deferred PWA feature assets and content-versioned runtime caches.");
+console.log(
+  `Verified deferred PWA assets and runtime cache version ${expectedContentVersion}.`,
+);

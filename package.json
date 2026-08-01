@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "pages:dev": "unset CLOUDFLARE_API_TOKEN; wrangler pages dev public --port 8788 --binding JWT_SECRET=dev-secret-not-for-production",
-    "pages:deploy": "unset CLOUDFLARE_API_TOKEN; wrangler pages deploy dist --project-name electrics",
+    "pages:deploy": "bun run build && unset CLOUDFLARE_API_TOKEN && wrangler pages deploy dist --project-name electrics",
     "migrate:local": "unset CLOUDFLARE_API_TOKEN; wrangler d1 migrations apply sparky-db --local",
     "migrate:remote": "unset CLOUDFLARE_API_TOKEN; wrangler d1 migrations apply sparky-db --remote",
     "build": "tsc -b && vite build && bun run scripts/check-pwa-output.ts",

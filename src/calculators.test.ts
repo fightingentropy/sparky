@@ -117,6 +117,15 @@ describe("calcUnistrutLength", () => {
       "Widths, allowances, and gaps cannot be negative."
     );
   });
+
+  it("rejects a zero-width containment row", () => {
+    const containments = [{ id: 1, label: "Tray", width: "0" }];
+    const result = calcUnistrutLength(containments, "50", "50", "50");
+    expect(result.validationMessage).toBe(
+      "Containment widths must be greater than 0 mm."
+    );
+    expect(result.finalLengthValue).toBe("-- mm");
+  });
 });
 
 // ── Angle drop ──
@@ -165,6 +174,28 @@ describe("calcAngle", () => {
     const result = calcAngle("10", "45", "0", "0", "0", "cm", false, false, "5");
     expect(result.angledLengthValue).toBe("14.14 cm");
   });
+
+  it.each(["", "0", "-5"])(
+    "returns empty when a prefab bend is selected with height %j",
+    (bendHeight) => {
+      const result = calcAngle(
+        "20",
+        "45",
+        "0",
+        "0",
+        "0",
+        "cm",
+        true,
+        false,
+        bendHeight
+      );
+      expect(result).toEqual({
+        angledLengthValue: "--",
+        offsetValue: "--",
+        totalLengthValue: "--",
+      });
+    }
+  );
 
   it("returns empty when bends exceed drop", () => {
     const result = calcAngle("8", "45", "0", "0", "0", "cm", true, true, "5");
@@ -351,8 +382,9 @@ describe("calcBreaker", () => {
 
   it("handles over max breaker size", () => {
     const result = calcBreaker("current", "150", "", "single", "230", "0.95");
-    expect(result.breakerValue).toBe("100 A");
-    expect(result.rangeValue).toBe("Over 100 A");
+    expect(result.breakerValue).toBe("-- A");
+    expect(result.currentValue).toBe("150 A");
+    expect(result.rangeValue).toBe("Over 100 A — no listed size");
   });
 });
 

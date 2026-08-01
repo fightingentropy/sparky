@@ -164,6 +164,7 @@ final class ExamExportTests: XCTestCase {
             d: ExamOptionFeedback(text: "D feedback", kind: answer == .d ? .correct : .reviewed)
         )
         return ExamQuestion(
+            id: "test/variant/section/question-\(number)",
             number: number,
             prompt: prompt,
             imageURLs: imageURLs,

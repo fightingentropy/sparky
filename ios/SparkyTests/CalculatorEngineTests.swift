@@ -181,6 +181,21 @@ final class CalculatorEngineTests: XCTestCase {
         XCTAssertEqual(missingWidth.validationMessage, "Enter a width for each containment.")
     }
 
+    func testUnistrutLengthRejectsZeroWidthContainment() {
+        let result = Engine.unistrutLength(
+            containments: [.init(id: 1, label: "Tray", width: "0")],
+            leftAllowance: "50",
+            rightAllowance: "50",
+            gap: "50"
+        )
+
+        XCTAssertEqual(
+            result.validationMessage,
+            "Containment widths must be greater than 0 mm."
+        )
+        XCTAssertEqual(result.finalLengthValue, "-- mm")
+    }
+
     // MARK: - Containment bend cut
 
     func testContainmentBendCutCalculatesTwoCutTrayExample() {
@@ -343,5 +358,25 @@ final class CalculatorEngineTests: XCTestCase {
         )
 
         XCTAssertEqual(result.angledLengthValue, "14.14 cm")
+    }
+
+    func testAngleDropRejectsInvalidHeightWhenPrefabBendIsSelected() {
+        for bendHeight in ["", "0", "-5"] {
+            let result = Engine.angleDrop(
+                drop: "20",
+                angle: "45",
+                topStraight: "0",
+                bottomStraight: "0",
+                allowance: "0",
+                unit: "cm",
+                topBend: true,
+                bottomBend: false,
+                bendHeight: bendHeight
+            )
+
+            XCTAssertEqual(result.angledLengthValue, "--", bendHeight)
+            XCTAssertEqual(result.offsetValue, "--", bendHeight)
+            XCTAssertEqual(result.totalLengthValue, "--", bendHeight)
+        }
     }
 }
