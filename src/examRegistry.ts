@@ -1,6 +1,7 @@
 import type { Exam } from "./exams/types";
 import { applyExamExplanationEnhancements } from "./examExplanationEnhancements";
 import { applyExamSolutionTables } from "./examSolutionTables";
+import { applyExamContentSource } from "./examContentSource";
 import { buildFundamentalInspectionExam } from "./fundamentalInspectionExam";
 import { buildInitialVerificationExam } from "./initialVerificationExam";
 import { PRIMARY_EXAM_TITLES } from "./examTaxonomy";
@@ -55,7 +56,9 @@ function loadExamAsset(id: ExamAssetId): Promise<Exam> {
     if (exam.id !== id) {
       throw new Error(`Loaded exam id ${exam.id} did not match requested exam ${id}`);
     }
-    return applyExamSolutionTables(applyExamExplanationEnhancements(exam));
+    return applyExamContentSource(
+      applyExamSolutionTables(applyExamExplanationEnhancements(exam))
+    );
   });
 
   examCache.set(id, request);

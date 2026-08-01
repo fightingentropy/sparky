@@ -132,6 +132,7 @@ struct ExamQuestion: Codable, Hashable, Identifiable, Sendable {
     let solutionTables: [ExamSolutionTable]?
     let preserveChoices: Bool?
     let optionFeedback: ExamOptionFeedbackMap
+    var sourceIDs: [String]? = nil
 
     var id: Int { number }
 
@@ -146,6 +147,7 @@ struct ExamQuestion: Codable, Hashable, Identifiable, Sendable {
         case solutionTables
         case preserveChoices
         case optionFeedback
+        case sourceIDs = "sourceIds"
     }
 }
 
@@ -189,6 +191,7 @@ struct Exam: Codable, Hashable, Identifiable, Sendable {
     let passPercent: Double
     let scoring: [ScoringBand]
     let priorities: [String]
+    var contentSources: [ContentSource]? = nil
     let tests: [ExamTest]
 
     func test(id: String) -> ExamTest? {

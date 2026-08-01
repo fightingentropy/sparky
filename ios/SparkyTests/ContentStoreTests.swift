@@ -6,7 +6,11 @@ final class ContentStoreTests: XCTestCase {
     func testLoadsExportedCatalogAndStudyContent() throws {
         let store = try ContentStore(contentDirectory: contentDirectory)
 
-        XCTAssertEqual(store.catalog.schemaVersion, 1)
+        XCTAssertEqual(store.manifest.schemaVersion, 1)
+        XCTAssertEqual(store.manifest.contentSchemaVersion, 2)
+        XCTAssertEqual(store.manifest.contentHash.count, 64)
+        XCTAssertEqual(store.manifest.files.count, 17)
+        XCTAssertEqual(store.catalog.schemaVersion, 2)
         XCTAssertEqual(store.catalog.examCount, 12)
         XCTAssertEqual(store.catalog.exams.count, 12)
         XCTAssertEqual(store.catalog.variantCount, 99)
@@ -14,10 +18,12 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertEqual(store.notes.count, 43)
         XCTAssertEqual(store.guides.count, 13)
         XCTAssertEqual(store.tutorials.count, 7)
+        XCTAssertEqual(store.calculators.count, 10)
 
         XCTAssertNotNil(store.note(id: "cheat-core-formulas"))
         XCTAssertNotNil(store.guide(id: "becoming-an-electrician-route"))
         XCTAssertNotNil(store.tutorial(id: "internal-90-trunking"))
+        XCTAssertEqual(store.calculator(id: "tray-bend-cut")?.algorithmVersion, 2)
 
         let swatches = store.notes.flatMap { $0.legend ?? [] }.compactMap(\.swatch)
         XCTAssertTrue(swatches.contains { if case .color = $0 { true } else { false } })
@@ -53,6 +59,8 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertEqual(homework.questions.map(\.number), Array(1...40))
         XCTAssertTrue(exam.format.contains("60 minutes"))
         XCTAssertTrue(exam.format.contains("Guidance Note 3"))
+        XCTAssertEqual(exam.contentSources?.first?.classification, .examConvention)
+        XCTAssertEqual(test.questions.first?.sourceIDs, exam.contentSources?.map(\.id))
     }
 
     @MainActor
@@ -213,6 +221,46 @@ final class ContentStoreTests: XCTestCase {
 
         let allHidden = NavigationPreferences.storageValue(for: Set(AppTab.allCases))
         XCTAssertEqual(NavigationPreferences.visibleTabs(from: allHidden), [.tools])
+    }
+
+    @MainActor
+    func testRejectsTamperedGeneratedContent() throws {
+        let temporaryDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("SparkyContentTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.copyItem(at: contentDirectory, to: temporaryDirectory)
+        defer { try? FileManager.default.removeItem(at: temporaryDirectory) }
+
+        let target = temporaryDirectory.appendingPathComponent("cheat-sheet.json")
+        var data = try Data(contentsOf: target)
+        data.append(0x20)
+        try data.write(to: target, options: .atomic)
+
+        XCTAssertThrowsError(try ContentStore(contentDirectory: temporaryDirectory)) { error in
+            guard case ContentStoreError.checksumMismatch("cheat-sheet.json") = error else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+        }
+    }
+
+    @MainActor
+    func testChecksLazyExamIntegrityWhenTheExamIsLoaded() throws {
+        let temporaryDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("SparkyExamIntegrityTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.copyItem(at: contentDirectory, to: temporaryDirectory)
+        defer { try? FileManager.default.removeItem(at: temporaryDirectory) }
+
+        let relativePath = "exams/ecs-health-safety.json"
+        let target = temporaryDirectory.appendingPathComponent(relativePath)
+        var data = try Data(contentsOf: target)
+        data.append(0x20)
+        try data.write(to: target, options: .atomic)
+
+        let store = try ContentStore(contentDirectory: temporaryDirectory)
+        XCTAssertThrowsError(try store.loadExam(id: "ecs-health-safety")) { error in
+            guard case ContentStoreError.checksumMismatch(relativePath) = error else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+        }
     }
 
     private var contentDirectory: URL {

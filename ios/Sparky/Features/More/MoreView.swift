@@ -264,6 +264,8 @@ private struct CalculationHistoryView: View {
 }
 
 struct SettingsView: View {
+    @Environment(InspectionTrainingStore.self) private var inspectionTrainingStore
+
     let contentStore: ContentStore
     let studyState: StudyStateStore
     let progressStore: ProgressStore
@@ -291,7 +293,7 @@ struct SettingsView: View {
             } header: {
                 Text("Navigation")
             } footer: {
-                Text("Choose which pages appear in the bottom tab bar. Keep at least one page visible; Settings remains available from the gear button.")
+                Text("Choose which pages appear in the bottom tab bar. Keep at least one page visible; Settings remains available from the profile menu.")
             }
 
             Section {
@@ -324,9 +326,10 @@ struct SettingsView: View {
             Section("Study data") {
                 LabeledContent("Saved notes", value: "\(studyState.savedNoteIDs.count)")
                 LabeledContent("Completed guides", value: "\(studyState.completedGuideIDs.count)")
+                LabeledContent("Training labs complete", value: "\(inspectionTrainingStore.completedLabCount)")
                 LabeledContent("Calculations", value: "\(studyState.recentCalculations.count)")
                 LabeledContent("Exam banks in progress", value: "\(progressStore.exams.count)")
-                Button("Reset notes, guides and history", role: .destructive) {
+                Button("Reset study and training progress", role: .destructive) {
                     showingResetConfirmation = true
                 }
                 Button("Reset all exam attempts", role: .destructive) {
@@ -352,9 +355,10 @@ struct SettingsView: View {
         ) {
             Button("Reset data", role: .destructive) {
                 studyState.resetStudyProgress()
+                inspectionTrainingStore.resetAll()
             }
         } message: {
-            Text("This removes saved notes, completed guides and calculation history from this device. Exam attempts are kept.")
+            Text("This removes saved notes, completed guides, calculation history and inspection-training progress from this device. Exam attempts are kept.")
         }
         .confirmationDialog(
             "Reset every exam attempt?",

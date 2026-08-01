@@ -1,12 +1,62 @@
+import { createHash } from "node:crypto";
+import { readdirSync, readFileSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+
+const ROOT_DIR = import.meta.dirname;
+
+function contentSourceFiles(path: string): string[] {
+  return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = join(path, entry.name);
+    if (entry.isDirectory()) return contentSourceFiles(entryPath);
+    return entry.isFile() ? [entryPath] : [];
+  });
+}
+
+function contentCacheVersion(): string {
+  const roots = [
+    "src/exam-data",
+    "src/examCorrections",
+    "src/examRationales"
+  ].map((path) => resolve(ROOT_DIR, path));
+  const files = [
+    ...roots.flatMap(contentSourceFiles),
+    ...[
+      "src/cheatSheetSections.ts",
+      "src/contentSchema.ts",
+      "src/courseGuides.ts",
+      "src/examContentSource.ts",
+      "src/examExplanationEnhancements.ts",
+      "src/examOptionExplanations.ts",
+      "src/examSolutionTables.ts",
+      "src/fundamentalInspectionExam.ts",
+      "src/initialVerificationExam.ts",
+      "src/tutorials.ts"
+    ].map((path) => resolve(ROOT_DIR, path))
+  ].sort((left, right) => left.localeCompare(right, "en-GB"));
+
+  const hash = createHash("sha256");
+  for (const file of files) {
+    hash.update(relative(ROOT_DIR, file));
+    hash.update("\0");
+    hash.update(readFileSync(file));
+    hash.update("\n");
+  }
+  return hash.digest("hex").slice(0, 16);
+}
+
+const CONTENT_CACHE_VERSION = contentCacheVersion();
 
 export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
+      // Keep an in-progress exam on its current application version. The new
+      // worker activates after the user closes/reloads instead of replacing
+      // content beneath an active session.
+      registerType: "prompt",
       includeAssets: [
         "icons/icon.svg",
         "icons/apple-touch-icon.png",
@@ -42,6 +92,14 @@ export default defineConfig({
           "assets/react-three-*.js",
           "assets/three-core-*.js",
           "assets/three-examples-*.js",
+          "assets/ExamPage-*.js",
+          "assets/LearningPage-*.js",
+          "assets/TutorialsPage-*.js",
+          "assets/InteractivePage-*.js",
+          "assets/FaultFinding-*.*",
+          "assets/PanelTrainer-*.*",
+          "assets/pdfmake-*.js",
+          "assets/vfs_fonts-*.js",
           // Build source for maskable-512.png — never referenced at runtime.
           "icons/maskable.svg",
           // Per-question diagram images are runtime-cached on first use (see
@@ -58,7 +116,7 @@ export default defineConfig({
             urlPattern: /\/assets\/.*\.json$/,
             handler: "CacheFirst",
             options: {
-              cacheName: "exam-data",
+              cacheName: `exam-data-${CONTENT_CACHE_VERSION}`,
               expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 60 }
             }
           },
@@ -72,13 +130,25 @@ export default defineConfig({
             }
           },
           {
+            // Feature pages and PDF tooling are fetched only when opened. Their
+            // Vite-hashed URLs make CacheFirst safe without adding megabytes to
+            // the service worker's initial install transaction.
+            urlPattern:
+              /\/assets\/(ExamPage|LearningPage|TutorialsPage|InteractivePage|FaultFinding|PanelTrainer|pdfmake|vfs_fonts)-.*\.(?:js|css)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: `lazy-pages-${CONTENT_CACHE_VERSION}`,
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 60 }
+            }
+          },
+          {
             // Per-question diagram images under /exam-images, loaded with their
             // exam. Runtime-cached so they work offline after first view without
             // bloating the install precache.
             urlPattern: /\/exam-images\/.*\.(png|jpe?g)$/,
             handler: "CacheFirst",
             options: {
-              cacheName: "exam-images",
+              cacheName: `exam-images-${CONTENT_CACHE_VERSION}`,
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 60 }
             }
           }
