@@ -566,6 +566,10 @@ describe("exam option explanations", () => {
             const correctExplanation = question.explanation
               .replace(/\s+/g, " ")
               .trim();
+            expect(
+              CHOICES.filter((choice) => feedback[choice].kind === "correct"),
+              `${exam.id}/${section.id}/${variant.id} Q${question.number}`,
+            ).toEqual([question.answer]);
             expect(feedback[question.answer].kind).toBe("correct");
 
             for (const choice of CHOICES) {

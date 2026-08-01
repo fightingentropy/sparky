@@ -534,10 +534,22 @@ private extension CheatSheetSection {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return true }
 
-        let searchableValues = [title, summary]
-            + items
-            + (legend?.map(\.label) ?? [])
-            + (tables?.flatMap { [$0.title] + $0.headers + $0.rows.flatMap { $0 } } ?? [])
+        var searchableValues = [title, summary]
+        searchableValues.append(contentsOf: items)
+
+        if let legend {
+            searchableValues.append(contentsOf: legend.map(\.label))
+        }
+
+        if let tables {
+            for table in tables {
+                searchableValues.append(table.title)
+                searchableValues.append(contentsOf: table.headers)
+                for row in table.rows {
+                    searchableValues.append(contentsOf: row)
+                }
+            }
+        }
 
         return searchableValues.contains { $0.localizedCaseInsensitiveContains(trimmed) }
     }

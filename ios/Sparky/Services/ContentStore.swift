@@ -64,7 +64,7 @@ final class ContentStore {
                 "unsupported manifest schema \(manifest.schemaVersion)"
             )
         }
-        guard manifest.contentSchemaVersion == 2 else {
+        guard manifest.contentSchemaVersion == 3 else {
             throw ContentStoreError.invalidManifest(
                 "unsupported content schema \(manifest.contentSchemaVersion)"
             )

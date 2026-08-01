@@ -4,7 +4,7 @@ Sparky is an electrician toolkit and study companion with a Bun/React web app an
 
 The iOS app includes:
 
-- five site calculators with saved calculation history
+- two native site-calculator surfaces with saved calculation history
 - searchable, saveable technical notes
 - guided learning routes and seven tutorials
 - 12 exam subjects, 99 tests, and 3,983 deterministic served questions
@@ -79,4 +79,10 @@ The mandatory local/CI gate validates generated content, lints/tests/builds the 
 bun run check
 ```
 
-Calculator source classification, edition/date, units, precision, rounding and limitations are recorded in `src/contentSchema.ts`. Question-bank provenance is classified as exam convention unless a question carries a more specific verified source citation; always check the current official publication for safety-critical work.
+### Content provenance and licensing boundary
+
+Every delivered question resolves at least one source record, and every calculator has one. Records include jurisdiction, document identifier, edition/amendment/effective date, classification (`law`, `standard`, `guidance`, or `exam-convention`), section/table locator, provenance profile and content versions, a scoped hash, and explicit licensed/editorial confirmation flags.
+
+Imported question banks remain classified as exam convention because their original publication, licence and edition were not present in the repository. Their SHA-256 values fingerprint the local JSON only. Focused standards records preserve existing section/table citations and hash the citation metadata, not the licensed publication. The generated manifest separately hashes the transformed delivered content.
+
+This provenance work does not certify all pre-existing study material as licence-cleared: existing cheat sheets include numerical quick-reference material derived from standards. No new licensed standards table was added in this audit. Any record marked `needsLicensedConfirmation` or `needsEditorialConfirmation`, and all pre-existing standards-derived quick references, must be checked against the applicable official edition and licensing position before safety-critical or assessment use.

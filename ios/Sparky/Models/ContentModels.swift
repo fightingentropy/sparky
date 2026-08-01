@@ -7,23 +7,49 @@ enum ContentSourceClassification: String, Codable, Hashable, Sendable {
     case examConvention = "exam-convention"
 }
 
+enum ContentSourceHashScope: String, Codable, Hashable, Sendable {
+    case repositoryFile = "repository-file"
+    case citationRecord = "citation-record"
+    case provenanceRecord = "provenance-record"
+}
+
 struct ContentSource: Codable, Hashable, Identifiable, Sendable {
     let id: String
     let classification: ContentSourceClassification
+    let jurisdiction: String
     let documentIdentifier: String
     let edition: String
+    let amendment: String
+    let effectiveDate: String
     let recordedOn: String
     let locator: String
+    let sectionOrTable: String
+    let profileVersion: String
+    let contentVersion: String
+    let sourceHash: String
+    let sourceHashScope: ContentSourceHashScope
+    let needsLicensedConfirmation: Bool
+    let needsEditorialConfirmation: Bool
     let sourceURL: URL?
     let limitations: String?
 
     private enum CodingKeys: String, CodingKey {
         case id
         case classification
+        case jurisdiction
         case documentIdentifier
         case edition
+        case amendment
+        case effectiveDate
         case recordedOn
         case locator
+        case sectionOrTable
+        case profileVersion
+        case contentVersion
+        case sourceHash
+        case sourceHashScope
+        case needsLicensedConfirmation
+        case needsEditorialConfirmation
         case sourceURL = "sourceUrl"
         case limitations
     }
@@ -36,6 +62,7 @@ struct CalculatorDefinition: Codable, Hashable, Identifiable, Sendable {
     let precision: String
     let roundingRule: String
     let source: ContentSource
+    let additionalSources: [ContentSource]?
 }
 
 struct ContentManifestFile: Codable, Hashable, Sendable {

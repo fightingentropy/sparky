@@ -330,6 +330,18 @@ export function calcUnistrutLength(
     };
   }
 
+  if (widths.some((w) => w === 0)) {
+    return {
+      validationMessage: "Containment widths must be greater than 0 mm.",
+      totalContainmentWidthValue: "-- mm",
+      totalSideAllowanceValue: "-- mm",
+      totalGapAllowanceValue: "-- mm",
+      exactLengthValue: "-- mm",
+      finalLengthValue: "-- mm",
+      gapLabel: `${Math.max(containments.length - 1, 0)} gaps`
+    };
+  }
+
   const totalContainmentWidth = widths.reduce((t, w) => t + w, 0);
   const totalSideAllowance = leftAllowance + rightAllowance;
   const gapCount = Math.max(containments.length - 1, 0);
@@ -384,10 +396,10 @@ export function calcAngle(
   ) return empty;
 
   const bendCount = (topBend ? 1 : 0) + (bottomBend ? 1 : 0);
-  const bendDeduction =
-    bendCount > 0 && Number.isFinite(bendHeight) && bendHeight > 0
-      ? bendCount * bendHeight
-      : 0;
+  if (bendCount > 0 && (!Number.isFinite(bendHeight) || bendHeight <= 0)) {
+    return empty;
+  }
+  const bendDeduction = bendCount > 0 ? bendCount * bendHeight : 0;
   const effectiveDrop = drop - bendDeduction;
 
   if (effectiveDrop <= 0) return empty;
@@ -664,16 +676,22 @@ export function calcBreaker(
   }
 
   const nextIndex = STANDARD_BREAKERS.findIndex((size) => size >= designCurrent);
-  const breakerSize =
-    nextIndex >= 0 ? STANDARD_BREAKERS[nextIndex] : STANDARD_BREAKERS[STANDARD_BREAKERS.length - 1];
+  const maximumListedBreaker = STANDARD_BREAKERS[STANDARD_BREAKERS.length - 1];
+  if (nextIndex === -1) {
+    return {
+      breakerValue: "-- A",
+      currentValue: `${formatNumber(designCurrent)} A`,
+      rangeValue: `Over ${maximumListedBreaker} A — no listed size`
+    };
+  }
+
+  const breakerSize = STANDARD_BREAKERS[nextIndex];
   const lowerSize =
     nextIndex > 0 ? STANDARD_BREAKERS[nextIndex - 1] : STANDARD_BREAKERS[0];
   const rangeValue =
-    nextIndex === -1
-      ? `Over ${breakerSize} A`
-      : nextIndex > 0
-        ? `Over ${lowerSize} A to ${breakerSize} A`
-        : `Up to ${breakerSize} A`;
+    nextIndex > 0
+      ? `Over ${lowerSize} A to ${breakerSize} A`
+      : `Up to ${breakerSize} A`;
 
   return {
     breakerValue: `${breakerSize} A`,

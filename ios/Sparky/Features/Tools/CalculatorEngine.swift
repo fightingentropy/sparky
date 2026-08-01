@@ -322,6 +322,13 @@ public enum CalculatorEngine {
             )
         }
 
+        guard !widths.contains(0) else {
+            return emptyUnistrutLength(
+                validationMessage: "Containment widths must be greater than 0 mm.",
+                gapLabel: errorGapLabel
+            )
+        }
+
         let totalContainmentWidth = widths.reduce(0, +)
         let totalSideAllowance = leftAllowance + rightAllowance
         let totalGapAllowance = Double(gapCount) * gap
@@ -454,13 +461,13 @@ public enum CalculatorEngine {
             return empty
         }
 
-        let parsedBendHeight = finite(parseNumber(bendHeight))
         let bendCount = (topBend ? 1 : 0) + (bottomBend ? 1 : 0)
-        let bendDeduction: Double
-        if bendCount > 0, let bendHeight = parsedBendHeight, bendHeight > 0 {
+        var bendDeduction = 0.0
+        if bendCount > 0 {
+            guard let bendHeight = finite(parseNumber(bendHeight)), bendHeight > 0 else {
+                return empty
+            }
             bendDeduction = Double(bendCount) * bendHeight
-        } else {
-            bendDeduction = 0
         }
 
         let effectiveDrop = drop - bendDeduction

@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   countQuestions,
@@ -158,6 +160,12 @@ function normalizedQuestionSignature(question: ExamQuestion): string {
   });
 }
 
+function expectImageReferenceExists(url: string, context: string): void {
+  expect(url, context).toMatch(/^\/exam-images\/[^/?#]+\.(?:png|jpe?g)$/i);
+  const publicPath = resolve(import.meta.dirname, "..", "public", url.slice(1));
+  expect(existsSync(publicPath), `${context} references missing ${url}`).toBe(true);
+}
+
 describe("exam data", () => {
   it("exposes the canonical exams in the expected order", () => {
     expect(EXAMS.map((exam) => exam.id)).toEqual(expectedExamOrder);
@@ -299,11 +307,17 @@ describe("exam data", () => {
               expect(choice.length).toBeGreaterThan(0);
             }
             for (const url of question.imageUrls ?? []) {
-              expect(url).toMatch(/^\/exam-images\//);
+              expectImageReferenceExists(
+                url,
+                `${exam.id}/${section.id}/${variant.id}/Q${question.number}`,
+              );
             }
             for (const [letter, url] of Object.entries(question.optionImageUrls ?? {})) {
               expect(["A", "B", "C", "D"]).toContain(letter);
-              expect(url).toMatch(/^\/exam-images\//);
+              expectImageReferenceExists(
+                url,
+                `${exam.id}/${section.id}/${variant.id}/Q${question.number}/${letter}`,
+              );
             }
           }
         }
