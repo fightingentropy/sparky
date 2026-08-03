@@ -4234,7 +4234,6 @@ select:focus,
 .sheet-practice-btn,
 .learning-filter-btn,
 .exam-review-filter,
-.exam-jump-btn,
 .ix-tab,
 .ix-energize,
 .ix-welcome-go,
@@ -5236,6 +5235,14 @@ body[data-page="exams"] .exam-hero{
 body[data-page="exams"] .exam-hero-text{
   display: grid;
   gap: 12px;
+  min-width: 0;
+}
+
+body[data-page="exams"] .exam-hero-heading-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -6495,10 +6502,6 @@ body[data-page="exams"] .exam-status-bad{
   font-weight: 600;
 }
 
-body[data-page="exams"] .exam-jump-btn{
-  font-size: 0.82rem;
-}
-
 /* Ghost buttons inside the exam footer. */
 body[data-page="exams"] .page-exams .ghost-button,
 body[data-page="exams"] .exam-footer .ghost-button{
@@ -6515,7 +6518,8 @@ body[data-page="exams"] .exam-footer .ghost-button:hover{
   color: var(--ex-text);
 }
 
-/* Flat brass Submit button. */
+/* Flat brass primary action for sequential exam navigation and submission. */
+body[data-page="exams"] .exam-next-btn,
 body[data-page="exams"] .exam-submit-btn{
   min-height: 42px;
   padding: 0 24px;
@@ -6532,6 +6536,7 @@ body[data-page="exams"] .exam-submit-btn{
   transition: background 160ms var(--ease), border-color 160ms var(--ease);
 }
 
+body[data-page="exams"] .exam-next-btn:hover:not(:disabled),
 body[data-page="exams"] .exam-submit-btn:hover:not(:disabled){
   background: var(--ex-brass-hover);
   border-color: var(--ex-brass-hover);
@@ -6539,6 +6544,7 @@ body[data-page="exams"] .exam-submit-btn:hover:not(:disabled){
   box-shadow: none;
 }
 
+body[data-page="exams"] .exam-next-btn:disabled,
 body[data-page="exams"] .exam-submit-btn:disabled{
   opacity: 0.4;
   cursor: not-allowed;
@@ -6553,76 +6559,44 @@ body[data-page="exams"] .exam-footer-actions{
   gap: 8px;
 }
 
-body[data-page="exams"] .exam-copy-full-btn{
-  gap: 8px;
-  white-space: nowrap;
+body[data-page="exams"] .exam-actions-wrap{
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
 }
 
-body[data-page="exams"] .exam-copy-full-btn:disabled{
+body[data-page="exams"] .exam-actions-trigger{
+  display: inline-grid;
+  width: 38px;
+  height: 34px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--ex-hair);
+  border-radius: 10px;
+  background: var(--ex-surface);
+  color: var(--ex-muted);
+  cursor: pointer;
+  transition: border-color 160ms var(--ease), background 160ms var(--ease), color 160ms var(--ease);
+}
+
+body[data-page="exams"] .exam-actions-trigger:hover:not(:disabled),
+body[data-page="exams"] .exam-actions-trigger:focus-visible,
+body[data-page="exams"] .exam-actions-trigger[aria-expanded="true"]{
+  outline: none;
+  border-color: var(--ex-brass-line);
+  background: var(--ex-hair-soft);
+  color: var(--ex-heading);
+}
+
+body[data-page="exams"] .exam-actions-trigger:disabled{
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-body[data-page="exams"] .exam-copy-full-btn--copied:not(:disabled){
-  color: var(--ex-good);
-  border-color: var(--ex-good-line);
-  background: var(--ex-good-tint);
-}
-
-body[data-page="exams"] .exam-copy-full-btn--copied .exam-copy-full-icon{
-  animation: exam-copy-icon-pop 260ms var(--ease);
-}
-
-body[data-page="exams"] .exam-copy-full-btn--failed:not(:disabled){
-  color: var(--ex-bad);
-  border-color: var(--ex-bad-line);
-  background: var(--ex-bad-tint);
-}
-
-body[data-page="exams"] .exam-copy-full-icon{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-body[data-page="exams"] .exam-export-wrap{
-  position: relative;
-  display: inline-flex;
-}
-
-body[data-page="exams"] .exam-export-trigger{
-  gap: 8px;
-  white-space: nowrap;
-}
-
-body[data-page="exams"] .exam-export-trigger--saved:not(:disabled){
-  color: var(--ex-good);
-  border-color: var(--ex-good-line);
-  background: var(--ex-good-tint);
-}
-
-body[data-page="exams"] .exam-export-trigger--failed:not(:disabled){
-  color: var(--ex-bad);
-  border-color: var(--ex-bad-line);
-  background: var(--ex-bad-tint);
-}
-
-body[data-page="exams"] .exam-export-trigger--preparing .exam-export-icon{
-  animation: exam-copy-icon-pop 700ms var(--ease) infinite alternate;
-}
-
-body[data-page="exams"] .exam-export-icon{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-body[data-page="exams"] .exam-export-menu{
+body[data-page="exams"] .exam-actions-menu{
   position: absolute;
   right: 0;
-  bottom: calc(100% + 10px);
+  top: calc(100% + 8px);
   z-index: 50;
   width: min(310px, calc(100vw - 24px));
   padding: 6px;
@@ -6634,12 +6608,12 @@ body[data-page="exams"] .exam-export-menu{
   -webkit-backdrop-filter: blur(18px);
 }
 
-body[data-page="exams"] .exam-export-menu button{
+body[data-page="exams"] .exam-actions-menu button{
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  gap: 11px;
   padding: 11px 12px;
   border: 0;
   border-radius: 8px;
@@ -6650,27 +6624,47 @@ body[data-page="exams"] .exam-export-menu button{
   cursor: pointer;
 }
 
-body[data-page="exams"] .exam-export-menu button:hover,
-body[data-page="exams"] .exam-export-menu button:focus-visible{
+body[data-page="exams"] .exam-actions-menu button:hover,
+body[data-page="exams"] .exam-actions-menu button:focus-visible{
   outline: none;
   background: var(--ex-hair-soft);
 }
 
-body[data-page="exams"] .exam-export-menu button > span:first-child{
+body[data-page="exams"] .exam-actions-menu button:disabled{
+  opacity: 0.55;
+  cursor: wait;
+}
+
+body[data-page="exams"] .exam-actions-menu button > span:nth-child(2){
   display: grid;
   gap: 3px;
   min-width: 0;
 }
 
-body[data-page="exams"] .exam-export-menu strong{
+body[data-page="exams"] .exam-actions-menu-icon{
+  display: inline-grid;
+  width: 18px;
+  place-items: center;
+  color: var(--ex-muted);
+}
+
+body[data-page="exams"] .exam-actions-menu strong{
   font-size: 0.86rem;
   font-weight: 700;
 }
 
-body[data-page="exams"] .exam-export-menu small{
+body[data-page="exams"] .exam-actions-menu small{
   color: var(--ex-muted);
   font-size: 0.74rem;
   line-height: 1.3;
+}
+
+body[data-page="exams"] .exam-actions-copy--copied{
+  color: var(--ex-good);
+}
+
+body[data-page="exams"] .exam-actions-copy--failed{
+  color: var(--ex-bad);
 }
 
 body[data-page="exams"] .exam-export-extension{
@@ -6751,6 +6745,11 @@ body[data-page="exams"] .exam-title-text{
     gap: 10px;
     width: 100%;
     min-width: 0;
+  }
+
+  body[data-page="exams"] .exam-hero-heading-row{
+    align-items: start;
+    gap: 8px;
   }
 
   body[data-page="exams"] .exam-title-menu-wrap{
@@ -6904,6 +6903,7 @@ body[data-page="exams"] .exam-q-topic{
     white-space: nowrap;
   }
 
+  body[data-page="exams"] .exam-next-btn,
   body[data-page="exams"] .exam-submit-btn{
     flex: 0 0 auto;
     min-width: 92px;
@@ -6923,43 +6923,6 @@ body[data-page="exams"] .exam-q-topic{
     font-size: 0.78rem;
   }
 
-  body[data-page="exams"] .exam-copy-full-btn{
-    width: 34px;
-    min-width: 34px;
-    padding: 0;
-  }
-
-  body[data-page="exams"] .exam-copy-full-label{
-    display: none;
-  }
-
-  body[data-page="exams"] .exam-export-trigger{
-    width: 34px;
-    min-width: 34px;
-    padding: 0;
-  }
-
-  body[data-page="exams"] .exam-export-label{
-    display: none;
-  }
-
-  body[data-page="exams"] .exam-export-menu{
-    position: fixed;
-    left: 12px;
-    right: 12px;
-    bottom: calc(max(env(safe-area-inset-bottom), 6px) + 58px);
-    width: auto;
-  }
-
-  body[data-page="exams"] .exam-jump-btn{
-    width: 100%;
-    min-height: 34px;
-    min-width: 0;
-    padding: 0 10px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -7181,34 +7144,7 @@ body[data-page="exams"] .exam-flag-btn.is-active {
   color: var(--ex-brass);
 }
 
-body[data-page="exams"] .exam-focus-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-body[data-page="exams"] .exam-focus-controls .ghost-button {
-  gap: 8px;
-}
-
-body[data-page="exams"] .exam-focus-shortcut {
-  display: inline-grid;
-  place-items: center;
-  min-width: 1.55rem;
-  height: 1.35rem;
-  padding: 0 0.3rem;
-  border: 1px solid var(--ex-hair);
-  border-bottom-color: var(--ex-brass-line);
-  border-radius: 5px;
-  background: var(--ex-surface-2);
-  color: var(--ex-heading);
-  font-family: var(--ex-mono);
-  font-size: 0.74rem;
-  font-weight: 600;
-  line-height: 1;
-}
-
+body[data-page="exams"] .exam-next-btn:disabled,
 body[data-page="exams"] .exam-submit-btn:disabled {
   border-color: var(--ex-hair);
   background: rgba(255, 255, 255, 0.055);
@@ -7221,8 +7157,6 @@ body[data-page="exams"] .exam-submit-btn:disabled {
 @media (max-width: 720px) {
   body[data-page="exams"] .exam-view-switch { width: 100%; margin-left: 0; }
   body[data-page="exams"] .exam-view-switch button { flex: 1; }
-  body[data-page="exams"] .exam-focus-controls { justify-content: space-between; }
-  body[data-page="exams"] .exam-focus-controls .ghost-button { min-width: 0; padding-inline: 10px; }
 }
 
 html.comfortable-text {
@@ -7703,10 +7637,6 @@ body[data-page="exams"] .exam-option-control:active:not(:disabled) {
 
 @media (max-width: 340px) {
   body[data-page="exams"] .brand strong {
-    display: none;
-  }
-
-  body[data-page="exams"] .exam-jump-detail {
     display: none;
   }
 }
