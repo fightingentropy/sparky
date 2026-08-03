@@ -506,11 +506,7 @@ private struct ExamSessionView: View {
         ) {
             Button("Submit exam") { submitExam() }
         } message: {
-            if score.unanswered > 0 {
-                Text("You still have \(score.unanswered) unanswered question\(score.unanswered == 1 ? "" : "s"). You can review everything after submitting.")
-            } else {
-                Text("Answers cannot be changed after submission unless you reset this test.")
-            }
+            Text("Answers cannot be changed after submission unless you reset this test.")
         }
         .confirmationDialog(
             "Reset this attempt?",
@@ -622,20 +618,7 @@ private struct ExamSessionView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(SparkyPrimaryButtonStyle())
-            } else if currentIndex < questions.count - 1 {
-                Button {
-                    currentIndex += 1
-                    Haptics.selection()
-                } label: {
-                    HStack {
-                        Text(progress.answers[question?.number ?? -1] == nil ? "Skip" : "Next")
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(SparkyPrimaryButtonStyle())
-            } else {
+            } else if score.unanswered == 0 && !questions.isEmpty {
                 Button {
                     showingSubmitConfirmation = true
                 } label: {
@@ -643,6 +626,37 @@ private struct ExamSessionView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(SparkyPrimaryButtonStyle())
+            } else if currentIndex < questions.count - 1 {
+                Button {
+                    currentIndex += 1
+                    Haptics.selection()
+                } label: {
+                    HStack {
+                        Text("Next question")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SparkyPrimaryButtonStyle())
+            } else if let nextUnansweredIndex = questions.firstIndex(where: {
+                progress.answers[$0.number] == nil
+            }), nextUnansweredIndex != currentIndex {
+                Button {
+                    currentIndex = nextUnansweredIndex
+                    Haptics.selection()
+                } label: {
+                    Label("Next unanswered", systemImage: "chevron.right")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SparkyPrimaryButtonStyle())
+            } else {
+                Button {} label: {
+                    Label("Answer to finish", systemImage: "checkmark.circle")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(SparkyPrimaryButtonStyle())
+                .disabled(true)
             }
         }
         .padding(.horizontal, SparkyLayout.pageInset)
@@ -658,6 +672,7 @@ private struct ExamSessionView: View {
     }
 
     private func submitExam() {
+        guard !questions.isEmpty, score.unanswered == 0 else { return }
         progressStore.submit(examID: exam.id, testID: test.id)
         Haptics.success()
         currentIndex = 0
