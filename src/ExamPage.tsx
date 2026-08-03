@@ -193,8 +193,8 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   const examMenuRef = useRef<HTMLDivElement>(null);
   const [testMenuOpen, setTestMenuOpen] = useState(false);
   const testMenuRef = useRef<HTMLDivElement>(null);
-  const [examExportMenuOpen, setExamExportMenuOpen] = useState(false);
-  const examExportMenuRef = useRef<HTMLDivElement>(null);
+  const [examActionsMenuOpen, setExamActionsMenuOpen] = useState(false);
+  const examActionsMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     clearStaleExamProgress();
@@ -247,17 +247,17 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   }, [testMenuOpen]);
 
   useEffect(() => {
-    if (!examExportMenuOpen) return;
+    if (!examActionsMenuOpen) return;
 
     function handlePointerDown(event: PointerEvent) {
-      if (!examExportMenuRef.current?.contains(event.target as Node)) {
-        setExamExportMenuOpen(false);
+      if (!examActionsMenuRef.current?.contains(event.target as Node)) {
+        setExamActionsMenuOpen(false);
       }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setExamExportMenuOpen(false);
+        setExamActionsMenuOpen(false);
       }
     }
 
@@ -267,7 +267,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [examExportMenuOpen]);
+  }, [examActionsMenuOpen]);
 
   const [selectedExamId, setSelectedExamId] = usePersistedState<string>(
     "exam-selected",
@@ -332,7 +332,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   const [examCopyState, setExamCopyState] = useState<CopyState>("idle");
   const [examExportState, setExamExportState] = useState<ExamExportState>("idle");
   const [examExportMessage, setExamExportMessage] = useState("Export full exam");
-  const [viewMode, setViewMode] = useState<ExamViewMode>("all");
+  const [viewMode, setViewMode] = useState<ExamViewMode>("focus");
   const [focusQuestionIndex, setFocusQuestionIndex] = useState(0);
   const [flaggedQuestionNumbers, setFlaggedQuestionNumbers] = useState<Set<number>>(() => new Set());
   const examCopyTimeoutRef = useRef<number | null>(null);
@@ -357,11 +357,11 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
     setRetryQuestionNumbers(null);
     setExamInfoOpen(false);
     setTestMenuOpen(false);
-    setExamExportMenuOpen(false);
+    setExamActionsMenuOpen(false);
     setExamCopyState("idle");
     setExamExportState("idle");
     setExamExportMessage("Export full exam");
-    setViewMode("all");
+    setViewMode("focus");
     setFocusQuestionIndex(0);
     setFlaggedQuestionNumbers(new Set());
     if (examCopyTimeoutRef.current !== null) {
@@ -525,6 +525,10 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
     () => questions.reduce((count, question) => count + (answers[question.number] ? 1 : 0), 0),
     [answers, questions]
   );
+  const firstUnansweredIndex = questions.findIndex((question) => !(question.number in answers));
+  const canSubmit = Boolean(exam) && total > 0 && answeredCount === total;
+  const nextQuestionIndex =
+    focusQuestionIndex < total - 1 ? focusQuestionIndex + 1 : firstUnansweredIndex;
 
   const correctCount = useMemo(() => {
     return questions.reduce(
@@ -615,7 +619,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   }
 
   function handleSubmit() {
-    if (!exam) return;
+    if (!exam || !canSubmit) return;
     setViewMode("all");
     setRetryQuestionNumbers(null);
     const nextProgress = writeSlot(progress, variantIndex, { answers, submitted: true });
@@ -693,20 +697,6 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
     setRetryQuestionNumbers(null);
   }
 
-  function scrollToFirstUnanswered() {
-    for (let index = 0; index < questions.length; index += 1) {
-      const q = questions[index];
-      if (!(q.number in answers)) {
-        if (viewMode === "focus") {
-          setFocusQuestionIndex(index);
-          return;
-        }
-        scrollIntoViewSafely(document.getElementById(`exam-q-${q.number}`), { block: "center" });
-        return;
-      }
-    }
-  }
-
   function toggleQuestionFlag(questionNumber: number) {
     setFlaggedQuestionNumbers((current) => {
       const next = new Set(current);
@@ -755,7 +745,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
 
   function exportFullExamMarkdown() {
     if (!exam) return;
-    setExamExportMenuOpen(false);
+    setExamActionsMenuOpen(false);
     try {
       downloadExamMarkdown(
         sectionGroups,
@@ -769,7 +759,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
 
   async function exportFullExamPdf() {
     if (!exam || examExportState === "preparing") return;
-    setExamExportMenuOpen(false);
+    setExamActionsMenuOpen(false);
     showExportFeedback("preparing", "Preparing PDF");
     try {
       await downloadExamPdf(
@@ -790,86 +780,92 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
         : "Copy full exam with answers";
   const examCopyButtonText =
     examCopyState === "copied" ? "Copied" : examCopyState === "failed" ? "Copy failed" : "Copy full exam";
-  const fullExamCopyButton = (
-    <button
-      type="button"
-      className={`ghost-button exam-copy-full-btn exam-copy-full-btn--${examCopyState}`}
-      onClick={copyFullExam}
-      disabled={!exam}
-      aria-label={examCopyLabel}
-      title={examCopyLabel}
-    >
-      <span className="sr-only" aria-live="polite">{examCopyLabel}</span>
-      <span className="exam-copy-full-icon" aria-hidden="true">
-        {examCopyState === "copied" ? (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12.5l4.4 4.4L19 7.3" />
-          </svg>
-        ) : examCopyState === "failed" ? (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7 7l10 10M17 7L7 17" />
-          </svg>
-        ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="9" width="10" height="10" rx="2" />
-            <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
-          </svg>
-        )}
-      </span>
-      <span className="exam-copy-full-label" aria-hidden="true">{examCopyButtonText}</span>
-    </button>
-  );
-  const examExportButtonText = examExportState === "idle" ? "Export exam" : examExportMessage;
-  const fullExamExportMenu = (
-    <div className="exam-export-wrap" ref={examExportMenuRef}>
+  const fullExamActionsMenu = (
+    <div className="exam-actions-wrap" ref={examActionsMenuRef}>
       <button
         type="button"
-        className={`ghost-button exam-export-trigger exam-export-trigger--${examExportState}`}
-        onClick={() => setExamExportMenuOpen((open) => !open)}
-        disabled={!exam || examExportState === "preparing"}
+        className="exam-actions-trigger"
+        onClick={() => setExamActionsMenuOpen((open) => !open)}
+        disabled={!exam}
         aria-haspopup="menu"
-        aria-expanded={examExportMenuOpen}
-        aria-label={examExportMessage}
-        title={examExportMessage}
+        aria-expanded={examActionsMenuOpen}
+        aria-label="Exam actions"
+        title="Exam actions"
       >
-        <span className="sr-only" aria-live="polite">{examExportMessage}</span>
-        <span className="exam-export-icon" aria-hidden="true">
-          {examExportState === "saved" ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12.5l4.4 4.4L19 7.3" />
-            </svg>
-          ) : examExportState === "failed" ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 7l10 10M17 7L7 17" />
-            </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3v12" />
-              <path d="m7 10 5 5 5-5" />
-              <path d="M5 21h14" />
-            </svg>
-          )}
-        </span>
-        <span className="exam-export-label" aria-hidden="true">{examExportButtonText}</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <circle cx="5" cy="12" r="1.7" />
+          <circle cx="12" cy="12" r="1.7" />
+          <circle cx="19" cy="12" r="1.7" />
+        </svg>
       </button>
-      {examExportMenuOpen ? (
-        <div className="exam-export-menu" role="menu" aria-label="Export full exam">
-          <button type="button" role="menuitem" onClick={exportFullExamMarkdown}>
+      {examActionsMenuOpen ? (
+        <div className="exam-actions-menu" role="menu" aria-label="Exam actions">
+          <button
+            type="button"
+            role="menuitem"
+            className={`exam-actions-copy exam-actions-copy--${examCopyState}`}
+            onClick={() => {
+              setExamActionsMenuOpen(false);
+              void copyFullExam();
+            }}
+          >
+            <span className="exam-actions-menu-icon" aria-hidden="true">
+              {examCopyState === "copied" ? (
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12.5l4.4 4.4L19 7.3" />
+                </svg>
+              ) : examCopyState === "failed" ? (
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 7l10 10M17 7L7 17" />
+                </svg>
+              ) : (
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="10" height="10" rx="2" />
+                  <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+                </svg>
+              )}
+            </span>
             <span>
-              <strong>Markdown</strong>
+              <strong>{examCopyButtonText}</strong>
+              <small>Questions, answers and explanations</small>
+            </span>
+          </button>
+          <button type="button" role="menuitem" onClick={exportFullExamMarkdown}>
+            <span className="exam-actions-menu-icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v12" />
+                <path d="m7 10 5 5 5-5" />
+                <path d="M5 21h14" />
+              </svg>
+            </span>
+            <span>
+              <strong>Export Markdown</strong>
               <small>Questions, answers and explanations</small>
             </span>
             <span className="exam-export-extension">.md</span>
           </button>
-          <button type="button" role="menuitem" onClick={exportFullExamPdf}>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => void exportFullExamPdf()}
+            disabled={examExportState === "preparing"}
+          >
+            <span className="exam-actions-menu-icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v12" />
+                <path d="m7 10 5 5 5-5" />
+                <path d="M5 21h14" />
+              </svg>
+            </span>
             <span>
-              <strong>PDF</strong>
+              <strong>{examExportState === "preparing" ? "Preparing PDF…" : "Export PDF"}</strong>
               <small>Print-ready with page numbers</small>
             </span>
             <span className="exam-export-extension">.pdf</span>
           </button>
         </div>
       ) : null}
+      <span className="sr-only" aria-live="polite">{examCopyLabel}. {examExportMessage}</span>
     </div>
   );
 
@@ -882,9 +878,10 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
           <div className="exam-hero-text">
             <span className="exam-eyebrow">PRACTICE EXAM</span>
             <h1 className="sr-only">{selectedExamEntry.title} practice exam</h1>
-            <div className="exam-title-wrap" ref={examMenuRef}>
-              {visibleExamRegistry.length > 1 ? (
-                <div className="exam-title-menu-wrap">
+            <div className="exam-hero-heading-row">
+              <div className="exam-title-wrap" ref={examMenuRef}>
+                {visibleExamRegistry.length > 1 ? (
+                  <div className="exam-title-menu-wrap">
                   <button
                     type="button"
                     className="exam-title-button"
@@ -939,13 +936,13 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
                       })}
                     </div>
                   ) : null}
-                </div>
-              ) : (
-                <h2>{selectedExamEntry.title}</h2>
-              )}
-              {exam ? (
-                <>
-                  <button
+                  </div>
+                ) : (
+                  <h2>{selectedExamEntry.title}</h2>
+                )}
+                {exam ? (
+                  <>
+                    <button
                     type="button"
                     className="exam-title-info"
                     aria-label="About this exam"
@@ -957,8 +954,8 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
                     }}
                   >
                     i
-                  </button>
-                  <div className={`exam-tooltip${examInfoOpen ? " is-open" : ""}`} role="tooltip">
+                    </button>
+                    <div className={`exam-tooltip${examInfoOpen ? " is-open" : ""}`} role="tooltip">
                     <span className="exam-tooltip-subtitle">{exam.subtitle}</span>
                     <p className="exam-tooltip-description">{exam.description}</p>
                     <p className="exam-tooltip-format">{exam.format}</p>
@@ -966,9 +963,11 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
                       <strong>Study aid.</strong> Confirm current awarding-body requirements, BS 7671 editions and
                       official guidance before relying on technical or regulatory wording.
                     </p>
-                  </div>
-                </>
-              ) : null}
+                    </div>
+                  </>
+                ) : null}
+              </div>
+              {fullExamActionsMenu}
             </div>
           </div>
           <div className="exam-hero-summary">
@@ -1168,33 +1167,6 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
           </div>
         </div>
 
-        {!submitted && viewMode === "focus" && displayQuestions.length > 0 ? (
-          <div className="exam-focus-controls" aria-label="Focus mode navigation">
-            <button
-              type="button"
-              className="ghost-button"
-              disabled={focusQuestionIndex === 0}
-              aria-keyshortcuts="ArrowLeft"
-              title="Previous question (Left Arrow)"
-              onClick={() => setFocusQuestionIndex((current) => Math.max(0, current - 1))}
-            >
-              <kbd className="exam-focus-shortcut" aria-hidden="true">←</kbd>
-              <span>Previous</span>
-            </button>
-            <button
-              type="button"
-              className="ghost-button"
-              disabled={focusQuestionIndex >= questions.length - 1}
-              aria-keyshortcuts="ArrowRight"
-              title="Next question (Right Arrow)"
-              onClick={() => setFocusQuestionIndex((current) => Math.min(questions.length - 1, current + 1))}
-            >
-              <span>Next</span>
-              <kbd className="exam-focus-shortcut" aria-hidden="true">→</kbd>
-            </button>
-          </div>
-        ) : null}
-
         {submitted && exam && displayQuestions.length === 0 ? (
           <p className="empty-state">No questions match the current review filters.</p>
         ) : null}
@@ -1212,18 +1184,10 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
                 ) : answeredCount === total ? (
                   <span className="exam-status-ok">Ready to submit.</span>
                 ) : (
-                  <button
-                    type="button"
-                    className="ghost-button exam-jump-btn"
-                    onClick={scrollToFirstUnanswered}
-                  >
-                    <span>Next <span className="exam-jump-detail">unanswered </span>({total - answeredCount})</span>
-                  </button>
+                  <span>{total - answeredCount} unanswered</span>
                 )}
               </div>
-              <div className="exam-footer-actions">
-                {fullExamCopyButton}
-                {fullExamExportMenu}
+              <div className="exam-footer-actions" aria-label="Question navigation">
                 {retryQuestionNumbers ? (
                   <button type="button" className="ghost-button" onClick={exitRetryMode}>
                     Exit retry
@@ -1231,12 +1195,41 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
                 ) : null}
                 <button
                   type="button"
-                  className="exam-submit-btn"
-                  onClick={handleSubmit}
-                  disabled={!exam || answeredCount === 0}
+                  className="ghost-button exam-previous-btn"
+                  disabled={focusQuestionIndex === 0}
+                  aria-keyshortcuts="ArrowLeft"
+                  title="Previous question (Left Arrow)"
+                  onClick={() => goToQuestion(Math.max(0, focusQuestionIndex - 1))}
                 >
-                  Submit exam
+                  <span aria-hidden="true">←</span>
+                  <span>Previous</span>
                 </button>
+                {canSubmit ? (
+                  <button
+                    type="button"
+                    className="exam-submit-btn"
+                    onClick={handleSubmit}
+                    disabled={!exam}
+                  >
+                    Submit exam
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="exam-next-btn"
+                    disabled={
+                      !exam ||
+                      nextQuestionIndex < 0 ||
+                      nextQuestionIndex === focusQuestionIndex
+                    }
+                    aria-keyshortcuts="ArrowRight"
+                    title="Next question (Right Arrow)"
+                    onClick={() => goToQuestion(nextQuestionIndex)}
+                  >
+                    <span>{focusQuestionIndex < total - 1 ? "Next question" : "Next unanswered"}</span>
+                    <span aria-hidden="true">→</span>
+                  </button>
+                )}
               </div>
             </>
           ) : (
@@ -1247,8 +1240,6 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
                 </span>
               </div>
               <div className="exam-footer-actions">
-                {fullExamCopyButton}
-                {fullExamExportMenu}
                 <button
                   type="button"
                   className="ghost-button"
