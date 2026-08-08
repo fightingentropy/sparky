@@ -4,9 +4,11 @@ import UniformTypeIdentifiers
 struct ExamActionsMenu: View {
     let copied: Bool
     let isPreparingPDF: Bool
+    let canReset: Bool
     let onCopy: () -> Void
     let onExportMarkdown: () -> Void
     let onExportPDF: () -> Void
+    let onReset: () -> Void
 
     var body: some View {
         Menu {
@@ -32,11 +34,18 @@ struct ExamActionsMenu: View {
             } label: {
                 Label("Export exam", systemImage: "square.and.arrow.up")
             }
+
+            Divider()
+
+            Button(role: .destructive, action: onReset) {
+                Label("Reset test", systemImage: "arrow.counterclockwise")
+            }
+            .disabled(!canReset)
         } label: {
             Image(systemName: "ellipsis")
         }
         .accessibilityLabel("Exam actions")
-        .accessibilityHint("Copy or export the full exam")
+        .accessibilityHint("Copy, export or reset the current test")
     }
 }
 
