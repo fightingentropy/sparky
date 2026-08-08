@@ -814,10 +814,11 @@ private struct QuestionCard: View {
                             answerRevealed ? "Hide answer" : "Show answer",
                             systemImage: answerRevealed ? "eye.slash" : "eye"
                         )
+                        .labelStyle(.iconOnly)
                         .font(.caption.weight(.semibold))
                     }
                     .buttonStyle(.bordered)
-                    .buttonBorderShape(.capsule)
+                    .buttonBorderShape(.circle)
                     .controlSize(.small)
                     .tint(Color.sparkyAccent)
                     .accessibilityIdentifier("exam.question.answer-toggle")
