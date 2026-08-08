@@ -362,6 +362,7 @@ private struct ExamSessionView: View {
     @State private var showingNavigator = false
     @State private var showingSubmitConfirmation = false
     @State private var showingResetConfirmation = false
+    @State private var revealedAnswerQuestionIDs: Set<String> = []
     @State private var copiedFullExam = false
     @State private var copyFeedbackToken = UUID()
     @State private var exportDocument: ExamActionFileDocument?
@@ -383,6 +384,12 @@ private struct ExamSessionView: View {
     private var score: ExamScore {
         progressStore.score(for: test, in: exam)
     }
+    private var canReset: Bool {
+        progress.submitted ||
+            !progress.answers.isEmpty ||
+            !progress.flaggedQuestions.isEmpty ||
+            progress.currentQuestion != 0
+    }
 
     var body: some View {
         ZStack {
@@ -401,6 +408,15 @@ private struct ExamSessionView: View {
                                 question: question,
                                 selectedAnswer: progress.answers[question.number],
                                 submitted: progress.submitted,
+                                answerRevealed: revealedAnswerQuestionIDs.contains(question.id),
+                                onToggleAnswer: {
+                                    if revealedAnswerQuestionIDs.contains(question.id) {
+                                        revealedAnswerQuestionIDs.remove(question.id)
+                                    } else {
+                                        revealedAnswerQuestionIDs.insert(question.id)
+                                    }
+                                    Haptics.selection()
+                                },
                                 onSelect: { choice in
                                     progressStore.answer(
                                         choice,
@@ -460,9 +476,11 @@ private struct ExamSessionView: View {
                 ExamActionsMenu(
                     copied: copiedFullExam,
                     isPreparingPDF: isPreparingPDF,
+                    canReset: canReset,
                     onCopy: copyFullExam,
                     onExportMarkdown: prepareMarkdownExport,
-                    onExportPDF: preparePDFExport
+                    onExportPDF: preparePDFExport,
+                    onReset: { showingResetConfirmation = true }
                 )
             }
         }
@@ -515,7 +533,9 @@ private struct ExamSessionView: View {
         ) {
             Button("Start again", role: .destructive) {
                 progressStore.reset(examID: exam.id, testID: test.id)
+                revealedAnswerQuestionIDs.removeAll()
                 currentIndex = 0
+                UIAccessibility.post(notification: .announcement, argument: "Test reset")
             }
         } message: {
             Text("All answers, flags and the result for this test will be removed from this device.")
@@ -772,15 +792,42 @@ private struct QuestionCard: View {
     let question: ExamQuestion
     let selectedAnswer: ExamChoice?
     let submitted: Bool
+    let answerRevealed: Bool
+    let onToggleAnswer: () -> Void
     let onSelect: (ExamChoice) -> Void
+
+    private var showsAnswer: Bool {
+        submitted || answerRevealed
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack(alignment: .firstTextBaseline) {
+            HStack(alignment: .center, spacing: 8) {
                 Text("Q\(question.number)")
                     .font(.caption.bold().monospaced())
                     .foregroundStyle(Color.sparkyAccent)
                 Spacer()
+
+                if !submitted {
+                    Button(action: onToggleAnswer) {
+                        Label(
+                            answerRevealed ? "Hide answer" : "Show answer",
+                            systemImage: answerRevealed ? "eye.slash" : "eye"
+                        )
+                        .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    .controlSize(.small)
+                    .tint(Color.sparkyAccent)
+                    .accessibilityIdentifier("exam.question.answer-toggle")
+                    .accessibilityHint(
+                        answerRevealed
+                            ? "Hides the answer preview"
+                            : "Reveals the correct answer without submitting the exam"
+                    )
+                }
+
                 Menu {
                     Button {
                         UIPasteboard.general.string = clipboardText
@@ -814,13 +861,14 @@ private struct QuestionCard: View {
                         selected: selectedAnswer == choice,
                         correct: question.answer == choice,
                         submitted: submitted,
+                        showsAnswer: showsAnswer,
                         feedback: question.optionFeedback[choice],
                         onSelect: { onSelect(choice) }
                     )
                 }
             }
 
-            if submitted, let tables = question.solutionTables, !tables.isEmpty {
+            if showsAnswer, let tables = question.solutionTables, !tables.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     SparkyEyebrow(text: "Standards lookup")
                     ForEach(Array(tables.enumerated()), id: \.offset) { _, table in
@@ -844,21 +892,22 @@ private struct ExamOptionCard: View {
     let selected: Bool
     let correct: Bool
     let submitted: Bool
+    let showsAnswer: Bool
     let feedback: ExamOptionFeedback
     let onSelect: () -> Void
 
     private var accent: Color {
-        guard submitted else { return selected ? .sparkyAccent : .sparkyBorder }
-        if correct { return .sparkySuccess }
-        if selected { return .sparkyDanger }
+        if showsAnswer && correct { return .sparkySuccess }
+        if submitted && selected { return .sparkyDanger }
+        if selected { return .sparkyAccent }
         return .sparkyBorder
     }
 
     private var fill: Color {
-        guard submitted else { return selected ? .sparkyAccentSoft : .sparkyBackground.opacity(0.58) }
-        if correct { return .sparkySuccess.opacity(0.11) }
-        if selected { return .sparkyDanger.opacity(0.10) }
-        return .sparkyBackground.opacity(0.45)
+        if showsAnswer && correct { return .sparkySuccess.opacity(0.11) }
+        if submitted && selected { return .sparkyDanger.opacity(0.10) }
+        if selected { return .sparkyAccentSoft }
+        return .sparkyBackground.opacity(submitted ? 0.45 : 0.58)
     }
 
     var body: some View {
@@ -867,11 +916,11 @@ private struct ExamOptionCard: View {
                 HStack(alignment: .top, spacing: 12) {
                     ZStack {
                         Circle()
-                            .fill(selected || (submitted && correct) ? accent : Color.clear)
+                            .fill(selected || (showsAnswer && correct) ? accent : Color.clear)
                         Circle().stroke(accent, lineWidth: 1.5)
                         Text(choice.rawValue)
                             .font(.caption.bold().monospaced())
-                            .foregroundStyle(selected || (submitted && correct) ? Color.sparkyBackground : Color.sparkyText)
+                            .foregroundStyle(selected || (showsAnswer && correct) ? Color.sparkyBackground : Color.sparkyText)
                     }
                     .frame(width: 30, height: 30)
 
@@ -881,7 +930,7 @@ private struct ExamOptionCard: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .multilineTextAlignment(.leading)
 
-                    if submitted && correct {
+                    if showsAnswer && correct {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(Color.sparkySuccess)
                     } else if submitted && selected {
@@ -894,7 +943,7 @@ private struct ExamOptionCard: View {
                     ExamImageView(path: imagePath, maxHeight: 180)
                 }
 
-                if submitted {
+                if showsAnswer {
                     Divider().overlay(accent.opacity(0.45))
                     HStack(alignment: .top, spacing: 9) {
                         Image(systemName: correct ? "checkmark.circle" : "info.circle")
@@ -912,7 +961,7 @@ private struct ExamOptionCard: View {
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(accent, lineWidth: selected || (submitted && correct) ? 1.6 : 1)
+                    .stroke(accent, lineWidth: selected || (showsAnswer && correct) ? 1.6 : 1)
             }
             .contentShape(Rectangle())
         }
@@ -924,8 +973,10 @@ private struct ExamOptionCard: View {
     }
 
     private var accessibilityValue: String {
-        if submitted && correct { return "Correct answer" }
+        if showsAnswer && correct { return selected ? "Selected, correct answer" : "Correct answer" }
         if submitted && selected { return "Selected, incorrect" }
+        if showsAnswer && selected { return "Selected, not the correct answer" }
+        if showsAnswer { return "Not the correct answer" }
         return selected ? "Selected" : "Not selected"
     }
 }

@@ -116,6 +116,7 @@ struct SparkyApp: App {
             let loadedContent = try ContentStore()
             contentStore = loadedContent
 #if DEBUG
+            resetPreviewTestIfNeeded()
             prepareSubmittedPreviewIfNeeded(content: loadedContent)
 #endif
             if let examID = Self.previewExamID {
@@ -131,6 +132,16 @@ struct SparkyApp: App {
     }
 
 #if DEBUG
+    private func resetPreviewTestIfNeeded() {
+        guard
+            Self.previewReset,
+            let examID = Self.previewExamID,
+            let testID = Self.previewTestID
+        else { return }
+
+        progressStore.reset(examID: examID, testID: testID)
+    }
+
     private func prepareSubmittedPreviewIfNeeded(content: ContentStore) {
         guard
             Self.previewSubmitted,
@@ -201,6 +212,10 @@ struct SparkyApp: App {
 #if DEBUG
     private static var previewSubmitted: Bool {
         ProcessInfo.processInfo.arguments.contains("-sparkyPreviewSubmitted")
+    }
+
+    private static var previewReset: Bool {
+        ProcessInfo.processInfo.arguments.contains("-sparkyPreviewReset")
     }
 #endif
 }

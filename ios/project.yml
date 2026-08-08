@@ -47,6 +47,7 @@ targets:
     scheme:
       testTargets:
         - SparkyTests
+        - SparkyUITests
       gatherCoverageData: true
 
   SparkyTests:
@@ -62,3 +63,16 @@ targets:
         GENERATE_INFOPLIST_FILE: true
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Sparky.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Sparky"
         BUNDLE_LOADER: "$(TEST_HOST)"
+
+  SparkyUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: SparkyUITests
+    dependencies:
+      - target: Sparky
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.erlinhoxha.sparky.uitests
+        GENERATE_INFOPLIST_FILE: true
+        TEST_TARGET_NAME: Sparky
