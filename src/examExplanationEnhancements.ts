@@ -1,5 +1,6 @@
 import { eighteenthEditionCorrections } from "./examCorrections/eighteenthEdition";
 import { eighteenthEditionPart2Corrections } from "./examCorrections/eighteenthEditionPart2";
+import { buildingRegulationsHomeworkCorrections } from "./examCorrections/buildingRegulationsHomework";
 import { ecsHealthSafetyCorrections } from "./examCorrections/ecsHealthSafety";
 import { periodicInspectionCorrections } from "./examCorrections/periodicInspection";
 import { periodicInspectionPart2Corrections } from "./examCorrections/periodicInspectionPart2";
@@ -12,6 +13,7 @@ import type { Exam, ExamQuestion } from "./exams/types";
 const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
   ...eighteenthEditionCorrections,
   ...eighteenthEditionPart2Corrections,
+  ...buildingRegulationsHomeworkCorrections,
   ...wiringRegulationsHomeworkCorrections,
   ...ecsHealthSafetyCorrections,
   ...periodicInspectionCorrections,

@@ -48,7 +48,6 @@ const EXAMS = [
 
 const CHOICES = ["A", "B", "C", "D"] as const;
 const IMPORTED_HOMEWORK_VARIANTS = new Set([
-  "building-regulations/building-regulations-homework",
   "fundamental-inspection-testing/fundamental-inspection-testing-homework",
   "initial-verification/initial-verification-homework",
   "pat-testing/portable-appliance-testing-homework",
@@ -513,13 +512,61 @@ describe("exam option explanations", () => {
     expect(reviewedDistractors).toBe(180);
   });
 
+  it("provides clear option-specific feedback for every Building Regulations test 8 question", () => {
+    const enhancedExam = applyExamExplanationEnhancements(
+      buildingRegulationsExam as unknown as Exam,
+    );
+    const variant = enhancedExam.sections
+      .flatMap((section) => section.variants)
+      .find((entry) => entry.id === "building-regulations-homework");
+    let reviewedDistractors = 0;
+
+    expect(variant?.questions).toHaveLength(20);
+    for (const question of variant!.questions) {
+      const feedback = buildOptionFeedback(question);
+      const wrongChoices = CHOICES.filter(
+        (choice) => choice !== question.answer,
+      );
+      const wrongReasons = wrongChoices.map((choice) => feedback[choice].text);
+
+      expect(feedback[question.answer].kind).toBe("correct");
+      expect(feedback[question.answer].text).not.toMatch(/applicable answer/i);
+      expect(
+        new Set(wrongReasons).size,
+        `Q${question.number}: ${question.prompt}`,
+      ).toBe(3);
+      for (const choice of wrongChoices) {
+        expect(
+          feedback[choice].kind,
+          `Q${question.number} ${choice}: ${question.prompt}`,
+        ).toBe("reviewed");
+        expect(feedback[choice].text).not.toMatch(
+          /applicable answer|alternatives describe|wrong because/i,
+        );
+        reviewedDistractors += 1;
+      }
+    }
+
+    expect(reviewedDistractors).toBe(60);
+    const question14 = variant!.questions.find(
+      (question) => question.number === 14,
+    );
+    expect(question14?.prompt).toContain("mounting-height band");
+    expect(buildOptionFeedback(question14!).A.text).toContain(
+      "above the 1200 mm upper reach point",
+    );
+    expect(buildOptionFeedback(question14!).D.text).toContain(
+      "practical reach range",
+    );
+  });
+
   it("attaches official or manufacturer source URLs to every reviewed question", () => {
     const sourcedSets = CURATED_RATIONALE_SETS.filter(
       (entry): entry is typeof entry & { sourceUrls: readonly string[] } =>
         "sourceUrls" in entry && Array.isArray(entry.sourceUrls),
     );
 
-    expect(sourcedSets).toHaveLength(4812);
+    expect(sourcedSets).toHaveLength(4832);
     for (const entry of sourcedSets) {
       expect(entry.sourceUrls.length).toBeGreaterThan(0);
       for (const sourceUrl of entry.sourceUrls) {

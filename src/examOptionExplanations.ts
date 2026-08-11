@@ -4,6 +4,7 @@ import { buildingRegulationsQ01To40 } from "./examRationales/buildingRegulations
 import { buildingRegulationsQ41To80 } from "./examRationales/buildingRegulationsQ41To80";
 import { buildingRegulationsQ81To120 } from "./examRationales/buildingRegulationsQ81To120";
 import { buildingRegulationsQ121To140 } from "./examRationales/buildingRegulationsQ121To140";
+import { buildingRegulationsQ141To160 } from "./examRationales/buildingRegulationsQ141To160";
 import { ecsHealthSafety } from "./examRationales/ecsHealthSafety";
 import { eighteenthEditionQ29716To29718 } from "./examRationales/eighteenthEditionQ29716To29718";
 import { eighteenthEditionQ29719To29721 } from "./examRationales/eighteenthEditionQ29719To29721";
@@ -266,6 +267,7 @@ export const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
   ...buildingRegulationsQ41To80,
   ...buildingRegulationsQ81To120,
   ...buildingRegulationsQ121To140,
+  ...buildingRegulationsQ141To160,
   ...ecsHealthSafety,
   ...eighteenthEditionQ29703To29706,
   ...eighteenthEditionQ29707To29710,

@@ -6635,6 +6635,29 @@ body[data-page="exams"] .exam-actions-menu button:disabled{
   cursor: wait;
 }
 
+body[data-page="exams"] .exam-actions-menu-separator{
+  height: 1px;
+  margin: 6px 8px;
+  background: var(--ex-hair);
+}
+
+body[data-page="exams"] .exam-actions-menu .exam-actions-reset{
+  color: var(--ex-bad);
+}
+
+body[data-page="exams"] .exam-actions-menu .exam-actions-reset:hover,
+body[data-page="exams"] .exam-actions-menu .exam-actions-reset:focus-visible{
+  background: color-mix(in srgb, var(--ex-bad) 10%, transparent);
+}
+
+body[data-page="exams"] .exam-actions-menu .exam-actions-reset:disabled{
+  cursor: not-allowed;
+}
+
+body[data-page="exams"] .exam-actions-menu .exam-actions-reset .exam-actions-menu-icon{
+  color: currentColor;
+}
+
 body[data-page="exams"] .exam-actions-menu button > span:nth-child(2){
   display: grid;
   gap: 3px;
@@ -6671,6 +6694,74 @@ body[data-page="exams"] .exam-export-extension{
   color: var(--ex-brass);
   font-family: var(--ex-mono);
   font-size: 0.74rem;
+}
+
+body[data-page="exams"] .exam-reset-backdrop{
+  z-index: 80;
+}
+
+body[data-page="exams"] .exam-reset-dialog{
+  width: min(430px, 100%);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  padding: 22px;
+  border-color: color-mix(in srgb, var(--ex-bad) 36%, var(--ex-hair));
+  background: var(--ex-overlay);
+}
+
+body[data-page="exams"] .exam-reset-dialog-icon{
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ex-bad) 12%, transparent);
+  color: var(--ex-bad);
+}
+
+body[data-page="exams"] .exam-reset-dialog-copy{
+  display: grid;
+  gap: 8px;
+}
+
+body[data-page="exams"] .exam-reset-dialog-copy h2{
+  color: var(--ex-heading);
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+body[data-page="exams"] .exam-reset-dialog-copy p{
+  color: var(--ex-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+body[data-page="exams"] .exam-reset-dialog-actions{
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+body[data-page="exams"] .exam-reset-confirm-button{
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--ex-bad);
+  border-radius: 9px;
+  background: var(--ex-bad);
+  color: #fff;
+  font-family: var(--ex-ui);
+  font-weight: 750;
+  cursor: pointer;
+}
+
+body[data-page="exams"] .exam-reset-confirm-button:hover,
+body[data-page="exams"] .exam-reset-confirm-button:focus-visible{
+  outline: none;
+  filter: brightness(1.08);
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */

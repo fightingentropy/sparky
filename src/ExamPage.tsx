@@ -32,6 +32,7 @@ import {
   getExamExportFilename
 } from "./examExport";
 import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
+import { useFocusTrap } from "./useFocusTrap";
 import {
   EXAM_PROGRESS_STORAGE_PREFIX,
   EXAM_UPDATED_STORAGE_PREFIX
@@ -195,6 +196,8 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   const testMenuRef = useRef<HTMLDivElement>(null);
   const [examActionsMenuOpen, setExamActionsMenuOpen] = useState(false);
   const examActionsMenuRef = useRef<HTMLDivElement>(null);
+  const [resetConfirmationOpen, setResetConfirmationOpen] = useState(false);
+  const resetDialogRef = useFocusTrap<HTMLDivElement>(resetConfirmationOpen);
 
   useEffect(() => {
     clearStaleExamProgress();
@@ -269,6 +272,19 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
     };
   }, [examActionsMenuOpen]);
 
+  useEffect(() => {
+    if (!resetConfirmationOpen) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setResetConfirmationOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [resetConfirmationOpen]);
+
   const [selectedExamId, setSelectedExamId] = usePersistedState<string>(
     "exam-selected",
     DEFAULT_EXAM_ID,
@@ -335,6 +351,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   const [viewMode, setViewMode] = useState<ExamViewMode>("focus");
   const [focusQuestionIndex, setFocusQuestionIndex] = useState(0);
   const [flaggedQuestionNumbers, setFlaggedQuestionNumbers] = useState<Set<number>>(() => new Set());
+  const [attemptRevision, setAttemptRevision] = useState(0);
   const examCopyTimeoutRef = useRef<number | null>(null);
   const examExportTimeoutRef = useRef<number | null>(null);
   // Marks each category complete once every one of its tests has been submitted,
@@ -358,6 +375,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
     setExamInfoOpen(false);
     setTestMenuOpen(false);
     setExamActionsMenuOpen(false);
+    setResetConfirmationOpen(false);
     setExamCopyState("idle");
     setExamExportState("idle");
     setExamExportMessage("Export full exam");
@@ -527,6 +545,9 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   );
   const firstUnansweredIndex = questions.findIndex((question) => !(question.number in answers));
   const canSubmit = Boolean(exam) && total > 0 && answeredCount === total;
+  const canResetCurrentTest =
+    Boolean(exam) &&
+    (submitted || Object.keys(answers).length > 0 || flaggedQuestionNumbers.size > 0);
   const nextQuestionIndex =
     focusQuestionIndex < total - 1 ? focusQuestionIndex + 1 : firstUnansweredIndex;
 
@@ -649,11 +670,23 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   // Clears just the current test so it can be retaken; other tests stay saved.
   function resetCurrentTest() {
     if (!exam) return;
+    setResetConfirmationOpen(false);
     setRetryQuestionNumbers(null);
+    setReviewFilter("all");
+    setViewMode("focus");
+    setFocusQuestionIndex(0);
+    setFlaggedQuestionNumbers(new Set());
+    setAttemptRevision((revision) => revision + 1);
     const nextProgress = writeSlot(progress, variantIndex, { answers: {}, submitted: false });
     setProgress(nextProgress);
     syncToServer({ current: variantIndex, variant: { index: variantIndex, answers: {}, submitted: false } });
     scrollToSafely(window, { top: 0 });
+  }
+
+  function requestResetCurrentTest() {
+    if (!canResetCurrentTest) return;
+    setExamActionsMenuOpen(false);
+    setResetConfirmationOpen(true);
   }
 
   function switchToTest(index: number) {
@@ -862,6 +895,25 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
               <small>Print-ready with page numbers</small>
             </span>
             <span className="exam-export-extension">.pdf</span>
+          </button>
+          <div className="exam-actions-menu-separator" role="separator" />
+          <button
+            type="button"
+            role="menuitem"
+            className="exam-actions-reset"
+            onClick={requestResetCurrentTest}
+            disabled={!canResetCurrentTest}
+          >
+            <span className="exam-actions-menu-icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 3-6.7" />
+                <path d="M3 4v6h6" />
+              </svg>
+            </span>
+            <span>
+              <strong>Reset test</strong>
+              <small>{canResetCurrentTest ? "Clear answers and result for this test" : "No answers to reset"}</small>
+            </span>
           </button>
         </div>
       ) : null}
@@ -1148,7 +1200,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
           <div className="exam-question-list">
             {displayQuestions.map((question) => (
               <QuestionCard
-                key={question.number}
+                key={`${selectedExamEntry.id}-${variantIndex}-${attemptRevision}-${question.number}`}
                 question={question}
                 selected={answers[question.number]}
                 submitted={submitted}
@@ -1248,7 +1300,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
                 >
                   Retry missed
                 </button>
-                <button type="button" className="ghost-button" onClick={resetCurrentTest}>
+                <button type="button" className="ghost-button" onClick={requestResetCurrentTest}>
                   Reset test
                 </button>
                 {variantCount > 1 ? (
@@ -1261,6 +1313,41 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
           )}
         </footer>
       </div>
+      {resetConfirmationOpen ? (
+        <div className="modal-backdrop exam-reset-backdrop" onClick={() => setResetConfirmationOpen(false)}>
+          <div
+            ref={resetDialogRef}
+            className="modal-shell exam-reset-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="exam-reset-title"
+            aria-describedby="exam-reset-description"
+            tabIndex={-1}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="exam-reset-dialog-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 3-6.7" />
+                <path d="M3 4v6h6" />
+              </svg>
+            </div>
+            <div className="exam-reset-dialog-copy">
+              <h2 id="exam-reset-title">Reset Test {variantIndex + 1}?</h2>
+              <p id="exam-reset-description">
+                All answers, flags and the result for this test will be removed. Your other tests stay saved.
+              </p>
+            </div>
+            <div className="exam-reset-dialog-actions">
+              <button type="button" className="ghost-button" onClick={() => setResetConfirmationOpen(false)}>
+                Cancel
+              </button>
+              <button type="button" className="exam-reset-confirm-button" onClick={resetCurrentTest}>
+                Reset test
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
