@@ -59,12 +59,10 @@ import { useAuth } from "./AuthContext";
 import { AuthModal } from "./AuthModal";
 import { SettingsPage } from "./SettingsPage";
 import { AccountAvatar } from "./AccountAvatar";
-import { AppBackground } from "./AppBackground";
 import {
   NAVIGATION_ITEMS,
   NAVIGATION_VISIBILITY_STORAGE_KEY,
   isNavigationPageIdArray,
-  preferredLandingPage,
   visibleNavigationItems,
   type NavigationPageId
 } from "./navigationPreferences";
@@ -103,7 +101,7 @@ function isColorTheme(value: unknown): value is ColorTheme {
   return value === "dark" || value === "light";
 }
 
-const DEFAULT_PAGE: NavigationPageId = "home";
+const DEFAULT_PAGE: NavigationPageId = "exams";
 
 const PAGE_NAV_ITEMS: { id: PageId; label: string }[] = [
   ...NAVIGATION_ITEMS,
@@ -119,10 +117,25 @@ const PRIMARY_NAV_ITEMS = NAVIGATION_ITEMS;
 // page, which has its own fixed bottom action bar.
 const MOBILE_TAB_ITEMS: { id: NavigationPageId; label: string; icon: ReactNode }[] = [
   {
-    id: "home",
-    label: "Tools",
+    id: "exams",
+    label: "Exams",
     icon: (
-      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+      <>
+        <rect width="8" height="4" x="8" y="2" rx="1" />
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        <path d="m9 14 2 2 4-4" />
+      </>
+    )
+  },
+  {
+    id: "learn",
+    label: "Learn",
+    icon: (
+      <>
+        <path d="M22 10 12 5 2 10l10 5z" />
+        <path d="M6 12v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4" />
+        <path d="M22 10v5" />
+      </>
     )
   },
   {
@@ -139,25 +152,10 @@ const MOBILE_TAB_ITEMS: { id: NavigationPageId; label: string; icon: ReactNode }
     )
   },
   {
-    id: "learn",
-    label: "Learn",
+    id: "home",
+    label: "Tools",
     icon: (
-      <>
-        <path d="M22 10 12 5 2 10l10 5z" />
-        <path d="M6 12v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4" />
-        <path d="M22 10v5" />
-      </>
-    )
-  },
-  {
-    id: "exams",
-    label: "Exams",
-    icon: (
-      <>
-        <rect width="8" height="4" x="8" y="2" rx="1" />
-        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-        <path d="m9 14 2 2 4-4" />
-      </>
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
     )
   }
 ];
@@ -414,9 +412,10 @@ function PresetButtons({
 
 function getPageFromLocation(): PageId {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (path === "/" || path === "/exams") return "exams";
+  if (path === "/tools") return "home";
   if (path === "/notes" || path === "/cheatsheet") return "cheatsheet";
   if (path === "/learn" || path === "/guides") return "learn";
-  if (path === "/exams") return "exams";
   if (path === "/tutorials") return "tutorials";
   if (path === "/interactive") return "interactive";
   if (path === "/settings") return "settings";
@@ -426,13 +425,13 @@ function getPageFromLocation(): PageId {
 function getPageHref(page: PageId): string {
   switch (page) {
     case "home":
-      return "/";
+      return "/tools";
     case "cheatsheet":
       return "/notes";
     case "learn":
       return "/learn";
     case "exams":
-      return "/exams";
+      return "/";
     case "tutorials":
       return "/tutorials";
     case "interactive":
@@ -478,7 +477,7 @@ export default function App() {
     document.documentElement.dataset.theme = colorTheme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute(
       "content",
-      colorTheme === "light" ? "#f6f9fc" : "#16130f"
+      colorTheme === "light" ? "#f5f5f2" : "#111212"
     );
   }, [colorTheme]);
 
@@ -495,22 +494,7 @@ export default function App() {
     () => MOBILE_TAB_ITEMS.filter((item) => visibleNavigationPageIdSet.has(item.id)),
     [visibleNavigationPageIdSet]
   );
-  const landingPage = visiblePrimaryNavItems[0].id;
-
-  const [page, setPage] = useState<PageId>(() => {
-    const requestedPage = getPageFromLocation();
-    if (requestedPage === DEFAULT_PAGE && !visibleNavigationPageIdSet.has(DEFAULT_PAGE)) {
-      return preferredLandingPage(hiddenNavigationPageIds);
-    }
-    return requestedPage;
-  });
-  const initialLandingRedirectedRef = useRef(false);
-  useEffect(() => {
-    if (initialLandingRedirectedRef.current) return;
-    initialLandingRedirectedRef.current = true;
-    if (getPageFromLocation() !== DEFAULT_PAGE || page === DEFAULT_PAGE) return;
-    window.history.replaceState(null, "", getPageHref(page));
-  }, [page]);
+  const [page, setPage] = useState<PageId>(getPageFromLocation);
   // Track which lazy-loaded pages we have ever activated. We only mount each
   // lazy page after its first activation so its chunk isn't downloaded for
   // users who never visit it. After the first visit it stays mounted so its
@@ -1011,11 +995,18 @@ export default function App() {
   const paletteBaseItems = useMemo<PaletteItem[]>(() => {
     return [
       {
-        title: "Tools",
-        subtitle: "Open the calculator dashboard.",
+        title: "Exams",
+        subtitle: "Interactive mock exams.",
         tag: "Page",
-        keywords: "home dashboard start tools calculators",
-        action: () => navigateTo("home")
+        keywords: "home exam mock quiz questions nvq level 3 city guilds",
+        action: () => navigateTo("exams")
+      },
+      {
+        title: "Learn",
+        subtitle: "Course routes, assessment checklists, and category guides.",
+        tag: "Page",
+        keywords: "learn guides course route pathway assessment checklist qualification 2391 2396 pat am2 ecs part p 18th edition",
+        action: () => navigateTo("learn")
       },
       {
         title: "Notes",
@@ -1025,18 +1016,11 @@ export default function App() {
         action: () => navigateTo("cheatsheet")
       },
       {
-        title: "Exams",
-        subtitle: "Interactive mock exams.",
+        title: "Tools",
+        subtitle: "Open the calculator dashboard.",
         tag: "Page",
-        keywords: "exam mock quiz questions nvq level 3 city guilds",
-        action: () => navigateTo("exams")
-      },
-      {
-        title: "Learn",
-        subtitle: "Course routes, assessment checklists, and category guides.",
-        tag: "Page",
-        keywords: "learn guides course route pathway assessment checklist qualification 2391 2396 pat am2 ecs part p 18th edition",
-        action: () => navigateTo("learn")
+        keywords: "tools calculators dashboard",
+        action: () => navigateTo("home")
       },
       {
         title: "Tutorials",
@@ -1365,16 +1349,15 @@ export default function App() {
 
   return (
     <>
-      <AppBackground />
       <div className="site-shell">
         <header className="topbar">
         <a
           className="brand"
-          href={getPageHref(landingPage)}
-          aria-label={`Go to ${visiblePrimaryNavItems[0].label}`}
+          href={getPageHref(DEFAULT_PAGE)}
+          aria-label="Go to Exams"
           onClick={(event) => {
             event.preventDefault();
-            navigateTo(landingPage);
+            navigateTo(DEFAULT_PAGE);
           }}
         >
           <svg

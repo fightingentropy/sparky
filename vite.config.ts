@@ -25,12 +25,12 @@ export default defineConfig({
       manifest: {
         name: "Sparky",
         short_name: "Sparky",
-        description: "Offline electrician toolkit with quick calculators and cheat sheets.",
+        description: "Electrical practice exams, learning guides, notes, and site tools.",
         start_url: "/",
         scope: "/",
         display: "standalone",
-        background_color: "#1a1612",
-        theme_color: "#13100d",
+        background_color: "#111212",
+        theme_color: "#111212",
         icons: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },

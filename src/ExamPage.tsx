@@ -923,8 +923,6 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
 
   return (
     <section className={`page page-exams ${isActive ? "is-active" : ""}`}>
-      {/* The triangle-mesh backdrop now lives at the app root (.app-bg in App.tsx)
-          so it spans every page; the exam page no longer renders its own. */}
       <div className="exam-shell">
         <header className="exam-hero">
           <div className="exam-hero-text">
