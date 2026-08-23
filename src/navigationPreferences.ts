@@ -1,10 +1,10 @@
 export const NAVIGATION_VISIBILITY_STORAGE_KEY = "pref-hidden-navigation-page-ids-v1";
 
 export const NAVIGATION_ITEMS = [
-  { id: "home", label: "Tools" },
-  { id: "cheatsheet", label: "Notes" },
+  { id: "exams", label: "Exams" },
   { id: "learn", label: "Learn" },
-  { id: "exams", label: "Exams" }
+  { id: "cheatsheet", label: "Notes" },
+  { id: "home", label: "Tools" }
 ] as const;
 
 export type NavigationPageId = (typeof NAVIGATION_ITEMS)[number]["id"];

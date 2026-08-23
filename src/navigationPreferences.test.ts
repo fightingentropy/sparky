@@ -6,6 +6,16 @@ import {
 } from "./navigationPreferences";
 
 describe("navigation visibility preferences", () => {
+  it("puts Exams first in the primary navigation", () => {
+    expect(visibleNavigationItems([]).map((item) => item.id)).toEqual([
+      "exams",
+      "learn",
+      "cheatsheet",
+      "home"
+    ]);
+    expect(preferredLandingPage([])).toBe("exams");
+  });
+
   it("accepts unique known navigation page ids only", () => {
     expect(isNavigationPageIdArray(["home", "cheatsheet", "learn"])).toBe(true);
     expect(isNavigationPageIdArray(["home", "home"])).toBe(false);
@@ -22,6 +32,6 @@ describe("navigation visibility preferences", () => {
   it("keeps a safe destination if stored preferences are externally corrupted", () => {
     const allHidden = ["home", "cheatsheet", "learn", "exams"] as const;
 
-    expect(visibleNavigationItems(allHidden).map((item) => item.id)).toEqual(["home"]);
+    expect(visibleNavigationItems(allHidden).map((item) => item.id)).toEqual(["exams"]);
   });
 });
