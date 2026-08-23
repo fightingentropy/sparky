@@ -17,8 +17,6 @@
 .content-notice {
   border: 1px solid var(--border);
   background: var(--panel-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 
 .dashboard-kicker {
@@ -368,9 +366,7 @@ html {
   background-color: var(--bg);
 }
 
-/* The page background is a flat dark base; the grid backdrop is the fixed SVG
-   mesh layer (.app-bg) rendered at the app root. #root is left transparent so
-   the grid shows through the gutters and behind the floating topbar. */
+/* The page background is a flat, neutral base. */
 body {
   margin: 0;
   background-color: var(--bg);
@@ -382,9 +378,7 @@ body {
   font-optical-sizing: auto;
 }
 
-#root {
-  background: transparent;
-}
+#root { background: var(--bg); }
 
 a,
 button,
@@ -2154,8 +2148,6 @@ input:disabled {
   place-items: center;
   padding: 20px;
   background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(14px) saturate(1.05);
-  -webkit-backdrop-filter: blur(14px) saturate(1.05);
 }
 
 .modal-shell {
@@ -2430,7 +2422,6 @@ input:disabled {
     border-bottom: 1px solid var(--border);
     border-radius: 0;
     background: rgba(9, 7, 5, 0.94);
-    backdrop-filter: none;
   }
 
   .brand {
@@ -3566,7 +3557,6 @@ body[data-page="interactive"] .ix-3d-wrap {
   justify-content: center;
   z-index: 50;
   padding: 24px;
-  backdrop-filter: blur(2px);
 }
 
 .ix-welcome {
@@ -3887,21 +3877,6 @@ body[data-page="interactive"] .ix-3d-wrap {
   padding-top: 0;
 }
 
-/* App-wide decorative background: triangle mesh behind all pages. */
-.app-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.app-bg-mesh {
-  width: 100%;
-  height: 100%;
-  display: block;
-  color: var(--grid-line);
-}
-
 .topbar {
   top: 0;
   min-height: 64px;
@@ -3914,8 +3889,6 @@ body[data-page="interactive"] .ix-3d-wrap {
   border-color: var(--border);
   border-radius: 0;
   background: var(--topbar-bg);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
   box-shadow: none;
 }
 
@@ -4458,7 +4431,7 @@ select:focus,
       calc(env(safe-area-inset-right) + 12px)
       10px
       calc(env(safe-area-inset-left) + 12px);
-    /* Inherit the frosted warm-dark fill from the global .topbar rule. */
+    /* Inherit the flat fill from the global .topbar rule. */
   }
 
   .page.is-active:not(.page-home) {
@@ -4522,7 +4495,7 @@ select:focus,
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Topbar (desktop): a full-width frosted flat bar with the search centered and
+   Topbar (desktop): a full-width flat bar with the search centered and
    the page navigation tucked into a menu under the profile avatar (right). The
    floating rounded bar + drop shadow was the pre-redesign treatment; the
    warm-dark retheme uses the flat sticky bar from the global .topbar rule on
@@ -5093,8 +5066,7 @@ body[data-page="exams"]{
   --ex-bad-line: rgba(207, 139, 111, 0.42);
   --ex-ui: "Hanken Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --ex-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  /* Dark base; the grid backdrop is the app-wide fixed DOM layer (.app-bg,
-     rendered at the app root). Matches the global body bg. */
+  /* Dark base shared with the rest of the app. */
   background-color: var(--ex-bg);
 }
 
@@ -5107,8 +5079,6 @@ body[data-page="exams"] .topbar{
   align-items: center;
   border-bottom: 1px solid var(--ex-hair);
   background: var(--ex-bar);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
 }
 
 /* Brass logo tile. */
@@ -5210,7 +5180,7 @@ body[data-page="exams"] .page-exams.is-active{
   color: var(--ex-text);
 }
 
-/* Content sits above the fixed mesh. */
+/* Main exam content. */
 body[data-page="exams"] .page-exams .exam-shell{
   position: relative;
   z-index: 1;
@@ -5738,11 +5708,7 @@ body[data-page="exams"] .exam-question{
   padding: 22px 24px;
   border: 1px solid var(--ex-hair);
   border-radius: 18px;
-  /* Frosted panel: a translucent warm fill plus a backdrop blur so the triangle
-     mesh behind the card is softened for legibility. */
   background: var(--ex-panel);
-  backdrop-filter: blur(10px) saturate(1.05);
-  -webkit-backdrop-filter: blur(10px) saturate(1.05);
   box-shadow: none;
   display: grid;
   gap: 16px;
@@ -6480,8 +6446,6 @@ body[data-page="exams"] .exam-footer{
   border-top: 1px solid var(--ex-hair);
   border-radius: 0;
   background: var(--ex-bar);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
   box-shadow: none;
 }
 
@@ -6604,8 +6568,6 @@ body[data-page="exams"] .exam-actions-menu{
   border-radius: 12px;
   background: var(--ex-overlay);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
 }
 
 body[data-page="exams"] .exam-actions-menu button{
@@ -7065,8 +7027,6 @@ body[data-page="exams"] .exam-q-topic{
       calc(env(safe-area-inset-left) + 8px);
     transform: translateY(-100%);
     background: var(--mobile-bar-bg);
-    backdrop-filter: blur(16px) saturate(1.3);
-    -webkit-backdrop-filter: blur(16px) saturate(1.3);
     border-top: 1px solid var(--border);
   }
 
@@ -7740,8 +7700,6 @@ body[data-page="exams"] .exam-option-control:active:not(:disabled) {
   .modal-shell,
   .auth-modal,
   body[data-page="exams"] .exam-footer {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
     background: var(--surface) !important;
   }
 }
@@ -7760,5 +7718,499 @@ body[data-page="exams"] .exam-option-control:active:not(:disabled) {
   input,
   select {
     border-color: var(--border-strong);
+  }
+}
+
+/* ── Minimal web refresh ──────────────────────────────────────────────────
+   A quiet, opaque interface: neutral surfaces, one safety-amber accent,
+   compact type, and clear borders. Decorative mesh, translucent panels,
+   backdrop blur, glows and oversized display type are intentionally absent. */
+
+:root {
+  --bg: #111212;
+  --surface: #181a1b;
+  --surface-alt: #202224;
+  --surface-soft: #272a2c;
+  --border: #2b2e30;
+  --border-strong: #414548;
+  --line: #242729;
+  --fill: #202224;
+  --text: #e8e8e5;
+  --text-strong: #f7f7f4;
+  --muted: #8f9497;
+  --muted-strong: #b4b7b8;
+  --text-muted: #8f9497;
+  --accent: #e2a63b;
+  --accent-soft: #2c261a;
+  --accent-strong: #f0b64c;
+  --accent-muted: #8d6a2d;
+  --accent-line: #8d6a2d;
+  --accent-line-strong: #b18435;
+  --accent-focus: #3a2f1c;
+  --on-accent: #17130b;
+  --danger: #e08067;
+  --shadow-card: none;
+  --shadow-glow: none;
+  --panel-glass: var(--surface);
+  --topbar-bg: var(--bg);
+  --overlay-bg: var(--surface);
+  --mobile-bar-bg: var(--surface);
+  --grid-line: transparent;
+  --radius-lg: 10px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+}
+
+html[data-theme="light"] {
+  --bg: #f5f5f2;
+  --surface: #ffffff;
+  --surface-alt: #efefeb;
+  --surface-soft: #e7e7e2;
+  --border: #deded8;
+  --border-strong: #bdbdb5;
+  --line: #e7e7e2;
+  --fill: #efefeb;
+  --text: #282a28;
+  --text-strong: #141614;
+  --muted: #777b77;
+  --muted-strong: #555a56;
+  --text-muted: #777b77;
+  --accent: #a75d12;
+  --accent-soft: #f3e7da;
+  --accent-strong: #82460c;
+  --accent-muted: #c49b72;
+  --accent-line: #c49b72;
+  --accent-line-strong: #a75d12;
+  --accent-focus: #ead6c1;
+  --on-accent: #ffffff;
+  --danger: #a64132;
+  --shadow-card: none;
+  --shadow-glow: none;
+  --panel-glass: var(--surface);
+  --topbar-bg: var(--bg);
+  --overlay-bg: var(--surface);
+  --mobile-bar-bg: var(--surface);
+  --grid-line: transparent;
+}
+
+body,
+#root {
+  background: var(--bg);
+}
+
+.site-shell {
+  width: min(1180px, calc(100% - 40px));
+}
+
+.topbar,
+body[data-page="exams"] .topbar {
+  min-height: 58px;
+  margin-bottom: 28px;
+  padding: 0 max(20px, calc((100vw - 1180px) / 2 + 20px));
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  box-shadow: none;
+}
+
+.brand {
+  gap: 8px;
+}
+
+.brand-mark,
+body[data-page="exams"] .brand-mark {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--accent);
+}
+
+.brand:hover .brand-mark,
+body[data-page="exams"] .brand:hover .brand-mark {
+  background: transparent;
+  color: var(--accent-strong);
+}
+
+.brand strong,
+body[data-page="exams"] .brand strong {
+  color: var(--text-strong);
+  font-size: 0.95rem;
+  font-weight: 720;
+}
+
+.desktop-primary-nav {
+  gap: 14px;
+}
+
+.desktop-primary-nav-item {
+  min-height: 58px;
+  padding: 2px 0 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 620;
+}
+
+.desktop-primary-nav-item:hover,
+.desktop-primary-nav-item:focus-visible {
+  background: transparent;
+  color: var(--text);
+}
+
+.desktop-primary-nav-item.is-active {
+  border-bottom-color: var(--accent);
+  background: transparent;
+  color: var(--text-strong);
+}
+
+.search-field,
+body[data-page="exams"] .search-field {
+  min-height: 36px;
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.search-field:hover,
+body[data-page="exams"] .search-field:hover {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
+.search-field:focus-visible,
+body[data-page="exams"] .search-field:focus-visible {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.search-hint,
+kbd,
+body[data-page="exams"] .search-hint {
+  min-width: 30px;
+  min-height: 19px;
+  border-color: var(--border);
+  border-radius: 4px;
+  background: var(--surface-alt);
+  box-shadow: none;
+}
+
+.topbar-icon-button,
+.topbar-account-btn,
+body[data-page="exams"] .topbar-icon-button,
+body[data-page="exams"] .topbar-account-btn {
+  border-color: var(--border);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.topbar-icon-button:hover,
+.topbar-account-btn:hover,
+body[data-page="exams"] .topbar-icon-button:hover,
+body[data-page="exams"] .topbar-account-btn:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-alt);
+  color: var(--text);
+}
+
+.nav-menu,
+.modal-shell,
+.auth-modal,
+.tool-tooltip,
+.exam-test-menu,
+body[data-page="exams"] .exam-tooltip,
+body[data-page="exams"] .exam-title-menu,
+body[data-page="exams"] .exam-test-menu,
+body[data-page="exams"] .exam-actions-menu {
+  border-color: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.nav-menu-item.is-active {
+  background: var(--accent-soft);
+  color: var(--text-strong);
+}
+
+.page-header h1,
+.page-header h2,
+.notes-header h1 {
+  max-width: 760px;
+  color: var(--text-strong);
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-weight: 720;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+
+.page-copy {
+  color: var(--muted);
+}
+
+.tool-library,
+.content-notice,
+.tool-panel,
+.sheet-card,
+.learning-card,
+.tutorial-card,
+.exam-review-tools,
+.exam-results-banner,
+.exam-results-card,
+.containment-card,
+.result-main,
+.mini-metrics > div,
+.reference-table-scroll,
+.search-result,
+.palette-result,
+.help-row,
+.ix-tabs,
+.ix-3d-wrap,
+.ix-palette,
+.ix-canvas,
+.ix-info-block,
+.ix-status,
+.ix-welcome,
+.settings-section {
+  border-color: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.tool-library {
+  padding: 18px;
+}
+
+.tool-library-item,
+.learning-route-strip span,
+.learning-route-strip li,
+.learning-fact,
+.reference-table th,
+.reference-table td,
+.search-result,
+.palette-result,
+.help-row,
+.history-entry,
+.ix-palette-item,
+.ix-readout > div,
+.formula-content {
+  border-color: var(--border);
+  background: var(--surface-alt);
+  box-shadow: none;
+}
+
+.tool-library-item {
+  border-radius: var(--radius-md);
+}
+
+.tool-library-item:hover,
+.tool-library-item:focus-visible,
+.tool-library-item.is-active {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.field input:not([type="checkbox"]):not([type="radio"]),
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+.ix-save-input,
+.ix-save-select,
+.ix-field input,
+.auth-field input,
+.unit-select,
+.suffix {
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  box-shadow: none;
+}
+
+.field input:not([type="checkbox"]):not([type="radio"]):hover,
+input:not([type="checkbox"]):not([type="radio"]):hover,
+select:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-alt);
+}
+
+.field input:not([type="checkbox"]):not([type="radio"]):focus,
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus {
+  border-color: var(--accent);
+  background: var(--surface-alt);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.ghost-button,
+.segment,
+.switch-chip,
+.preset-button,
+.sheet-practice-btn,
+.learning-filter-btn,
+.exam-review-filter,
+.ix-tab {
+  border-radius: var(--radius-md);
+}
+
+body[data-page="exams"],
+html[data-theme="light"] body[data-page="exams"] {
+  --ex-bg: var(--bg);
+  --ex-text: var(--text);
+  --ex-heading: var(--text-strong);
+  --ex-muted: var(--muted);
+  --ex-faint: var(--muted);
+  --ex-brass: var(--accent);
+  --ex-brass-hover: var(--accent-strong);
+  --ex-hair: var(--border);
+  --ex-hair-soft: var(--surface-alt);
+  --ex-surface: var(--surface);
+  --ex-surface-2: var(--surface-alt);
+  --ex-brass-tint: var(--accent-soft);
+  --ex-brass-line: var(--accent-line);
+  --ex-on-accent: var(--on-accent);
+  --ex-overlay: var(--surface);
+  --ex-panel: var(--surface);
+  --ex-bar: var(--bg);
+  --ex-good: #4f8a67;
+  --ex-good-tint: #e7f1eb;
+  --ex-good-line: #8db29d;
+  --ex-bad: var(--danger);
+  --ex-bad-tint: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  --ex-bad-line: color-mix(in srgb, var(--danger) 55%, var(--border));
+  background: var(--bg);
+}
+
+body[data-page="exams"] .page-exams .exam-shell {
+  gap: 18px;
+}
+
+body[data-page="exams"] .exam-hero {
+  gap: 18px;
+  padding: 0;
+}
+
+body[data-page="exams"] .exam-hero-text h2,
+body[data-page="exams"] .exam-title-text {
+  font-size: clamp(2rem, 4.6vw, 3.25rem);
+  font-weight: 720;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+
+body[data-page="exams"] .exam-eyebrow {
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+
+body[data-page="exams"] .exam-hero-stats,
+body[data-page="exams"] .exam-question,
+body[data-page="exams"] .exam-explanation,
+body[data-page="exams"] .exam-option-control,
+body[data-page="exams"] .exam-view-switch {
+  border-color: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+body[data-page="exams"] .exam-question {
+  padding: 20px;
+}
+
+body[data-page="exams"] .exam-option-control:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-alt);
+}
+
+body[data-page="exams"] .exam-footer {
+  border-top-color: var(--border);
+  background: var(--bg);
+  box-shadow: none;
+}
+
+body[data-page="exams"] .exam-next-btn,
+body[data-page="exams"] .exam-submit-btn {
+  border-radius: var(--radius-md);
+}
+
+.mobile-tabbar {
+  border-top-color: var(--border);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+@media (max-width: 720px) {
+  .site-shell {
+    width: auto;
+  }
+
+  .topbar,
+  body[data-page="exams"] .topbar {
+    grid-template-columns: auto minmax(68px, 1fr) auto;
+    grid-template-rows: auto;
+    gap: 8px;
+    min-height: 54px;
+    margin-bottom: 16px;
+    padding:
+      max(6px, env(safe-area-inset-top))
+      calc(env(safe-area-inset-right) + 10px)
+      6px
+      calc(env(safe-area-inset-left) + 10px);
+  }
+
+  .topbar > .brand,
+  body[data-page="exams"] .topbar > .brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .topbar > .search-field,
+  body[data-page="exams"] .topbar > .search-field {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+  }
+
+  .topbar > .topbar-actions,
+  body[data-page="exams"] .topbar > .topbar-actions {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .search-hint {
+    display: none;
+  }
+
+  body[data-page="exams"] .exam-question {
+    padding: 16px;
+  }
+
+  body[data-page="exams"] .exam-footer {
+    background: var(--bg);
+  }
+
+  .mobile-tabbar {
+    --mobile-tabbar-h: 52px;
+    gap: 0;
+    padding-top: 4px;
+  }
+
+  .mobile-tab {
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .brand strong {
+    display: none;
+  }
+
+  .search-placeholder {
+    font-size: 0.82rem;
   }
 }
