@@ -1361,7 +1361,7 @@ type QuestionCardProps = {
   onActivate: () => void;
 };
 
-function QuestionCard({
+export function QuestionCard({
   question,
   selected,
   submitted,
@@ -1596,9 +1596,11 @@ function QuestionCard({
           const isWrongPick = submitted && isSelected && letter !== correct;
           const feedback = reveal ? optionFeedback[letter] : undefined;
           const optionExplanation = feedback?.kind === "fallback" ? undefined : feedback?.text;
+          const hasWrongExplanation = Boolean(optionExplanation) && !isAnswer;
           const optionFeedbackId = `exam-option-feedback-${question.number}-${letter}`;
           const classes = [
             "exam-option",
+            hasWrongExplanation ? "has-wrong-explanation" : "",
             isSelected ? "is-selected" : "",
             isAnswer ? "is-answer" : "",
             isWrongPick ? "is-wrong" : "",
@@ -1614,7 +1616,7 @@ function QuestionCard({
                 className="exam-option-control"
                 role="radio"
                 aria-checked={isSelected}
-                aria-describedby={optionExplanation ? optionFeedbackId : undefined}
+                aria-describedby={isAnswer && optionExplanation ? optionFeedbackId : undefined}
                 disabled={submitted}
                 onClick={() => onSelect(letter)}
               >
@@ -1637,12 +1639,28 @@ function QuestionCard({
                   <span className="exam-option-mark exam-option-mark--bad" aria-hidden="true">✕</span>
                 ) : null}
               </button>
-              {optionExplanation ? (
+              {hasWrongExplanation ? (
+                <details className="exam-option-details">
+                  <summary
+                    className="exam-option-explanation-toggle"
+                    aria-label={`Why is option ${letter} wrong for question ${question.number}?`}
+                  >
+                    Why?
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </summary>
+                  <div id={optionFeedbackId} className="exam-option-feedback is-incorrect">
+                    <strong>WRONG:</strong>
+                    <span>{optionExplanation}</span>
+                  </div>
+                </details>
+              ) : isAnswer && optionExplanation ? (
                 <div
                   id={optionFeedbackId}
-                  className={`exam-option-feedback ${letter === correct ? "is-correct" : "is-incorrect"}`}
+                  className="exam-option-feedback is-correct"
                 >
-                  <strong>{letter === correct ? "CORRECT:" : "WRONG:"}</strong>
+                  <strong>CORRECT:</strong>
                   <span>{optionExplanation}</span>
                 </div>
               ) : null}

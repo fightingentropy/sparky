@@ -856,6 +856,7 @@ private struct QuestionCard: View {
             VStack(spacing: 11) {
                 ForEach(ExamChoice.allCases) { choice in
                     ExamOptionCard(
+                        questionID: question.id,
                         choice: choice,
                         text: question.options[choice],
                         imagePath: question.optionImageURLs?[choice],
@@ -887,6 +888,7 @@ private struct QuestionCard: View {
 }
 
 private struct ExamOptionCard: View {
+    let questionID: String
     let choice: ExamChoice
     let text: String
     let imagePath: String?
@@ -896,6 +898,8 @@ private struct ExamOptionCard: View {
     let showsAnswer: Bool
     let feedback: ExamOptionFeedback
     let onSelect: () -> Void
+
+    @State private var explanationExpanded = false
 
     private var accent: Color {
         if showsAnswer && correct { return .sparkySuccess }
@@ -912,65 +916,100 @@ private struct ExamOptionCard: View {
     }
 
     var body: some View {
-        Button(action: onSelect) {
-            VStack(alignment: .leading, spacing: 11) {
-                HStack(alignment: .top, spacing: 12) {
-                    ZStack {
-                        Circle()
-                            .fill(selected || (showsAnswer && correct) ? accent : Color.clear)
-                        Circle().stroke(accent, lineWidth: 1.5)
-                        Text(choice.rawValue)
-                            .font(.caption.bold().monospaced())
-                            .foregroundStyle(selected || (showsAnswer && correct) ? Color.sparkyBackground : Color.sparkyText)
-                    }
-                    .frame(width: 30, height: 30)
+        VStack(alignment: .leading, spacing: 11) {
+            HStack(alignment: .top, spacing: 8) {
+                Button(action: onSelect) {
+                    VStack(alignment: .leading, spacing: 11) {
+                        HStack(alignment: .top, spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(selected || (showsAnswer && correct) ? accent : Color.clear)
+                                Circle().stroke(accent, lineWidth: 1.5)
+                                Text(choice.rawValue)
+                                    .font(.caption.bold().monospaced())
+                                    .foregroundStyle(selected || (showsAnswer && correct) ? Color.sparkyBackground : Color.sparkyText)
+                            }
+                            .frame(width: 30, height: 30)
 
-                    Text(text)
-                        .font(.body)
-                        .foregroundStyle(Color.sparkyText)
+                            Text(text)
+                                .font(.body)
+                                .foregroundStyle(Color.sparkyText)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .multilineTextAlignment(.leading)
+
+                            if showsAnswer && correct {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(Color.sparkySuccess)
+                            } else if submitted && selected {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(Color.sparkyDanger)
+                            }
+                        }
+
+                        if let imagePath {
+                            ExamImageView(path: imagePath, maxHeight: 180)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(submitted)
+                .accessibilityLabel("Option \(choice.rawValue), \(text)")
+                .accessibilityValue(accessibilityValue)
+                .accessibilityAddTraits(selected ? .isSelected : [])
+
+                if showsAnswer && !correct {
+                    Button {
+                        explanationExpanded.toggle()
+                        Haptics.selection()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("Why?")
+                            Image(systemName: explanationExpanded ? "chevron.up" : "chevron.down")
+                        }
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.sparkyMuted)
+                        .fixedSize()
+                        .padding(.horizontal, 4)
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("\(explanationExpanded ? "Hide" : "Show") why option \(choice.rawValue) is wrong")
+                    .accessibilityValue(explanationExpanded ? "Expanded" : "Collapsed")
+                    .accessibilityHint("Does not change your answer")
+                    .accessibilityIdentifier("exam.option.\(choice.rawValue).explanation-toggle")
+                }
+            }
+
+            if showsAnswer && (correct || explanationExpanded) {
+                Divider().overlay(accent.opacity(0.45))
+                HStack(alignment: .top, spacing: 9) {
+                    Image(systemName: correct ? "checkmark.circle" : "info.circle")
+                        .foregroundStyle(accent)
+                    Text(feedback.text)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.sparkyMuted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .multilineTextAlignment(.leading)
-
-                    if showsAnswer && correct {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(Color.sparkySuccess)
-                    } else if submitted && selected {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(Color.sparkyDanger)
-                    }
-                }
-
-                if let imagePath {
-                    ExamImageView(path: imagePath, maxHeight: 180)
-                }
-
-                if showsAnswer {
-                    Divider().overlay(accent.opacity(0.45))
-                    HStack(alignment: .top, spacing: 9) {
-                        Image(systemName: correct ? "checkmark.circle" : "info.circle")
-                            .foregroundStyle(accent)
-                        Text(feedback.text)
-                            .font(.subheadline)
-                            .foregroundStyle(Color.sparkyMuted)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                    }
+                        .accessibilityIdentifier("exam.option.\(choice.rawValue).explanation")
                 }
             }
-            .padding(14)
-            .background(fill)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(accent, lineWidth: selected || (showsAnswer && correct) ? 1.6 : 1)
-            }
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .disabled(submitted)
-        .accessibilityLabel("Option \(choice.rawValue), \(text)")
-        .accessibilityValue(accessibilityValue)
-        .accessibilityAddTraits(selected ? .isSelected : [])
+        .padding(14)
+        .background(fill)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(accent, lineWidth: selected || (showsAnswer && correct) ? 1.6 : 1)
+        }
+        .onChange(of: showsAnswer) { _, isShowing in
+            if !isShowing { explanationExpanded = false }
+        }
+        .onChange(of: questionID) { _, _ in
+            explanationExpanded = false
+        }
     }
 
     private var accessibilityValue: String {

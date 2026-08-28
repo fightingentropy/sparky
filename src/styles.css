@@ -5879,6 +5879,7 @@ body[data-page="exams"] .exam-options{
 }
 
 body[data-page="exams"] .exam-option{
+  position: relative;
   display: grid;
   width: 100%;
   border: 1px solid var(--ex-hair);
@@ -5917,6 +5918,50 @@ body[data-page="exams"] .exam-option-control:disabled{
 body[data-page="exams"] .exam-option-control:focus-visible{
   outline: 2px solid var(--ex-brass);
   outline-offset: -2px;
+}
+
+body[data-page="exams"] .exam-option.has-wrong-explanation .exam-option-control{
+  padding-right: 94px;
+}
+
+body[data-page="exams"] .exam-option-explanation-toggle{
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 68px;
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: 8px;
+  color: var(--ex-muted);
+  font-family: var(--ex-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+  list-style: none;
+  cursor: pointer;
+}
+
+body[data-page="exams"] .exam-option-explanation-toggle::-webkit-details-marker{
+  display: none;
+}
+
+body[data-page="exams"] .exam-option-explanation-toggle:hover,
+body[data-page="exams"] .exam-option-details[open] > summary{
+  background: var(--ex-brass-tint);
+  color: var(--ex-brass);
+}
+
+body[data-page="exams"] .exam-option-explanation-toggle:focus-visible{
+  outline: 2px solid var(--ex-brass);
+  outline-offset: -2px;
+}
+
+body[data-page="exams"] .exam-option-details[open] > summary svg{
+  transform: rotate(180deg);
 }
 
 /* Selected (answering) — brass border + faint brass tint + filled badge.
@@ -7679,6 +7724,15 @@ body[data-page="exams"] .exam-option-control:active:not(:disabled) {
     gap: 10px;
     padding: 12px;
     font-size: 0.92rem;
+  }
+
+  body[data-page="exams"] .exam-option.has-wrong-explanation .exam-option-control {
+    padding-right: 84px;
+  }
+
+  body[data-page="exams"] .exam-option-explanation-toggle {
+    top: 4px;
+    right: 4px;
   }
 
   body[data-page="exams"] .exam-option-feedback {
