@@ -50,7 +50,6 @@ const CHOICES = ["A", "B", "C", "D"] as const;
 const IMPORTED_HOMEWORK_VARIANTS = new Set([
   "fundamental-inspection-testing/fundamental-inspection-testing-homework",
   "initial-verification/initial-verification-homework",
-  "pat-testing/portable-appliance-testing-homework",
   "periodic-inspection/v6",
 ]);
 
@@ -566,7 +565,7 @@ describe("exam option explanations", () => {
         "sourceUrls" in entry && Array.isArray(entry.sourceUrls),
     );
 
-    expect(sourcedSets).toHaveLength(4834);
+    expect(sourcedSets).toHaveLength(4867);
     for (const entry of sourcedSets) {
       expect(entry.sourceUrls.length).toBeGreaterThan(0);
       for (const sourceUrl of entry.sourceUrls) {

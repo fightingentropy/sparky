@@ -2,6 +2,7 @@ import { eighteenthEditionCorrections } from "./examCorrections/eighteenthEditio
 import { eighteenthEditionPart2Corrections } from "./examCorrections/eighteenthEditionPart2";
 import { buildingRegulationsHomeworkCorrections } from "./examCorrections/buildingRegulationsHomework";
 import { ecsHealthSafetyCorrections } from "./examCorrections/ecsHealthSafety";
+import { patTestingHomeworkCorrections } from "./examCorrections/patTestingHomework";
 import { periodicInspectionCorrections } from "./examCorrections/periodicInspection";
 import { periodicInspectionPart2Corrections } from "./examCorrections/periodicInspectionPart2";
 import { periodicInspectionPart3Corrections } from "./examCorrections/periodicInspectionPart3";
@@ -16,6 +17,7 @@ const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
   ...buildingRegulationsHomeworkCorrections,
   ...wiringRegulationsHomeworkCorrections,
   ...ecsHealthSafetyCorrections,
+  ...patTestingHomeworkCorrections,
   ...periodicInspectionCorrections,
   ...periodicInspectionPart2Corrections,
   ...periodicInspectionPart3Corrections,
