@@ -2389,6 +2389,28 @@ const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
   },
   {
     examId: "pat-testing",
+    variantId: "portable-appliance-testing-homework",
+    questionNumber: 6,
+    promptSuffix:
+      "A portable appliance is fitted with a cable 4.5m long and has a protective condor of 1.0mm2. Calculate the resistance of the protective conductor.",
+    correctedPromptSuffix:
+      "A portable appliance has a 4.5 m flexible cable with a 1.0 mm² copper protective conductor. Using the tabulated resistance at 20 °C, calculate the resistance of the protective conductor.",
+    explanation:
+      "The IET flexible-cable resistance table gives 19.5 mΩ/m at 20 °C for a 1.0 mm² flexible copper conductor. Use R = resistance per metre × length: 19.5 mΩ/m × 4.5 m = 87.75 mΩ. To convert milliohms to ohms, divide by 1000: 87.75 ÷ 1000 = 0.08775 Ω. This is a single protective conductor, so use 4.5 m, not twice the cable length. Do not add the separate 0.1 Ω appliance earth-continuity allowance; this calculation is for the cable conductor alone.",
+  },
+  {
+    examId: "pat-testing",
+    variantId: "portable-appliance-testing-homework",
+    questionNumber: 30,
+    promptSuffix:
+      "What is the expected protection conductor resistance of an appliance cable if it has a CSA of 0.75mm squared and is 1.5m long?",
+    correctedPromptSuffix:
+      "An appliance has a 1.5 m flexible cable with a 0.75 mm² copper protective conductor. Using the tabulated resistance at 20 °C, what is the expected resistance of the protective conductor?",
+    explanation:
+      "The IET flexible-cable resistance table gives 26 mΩ/m at 20 °C for a 0.75 mm² flexible copper conductor. Use R = resistance per metre × length: 26 mΩ/m × 1.5 m = 39 mΩ. To convert milliohms to ohms, divide by 1000: 39 ÷ 1000 = 0.039 Ω. Use the single protective conductor length, not an out-and-back loop. The separate 0.1 Ω appliance earth-continuity allowance is not part of the cable conductor's resistance.",
+  },
+  {
+    examId: "pat-testing",
     variantId: "quiz-29742",
     questionNumber: 7,
     promptSuffix:

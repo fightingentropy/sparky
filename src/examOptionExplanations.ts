@@ -33,6 +33,7 @@ import { patTestingTest1 } from "./examRationales/patTestingTest1";
 import { patTestingTest2 } from "./examRationales/patTestingTest2";
 import { patTestingTest3 } from "./examRationales/patTestingTest3";
 import { patTestingTest4 } from "./examRationales/patTestingTest4";
+import { patTestingCalculations } from "./examRationales/patTestingCalculations";
 import { periodicInspectionPart1 } from "./examRationales/periodicInspectionPart1";
 import { periodicInspectionEicrPart1 } from "./examRationales/periodicInspectionEicrPart1";
 import { periodicInspectionEicrPart2 } from "./examRationales/periodicInspectionEicrPart2";
@@ -297,6 +298,7 @@ export const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
   ...patTestingTest2,
   ...patTestingTest3,
   ...patTestingTest4,
+  ...patTestingCalculations,
   ...periodicInspectionPart1,
   ...periodicInspectionEicrPart1,
   ...periodicInspectionEicrPart2,
