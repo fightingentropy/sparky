@@ -11,10 +11,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // Keep an in-progress exam on its current application version. The new
-      // worker activates after the user closes/reloads instead of replacing
-      // content beneath an active session.
-      registerType: "prompt",
+      // Exam answers are persisted as they are selected, so activate a new app
+      // shell as soon as it is installed. Leaving updates in `prompt` mode
+      // without an update prompt can strand an open PWA on an old UI forever.
+      registerType: "autoUpdate",
       includeAssets: [
         "icons/icon.svg",
         "icons/apple-touch-icon.png",

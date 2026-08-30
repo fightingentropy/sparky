@@ -6,6 +6,14 @@ import { contentCacheVersion } from "./content-cache-version";
 const rootDir = resolve(import.meta.dirname, "..");
 const serviceWorkerPath = resolve(rootDir, "dist", "sw.js");
 const serviceWorker = await readFile(serviceWorkerPath, "utf8");
+
+// A prompt-mode worker can remain in `waiting` forever because Sparky has no
+// update-confirmation UI. Require the generated worker to take control so a
+// deployed UI fix cannot be hidden behind an indefinitely stale app shell.
+if (!serviceWorker.includes("self.skipWaiting()") || !serviceWorker.includes(".clientsClaim()")) {
+  throw new Error("dist/sw.js must activate and claim new application builds automatically");
+}
+
 const runtimeRouteStart = serviceWorker.indexOf("cleanupOutdatedCaches");
 if (runtimeRouteStart < 0) {
   throw new Error("Could not find the Workbox runtime route boundary in dist/sw.js");
