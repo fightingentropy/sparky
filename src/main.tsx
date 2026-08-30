@@ -6,21 +6,6 @@ import App from "./App";
 import { claimPreloadRecovery, recoverFromPreloadError } from "./pwaRecovery";
 import "./styles.css";
 
-if ("serviceWorker" in navigator) {
-  let hadController = Boolean(navigator.serviceWorker.controller);
-  let reloadingForServiceWorker = false;
-
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (!hadController) {
-      hadController = true;
-      return;
-    }
-    if (reloadingForServiceWorker) return;
-    reloadingForServiceWorker = true;
-    window.location.reload();
-  });
-}
-
 const activateServiceWorkerUpdate = registerSW({
   immediate: true,
   onRegisteredSW: (_swScriptUrl, registration) => {
@@ -31,10 +16,9 @@ const activateServiceWorkerUpdate = registerSW({
     };
 
     checkForServiceWorkerUpdate();
-    // Poll for a new build every 30 min (not every 60s). The visibilitychange
-    // handler below already catches the common "user came back to the tab"
-    // case, so a tight interval just spends needless network requests and, with
-    // autoUpdate, risks reloading a tab out from under someone mid-exam.
+    // Poll for a new build every 30 min (not every 60s). Answers are persisted
+    // immediately, and autoUpdate reloads the app when a newer shell takes
+    // control. The visibility handler catches the common return-to-app case.
     window.setInterval(checkForServiceWorkerUpdate, 30 * 60 * 1000);
 
     document.addEventListener("visibilitychange", () => {
