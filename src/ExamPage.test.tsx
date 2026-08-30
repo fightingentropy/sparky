@@ -28,6 +28,16 @@ function renderQuestion(submitted: boolean, selected?: ExamChoice, entry = quest
 }
 
 describe("question answer explanations", () => {
+  it("offers a ChatGPT tutoring handoff for the complete question", () => {
+    const markup = renderQuestion(false, "A");
+
+    expect(markup).toContain('href="https://chatgpt.com/?q=');
+    expect(markup).toContain('target="_blank"');
+    expect(markup).toContain('rel="noopener noreferrer"');
+    expect(markup).toContain('aria-label="Ask ChatGPT to explain question 15"');
+    expect(markup).toContain('title="Explain with ChatGPT"');
+  });
+
   it("does not reveal explanations or why controls while answering", () => {
     const markup = renderQuestion(false, "A");
 
