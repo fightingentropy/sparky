@@ -12,7 +12,12 @@ const question: ExamQuestion = {
   explanation: "The stated minimum permitted clearance is 1.0 m."
 };
 
-function renderQuestion(submitted: boolean, selected?: ExamChoice, entry = question) {
+function renderQuestion(
+  submitted: boolean,
+  selected?: ExamChoice,
+  entry = question,
+  showFlagAction = true
+) {
   return renderToStaticMarkup(
     <QuestionCard
       question={entry}
@@ -21,6 +26,7 @@ function renderQuestion(submitted: boolean, selected?: ExamChoice, entry = quest
       onSelect={() => {}}
       flagged={false}
       onToggleFlag={() => {}}
+      showFlagAction={showFlagAction}
       keyboardShortcutActive={false}
       onActivate={() => {}}
     />
@@ -36,6 +42,17 @@ describe("question answer explanations", () => {
     expect(markup).toContain('rel="noopener noreferrer"');
     expect(markup).toContain('aria-label="Ask ChatGPT to explain question 15"');
     expect(markup).toContain('title="Explain with ChatGPT"');
+  });
+
+  it("can hide the review flag without removing the other question actions", () => {
+    const studentMarkup = renderQuestion(false);
+    const adminMarkup = renderQuestion(false, undefined, question, false);
+
+    expect(studentMarkup).toContain('aria-label="Flag question 15 for review"');
+    expect(adminMarkup).not.toContain('aria-label="Flag question 15 for review"');
+    expect(adminMarkup).toContain('aria-label="Preview the answer for question 15.');
+    expect(adminMarkup).toContain('aria-label="Copy question 15 with options"');
+    expect(adminMarkup).toContain('aria-label="Ask ChatGPT to explain question 15"');
   });
 
   it("does not reveal explanations or why controls while answering", () => {

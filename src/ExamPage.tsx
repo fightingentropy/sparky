@@ -26,6 +26,7 @@ import { getExamProgress, saveExamProgress } from "./api";
 import { writeClipboardText } from "./clipboard";
 import { getExamClipboardText, getQuestionClipboardText } from "./examClipboard";
 import { getQuestionChatGPTUrl } from "./chatgptQuestion";
+import { isAdminUser } from "./userAccess";
 import { buildOptionFeedback } from "./examOptionExplanations";
 import {
   downloadExamMarkdown,
@@ -190,7 +191,8 @@ type Props = {
 };
 
 export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const canUseQuestionFlags = !authLoading && !isAdminUser(user);
   const [examMenuOpen, setExamMenuOpen] = useState(false);
   const examMenuRef = useRef<HTMLDivElement>(null);
   const [testMenuOpen, setTestMenuOpen] = useState(false);
@@ -548,7 +550,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   const canSubmit = Boolean(exam) && total > 0 && answeredCount === total;
   const canResetCurrentTest =
     Boolean(exam) &&
-    (submitted || Object.keys(answers).length > 0 || flaggedQuestionNumbers.size > 0);
+    (submitted || Object.keys(answers).length > 0 || (canUseQuestionFlags && flaggedQuestionNumbers.size > 0));
   const nextQuestionIndex =
     focusQuestionIndex < total - 1 ? focusQuestionIndex + 1 : firstUnansweredIndex;
 
@@ -732,6 +734,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   }
 
   function toggleQuestionFlag(questionNumber: number) {
+    if (!canUseQuestionFlags) return;
     setFlaggedQuestionNumbers((current) => {
       const next = new Set(current);
       if (next.has(questionNumber)) next.delete(questionNumber);
@@ -1132,7 +1135,8 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
               const state = questionState(question, answers);
               const answered = state !== "unanswered";
               const current = !submitted && viewMode === "focus" && index === focusQuestionIndex;
-              const flagged = !submitted && flaggedQuestionNumbers.has(question.number);
+              const flagged =
+                canUseQuestionFlags && !submitted && flaggedQuestionNumbers.has(question.number);
               const status = submitted
                 ? state === "wrong" ? "incorrect" : state
                 : answered ? "answered" : "unanswered";
@@ -1204,8 +1208,9 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
                 selected={answers[question.number]}
                 submitted={submitted}
                 onSelect={(choice) => setAnswer(question.number, choice)}
-                flagged={flaggedQuestionNumbers.has(question.number)}
+                flagged={canUseQuestionFlags && flaggedQuestionNumbers.has(question.number)}
                 onToggleFlag={() => toggleQuestionFlag(question.number)}
+                showFlagAction={canUseQuestionFlags}
                 keyboardShortcutActive={
                   !submitted && question.number === questions[focusQuestionIndex]?.number
                 }
@@ -1333,7 +1338,9 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
             <div className="exam-reset-dialog-copy">
               <h2 id="exam-reset-title">Reset Test {variantIndex + 1}?</h2>
               <p id="exam-reset-description">
-                All answers, flags and the result for this test will be removed. Your other tests stay saved.
+                {canUseQuestionFlags
+                  ? "All answers, flags and the result for this test will be removed. Your other tests stay saved."
+                  : "All answers and the result for this test will be removed. Your other tests stay saved."}
               </p>
             </div>
             <div className="exam-reset-dialog-actions">
@@ -1358,6 +1365,7 @@ type QuestionCardProps = {
   onSelect: (choice: ExamChoice) => void;
   flagged: boolean;
   onToggleFlag: () => void;
+  showFlagAction: boolean;
   keyboardShortcutActive: boolean;
   onActivate: () => void;
 };
@@ -1377,6 +1385,7 @@ export function QuestionCard({
   onSelect,
   flagged,
   onToggleFlag,
+  showFlagAction,
   keyboardShortcutActive,
   onActivate
 }: QuestionCardProps) {
@@ -1574,7 +1583,7 @@ export function QuestionCard({
           >
             <ChatGPTIcon />
           </a>
-          {!submitted ? (
+          {!submitted && showFlagAction ? (
             <button
               type="button"
               className={`exam-copy-btn exam-flag-btn${flagged ? " is-active" : ""}`}
