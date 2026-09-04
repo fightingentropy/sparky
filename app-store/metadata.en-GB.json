@@ -1,0 +1,26 @@
+{
+  "locale": "en-GB",
+  "name": "Sparky: Electrical Study",
+  "subtitle": "Exams, guides and site tools",
+  "bundleId": "com.erlinhoxha.sparky",
+  "version": "1.0",
+  "primaryCategory": "EDUCATION",
+  "copyright": "2026 Erlin Hoxha",
+  "supportUrl": "https://electrics.pages.dev/support",
+  "privacyPolicyUrl": "https://electrics.pages.dev/privacy",
+  "marketingUrl": "https://electrics.pages.dev/",
+  "keywords": "electrician,electrical,revision,exam,BS7671,PAT,AM2,inspection,testing,installation,study",
+  "promotionalText": "Build your electrical knowledge with practice questions, answer explanations, study guides and practical site tools. Keep learning offline and track your progress.",
+  "description": "Sparky brings electrical revision and practical tools together in a native app for iPhone and iPad.\n\nPRACTISE AND REVIEW\nWork through 12 electrical subjects, with practice tests, answer explanations and saved progress. Topics include the 18th Edition, Building Regulations, PAT testing, inspection and testing, electrical installation, ECS health and safety, AM2 and special locations.\n\nLEARN AT YOUR PACE\nExplore learning guides, tutorials and searchable reference notes. Save useful notes and work through guided inspection-training activities.\n\nTOOLS FOR THE TASK\nUse site calculators and keep useful calculation history alongside your study materials.\n\nSTUDY OFFLINE\nAccess bundled study content and keep progress on your device. You can study without an account. Sign in with an existing Sparky account to synchronise exam progress with the web app.\n\nMADE FOR IPHONE AND IPAD\nUse native navigation, adjustable text, light and dark appearances, and configurable navigation and exam categories.\n\nSparky is an independent study and calculation aid. It is not an official examination provider, qualification, or substitute for the current regulations and competent professional judgement.",
+  "reviewNotes": "Core study content, calculators and local progress work without signing in. Dismiss the profile sheet to continue without an account. Optional email/password sign-in synchronises exam progress and a private profile with electrics.pages.dev. There are no in-app purchases, ads, social feeds, or public user-generated content. Settings contains direct Privacy policy, Help and support, and Delete account links. Account deletion requires the account email, password and explicit confirmation on the linked secure page. Practice questions are owned by the developer. This is an independent educational app, not an official awarding-body app.",
+  "pending": [
+    "Review login credentials for optional account features",
+    "Age-rating questionnaire and distribution territory selections",
+    "Integrated simulator visual verification and iPhone/iPad screenshots",
+    "Archive using an App Store-supported production toolchain",
+    "Distribution signing, upload and review submission"
+  ],
+  "appleId": "6808803044",
+  "supportEmail": "erlin.hx@gmail.com",
+  "price": "free"
+}
