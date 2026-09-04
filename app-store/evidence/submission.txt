@@ -1,0 +1,9 @@
+App Store Connect receipt observed 2026-09-04 at 23:47 Europe/London
+App: Sparky: Electrical Study
+Apple ID: 6808803044
+Version: 1.0 (2)
+Status: Waiting for Review
+Items Submitted: 1
+Submission ID: 24dae446-9c84-4bff-be4b-6f85667d3a2d
+Submitted By: Erlin Hoxha
+Release: automatically after approval, free, United Kingdom
