@@ -1,0 +1,9 @@
+Test Suite 'Selected tests' started at 2026-09-04 23:35:56.679.
+Test Suite 'SparkyUITests.xctest' started at 2026-09-04 23:35:56.679.
+Test Suite 'ExamFeatureParityUITests' started at 2026-09-04 23:35:56.679.
+Test Case '-[SparkyUITests.ExamFeatureParityUITests testCanRevealAnswerAndResetBeforeSubmitting]' started.
+Test Case '-[SparkyUITests.ExamFeatureParityUITests testCanRevealAnswerAndResetBeforeSubmitting]' passed (18.670 seconds).
+Test Suite 'ExamFeatureParityUITests' passed at 2026-09-04 23:36:15.351.
+Test Suite 'SparkyUITests.xctest' passed at 2026-09-04 23:36:15.351.
+Test Suite 'Selected tests' passed at 2026-09-04 23:36:15.352.
+** TEST EXECUTE SUCCEEDED **
