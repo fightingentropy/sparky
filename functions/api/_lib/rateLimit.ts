@@ -5,6 +5,7 @@ import type { Env } from "./auth";
 // concurrent requests against one bucket can't lose increments. Fails OPEN on
 // any storage error — an infra blip must never lock legitimate users out.
 //
+// Destructive endpoints set failClosed so storage failures deny the request.
 // Returns true if the request is allowed (count within `limit`), false if the
 // bucket is over its limit for the current window.
 export async function rateLimit(
@@ -12,7 +13,8 @@ export async function rateLimit(
   bucket: string,
   limit: number,
   windowMs: number,
-  now: number
+  now: number,
+  failClosed = false
 ): Promise<boolean> {
   try {
     const row = await env.DB.prepare(
@@ -26,7 +28,7 @@ export async function rateLimit(
       .first<{ count: number }>();
     return (row?.count ?? 1) <= limit;
   } catch {
-    return true;
+    return !failClosed;
   }
 }
 

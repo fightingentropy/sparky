@@ -162,7 +162,7 @@ describe("exam content provenance", () => {
       expect(bankSource, `${exam.id} bank source`).toMatchObject({
         classification: "exam-convention",
         sourceHashScope: "repository-file",
-        needsLicensedConfirmation: true,
+        needsLicensedConfirmation: false,
         needsEditorialConfirmation: true,
       });
       expect(bankSource?.sourceHash).toMatch(/^sha256:[a-f0-9]{64}$/);

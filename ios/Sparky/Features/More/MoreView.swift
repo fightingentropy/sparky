@@ -337,6 +337,14 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Account and support") {
+                Link("Privacy policy", destination: URL(string: "https://electrics.pages.dev/privacy")!)
+                Link("Help and support", destination: URL(string: "https://electrics.pages.dev/support")!)
+                Link("Delete account", destination: URL(string: "https://electrics.pages.dev/delete-account")!)
+                    .foregroundStyle(Color.sparkyDanger)
+                    .accessibilityHint("Opens Sparky's secure account deletion page")
+            }
+
             Section("About") {
                 LabeledContent("Version", value: appVersion)
                 Link("Open Sparky on the web", destination: URL(string: "https://electrics.pages.dev")!)
