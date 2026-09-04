@@ -13,6 +13,10 @@ export async function getUserFromRequest(request: Request, env: Env): Promise<Se
   if (!auth?.startsWith("Bearer ")) return null;
   const payload = await verifyJWT(auth.slice(7), env.JWT_SECRET);
   if (!payload || typeof payload.sub !== "string" || typeof payload.email !== "string") return null;
+  // Account deletion immediately invalidates existing sessions, including sync.
+  const account = await env.DB.prepare("SELECT id FROM users WHERE id = ? AND email = ?")
+    .bind(payload.sub, payload.email).first();
+  if (!account) return null;
   return { id: payload.sub, email: payload.email };
 }
 

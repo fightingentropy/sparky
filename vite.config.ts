@@ -65,6 +65,7 @@ export default defineConfig({
           "exam-images/**"
         ],
         navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/(privacy|support|delete-account)(\.html)?\/?$/],
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         runtimeCaching: [

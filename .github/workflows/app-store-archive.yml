@@ -1,0 +1,36 @@
+name: App Store archive
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [release/app-store-1.0]
+
+permissions:
+  contents: read
+
+jobs:
+  archive:
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.10
+      - run: brew install xcodegen
+      - run: bun install --frozen-lockfile
+      - run: bun run check:content
+      - run: bun run ios:project
+      - name: Archive with stable Xcode without signing credentials
+        run: |
+          xcodebuild -version
+          xcodebuild archive -project ios/Sparky.xcodeproj -scheme Sparky -configuration Release -destination 'generic/platform=iOS' -archivePath ios/build/Sparky-AppStore.xcarchive CODE_SIGNING_ALLOWED=NO
+          ditto -c -k --sequesterRsrc --keepParent ios/build/Sparky-AppStore.xcarchive ios/build/Sparky-AppStore.xcarchive.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Sparky-AppStore-unsigned
+          path: ios/build/Sparky-AppStore.xcarchive.zip
+          retention-days: 7
+          if-no-files-found: error

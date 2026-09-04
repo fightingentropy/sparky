@@ -79,10 +79,10 @@ The mandatory local/CI gate validates generated content, lints/tests/builds the 
 bun run check
 ```
 
-### Content provenance and licensing boundary
+### Content ownership and provenance
 
 Every delivered question resolves at least one source record, and every calculator has one. Records include jurisdiction, document identifier, edition/amendment/effective date, classification (`law`, `standard`, `guidance`, or `exam-convention`), section/table locator, provenance profile and content versions, a scoped hash, and explicit licensed/editorial confirmation flags.
 
-Imported question banks remain classified as exam convention because their original publication, licence and edition were not present in the repository. Their SHA-256 values fingerprint the local JSON only. Focused standards records preserve existing section/table citations and hash the citation metadata, not the licensed publication. The generated manifest separately hashes the transformed delivered content.
+The practice questions are owned by Erlin Hoxha, as confirmed on 4 September 2026. Question-bank records are classified as exam convention and do not require question-ownership or licensing confirmation. Their SHA-256 values fingerprint the local JSON only. Focused standards records preserve existing section/table citations and hash the citation metadata, not the referenced publication. The generated manifest separately hashes the transformed delivered content.
 
-This provenance work does not certify all pre-existing study material as licence-cleared: existing cheat sheets include numerical quick-reference material derived from standards. No new licensed standards table was added in this audit. Any record marked `needsLicensedConfirmation` or `needsEditorialConfirmation`, and all pre-existing standards-derived quick references, must be checked against the applicable official edition and licensing position before safety-critical or assessment use.
+Question ownership is separate from technical accuracy: records marked `needsEditorialConfirmation` still require checking against the applicable official edition before safety-critical or assessment use. Licensing flags on third-party standards references and standards-derived quick references concern those publications, not ownership of the practice questions.

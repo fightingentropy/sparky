@@ -12,7 +12,7 @@ import type { Exam, ExamQuestion, ExamSolutionTable } from "./exams/types";
 
 const RECORDED_ON = "2026-08-01";
 const QUESTION_BANK_JURISDICTION =
-  "United Kingdom — question-level jurisdiction is not recorded in the imported bank";
+  "United Kingdom — question-level jurisdiction is not recorded in the question bank";
 const QUESTION_BANK_SECTION =
   "No source section or table recorded; use a linked focused citation where present";
 
@@ -47,25 +47,25 @@ export const EXAM_CONTENT_PROFILES = {
   "18th-edition": examProfile(
     "18th-edition.json",
     "30b7da01456faa734bdb7cb9745298f5eedbf6fa2689891d0d2e1585ec479f19",
-    "Imported Wiring Regulations (18th Edition) practice question bank",
+    "Sparky Wiring Regulations (18th Edition) practice question bank",
     "repository-bank/18th-edition/source-30b7da01456f",
   ),
   "am2-installation-assessment": examProfile(
     "am2-installation-assessment.json",
     "ba49be9984bec005bf211cf062ee34f91c82c7a1ebe7772c6a0dc2dc93c4a0cc",
-    "Imported AM2 / AM2E installation assessment practice question bank",
+    "Sparky AM2 / AM2E installation assessment practice question bank",
     "repository-bank/am2-installation-assessment/source-ba49be9984be",
   ),
   "building-regulations": examProfile(
     "building-regulations.json",
     "c25c4ab91ef2c988bb091719004d22a5c0f74d185f113d33ee2ec6d74f3a20d7",
-    "Imported Building Regulations practice question bank",
+    "Sparky Building Regulations practice question bank",
     "repository-bank/building-regulations/source-c25c4ab91ef2",
   ),
   "ecs-health-safety": examProfile(
     "ecs-health-safety.json",
     "c1ca4663301e133542f4581a31f62cae463eac2e86ba1aeb8c568bab8aff3d02",
-    "Imported ECS Health and Safety practice question bank",
+    "Sparky ECS Health and Safety practice question bank",
     "repository-bank/ecs-health-safety/source-c1ca4663301e",
   ),
   "fundamental-inspection-testing": examProfile(
@@ -83,37 +83,37 @@ export const EXAM_CONTENT_PROFILES = {
   "inspection-design-2396": examProfile(
     "inspection-design-2396.json",
     "b78ce33e82ae4e256f198291dcf061c8c8c152e196e12768ce567f7c19e642aa",
-    "Imported Inspection and Design 2396 practice question bank",
+    "Sparky Inspection and Design 2396 practice question bank",
     "repository-bank/inspection-design-2396/source-b78ce33e82ae",
   ),
   "level-2-electrical-installation": examProfile(
     "level-2-electrical-installation.json",
     "9b195a41da35b8f5ba110b316ebc2b9bbc85548d387ed58bbff0534aa11156fa",
-    "Imported Level 2 Electrical Installation practice question bank",
+    "Sparky Level 2 Electrical Installation practice question bank",
     "repository-bank/level-2-electrical-installation/source-9b195a41da35",
   ),
   "level-3-electrical-installation": examProfile(
     "level-3-electrical-installation.json",
     "8b15beb954022c04dded3d125ffb0be5899f3fb512f26a4e12bf692c065b61b9",
-    "Imported Level 3 Electrical Installation practice question bank",
+    "Sparky Level 3 Electrical Installation practice question bank",
     "repository-bank/level-3-electrical-installation/source-8b15beb95402",
   ),
   "pat-testing": examProfile(
     "pat-testing.json",
     "1cee73b1b8aa551ad2b679805cb3f129a641ac57bbd6faef25badfd8c28f51a1",
-    "Imported PAT Testing practice question bank",
+    "Sparky PAT Testing practice question bank",
     "repository-bank/pat-testing/source-1cee73b1b8aa",
   ),
   "periodic-inspection": examProfile(
     "periodic-inspection.json",
     "2e536fa04589e47173cbd99b05c14eed392ec5c08533cb597c231c1e8cac190f",
-    "Imported Periodic Inspection and Testing practice question bank",
+    "Sparky Periodic Inspection and Testing practice question bank",
     "repository-bank/periodic-inspection/source-2e536fa04589",
   ),
   "special-locations": examProfile(
     "special-locations.json",
     "83ce5b6f0f05611d157fed9f8e4cfe7f97fb961668b16c36e22edd91ce5c5bd3",
-    "Imported Special Locations practice question bank",
+    "Sparky Special Locations practice question bank",
     "repository-bank/special-locations/source-83ce5b6f0f05",
   ),
 } as const satisfies Readonly<Record<string, ExamContentProfile>>;
@@ -186,10 +186,10 @@ function sourceForExam(exam: Exam): ContentSource {
     contentVersion: profile.contentVersion,
     sourceHash: profile.sourceHash,
     sourceHashScope: "repository-file",
-    needsLicensedConfirmation: true,
+    needsLicensedConfirmation: false,
     needsEditorialConfirmation: true,
     limitations:
-      "Imported study-bank wording is an exam convention. Its original publication, licence, edition, amendment status, effective date and question-level jurisdiction remain unverified. It is not a substitute for current official law, standards or guidance; linked focused citations take precedence where present.",
+      "These practice questions are owned by Erlin Hoxha, as confirmed on 4 September 2026. They are classified as an exam convention. The applicable edition, amendment status, effective date and question-level jurisdiction still require editorial confirmation. They are not a substitute for current official law, standards or guidance; linked focused citations take precedence where present.",
   };
 }
 
@@ -278,7 +278,7 @@ function focusedSourcesForQuestion(question: ExamQuestion): ContentSource[] {
 
 /**
  * Attach explicit provenance to an exam and every delivered question. The
- * imported bank remains the honest fallback. Where a question already carries
+ * owner-authored question bank supplies the base record. Where a question already carries
  * a focused solution-table citation, the question also links to a more-specific
  * central source record without copying or inventing licensed text/locators.
  */
