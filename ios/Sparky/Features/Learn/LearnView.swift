@@ -10,23 +10,19 @@ struct LearnView: View {
     @Environment(StudyStateStore.self) private var studyState
 
     @State private var path: [LearnRoute] = []
-    @State private var selectedFilter: GuideFilter = .all
+    @State private var searchText = ""
+    @FocusState private var searchIsFocused: Bool
 
     private var completedCount: Int {
         contentStore.guides.filter { studyState.isGuideCompleted($0.id) }.count
     }
 
-    private var progress: Double {
-        guard !contentStore.guides.isEmpty else { return 0 }
-        return Double(completedCount) / Double(contentStore.guides.count)
-    }
-
-    private var nextGuide: CourseGuide? {
-        contentStore.guides.first { !studyState.isGuideCompleted($0.id) } ?? contentStore.guides.first
-    }
-
     private var visibleGuides: [CourseGuide] {
-        contentStore.guides.filter(selectedFilter.includes)
+        contentStore.guides.filter { $0.matchesLearningQuery(searchText) }
+    }
+
+    private var hasSearch: Bool {
+        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
@@ -35,44 +31,79 @@ struct LearnView: View {
                 SparkyBackdrop()
 
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 16) {
-                        LearnOverview(
-                            completedCount: completedCount,
-                            totalCount: contentStore.guides.count,
-                            progress: progress,
-                            nextGuide: nextGuide,
-                            hasStarted: completedCount > 0,
-                            isComplete: completedCount == contentStore.guides.count && !contentStore.guides.isEmpty
-                        )
+                    LazyVStack(alignment: .leading, spacing: 20) {
+                        searchField
 
-                        QualificationRouteCard()
+                        if !hasSearch {
+                            if let guide = studyState.suggestedGuide(in: contentStore.guides) {
+                                ContinueGuideCard(
+                                    guide: guide,
+                                    isReturning: guide.id == studyState.lastOpenedGuideID,
+                                    completedCount: completedCount,
+                                    totalCount: contentStore.guides.count
+                                )
+                            } else if !contentStore.guides.isEmpty {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Label("All guides complete", systemImage: "checkmark.circle.fill")
+                                        .font(.headline)
+                                        .foregroundStyle(Color.sparkySuccess)
+                                    Text("Choose any guide below to revisit it.")
+                                        .font(.subheadline)
+                                        .foregroundStyle(Color.sparkyMuted)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .sparkyCard(padding: 16)
+                            }
 
-                        InspectionTrainingFeaturedCard()
+                            InspectionTrainingLink()
+                        }
 
-                        GuideFilterBar(selection: $selectedFilter)
-
-                        SparkySectionHeader(
-                            eyebrow: selectedFilter == .all ? "Course library" : selectedFilter.title,
-                            title: selectedFilter == .all ? "Learning guides" : "\(selectedFilter.title) guides",
-                            detail: "\(visibleGuides.count)"
-                        )
-                        .padding(.top, 2)
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(hasSearch ? "Search results" : "Study guides")
+                                .font(.title2.bold())
+                                .foregroundStyle(Color.sparkyText)
+                                .accessibilityAddTraits(.isHeader)
+                            Spacer()
+                            Text("\(visibleGuides.count)")
+                                .font(.subheadline.monospacedDigit())
+                                .foregroundStyle(Color.sparkyMuted)
+                                .accessibilityLabel("\(visibleGuides.count) guides")
+                        }
 
                         if visibleGuides.isEmpty {
-                            ContentUnavailableView(
-                                "No guides here yet",
-                                systemImage: "book.closed",
-                                description: Text("Try another guide category.")
-                            )
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 22)
+                            ContentUnavailableView {
+                                Label("No matching guides", systemImage: "magnifyingglass")
+                            } description: {
+                                Text("Try a qualification or topic, such as PAT or wiring regulations.")
+                            } actions: {
+                                Button("Clear search") { searchText = "" }
+                            }
                         } else {
-                            ForEach(visibleGuides) { guide in
-                                GuideCard(
-                                    guide: guide,
-                                    isCompleted: studyState.isGuideCompleted(guide.id),
-                                    onToggleCompleted: { studyState.toggleCompletedGuide(guide.id) }
-                                )
+                            ForEach(LearnTopic.allCases) { topic in
+                                let guides = visibleGuides.filter { topic.includes($0) }
+                                if !guides.isEmpty {
+                                    VStack(alignment: .leading, spacing: 10) {
+                                        Text(topic.title)
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(Color.sparkyMuted)
+                                            .accessibilityAddTraits(.isHeader)
+
+                                        VStack(spacing: 0) {
+                                            ForEach(Array(guides.enumerated()), id: \.element.id) { index, guide in
+                                                GuideRow(
+                                                    guide: guide,
+                                                    isCompleted: studyState.isGuideCompleted(guide.id),
+                                                    isInProgress: studyState.lastOpenedGuideID == guide.id
+                                                )
+                                                if index < guides.count - 1 {
+                                                    Divider().overlay(Color.sparkyBorder)
+                                                        .padding(.horizontal, 16)
+                                                }
+                                            }
+                                        }
+                                        .sparkyCard(padding: 0)
+                                    }
+                                }
                             }
                         }
                     }
@@ -80,6 +111,7 @@ struct LearnView: View {
                     .padding(.top, 10)
                     .padding(.bottom, 34)
                 }
+                .scrollDismissesKeyboard(.interactively)
             }
             .navigationTitle("Learn")
             .navigationBarTitleDisplayMode(.large)
@@ -91,6 +123,7 @@ struct LearnView: View {
                     SparkyAccountToolbarItem()
                 }
             }
+            .onChange(of: path) { _, _ in searchIsFocused = false }
             .navigationDestination(for: LearnRoute.self) { route in
                 switch route {
                 case let .guide(guideID):
@@ -109,339 +142,165 @@ struct LearnView: View {
             }
         }
     }
+
+    private var searchField: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(Color.sparkyMuted)
+                .accessibilityHidden(true)
+            TextField("Search guides and topics", text: $searchText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+                .focused($searchIsFocused)
+                .onSubmit { searchIsFocused = false }
+                .accessibilityIdentifier("learn-search")
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color.sparkyMuted)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.leading, 14)
+        .padding(.trailing, searchText.isEmpty ? 14 : 0)
+        .frame(minHeight: 48)
+        .background(Color.sparkySurfaceRaised)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
 }
 
-private struct LearnOverview: View {
+private struct ContinueGuideCard: View {
+    let guide: CourseGuide
+    let isReturning: Bool
     let completedCount: Int
     let totalCount: Int
-    let progress: Double
-    let nextGuide: CourseGuide?
-    let hasStarted: Bool
-    let isComplete: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .center, spacing: 16) {
-                    overviewCopy
-                    Spacer(minLength: 12)
-                    ProgressRing(progress: progress, size: 68, lineWidth: 7)
-                }
-
-                VStack(alignment: .leading, spacing: 14) {
-                    overviewCopy
-                    HStack(spacing: 12) {
-                        ProgressRing(progress: progress, size: 60, lineWidth: 6)
-                        Text("\(completedCount) of \(totalCount) guides complete")
+        NavigationLink(value: LearnRoute.guide(guide.id)) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(isReturning ? "Continue reading" : completedCount > 0 ? "Next unread guide" : "Start here")
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color.sparkyMuted)
-                    }
-                }
-            }
-
-            if let nextGuide {
-                NavigationLink(value: LearnRoute.guide(nextGuide.id)) {
-                    HStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(isComplete ? "Review your knowledge" : hasStarted ? "Continue learning" : "Start your route")
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(Color.sparkyBackground.opacity(0.82))
-                            Text(nextGuide.title)
-                                .font(.headline)
-                                .foregroundStyle(Color.sparkyBackground)
-                                .multilineTextAlignment(.leading)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-
-                        Spacer(minLength: 8)
-
-                        Image(systemName: "arrow.right")
-                            .font(.headline.weight(.bold))
-                            .accessibilityHidden(true)
-                    }
-                    .padding(.horizontal, 16)
-                    .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(SparkyPrimaryButtonStyle())
-                .accessibilityHint("Opens the guide")
-            }
-        }
-        .sparkyCard(padding: 18)
-    }
-
-    private var overviewCopy: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            SparkyEyebrow(text: "UK electrician pathway")
-            Text("Build skill in the right order")
-                .font(.title2.weight(.bold))
-                .foregroundStyle(Color.sparkyText)
-            Text("Follow qualification routes, prepare for assessments and keep your technical references sharp.")
-                .font(.subheadline)
-                .foregroundStyle(Color.sparkyMuted)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-}
-
-private struct InspectionTrainingFeaturedCard: View {
-    var body: some View {
-        NavigationLink(value: LearnRoute.inspectionTraining) {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .top, spacing: 13) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 15, style: .continuous)
-                            .fill(Color.sparkyAccentSoft)
-                        Image(systemName: "waveform.path.ecg.rectangle")
-                            .font(.title2.weight(.semibold))
                             .foregroundStyle(Color.sparkyAccent)
-                    }
-                    .frame(width: 52, height: 52)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        SparkyEyebrow(text: "Interactive test lab")
-                        Text("Inspection & Testing")
-                            .font(.title3.weight(.bold))
+                        Text(guide.title)
+                            .font(.headline)
                             .foregroundStyle(Color.sparkyText)
-                        Text("Set up a virtual tester, place the probes and interpret the result across five guided labs.")
-                            .font(.subheadline)
-                            .foregroundStyle(Color.sparkyMuted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-
-                    Spacer(minLength: 0)
-                }
-
-                HStack(spacing: 8) {
-                    Label("5 labs", systemImage: "square.grid.2x2")
-                    Label("Saves progress", systemImage: "arrow.clockwise")
                     Spacer(minLength: 0)
                     Image(systemName: "arrow.right")
-                        .font(.caption.bold())
+                        .font(.headline)
+                        .foregroundStyle(Color.sparkyAccent)
+                        .padding(.top, 3)
+                        .accessibilityHidden(true)
                 }
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.sparkyAccent)
+                VStack(alignment: .leading, spacing: 7) {
+                    Text("\(completedCount) of \(totalCount) guides complete")
+                        .font(.caption)
+                        .foregroundStyle(Color.sparkyMuted)
+                    ProgressView(value: Double(completedCount), total: Double(max(totalCount, 1)))
+                        .tint(Color.sparkyAccent)
+                        .accessibilityHidden(true)
+                }
             }
+            .multilineTextAlignment(.leading)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .sparkyCard(padding: 17)
+            .sparkyCard(padding: 16)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityHint("Opens the practical inspection and testing trainer")
+        .accessibilityIdentifier("learn-continue-guide")
     }
 }
 
-private struct QualificationRouteCard: View {
-    @State private var showsAdvice = false
-
-    private let steps = ["Level 2", "Level 3", "NVQ evidence", "AM2", "ECS card"]
+private struct InspectionTrainingLink: View {
+    @Environment(InspectionTrainingStore.self) private var trainingStore
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    showsAdvice.toggle()
-                }
-            } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: "point.topleft.down.curvedto.point.bottomright.up")
+        NavigationLink(value: LearnRoute.inspectionTraining) {
+            HStack(spacing: 12) {
+                Image(systemName: "waveform.path.ecg.rectangle")
+                    .font(.title2)
+                    .foregroundStyle(Color.sparkyAccent)
+                    .frame(width: 44, height: 44)
+                    .background(Color.sparkyAccentSoft)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Inspection & testing labs")
                         .font(.headline)
-                        .foregroundStyle(Color.sparkyAccent)
-                        .frame(width: 40, height: 40)
-                        .background(Color.sparkyAccentSoft)
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Your qualification route")
-                            .font(.headline)
-                            .foregroundStyle(Color.sparkyText)
-                        Text("Level 2 through ECS card")
-                            .font(.caption)
-                            .foregroundStyle(Color.sparkyMuted)
-                    }
-
-                    Spacer(minLength: 8)
-
-                    Image(systemName: "chevron.down")
-                        .font(.caption.bold())
+                        .foregroundStyle(Color.sparkyText)
+                    Text("\(InspectionTrainingCatalog.labs.count) interactive labs · \(trainingStore.completedLabCount) complete")
+                        .font(.caption)
                         .foregroundStyle(Color.sparkyMuted)
-                        .rotationEffect(.degrees(showsAdvice ? 180 : 0))
-                        .accessibilityHidden(true)
                 }
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .contentShape(Rectangle())
+                .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.caption.bold())
+                    .foregroundStyle(Color.sparkyMuted)
+                    .accessibilityHidden(true)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Your qualification route, Level 2 through ECS card")
-            .accessibilityValue(showsAdvice ? "Expanded" : "Collapsed")
-
-            ScrollView(.horizontal) {
-                HStack(spacing: 0) {
-                    ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                        RouteStep(number: index + 1, title: step)
-
-                        if index < steps.count - 1 {
-                            Rectangle()
-                                .fill(Color.sparkyAccent.opacity(0.32))
-                                .frame(width: 24, height: 2)
-                                .accessibilityHidden(true)
-                        }
-                    }
-                }
-                .padding(.vertical, 2)
-            }
-            .scrollIndicators(.hidden)
-
-            if showsAdvice {
-                StudyNotice(
-                    title: "Plan with current sources",
-                    message: "Course, workplace evidence and card requirements can change. Confirm your route with the awarding body, training provider and ECS guidance."
-                )
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .sparkyCard(padding: 16)
+            .contentShape(Rectangle())
         }
-        .sparkyCard(padding: 16)
+        .buttonStyle(.plain)
+        .accessibilityHint("Practise using a virtual tester and interpreting results")
     }
 }
 
-private struct RouteStep: View {
-    let number: Int
-    let title: String
-
-    var body: some View {
-        VStack(spacing: 7) {
-            Text("\(number)")
-                .font(.caption.bold().monospacedDigit())
-                .foregroundStyle(Color.sparkyAccent)
-                .frame(width: 32, height: 32)
-                .background(Color.sparkyAccentSoft)
-                .clipShape(Circle())
-
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.sparkyText)
-                .fixedSize(horizontal: true, vertical: false)
-        }
-        .frame(minWidth: 74)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Step \(number), \(title)")
-    }
-}
-
-private struct GuideFilterBar: View {
-    @Binding var selection: GuideFilter
-
-    var body: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 8) {
-                ForEach(GuideFilter.options) { filter in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.16)) {
-                            selection = filter
-                        }
-                    } label: {
-                        TagChip(
-                            title: filter.title,
-                            selected: selection == filter,
-                            symbol: filter.symbolName
-                        )
-                        .frame(minHeight: 44)
-                        .contentShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(selection == filter ? .isSelected : [])
-                }
-            }
-        }
-        .scrollIndicators(.hidden)
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Guide categories")
-    }
-}
-
-private struct GuideCard: View {
+private struct GuideRow: View {
     let guide: CourseGuide
     let isCompleted: Bool
-    let onToggleCompleted: () -> Void
+    let isInProgress: Bool
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            NavigationLink(value: LearnRoute.guide(guide.id)) {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack(alignment: .center, spacing: 9) {
-                        Label(guide.category.title, systemImage: guide.category.symbolName)
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(Color.sparkyAccent)
-
-                        Spacer(minLength: 6)
-
-                        Text(guide.kicker.uppercased())
-                            .font(.caption2.weight(.bold).monospaced())
-                            .tracking(0.8)
-                            .foregroundStyle(Color.sparkyMuted)
-                    }
-
+        NavigationLink(value: LearnRoute.guide(guide.id)) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(guide.title)
-                        .font(.title3.weight(.bold))
+                        .font(.headline)
                         .foregroundStyle(Color.sparkyText)
-                        .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
-
-                    Text(guide.summary)
-                        .font(.subheadline)
-                        .foregroundStyle(Color.sparkyMuted)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    if let fact = guide.facts.first {
-                        HStack(alignment: .firstTextBaseline, spacing: 6) {
-                            Text(fact.label)
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Color.sparkyMuted)
-                            Text(fact.value)
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(Color.sparkyText)
-                                .lineLimit(2)
+                    HStack(spacing: 8) {
+                        Text("\(guide.sections.count) sections")
+                            .foregroundStyle(Color.sparkyMuted)
+                        if isCompleted {
+                            Label("Complete", systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(Color.sparkySuccess)
+                        } else if isInProgress {
+                            Text("In progress")
+                                .foregroundStyle(Color.sparkyAccent)
                         }
                     }
-
-                    HStack(spacing: 6) {
-                        Text("Open guide")
-                            .font(.subheadline.weight(.bold))
-                        Image(systemName: "arrow.right")
-                            .font(.caption.bold())
-                    }
-                    .foregroundStyle(Color.sparkyAccent)
+                    .font(.caption)
                 }
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .contentShape(Rectangle())
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.caption.bold())
+                    .foregroundStyle(Color.sparkyMuted)
+                    .accessibilityHidden(true)
             }
-            .buttonStyle(.plain)
-
-            Button(action: onToggleCompleted) {
-                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(isCompleted ? Color.sparkySuccess : Color.sparkyMuted)
-                    .frame(width: 44, height: 44)
-                    .background(isCompleted ? Color.sparkySuccess.opacity(0.12) : Color.sparkyBackground.opacity(0.7))
-                    .clipShape(Circle())
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(isCompleted ? "Mark \(guide.title) incomplete" : "Mark \(guide.title) complete")
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .padding(16)
+            .contentShape(Rectangle())
         }
-        .padding(17)
-        .background(Color.sparkySurface)
-        .clipShape(RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous)
-                .stroke(isCompleted ? Color.sparkySuccess.opacity(0.4) : Color.sparkyBorder, lineWidth: 1)
-        }
-        .shadow(color: Color.black.opacity(0.045), radius: 15, y: 7)
+        .buttonStyle(.plain)
     }
 }
 
 private struct GuideDetailView: View {
+    @Environment(ContentStore.self) private var contentStore
     @Environment(StudyStateStore.self) private var studyState
     @Environment(AppRouter.self) private var router
 
@@ -451,129 +310,178 @@ private struct GuideDetailView: View {
         studyState.isGuideCompleted(guide.id)
     }
 
+    private var nextGuide: CourseGuide? {
+        contentStore.guides.first { $0.id != guide.id && !studyState.isGuideCompleted($0.id) }
+    }
+
     var body: some View {
-        ZStack {
-            SparkyBackdrop()
+        ScrollViewReader { scroll in
+            ZStack {
+                SparkyBackdrop()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    GuideDetailHero(guide: guide, isCompleted: isCompleted) {
-                        studyState.toggleCompletedGuide(guide.id)
-                    }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        GuideDetailHero(guide: guide, isCompleted: isCompleted)
 
-                    if !guide.facts.isEmpty {
-                        GuideFactsView(facts: guide.facts)
-                    }
+                        if !guide.sections.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("In this guide")
+                                    .font(.headline)
+                                    .foregroundStyle(Color.sparkyText)
+                                    .accessibilityAddTraits(.isHeader)
+                                ForEach(Array(guide.sections.enumerated()), id: \.offset) { index, section in
+                                    Button {
+                                        withAnimation {
+                                            scroll.scrollTo("guide-section-\(index)", anchor: .top)
+                                        }
+                                    } label: {
+                                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                            Text("\(index + 1).")
+                                                .font(.subheadline.monospacedDigit())
+                                            Text(section.title)
+                                                .font(.subheadline.weight(.semibold))
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                            Image(systemName: "arrow.down")
+                                                .font(.caption)
+                                                .accessibilityHidden(true)
+                                        }
+                                        .foregroundStyle(Color.sparkyAccent)
+                                        .multilineTextAlignment(.leading)
+                                        .frame(minHeight: 44)
+                                        .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityHint("Jumps to this section")
+                                }
+                            }
+                            .sparkyCard(padding: 16)
+                        }
 
-                    GuideCrossLinks(guide: guide, router: router)
+                        if !guide.facts.isEmpty {
+                            DisclosureGroup("Key details") {
+                                GuideFactsView(facts: guide.facts)
+                                    .padding(.top, 10)
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .tint(Color.sparkyAccent)
+                            .padding(.horizontal, 4)
+                        }
 
-                    ForEach(Array(guide.sections.enumerated()), id: \.offset) { index, section in
-                        GuideSectionCard(number: index + 1, section: section)
-                    }
+                        ForEach(Array(guide.sections.enumerated()), id: \.offset) { index, section in
+                            GuideSectionCard(number: index + 1, section: section)
+                                .id("guide-section-\(index)")
+                        }
 
-                    if !guide.pitfalls.isEmpty {
-                        GuideListCard(
-                            eyebrow: "Watch out",
-                            title: "Common traps",
-                            symbolName: "exclamationmark.triangle.fill",
-                            tone: .warning,
-                            items: guide.pitfalls
+                        if !guide.pitfalls.isEmpty {
+                            GuideListCard(
+                                eyebrow: "Watch out",
+                                title: "Common mistakes",
+                                symbolName: "exclamationmark.triangle.fill",
+                                tone: .warning,
+                                items: guide.pitfalls
+                            )
+                        }
+
+                        if !guide.nextActions.isEmpty {
+                            GuideListCard(
+                                eyebrow: "Put it into practice",
+                                title: "What to do next",
+                                symbolName: "arrow.up.right.circle.fill",
+                                tone: .next,
+                                items: guide.nextActions
+                            )
+                        }
+
+                        completionCard
+                        GuideCrossLinks(guide: guide, router: router)
+
+                        StudyNotice(
+                            message: "Training routes, assessment rules and technical standards can change. Check the relevant awarding body and official publications as you plan."
                         )
                     }
-
-                    if !guide.nextActions.isEmpty {
-                        GuideListCard(
-                            eyebrow: "Put it to work",
-                            title: "Next actions",
-                            symbolName: "arrow.up.right.circle.fill",
-                            tone: .next,
-                            items: guide.nextActions
-                        )
-                    }
-
-                    StudyNotice(
-                        message: "Training routes, assessment rules and technical standards can change. Check the relevant awarding body and official publications as you plan."
-                    )
+                    .padding(.horizontal, SparkyLayout.pageInset)
+                    .padding(.top, 10)
+                    .padding(.bottom, 36)
                 }
-                .padding(.horizontal, SparkyLayout.pageInset)
-                .padding(.top, 10)
-                .padding(.bottom, 36)
             }
         }
-        .navigationTitle(guide.title)
+        .navigationTitle("Study guide")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+        .onAppear { studyState.recordOpenedGuide(guide.id) }
+    }
+
+    private var completionCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(isCompleted ? "Guide complete" : "Finished reading?")
+                .font(.headline)
+                .foregroundStyle(isCompleted ? Color.sparkySuccess : Color.sparkyText)
+            if isCompleted {
+                Button("Mark as not complete") {
+                    studyState.toggleCompletedGuide(guide.id)
+                }
+                .font(.subheadline)
+                .tint(Color.sparkyMuted)
+                .frame(minHeight: 44)
+                .accessibilityIdentifier("learn-mark-incomplete")
+
+                if let nextGuide {
+                    NavigationLink(value: LearnRoute.guide(nextGuide.id)) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("Next unread guide")
+                                .font(.caption)
+                                .foregroundStyle(Color.sparkyMuted)
+                            Label(nextGuide.title, systemImage: "arrow.right")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Color.sparkyAccent)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            } else {
                 Button {
                     studyState.toggleCompletedGuide(guide.id)
                 } label: {
-                    Image(systemName: isCompleted ? "checkmark.circle.fill" : "checkmark.circle")
-                        .foregroundStyle(isCompleted ? Color.sparkySuccess : Color.sparkyAccent)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
+                    Label("Mark guide complete", systemImage: "checkmark.circle")
+                        .frame(maxWidth: .infinity, minHeight: 48)
                 }
-                .accessibilityLabel(isCompleted ? "Mark guide incomplete" : "Mark guide complete")
+                .buttonStyle(SparkyPrimaryButtonStyle())
+                .accessibilityIdentifier("learn-mark-complete")
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .sparkyCard(padding: 16)
     }
 }
 
 private struct GuideDetailHero: View {
     let guide: CourseGuide
     let isCompleted: Bool
-    let onToggleCompleted: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 10) {
-                Image(systemName: guide.category.symbolName)
-                    .font(.headline)
-                    .foregroundStyle(Color.sparkyAccent)
-                    .frame(width: 42, height: 42)
-                    .background(Color.sparkyAccentSoft)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-
-                VStack(alignment: .leading, spacing: 2) {
-                    SparkyEyebrow(text: guide.kicker)
-                    Text(guide.category.title)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color.sparkyMuted)
-                }
-            }
-
+        VStack(alignment: .leading, spacing: 12) {
+            Text(guide.category.title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.sparkyAccent)
             Text(guide.title)
-                .font(.largeTitle.weight(.bold))
+                .font(.title.bold())
                 .foregroundStyle(Color.sparkyText)
                 .fixedSize(horizontal: false, vertical: true)
-
+                .accessibilityAddTraits(.isHeader)
             Text(guide.summary)
                 .font(.body)
                 .foregroundStyle(Color.sparkyMuted)
                 .fixedSize(horizontal: false, vertical: true)
-
-            Button(action: onToggleCompleted) {
-                Label(
-                    isCompleted ? "Completed — tap to undo" : "Mark guide complete",
-                    systemImage: isCompleted ? "checkmark.circle.fill" : "circle"
-                )
-                .font(.headline)
-                .foregroundStyle(isCompleted ? Color.sparkySuccess : Color.sparkyAccent)
-                .frame(maxWidth: .infinity, minHeight: 50)
-                .background(isCompleted ? Color.sparkySuccess.opacity(0.12) : Color.sparkyAccentSoft)
-                .clipShape(RoundedRectangle(cornerRadius: SparkyLayout.controlRadius, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: SparkyLayout.controlRadius, style: .continuous)
-                        .stroke(
-                            isCompleted ? Color.sparkySuccess.opacity(0.35) : Color.sparkyAccent.opacity(0.3),
-                            lineWidth: 1
-                        )
-                }
-                .contentShape(Rectangle())
+            if isCompleted {
+                Label("Completed", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.sparkySuccess)
             }
-            .buttonStyle(.plain)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .sparkyCard(padding: 18)
     }
 }
 
@@ -783,37 +691,26 @@ private struct GuideListCard: View {
     }
 }
 
-private enum GuideFilter: Hashable, Identifiable {
-    case all
-    case category(GuideCategory)
+private enum LearnTopic: String, CaseIterable, Identifiable {
+    case qualifications
+    case assessments
+    case reference
 
-    static let options: [GuideFilter] = [.all] + GuideCategory.allCases.map(GuideFilter.category)
-
-    var id: String {
-        switch self {
-        case .all: "all"
-        case .category(let category): category.rawValue
-        }
-    }
+    var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .all: "All"
-        case .category(let category): category.title
-        }
-    }
-
-    var symbolName: String {
-        switch self {
-        case .all: "square.grid.2x2"
-        case .category(let category): category.symbolName
+        case .qualifications: "Getting qualified"
+        case .assessments: "Preparing for assessments"
+        case .reference: "Technical reference"
         }
     }
 
     func includes(_ guide: CourseGuide) -> Bool {
         switch self {
-        case .all: true
-        case .category(let category): guide.category == category
+        case .qualifications: guide.category == .route || guide.category == .qualification
+        case .assessments: guide.category == .assessment
+        case .reference: guide.category == .reference
         }
     }
 }
@@ -821,19 +718,30 @@ private enum GuideFilter: Hashable, Identifiable {
 private extension GuideCategory {
     var title: String {
         switch self {
-        case .route: "Career Route"
-        case .qualification: "Qualification"
-        case .assessment: "Assessment"
-        case .reference: "Reference"
+        case .route: "Career route"
+        case .qualification: "Qualification guide"
+        case .assessment: "Assessment preparation"
+        case .reference: "Technical reference"
         }
     }
+}
 
-    var symbolName: String {
-        switch self {
-        case .route: "signpost.right.fill"
-        case .qualification: "graduationcap.fill"
-        case .assessment: "checkmark.seal.fill"
-        case .reference: "books.vertical.fill"
+extension CourseGuide {
+    func matchesLearningQuery(_ query: String) -> Bool {
+        func words(in value: String) -> [String] {
+            value.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+                .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                .filter { !$0.isEmpty }
         }
+        let terms = words(in: query)
+        guard !terms.isEmpty else {
+            return query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        var text = [title, kicker, summary, examLabel ?? ""]
+        text += facts.flatMap { [$0.label, $0.value] }
+        text += sections.flatMap { [$0.title] + $0.items }
+        text += pitfalls + nextActions
+        let searchableWords = words(in: text.joined(separator: " "))
+        return terms.allSatisfy { term in searchableWords.contains { $0.hasPrefix(term) } }
     }
 }
