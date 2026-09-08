@@ -7,6 +7,7 @@ final class StudyStateStore {
     private enum Keys {
         static let savedNotes = "savedNoteIDs"
         static let completedGuides = "completedGuideIDs"
+        static let lastOpenedGuide = "lastOpenedGuideID"
         static let recentCalculations = "recentCalculations"
     }
 
@@ -14,12 +15,14 @@ final class StudyStateStore {
 
     private(set) var savedNoteIDs: Set<String>
     private(set) var completedGuideIDs: Set<String>
+    private(set) var lastOpenedGuideID: String?
     private(set) var recentCalculations: [CalculationHistoryItem]
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         savedNoteIDs = Set(defaults.stringArray(forKey: Keys.savedNotes) ?? [])
         completedGuideIDs = Set(defaults.stringArray(forKey: Keys.completedGuides) ?? [])
+        lastOpenedGuideID = defaults.string(forKey: Keys.lastOpenedGuide)
 
         if let data = defaults.data(forKey: Keys.recentCalculations),
            let decoded = try? JSONDecoder().decode([CalculationHistoryItem].self, from: data) {
@@ -44,6 +47,19 @@ final class StudyStateStore {
 
     func isGuideCompleted(_ id: String) -> Bool {
         completedGuideIDs.contains(id)
+    }
+
+    func recordOpenedGuide(_ id: String) {
+        lastOpenedGuideID = id
+        defaults.set(id, forKey: Keys.lastOpenedGuide)
+    }
+
+    func suggestedGuide(in guides: [CourseGuide]) -> CourseGuide? {
+        if let lastOpenedGuideID,
+           let guide = guides.first(where: { $0.id == lastOpenedGuideID && !isGuideCompleted($0.id) }) {
+            return guide
+        }
+        return guides.first { !isGuideCompleted($0.id) }
     }
 
     func toggleCompletedGuide(_ id: String) {
@@ -74,9 +90,11 @@ final class StudyStateStore {
     func resetStudyProgress() {
         savedNoteIDs = []
         completedGuideIDs = []
+        lastOpenedGuideID = nil
         recentCalculations = []
         defaults.removeObject(forKey: Keys.savedNotes)
         defaults.removeObject(forKey: Keys.completedGuides)
+        defaults.removeObject(forKey: Keys.lastOpenedGuide)
         defaults.removeObject(forKey: Keys.recentCalculations)
     }
 
@@ -93,4 +111,3 @@ struct CalculationHistoryItem: Identifiable, Codable, Hashable {
     let value: String
     let date: Date
 }
-
