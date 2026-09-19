@@ -1,4 +1,4 @@
-import { Suspense, lazy, memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Suspense, lazy, memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   CONTAINMENT_OPTIONS,
   DEFAULT_CONTAINMENT_ROD_VALUES,
@@ -113,8 +113,8 @@ const PRIMARY_NAV_ITEMS = NAVIGATION_ITEMS;
 
 // The primary pages surfaced in the mobile bottom tab bar. The remaining pages
 // (Tutorials, Interactive, Settings) stay reachable from the avatar menu and the
-// command palette, both of which list every page. The bar is hidden on the exams
-// page, which has its own fixed bottom action bar.
+// command palette, both of which list every page. Exam actions sit above the
+// tab bar so primary navigation remains available during practice.
 const MOBILE_TAB_ITEMS: { id: NavigationPageId; label: string; icon: ReactNode }[] = [
   {
     id: "exams",
@@ -619,9 +619,7 @@ export default function App() {
   const [structureJoist, setStructureJoist] = usePersistedState("struct-joist", "200");
 
   const [activeToolIndex, setActiveToolIndex] = useState(0);
-  const [toolGridHeight, setToolGridHeight] = useState<number | null>(null);
 
-  const toolGridRef = useRef<HTMLDivElement | null>(null);
   const paletteInputRef = useRef<HTMLInputElement | null>(null);
   const nextUnistrutContainmentIdRef = useRef(
     Math.max(...unistrutContainments.map((c) => c.id), 0) + 1
@@ -643,6 +641,10 @@ export default function App() {
   const navigateTo = useCallback((nextPage: PageId, targetId?: string) => {
     window.history.pushState(null, "", getPageHref(nextPage));
     setPage(nextPage);
+    if (nextPage === "home" && targetId) {
+      const index = applets.findIndex((applet) => applet.id === targetId);
+      if (index >= 0) setActiveToolIndex(index);
+    }
 
     if (targetId) {
       window.setTimeout(() => {
@@ -693,14 +695,8 @@ export default function App() {
     [navigateTo]
   );
 
-  function scrollToTool(index: number) {
-    const grid = toolGridRef.current;
-    if (!grid) return;
-    const maxIndex = Math.max(filteredApplets.length - 1, 0);
-    const nextIndex = Math.min(Math.max(index, 0), maxIndex);
-    setActiveToolIndex((current) => (current === nextIndex ? current : nextIndex));
-    scrollToSafely(grid, { left: grid.clientWidth * nextIndex });
-    scrollIntoViewSafely(grid, { block: "start" });
+  function selectTool(index: number) {
+    setActiveToolIndex(Math.min(Math.max(index, 0), applets.length - 1));
   }
 
   function openCommandPalette() {
@@ -965,11 +961,6 @@ export default function App() {
   );
 
   const filteredApplets = applets;
-  const filteredAppletIds = useMemo(
-    () => filteredApplets.map((applet) => applet.id).join("|"),
-    [filteredApplets]
-  );
-
   const filteredCheatSections = useMemo(() => {
     const query = noteQuery.trim();
     return cheatSheetSections.filter((section) => {
@@ -1211,69 +1202,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const grid = toolGridRef.current;
-    if (!grid) return;
-
-    function handleScroll() {
-      const width = grid!.clientWidth;
-      if (width === 0) return;
-      const index = Math.round(grid!.scrollLeft / width);
-      setActiveToolIndex((current) => (current === index ? current : index));
-    }
-
-    grid.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => grid.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const grid = toolGridRef.current;
-    if (!grid) return;
-    const width = grid.clientWidth;
-    if (width === 0) return;
-    const maxIndex = Math.max(filteredApplets.length - 1, 0);
-    const index = Math.min(Math.round(grid.scrollLeft / width), maxIndex);
-    setActiveToolIndex((current) => (current === index ? current : index));
-  }, [filteredApplets]);
-
-  useEffect(() => {
-    const grid = toolGridRef.current;
-    if (!grid || page !== "home" || filteredApplets.length === 0) {
-      setToolGridHeight(null);
-      return;
-    }
-
-    let frame = 0;
-    const panelIndex = Math.min(activeToolIndex, grid.children.length - 1);
-    const activePanel = grid.children.item(panelIndex) as HTMLElement | null;
-
-    const updateHeight = () => {
-      if (frame) {
-        window.cancelAnimationFrame(frame);
-      }
-
-      frame = window.requestAnimationFrame(() => {
-        const nextHeight = activePanel ? Math.ceil(activePanel.scrollHeight) : null;
-        setToolGridHeight((current) => (current === nextHeight ? current : nextHeight));
-      });
-    };
-
-    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(updateHeight);
-    if (activePanel && resizeObserver) {
-      resizeObserver.observe(activePanel);
-    }
-
-    window.addEventListener("resize", updateHeight);
-    updateHeight();
-
-    return () => {
-      if (frame) {
-        window.cancelAnimationFrame(frame);
-      }
-      resizeObserver?.disconnect();
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, [activeToolIndex, filteredAppletIds, filteredApplets.length, page]);
+    scrollToSafely(window, { top: 0, behavior: "instant" });
+  }, [page]);
 
   function handleNavMenuKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     const container = navMenuRef.current;
@@ -1342,10 +1272,6 @@ export default function App() {
       setCopiedSectionId(null);
     }
   }
-
-  const toolGridStyle = toolGridHeight
-    ? ({ "--tool-grid-height": `${toolGridHeight}px` } as CSSProperties)
-    : undefined;
 
   return (
     <>
@@ -1453,11 +1379,6 @@ export default function App() {
               </svg>
             )}
           </button>
-          {page === "home" ? (
-            <button type="button" className="topbar-icon-button" onClick={() => setHistoryOpen(true)} aria-label="Calculation history" title="Calculation history">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </button>
-          ) : null}
           <div className="nav-menu-wrap">
             <button
               type="button"
@@ -1571,11 +1492,11 @@ export default function App() {
           <section className="tool-library" aria-labelledby="tool-library-title">
             <div className="tool-library-head">
               <div>
-                <span className="dashboard-kicker">Calculator library</span>
-                <h2 id="tool-library-title">{applets.length} site and design tools</h2>
+                <h1 id="tool-library-title">Tools</h1>
+                <p className="page-copy">Quick calculations for work on site.</p>
               </div>
-              <button type="button" className="ghost-button" onClick={() => setHistoryOpen(true)}>
-                Calculation history
+              <button type="button" className="ghost-button" aria-label="Calculation history" onClick={() => setHistoryOpen(true)}>
+                History
               </button>
             </div>
             <ul className="tool-library-list">
@@ -1585,7 +1506,7 @@ export default function App() {
                     type="button"
                     className={`tool-library-item${index === activeToolIndex ? " is-active" : ""}`}
                     aria-pressed={index === activeToolIndex}
-                    onClick={() => scrollToTool(index)}
+                    onClick={() => selectTool(index)}
                   >
                     <strong>{applet.title}</strong>
                     <span>{applet.subtitle}</span>
@@ -1599,7 +1520,7 @@ export default function App() {
                 value={filteredApplets[activeToolIndex]?.id ?? ""}
                 onChange={(event) => {
                   const index = filteredApplets.findIndex((applet) => applet.id === event.target.value);
-                  if (index >= 0) scrollToTool(index);
+                  if (index >= 0) selectTool(index);
                 }}
               >
                 {filteredApplets.map((applet) => (
@@ -1609,8 +1530,8 @@ export default function App() {
             </label>
           </section>
 
-          <div className="tool-grid" ref={toolGridRef} style={toolGridStyle}>
-            {filteredApplets.some((a) => a.id === "tool-containment-rod") ? (
+          <div className="tool-grid">
+            {filteredApplets[activeToolIndex]?.id === "tool-containment-rod" ? (
               <article id="tool-containment-rod" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Containment rod" hint={toolHints.containmentRod} />
@@ -1716,7 +1637,7 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((a) => a.id === "tool-unistrut-length") ? (
+            {filteredApplets[activeToolIndex]?.id === "tool-unistrut-length" ? (
               <article id="tool-unistrut-length" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Unistrut length" hint={toolHints.unistrutLength} />
@@ -1965,7 +1886,7 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((a) => a.id === "tool-tray-bend-cut") ? (
+            {filteredApplets[activeToolIndex]?.id === "tool-tray-bend-cut" ? (
               <article id="tool-tray-bend-cut" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Containment bend cut" hint={toolHints.trayBendCut} />
@@ -2090,7 +2011,7 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((a) => a.id === "tool-angle") ? (
+            {filteredApplets[activeToolIndex]?.id === "tool-angle" ? (
               <article id="tool-angle" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Angle drop" hint={toolHints.angle} />
@@ -2273,7 +2194,7 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((a) => a.id === "tool-trunking-opposite-mark") ? (
+            {filteredApplets[activeToolIndex]?.id === "tool-trunking-opposite-mark" ? (
               <article id="tool-trunking-opposite-mark" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="100 mm trunking mark" hint={toolHints.trunkingOpposite} />
@@ -2388,7 +2309,7 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((a) => a.id === "tool-power") ? (
+            {filteredApplets[activeToolIndex]?.id === "tool-power" ? (
               <article id="tool-power" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="kW / A / V" hint={toolHints.power} />
@@ -2481,7 +2402,7 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((a) => a.id === "tool-vdrop") ? (
+            {filteredApplets[activeToolIndex]?.id === "tool-vdrop" ? (
               <article id="tool-vdrop" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Voltage drop" hint={toolHints.vdrop} />
@@ -2582,7 +2503,7 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((a) => a.id === "tool-breaker") ? (
+            {filteredApplets[activeToolIndex]?.id === "tool-breaker" ? (
               <article id="tool-breaker" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Breaker sizing" hint={toolHints.breaker} />
@@ -2699,7 +2620,7 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((a) => a.id === "tool-conduit") ? (
+            {filteredApplets[activeToolIndex]?.id === "tool-conduit" ? (
               <article id="tool-conduit" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Conduit fill" hint={toolHints.conduit} />
@@ -2794,7 +2715,7 @@ export default function App() {
               </article>
             ) : null}
 
-            {filteredApplets.some((a) => a.id === "tool-structure") ? (
+            {filteredApplets[activeToolIndex]?.id === "tool-structure" ? (
               <article id="tool-structure" className="tool-panel">
                 <div className="tool-heading">
                   <ToolTitle title="Structural limits" hint={toolHints.structure} />
@@ -2864,9 +2785,8 @@ export default function App() {
         <section className={`page page-notes ${page === "cheatsheet" ? "is-active" : ""}`}>
           <header className="page-header notes-header">
             <div>
-              <span className="dashboard-kicker">UK electrical revision</span>
-              <h1>Notes and quick reference</h1>
-              <p className="page-copy">Search the working notes, open the detail you need, and jump straight into a linked practice exam.</p>
+              <h1>Notes</h1>
+              <p className="page-copy">Formulas, regulations and the essentials to hand.</p>
             </div>
             <div className="notes-controls">
               <label className="notes-search">
@@ -2875,7 +2795,7 @@ export default function App() {
                   type="search"
                   value={noteQuery}
                   onChange={(event) => setNoteQuery(event.target.value)}
-                  placeholder="Search notes, regulations and formulas"
+                  placeholder="Search notes and formulas"
                 />
               </label>
               <button
@@ -2902,7 +2822,23 @@ export default function App() {
                 className={`sheet-card${expanded ? " is-expanded" : ""}${highlightedNoteId === section.id ? " is-highlighted" : ""}`}
               >
                 <div className="sheet-card-head">
-                  <h3>{section.title}</h3>
+                  <h3>
+                    <button
+                      type="button"
+                      className="note-toggle"
+                      aria-expanded={expanded}
+                      aria-controls={`${section.id}-detail`}
+                      onClick={() => setExpandedNoteIds((current) => {
+                        const next = new Set(current);
+                        if (next.has(section.id)) next.delete(section.id);
+                        else next.add(section.id);
+                        return next;
+                      })}
+                    >
+                      <span>{section.title}</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+                    </button>
+                  </h3>
                   <div className="sheet-card-actions">
                     <button
                       type="button"
@@ -2959,20 +2895,6 @@ export default function App() {
                   </div>
                 </div>
                 <p className="sheet-summary">{section.summary}</p>
-                <button
-                  type="button"
-                  className="sheet-expand-btn"
-                  aria-expanded={expanded}
-                  aria-controls={`${section.id}-detail`}
-                  onClick={() => setExpandedNoteIds((current) => {
-                    const next = new Set(current);
-                    if (next.has(section.id)) next.delete(section.id);
-                    else next.add(section.id);
-                    return next;
-                  })}
-                >
-                  {expanded ? "Hide note" : "Open note"}
-                </button>
                 {expanded ? (
                   <div id={`${section.id}-detail`} className="sheet-detail">
                 {(NOTE_PRACTICE_LINKS[section.id] ?? []).length > 0 ? (

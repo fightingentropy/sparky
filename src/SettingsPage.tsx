@@ -307,7 +307,7 @@ export function SettingsPage({
           <div className="settings-toggle-row">
             <span className="settings-toggle-text">
               <span className="settings-toggle-label">Light mode</span>
-              <span className="settings-hint">Use an off-white canvas with sky-blue surfaces and accents.</span>
+              <span className="settings-hint">Use a light background with neutral surfaces and warm accents.</span>
             </span>
             <button
               type="button"
