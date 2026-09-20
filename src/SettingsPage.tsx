@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
 import { useAuth } from "./AuthContext";
 import { AccountAvatar } from "./AccountAvatar";
 import { ApiError } from "./api";
@@ -27,6 +27,44 @@ type Props = {
   onExamVisibilityChange: (examId: ExamId, visible: boolean) => void;
   onRequestAuth: () => void;
 };
+
+function SettingsToggle({
+  label,
+  description,
+  checked,
+  disabled = false,
+  onChange
+}: {
+  label: string;
+  description?: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: () => void;
+}) {
+  const id = useId();
+
+  return (
+    <div className="settings-row">
+      <div className="settings-row-text">
+        <label className="settings-label" id={`${id}-label`} htmlFor={id}>{label}</label>
+        {description ? <p className="settings-hint" id={`${id}-hint`}>{description}</p> : null}
+      </div>
+      <button
+        id={id}
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-labelledby={`${id}-label`}
+        aria-describedby={description ? `${id}-hint` : undefined}
+        className={`settings-switch${checked ? " is-on" : ""}`}
+        disabled={disabled}
+        onClick={onChange}
+      >
+        <span className="settings-switch-knob" aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
 
 // Decode an image file and re-encode it as a small, square, center-cropped JPEG
 // data URL so the stored avatar stays tiny (~a few KB) regardless of the source.
@@ -113,11 +151,18 @@ export function SettingsPage({
 
   const previewAvatar = avatarDraft === undefined ? user?.avatar ?? null : avatarDraft;
   const trimmedNickname = nickname.trim();
-  const dirty = avatarDraft !== undefined || trimmedNickname !== (user?.nickname ?? "");
+  const dirty = previewAvatar !== (user?.avatar ?? null) || trimmedNickname !== (user?.nickname ?? "");
   const hiddenNavigationPageIdSet = new Set(hiddenNavigationPageIds);
   const visibleNavigationPageCount = NAVIGATION_ITEMS.length - hiddenNavigationPageIdSet.size;
   const hiddenExamIdSet = new Set(hiddenExamIds);
   const visibleExamCount = EXAM_REGISTRY.length - hiddenExamIdSet.size;
+
+  function discardProfileChanges() {
+    setNickname(user?.nickname ?? "");
+    setAvatarDraft(undefined);
+    setError("");
+    setSavedAt(0);
+  }
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -134,7 +179,7 @@ export function SettingsPage({
   }
 
   async function handleSave() {
-    if (!user || !dirty) return;
+    if (!user || !dirty || saving) return;
     setSaving(true);
     setError("");
     try {
@@ -187,203 +232,154 @@ export function SettingsPage({
   return (
     <section className={`page page-settings ${isActive ? "is-active" : ""}`}>
       <div className="settings-page">
-        <header className="page-header settings-header">
-          <div>
-            <span className="dashboard-kicker">Personalise Sparky</span>
-            <h1>Settings</h1>
-            <p className="page-copy">Account, accessibility and local app data.</p>
-          </div>
+        <header className="settings-header">
+          <h1>Profile &amp; settings</h1>
         </header>
-        <section className="settings-section">
-          <h3 className="settings-section-title">Profile</h3>
+        <section className="settings-section" aria-labelledby="settings-profile-title">
+          <div className="settings-section-heading">
+            <h2 id="settings-profile-title">Profile</h2>
+            <p className="settings-hint">Your name and photo.</p>
+          </div>
           {user ? (
-            <>
+            <form className="settings-section-body settings-profile-form" onSubmit={(event) => { event.preventDefault(); void handleSave(); }}>
               <div className="settings-avatar-row">
                 <AccountAvatar avatar={previewAvatar} name={trimmedNickname || user.email} large />
-                <div className="settings-avatar-actions">
-                  <button type="button" className="ghost-button" onClick={() => fileInputRef.current?.click()}>
-                    {previewAvatar ? "Change photo" : "Upload photo"}
-                  </button>
-                  {previewAvatar ? (
-                    <button type="button" className="ghost-button settings-danger-btn" onClick={() => { setAvatarDraft(null); setSavedAt(0); }}>
-                      Remove
+                <div className="settings-profile-identity">
+                  <span className="settings-profile-name">{user.nickname?.trim() || user.email}</span>
+                  {user.nickname?.trim() ? <span className="settings-account-email">{user.email}</span> : null}
+                  <div className="settings-avatar-actions">
+                    <button type="button" className="settings-text-button" disabled={saving} onClick={() => fileInputRef.current?.click()}>
+                      {previewAvatar ? "Change photo" : "Add photo"}
                     </button>
-                  ) : null}
-                  <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="settings-file-input" onChange={handleFile} />
-                  <p className="settings-hint">Square JPG, PNG or WebP. Resized automatically.</p>
+                    {previewAvatar ? (
+                      <button type="button" className="settings-text-button settings-text-button--muted" disabled={saving} onClick={() => { setAvatarDraft(null); setSavedAt(0); }}>
+                        Remove photo
+                      </button>
+                    ) : null}
+                  </div>
+                  <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="settings-file-input" aria-label="Profile photo" disabled={saving} onChange={handleFile} />
                 </div>
               </div>
 
-              <label className="auth-field settings-field">
-                <span>Display name</span>
+              <div className="settings-field">
+                <label className="settings-label" htmlFor="settings-display-name">Display name</label>
                 <input
+                  id="settings-display-name"
+                  className="settings-input"
                   type="text"
                   value={nickname}
                   maxLength={NICKNAME_MAX}
                   placeholder={user.email}
                   autoComplete="nickname"
+                  aria-describedby="settings-name-hint"
+                  disabled={saving}
                   onChange={(e) => { setNickname(e.target.value); setSavedAt(0); }}
                 />
-                <span className="settings-hint">Shown instead of your email. Leave blank to use your email.</span>
-              </label>
-
-              {error ? <p className="auth-error">{error}</p> : null}
-
-              <div className="settings-actions">
-                {savedAt ? <span className="settings-saved" role="status">Saved</span> : null}
-                <button type="button" className="auth-submit" onClick={handleSave} disabled={!dirty || saving}>
-                  {saving ? "Saving…" : "Save changes"}
-                </button>
+                <p className="settings-hint" id="settings-name-hint">Leave blank to use your email.</p>
               </div>
-            </>
+
+              {error ? <p className="settings-error" role="alert">{error}</p> : null}
+
+              <div className="settings-profile-footer">
+                <span className="settings-hint" role="status">{savedAt ? "Changes saved" : dirty ? "Unsaved changes" : ""}</span>
+                <div className="settings-actions">
+                  {dirty ? <button type="button" className="settings-button" disabled={saving} onClick={discardProfileChanges}>Cancel</button> : null}
+                  <button type="submit" className="settings-button settings-button--primary" disabled={!dirty || saving}>
+                    {saving ? "Saving…" : "Save changes"}
+                  </button>
+                </div>
+              </div>
+            </form>
           ) : (
-            <div className="settings-signed-out">
-              <p className="settings-hint">Log in to add a photo and a display name to your account.</p>
-              <button type="button" className="auth-submit" onClick={onRequestAuth}>
+            <div className="settings-section-body settings-signed-out">
+              <p className="settings-label">Log in to manage your profile.</p>
+              <p className="settings-hint">Your preferences below work without an account.</p>
+              <button type="button" className="settings-button settings-button--primary" onClick={onRequestAuth}>
                 Log in
               </button>
             </div>
           )}
         </section>
 
-        <section className="settings-section">
-          <h3 className="settings-section-title">Navigation</h3>
-          <p className="settings-hint">Choose which main pages appear in the navigation bar. Hidden pages keep their data and can be shown again here.</p>
-          {NAVIGATION_ITEMS.map((item) => {
-            const visible = !hiddenNavigationPageIdSet.has(item.id);
-            const lastVisiblePage = visible && visibleNavigationPageCount <= 1;
-            return (
-              <div className="settings-toggle-row" key={item.id}>
-                <span className="settings-toggle-text">
-                  <span className="settings-toggle-label">{item.label}</span>
-                  <span className="settings-hint">{visible ? "Shown in navigation" : "Hidden from navigation"}</span>
-                </span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={visible}
-                  aria-label={`Show ${item.label} in navigation`}
-                  className={`settings-switch${visible ? " is-on" : ""}`}
-                  disabled={lastVisiblePage}
-                  onClick={() => onNavigationVisibilityChange(item.id, !visible)}
-                >
-                  <span className="settings-switch-knob" aria-hidden="true" />
-                </button>
+        <section className="settings-section" aria-labelledby="settings-appearance-title">
+          <div className="settings-section-heading">
+            <h2 id="settings-appearance-title">Appearance</h2>
+            <p className="settings-hint">Saved on this device.</p>
+          </div>
+          <div className="settings-section-body">
+            <div className="settings-row">
+              <span className="settings-label" id="settings-theme-label">Theme</span>
+              <div className="settings-theme" role="group" aria-labelledby="settings-theme-label">
+                {(["light", "dark"] as const).map((theme) => (
+                  <label className="settings-theme-option" key={theme}>
+                    <input type="radio" name="settings-theme" value={theme} checked={colorTheme === theme} onChange={() => onColorThemeChange(theme)} />
+                    <span>{theme === "light" ? "Light" : "Dark"}</span>
+                  </label>
+                ))}
               </div>
-            );
-          })}
+            </div>
+            <SettingsToggle label="Reduce motion" description="Limit animations and smooth scrolling." checked={reduceMotion} onChange={() => onReduceMotionChange(!reduceMotion)} />
+            <SettingsToggle label="Larger text" description="Make text easier to read across Sparky." checked={comfortableText} onChange={() => onComfortableTextChange(!comfortableText)} />
+          </div>
         </section>
 
-        <section className="settings-section">
-          <h3 className="settings-section-title">Exam library</h3>
-          <p className="settings-hint">Choose which qualifications appear in the practice-exam selector.</p>
-          {EXAM_REGISTRY.map((exam) => {
-            const visible = !hiddenExamIdSet.has(exam.id);
-            const lastVisibleExam = visible && visibleExamCount <= 1;
-            return (
-              <div className="settings-toggle-row" key={exam.id}>
-                <span className="settings-toggle-text">
-                  <span className="settings-toggle-label">{exam.title}</span>
-                  <span className="settings-hint">{visible ? "Shown in Exams" : "Hidden from Exams"}</span>
+        <section className="settings-section" aria-labelledby="settings-study-title">
+          <div className="settings-section-heading">
+            <h2 id="settings-study-title">Study</h2>
+            <p className="settings-hint">Choose what you see.</p>
+          </div>
+          <div className="settings-section-body">
+            <div className="settings-list-heading">
+              <h3>Navigation</h3>
+              <p className="settings-hint">Show these pages in your navigation bar.</p>
+            </div>
+            {NAVIGATION_ITEMS.map((item) => {
+              const visible = !hiddenNavigationPageIdSet.has(item.id);
+              const lastVisiblePage = visible && visibleNavigationPageCount <= 1;
+              return <SettingsToggle key={item.id} label={item.label} description={lastVisiblePage ? "Keep at least one page visible." : undefined} checked={visible} disabled={lastVisiblePage} onChange={() => onNavigationVisibilityChange(item.id, !visible)} />;
+            })}
+            <details className="settings-exam-library">
+              <summary>
+                <span className="settings-row-text">
+                  <span className="settings-label">Exam subjects</span>
+                  <span className="settings-hint">{visibleExamCount} of {EXAM_REGISTRY.length} shown</span>
                 </span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={visible}
-                  aria-label={`Show ${exam.title}`}
-                  className={`settings-switch${visible ? " is-on" : ""}`}
-                  disabled={lastVisibleExam}
-                  onClick={() => onExamVisibilityChange(exam.id, !visible)}
-                >
-                  <span className="settings-switch-knob" aria-hidden="true" />
-                </button>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+              </summary>
+              <div className="settings-exam-options" role="group" aria-label="Visible exam subjects">
+                <p className="settings-hint">Choose the subjects in your exam selector. Hiding a subject keeps your progress.</p>
+                {EXAM_REGISTRY.map((exam) => {
+                  const visible = !hiddenExamIdSet.has(exam.id);
+                  const lastVisibleExam = visible && visibleExamCount <= 1;
+                  return <SettingsToggle key={exam.id} label={exam.title} description={lastVisibleExam ? "Keep at least one subject visible." : undefined} checked={visible} disabled={lastVisibleExam} onChange={() => onExamVisibilityChange(exam.id, !visible)} />;
+                })}
               </div>
-            );
-          })}
-        </section>
-
-        <section className="settings-section">
-          <h3 className="settings-section-title">Preferences</h3>
-          <div className="settings-toggle-row">
-            <span className="settings-toggle-text">
-              <span className="settings-toggle-label">Light mode</span>
-              <span className="settings-hint">Use a light background with neutral surfaces and warm accents.</span>
-            </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={colorTheme === "light"}
-              aria-label="Light mode"
-              className={`settings-switch${colorTheme === "light" ? " is-on" : ""}`}
-              onClick={() => onColorThemeChange(colorTheme === "light" ? "dark" : "light")}
-            >
-              <span className="settings-switch-knob" aria-hidden="true" />
-            </button>
-          </div>
-          <div className="settings-toggle-row">
-            <span className="settings-toggle-text">
-              <span className="settings-toggle-label">Reduce motion</span>
-              <span className="settings-hint">Turn off animations and smooth scrolling.</span>
-            </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={reduceMotion}
-              aria-label="Reduce motion"
-              className={`settings-switch${reduceMotion ? " is-on" : ""}`}
-              onClick={() => onReduceMotionChange(!reduceMotion)}
-            >
-              <span className="settings-switch-knob" aria-hidden="true" />
-            </button>
-          </div>
-          <div className="settings-toggle-row">
-            <span className="settings-toggle-text">
-              <span className="settings-toggle-label">Comfortable text</span>
-              <span className="settings-hint">Increase reading size across notes, guides and controls.</span>
-            </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={comfortableText}
-              aria-label="Comfortable text"
-              className={`settings-switch${comfortableText ? " is-on" : ""}`}
-              onClick={() => onComfortableTextChange(!comfortableText)}
-            >
-              <span className="settings-switch-knob" aria-hidden="true" />
-            </button>
+            </details>
           </div>
         </section>
 
-        <section className="settings-section">
-          <h3 className="settings-section-title">Data</h3>
-          <div className="settings-row settings-data-row">
-            <span>
-              <span className="settings-toggle-label">Export local data</span>
-              <span className="settings-hint">Download calculator values, preferences, learning progress and locally stored exam progress.</span>
-            </span>
-            <button type="button" className="ghost-button" onClick={exportLocalData}>
-              Export JSON
-            </button>
+        <section className="settings-section" aria-labelledby="settings-data-title">
+          <div className="settings-section-heading">
+            <h2 id="settings-data-title">Data</h2>
+            <p className="settings-hint">Keep a copy of your work.</p>
+          </div>
+          <div className="settings-section-body">
+            <div className="settings-row settings-data-row">
+              <div className="settings-row-text">
+                <span className="settings-label">Download your data</span>
+                <p className="settings-hint">Export progress, calculator values and preferences saved on this device.</p>
+              </div>
+              <button type="button" className="settings-button" onClick={exportLocalData}>
+                Export
+              </button>
+            </div>
           </div>
         </section>
 
         {user ? (
-          <section className="settings-section">
-            <h3 className="settings-section-title">Account</h3>
-            <div className="settings-row">
-              <span className="settings-toggle-label">Email</span>
-              <span className="settings-account-email">{user.email}</span>
-            </div>
-            <div className="settings-actions">
-              <button
-                type="button"
-                className="ghost-button settings-danger-btn"
-                onClick={() => logout()}
-              >
-                Log out
-              </button>
-            </div>
-          </section>
+          <footer className="settings-footer">
+            <button type="button" className="settings-button" onClick={() => logout()}>Log out</button>
+          </footer>
         ) : null}
       </div>
     </section>
