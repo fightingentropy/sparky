@@ -9,7 +9,7 @@
     "pages:dev": "unset CLOUDFLARE_API_TOKEN; wrangler pages dev public --port 8788 --binding JWT_SECRET=dev-secret-not-for-production",
     "pages:deploy": "bun run build && unset CLOUDFLARE_API_TOKEN && wrangler pages deploy dist --project-name electrics",
     "migrate:local": "unset CLOUDFLARE_API_TOKEN; wrangler d1 migrations apply sparky-db --local",
-    "migrate:remote": "unset CLOUDFLARE_API_TOKEN; wrangler d1 migrations apply sparky-db --remote",
+    "migrate:remote": "CLOUDFLARE_ACCOUNT_ID=9349e7e9527ec0aad29368255a686ec4 node node_modules/cf/bin/cf d1 migrations apply b38c9adc-5e65-4a49-84f3-ee636a23ab89 --dir migrations",
     "build": "tsc -b && vite build && bun run scripts/check-pwa-output.ts",
     "preview": "vite preview",
     "test": "vitest run",
@@ -41,6 +41,7 @@
     "@types/three": "0.182.0",
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^5.0.0",
+    "cf": "1.0.0-beta.12",
     "eslint": "^10.5.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
@@ -50,6 +51,10 @@
     "vite": "^8.0.0",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.1.4",
-    "workbox-window": "^7.4.0"
+    "workbox-window": "^7.4.0",
+    "wrangler": "4.147.0"
+  },
+  "engines": {
+    "node": ">=22.18.0"
   }
 }
