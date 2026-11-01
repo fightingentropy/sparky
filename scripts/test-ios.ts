@@ -58,6 +58,10 @@ if (!simulator?.udid) {
   );
 }
 
+// -quiet leaves test assertions out of the log, so CI asks for a result bundle
+// to keep when a test fails.
+const resultBundle = process.env.SPARKY_TEST_RESULT_BUNDLE;
+
 console.log(`Running Sparky tests on ${simulator.name} (${simulator.udid}).`);
 await run([
   "xcodebuild",
@@ -69,5 +73,6 @@ await run([
   "Sparky",
   "-destination",
   `platform=iOS Simulator,id=${simulator.udid}`,
+  ...(resultBundle ? ["-resultBundlePath", resultBundle] : []),
   "CODE_SIGNING_ALLOWED=NO",
 ]);
