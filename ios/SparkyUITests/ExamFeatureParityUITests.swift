@@ -69,14 +69,15 @@ final class ExamFeatureParityUITests: XCTestCase {
 
         // The exam actions menu, its Reset item and the confirmation dialog are
         // system-presented UI. They animate in more slowly than the app's own
-        // views and their element types differ between iOS releases.
+        // views, their element types differ between iOS releases, and iOS 26
+        // refuses to scroll the toolbar button into view, so tap them in place.
         let examActions = presentedControl("Exam actions", in: app, timeout: Timeout.interaction)
-        examActions.tap()
+        tapInPlace(examActions)
         let resetButton = presentedControl("Reset test", in: app, timeout: Timeout.presentation)
-        resetButton.tap()
+        tapInPlace(resetButton)
 
         let startAgainButton = presentedControl("Start again", in: app, timeout: Timeout.presentation)
-        startAgainButton.tap()
+        tapInPlace(startAgainButton)
 
         expectExists(app.staticTexts["0 answered"], "the answered count to reset to 0")
         expectLabel(answerToggle, "Show answer")
@@ -250,5 +251,13 @@ extension ExamFeatureParityUITests {
             line: line
         )
         return found ?? candidates[0]
+    }
+
+    /// Taps the element's centre without first asking XCUITest to scroll it
+    /// into view. On iOS 26 that request fails for toolbar buttons
+    /// (kAXErrorCannotComplete on kAXScrollToVisibleAction), so a plain tap()
+    /// fails even though the button is on screen.
+    fileprivate func tapInPlace(_ element: XCUIElement) {
+        element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
     }
 }
