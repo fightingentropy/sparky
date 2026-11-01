@@ -1,0 +1,7 @@
+{
+  "type": "xcode",
+  "app": "ios",
+  "generate": "xcodegen generate",
+  "project": "Sparky.xcodeproj",
+  "scheme": "Sparky"
+}
