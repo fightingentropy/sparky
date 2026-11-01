@@ -22,7 +22,8 @@
     "check": "bun run check:content && bun run check:web && bun run check:native",
     "icons": "bun run scripts/generate-icons.ts",
     "ios:content": "bun run scripts/export-ios-content.ts",
-    "ios:project": "bun run ios:content && cd ios && xcodegen generate"
+    "ios:project": "bun run ios:content && cd ios && xcodegen generate",
+    "mini:build-ios": "mini-build ios"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

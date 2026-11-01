@@ -13,3 +13,8 @@
 - `xcodebuild` may still target an iOS Simulator for automated tests, but passing tests do not replace an integrated-simulator visual check.
 - If the integrated simulator is unavailable or cannot reproduce an issue, report the blocker. Do not reinstall or fall back to the standalone Simulator without explicit user approval.
 - Use a physical device only for device-specific behavior or when the user explicitly asks for an install.
+
+## iPhone builds
+
+- Development device builds run on the Mac mini: `bun run mini:build-ios` (`mini-build ios`, from `~/Developer/mini-build`). It syncs the repo to `~/Builds/sparky` on the mini, runs XcodeGen, builds a signed Release app there and installs it on the paired iPhone, so only run it when the user explicitly asks for an install (`mini-build ios --no-install` builds without installing). Don't build device apps on this Mac.
+- `bun run test:ios` and the integrated simulator stay the way to test and check UI. App Store archives still come from the GitHub Actions workflow, not from mini-build.
