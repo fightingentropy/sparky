@@ -1,1 +1,0 @@
-Sparky.debug.dylib
