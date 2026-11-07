@@ -1,3 +1,7 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
@@ -6,6 +10,14 @@ import { contentCacheVersion } from "./scripts/content-cache-version";
 
 const ROOT_DIR = import.meta.dirname;
 const CONTENT_CACHE_VERSION = contentCacheVersion(ROOT_DIR);
+// The service worker serves precached HTML with the response headers it was
+// cached with, including the Content-Security-Policy from public/_headers.
+// Folding the headers file into each HTML page's precache revision makes a
+// header-only change refresh those cached pages for returning visitors.
+const HEADERS_REVISION = createHash("sha256")
+  .update(readFileSync(resolve(ROOT_DIR, "public/_headers")))
+  .digest("hex")
+  .slice(0, 12);
 
 export default defineConfig({
   plugins: [
@@ -29,8 +41,8 @@ export default defineConfig({
         start_url: "/",
         scope: "/",
         display: "standalone",
-        background_color: "#111212",
-        theme_color: "#111212",
+        background_color: "#100e0c",
+        theme_color: "#100e0c",
         icons: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
@@ -63,6 +75,16 @@ export default defineConfig({
           // Per-question diagram images are runtime-cached on first use (see
           // runtimeCaching), not precached, to keep the install payload small.
           "exam-images/**"
+        ],
+        manifestTransforms: [
+          async (entries) => ({
+            manifest: entries.map((entry) =>
+              entry.url.endsWith(".html") && entry.revision
+                ? { ...entry, revision: `${entry.revision}-${HEADERS_REVISION}` }
+                : entry
+            ),
+            warnings: []
+          })
         ],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/(privacy|support|delete-account)(\.html)?\/?$/],

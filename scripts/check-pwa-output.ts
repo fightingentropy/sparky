@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -49,6 +50,25 @@ for (const cachePrefix of ["exam-data", "exam-images", "lazy-pages"]) {
   }
 }
 
+// Precached HTML keeps the response headers it was cached with, including the
+// Content-Security-Policy. Each HTML revision must carry the _headers hash so a
+// header-only deploy still refreshes those pages for returning visitors.
+const headersRevision = createHash("sha256")
+  .update(await readFile(resolve(rootDir, "public", "_headers")))
+  .digest("hex")
+  .slice(0, 12);
+const htmlEntries = [...precache.matchAll(/\{url:"([^"]+\.html)",revision:"([^"]+)"\}/g)];
+if (htmlEntries.length === 0) {
+  throw new Error("dist/sw.js precaches no HTML pages; expected at least index.html");
+}
+for (const [, url, revision] of htmlEntries) {
+  if (!revision.endsWith(`-${headersRevision}`)) {
+    throw new Error(
+      `dist/sw.js precaches ${url} at revision ${revision}, which does not include the public/_headers hash ${headersRevision}`,
+    );
+  }
+}
+
 console.log(
-  `Verified deferred PWA assets and runtime cache version ${expectedContentVersion}.`,
+  `Verified deferred PWA assets, runtime cache version ${expectedContentVersion} and ${htmlEntries.length} header-versioned HTML pages.`,
 );
