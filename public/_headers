@@ -1,14 +1,19 @@
 # Cloudflare Pages security headers (applied to every response).
 # CSP notes:
-#  - script-src 'self': the built index.html has no inline scripts; all JS is
-#    hashed same-origin bundles, and the service worker is same-origin.
+#  - script-src 'self' + one hash: all JS is hashed same-origin bundles and the
+#    service worker is same-origin. The only inline script is the tiny theme
+#    bootstrap in index.html, allowed by its exact sha256 hash
+#    (src/securityHeaders.test.ts fails if the script and hash drift apart).
 #  - style-src 'unsafe-inline': the app uses inline style attributes for
-#    progress-bar widths and CSS custom properties. The font is self-hosted.
-#  - img-src 'self': question diagram images are bundled locally under
-#    /exam-images. data:/blob: cover canvas/texture sources.
+#    progress-bar widths and CSS custom properties. Fonts are self-hosted.
+#  - img-src: question diagram images are bundled locally under /exam-images;
+#    data:/blob: cover canvas/texture sources; i.ytimg.com serves the
+#    Workplace Tutorials video thumbnails.
+#  - frame-src: Workplace Tutorials embeds play from youtube-nocookie.com, and
+#    only after the viewer presses Play.
 #  - connect-src 'self': the only network calls are the same-origin /api routes.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-XGveDDUZdww36atTbyeAIpwOSV+azQbNhyLFi8FPcgg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com; frame-src https://www.youtube-nocookie.com; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
