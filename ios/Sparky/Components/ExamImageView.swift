@@ -26,7 +26,7 @@ struct ExamImageView: View {
                     .accessibilityLabel("Question diagram")
             } else {
                 Label("Diagram unavailable", systemImage: "photo.badge.exclamationmark")
-                    .font(.caption)
+                    .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
                     .frame(maxWidth: .infinity)
                     .padding()

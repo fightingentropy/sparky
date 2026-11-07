@@ -43,11 +43,11 @@ struct SparkyAccountSummaryCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     SparkyEyebrow(text: authStore.user == nil ? "Sparky account" : "Signed in")
                     Text(authStore.user?.displayName ?? "Sign in to sync")
-                        .font(.headline)
+                        .font(.sparky(.headline))
                         .foregroundStyle(Color.sparkyText)
                         .lineLimit(1)
                     Text(summaryDetail)
-                        .font(.caption)
+                        .font(.sparky(.caption))
                         .foregroundStyle(Color.sparkyMuted)
                         .lineLimit(2)
                 }
@@ -123,10 +123,10 @@ struct ProgressSyncStatusCard: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.sparky(.subheadline, weight: .semibold))
                     .foregroundStyle(Color.sparkyText)
                 Text(detail)
-                    .font(.caption)
+                    .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -147,7 +147,7 @@ struct ProgressSyncStatusCard: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Color.sparkyAccent)
+            .foregroundStyle(Color.sparkyAccentText)
             .disabled(isSyncing)
             .opacity(isSyncing ? 0.45 : 1)
             .accessibilityLabel(isSyncing ? "Syncing progress" : "Sync progress now")

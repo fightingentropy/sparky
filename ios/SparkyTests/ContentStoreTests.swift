@@ -17,12 +17,19 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertEqual(store.catalog.questionCount, 3_983)
         XCTAssertEqual(store.notes.count, 43)
         XCTAssertEqual(store.guides.count, 13)
-        XCTAssertEqual(store.tutorials.count, 7)
+        XCTAssertEqual(store.tutorials.count, 8)
         XCTAssertEqual(store.calculators.count, 10)
 
         XCTAssertNotNil(store.note(id: "cheat-core-formulas"))
         XCTAssertNotNil(store.guide(id: "becoming-an-electrician-route"))
         XCTAssertNotNil(store.tutorial(id: "internal-90-trunking"))
+        XCTAssertEqual(store.tutorial(id: "swa-gland-make-off")?.instructions?.steps.count, 12)
+        for tutorial in store.tutorials {
+            XCTAssertFalse(
+                tutorial.instructions?.steps.isEmpty ?? true,
+                "\(tutorial.id) has no step-by-step instructions"
+            )
+        }
         XCTAssertEqual(store.calculator(id: "tray-bend-cut")?.algorithmVersion, 2)
         XCTAssertEqual(
             store.calculator(id: "structural-limits")?.additionalSources?.first?.classification,

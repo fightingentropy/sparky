@@ -710,7 +710,7 @@ private enum PDFColors {
     static let text = UIColor(red: 33 / 255, green: 29 / 255, blue: 24 / 255, alpha: 1)
     static let optionLabel = UIColor(red: 52 / 255, green: 39 / 255, blue: 18 / 255, alpha: 1)
     static let muted = UIColor(red: 129 / 255, green: 119 / 255, blue: 101 / 255, alpha: 1)
-    static let accent = UIColor(red: 138 / 255, green: 99 / 255, blue: 32 / 255, alpha: 1)
+    static let accent = UIColor(red: 185 / 255, green: 48 / 255, blue: 4 / 255, alpha: 1)
     static let success = UIColor(red: 49 / 255, green: 92 / 255, blue: 69 / 255, alpha: 1)
     static let answerFill = UIColor(red: 247 / 255, green: 243 / 255, blue: 233 / 255, alpha: 1)
     static let border = UIColor(red: 217 / 255, green: 204 / 255, blue: 178 / 255, alpha: 1)

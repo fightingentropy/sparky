@@ -1,15 +1,3 @@
-/* Self-hosted Inter (variable weight 100–900), bundled under public/fonts and
-   precached so the type loads offline with no third-party font request. Inter is a
-   clean, neutral grotesque — the closest freely-licensed analogue to Anthropic's
-   Styrene sans — used for both UI chrome and body/exam copy. */
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("/fonts/inter-latin.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 
 /* ── Calculator library and expandable notes ────────────────────────────── */
 
@@ -113,92 +101,100 @@
   .notes-search { flex-basis: auto; width: 100%; }
   .notes-header h1 { font-size: 2rem; }
 }
-@font-face {
-  font-family: "Hanken Grotesk";
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url("/fonts/hanken-grotesk-latin.woff2") format("woff2");
-}
-@font-face {
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
-}
+/* Fonts: Geist families are self-hosted under public/fonts and precached. */
+@font-face { font-family: "Geist"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/Geist-Variable.woff2") format("woff2"); }
+@font-face { font-family: "Geist"; font-style: italic; font-weight: 100 900; font-display: swap; src: url("/fonts/Geist-Italic-Variable.woff2") format("woff2"); }
+@font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/GeistMono-Variable.woff2") format("woff2"); }
+@font-face { font-family: "Geist Serif"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/GeistSerif-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Geist Fallback"; src: local("Arial"); size-adjust: 106.28%; ascent-override: 94.56%; descent-override: 27.76%; line-gap-override: 0%; }
+@font-face { font-family: "Geist Serif Fallback"; src: local("Times New Roman"); size-adjust: 114.49%; ascent-override: 87.78%; descent-override: 25.77%; line-gap-override: 0%; }
+@font-face { font-family: "Geist Mono Fallback"; src: local("Courier New"); size-adjust: 99.98%; ascent-override: 100.52%; descent-override: 29.5%; line-gap-override: 0%; }
 
+/* Design tokens: one source per theme (warm neutrals, orange accent, no blue).
+   Dark is the default; html[data-theme="light"] overrides below. */
 :root {
   color-scheme: dark;
-  --bg: #16130f;
-  --surface: #1e1a15;
-  --surface-alt: #241f19;
-  --surface-soft: #2c251d;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --line: rgba(255, 255, 255, 0.05);
-  --fill: rgba(255, 255, 255, 0.03);
-  --text: #e3dfd6;
-  --muted: #9a948a;
-  --muted-strong: #b3aca0;
-  --text-muted: #9a948a;
-  /* Single accent: muted brass. */
-  --accent: #bd8b4a;
-  --accent-soft: rgba(189, 139, 74, 0.12);
-  --accent-strong: #cb9954;
-  --accent-muted: rgba(189, 139, 74, 0.5);
-  --accent-line: rgba(189, 139, 74, 0.55);
-  --accent-line-strong: rgba(203, 153, 84, 0.72);
-  --accent-focus: rgba(189, 139, 74, 0.2);
+  --bg: #100e0c;
+  --surface: #171412;
+  --surface-alt: #1f1c1a;
+  --surface-soft: #2a2725;
+  --fill: #1f1c1a;
+  --border: #262422;
+  --border-strong: #363433;
+  --line: #1e1c1b;
+  --text: #edebe6;
+  --text-strong: #f7f5f0;
+  --muted: #a29e98;
+  --muted-strong: #cdcac5;
+  --text-muted: #a29e98;
+  --accent: #fa7a45;
+  --accent-strong: #fe8f5b;
+  --accent-soft: #2c1b13;
+  --accent-focus: #3a2116;
+  --accent-muted: #623420;
+  --accent-line: #623420;
+  --accent-line-strong: #854429;
   --accent-glow: transparent;
-  --on-accent: #0c0b0a;
-  --danger: #cf8b6f;
+  --on-accent: #191512;
+  --primary: #edebe6;
+  --on-primary: #191512;
+  --danger: #ff6467;
+  --danger-soft: #311a19;
+  --success: #62bb78;
+  --success-soft: #1c261b;
+  --warning: #e9b452;
   --shadow-card: none;
-  --shadow-glow: 0 0 0 1px var(--accent-muted);
-  --panel-glass: rgba(20, 17, 13, 0.72);
-  --topbar-bg: #16130f;
-  --overlay-bg: rgba(16, 14, 12, 0.98);
-  --mobile-bar-bg: rgba(22, 19, 15, 0.96);
-  --grid-line: rgba(255, 255, 255, 0.05);
-  --radius-lg: 16px;
-  --radius-md: 12px;
-  --radius-sm: 9px;
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --font-ui: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --font-heading: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --shadow-glow: none;
+  --shadow-pop: none;
+  --panel-glass: var(--surface);
+  --topbar-bg: var(--bg);
+  --overlay-bg: var(--surface);
+  --mobile-bar-bg: var(--surface);
+  --grid-line: transparent;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --font-ui: "Geist", "Geist Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-heading: "Geist", "Geist Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-serif: "Geist Serif", "Geist Serif Fallback", Georgia, "Times New Roman", serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 html[data-theme="light"] {
   color-scheme: light;
-  --bg: #f6f9fc;
-  --surface: #ffffff;
-  --surface-alt: #edf7ff;
-  --surface-soft: #dcefff;
-  --border: rgba(36, 105, 150, 0.14);
-  --border-strong: rgba(36, 105, 150, 0.25);
-  --line: rgba(36, 105, 150, 0.11);
-  --fill: rgba(105, 190, 239, 0.08);
-  --text: #173247;
-  --muted: #6d8291;
-  --muted-strong: #4d687b;
-  --text-muted: #6d8291;
-  --accent: #55b5e8;
-  --accent-soft: rgba(85, 181, 232, 0.15);
-  --accent-strong: #1686c2;
-  --accent-muted: rgba(31, 145, 205, 0.38);
-  --accent-line: rgba(31, 145, 205, 0.42);
-  --accent-line-strong: rgba(22, 134, 194, 0.64);
-  --accent-focus: rgba(85, 181, 232, 0.25);
-  --on-accent: #082b3f;
-  --danger: #c75353;
-  --shadow-card: 0 12px 36px rgba(49, 104, 137, 0.08);
-  --shadow-glow: 0 0 0 1px var(--accent-muted);
-  --panel-glass: rgba(255, 255, 255, 0.82);
-  --topbar-bg: #f6f9fc;
-  --overlay-bg: rgba(255, 255, 255, 0.98);
-  --mobile-bar-bg: rgba(246, 249, 252, 0.96);
-  --grid-line: rgba(72, 156, 207, 0.10);
+  --bg: #fbfaf7;
+  --surface: #fefdfc;
+  --surface-alt: #f2f0ec;
+  --surface-soft: #eae7e3;
+  --fill: #f2f0ec;
+  --border: #e0ddd9;
+  --border-strong: #c7c3be;
+  --line: #ebe8e4;
+  --text: #191512;
+  --text-strong: #0d0b09;
+  --muted: #67625d;
+  --muted-strong: #46413e;
+  --text-muted: #67625d;
+  --accent: #cf3c12;
+  --accent-strong: #b93004;
+  --accent-soft: #f8ebe5;
+  --accent-focus: #f3d8ce;
+  --accent-muted: #ecb7a7;
+  --accent-line: #ecb7a7;
+  --accent-line-strong: #cf3c12;
+  --on-accent: #ffffff;
+  --primary: #191512;
+  --on-primary: #fbfaf7;
+  --danger: #c2272d;
+  --danger-soft: #f7e5e2;
+  --success: #267543;
+  --success-soft: #e6ede5;
+  --warning: #9d6300;
+  --shadow-card: 0 1px 2px rgba(25, 21, 18, 0.05);
+  --shadow-pop: 0 8px 24px rgba(25, 21, 18, 0.08);
+  --scrim: rgba(25, 21, 18, 0.35);
 }
 
 * {
@@ -211,7 +207,7 @@ body,
 }
 
 /* Slightly larger root than the 16px default so all rem-based type reads a touch
-   bigger; Inter's tall x-height already adds apparent size, so 16px is plenty.
+   bigger; Geist reads large at this size, so 16px is plenty.
    Per-component reading sizes are bumped further below. */
 html {
   font-size: 16px;
@@ -293,7 +289,7 @@ h3 {
   border: 1px solid var(--border-strong);
   border-radius: 14px;
   background: var(--overlay-bg);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-pop);
 }
 
 .nav-menu-item {
@@ -315,13 +311,13 @@ h3 {
 }
 
 .nav-menu-item:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--surface-soft);
   color: var(--text);
 }
 
 .nav-menu-item:focus-visible {
   outline: none;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--surface-soft);
   color: var(--text);
   box-shadow: 0 0 0 2px var(--accent-soft);
 }
@@ -359,13 +355,13 @@ kbd {
   min-width: 36px;
   min-height: 22px;
   padding: 0 6px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--surface-soft);
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
 }
 
 /* ── Buttons ────────────────────────────── */
@@ -389,14 +385,14 @@ kbd {
 
 .ghost-button:hover,
 .switch-chip:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-soft);
   border-color: var(--border-strong);
   color: var(--text);
 }
 
 .ghost-button:active,
 .switch-chip:active {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-alt);
 }
 
 .switch-chip {
@@ -512,7 +508,7 @@ kbd {
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--surface-alt);
 }
 
 .reference-table table {
@@ -544,7 +540,7 @@ kbd {
 }
 
 .reference-table th {
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--surface-soft);
   color: var(--text);
   font-weight: 700;
 }
@@ -640,12 +636,68 @@ kbd {
   margin-top: 2px;
 }
 
+.tutorial-steps {
+  border-top: 1px solid var(--border);
+}
+
+.tutorial-steps > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 0 0;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.tutorial-steps > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tutorial-steps > summary > svg {
+  flex: none;
+  color: var(--muted);
+  transition: transform 160ms var(--ease);
+}
+
+.tutorial-steps[open] > summary > svg {
+  transform: rotate(90deg);
+}
+
+.tutorial-card-body .tutorial-steps-note {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  color: var(--muted-strong);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.tutorial-steps ol {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-left: 22px;
+  color: var(--muted-strong);
+  line-height: 1.55;
+}
+
+.tutorial-steps li::marker {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .tutorial-embed {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: #0c0a07;
+  background: #100e0c;
 }
 
 .tutorial-embed iframe {
@@ -690,8 +742,8 @@ kbd {
   height: 100%;
   padding: 0;
   border: 0;
-  background: #0c0a07;
-  color: #fff;
+  background: #100e0c;
+  color: #f7f5f0;
   cursor: pointer;
 }
 
@@ -724,8 +776,8 @@ kbd {
   width: 62px;
   height: 46px;
   border-radius: 14px;
-  background: rgba(207, 160, 91, 0.94);
-  color: #15110c;
+  background: var(--accent);
+  color: var(--on-accent);
   font-size: 1.1rem;
   transform: translate(-50%, -58%);
 }
@@ -736,8 +788,8 @@ kbd {
   bottom: 12px;
   padding: 7px 10px;
   border-radius: 999px;
-  background: rgba(8, 7, 5, 0.82);
-  color: #fff;
+  background: rgba(16, 14, 12, 0.82);
+  color: #f7f5f0;
   font-size: 0.76rem;
   font-weight: 700;
 }
@@ -858,9 +910,9 @@ select {
   padding: 0 14px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--surface-soft);
   color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  box-shadow: none;
   transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease), background 200ms var(--ease);
 }
 
@@ -876,8 +928,8 @@ input:focus,
 select:focus {
   outline: none;
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 0 3px var(--accent-soft);
+  background: var(--surface-soft);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .ghost-button:focus-visible,
@@ -892,7 +944,7 @@ select:focus {
 
 input[aria-invalid="true"] {
   border-color: var(--danger);
-  box-shadow: 0 0 0 3px rgba(207, 139, 111, 0.18);
+  box-shadow: 0 0 0 3px var(--danger-soft);
 }
 
 .input-wrap {
@@ -1005,7 +1057,7 @@ input:disabled {
   background: var(--surface-alt);
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: none;
 }
 
 .result-label {
@@ -1051,7 +1103,7 @@ input:disabled {
 
 .mini-metrics > div:hover {
   border-color: var(--border-strong);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-alt);
 }
 
 .mini-metrics span {
@@ -1336,7 +1388,7 @@ input:disabled {
   width: 48px;
   height: 20px;
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border-strong);
   border-radius: 3px;
   position: relative;
   overflow: hidden;
@@ -1426,7 +1478,7 @@ input:disabled {
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.72);
+  background: var(--scrim);
 }
 
 .modal-shell {
@@ -1436,8 +1488,8 @@ input:disabled {
   padding: 20px;
   border: 1px solid var(--border-strong);
   border-radius: 16px;
-  background: rgba(28, 25, 21, 0.98);
-  box-shadow: 0 28px 100px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
 }
 
 .palette-search {
@@ -1460,7 +1512,7 @@ input:disabled {
 .help-row {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--surface-alt);
 }
 
 .search-result,
@@ -1474,7 +1526,7 @@ input:disabled {
 }
 
 .palette-result:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--surface-soft);
   border-color: var(--border-strong);
 }
 
@@ -2243,7 +2295,7 @@ body[data-page="interactive"] .ix-3d-wrap {
 }
 
 .ix-breaker-body.is-tripped {
-  fill: rgba(207, 139, 111, 0.16);
+  fill: var(--danger-soft);
   stroke: var(--danger);
 }
 
@@ -2341,7 +2393,7 @@ body[data-page="interactive"] .ix-3d-wrap {
 }
 
 .ix-tip-bg {
-  fill: rgba(17, 19, 21, 0.94);
+  fill: var(--surface);
   stroke: var(--accent-muted);
   stroke-width: 1;
 }
@@ -2364,8 +2416,8 @@ body[data-page="interactive"] .ix-3d-wrap {
 }
 
 .ix-status.is-warning {
-  background: rgba(207, 139, 111, 0.1);
-  border-color: rgba(207, 139, 111, 0.4);
+  background: var(--danger-soft);
+  border-color: var(--danger);
   color: var(--danger);
 }
 
@@ -2521,7 +2573,7 @@ body[data-page="interactive"] .ix-3d-wrap {
 .ix-welcome-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(9, 7, 5, 0.72);
+  background: var(--scrim);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2692,8 +2744,8 @@ body[data-page="interactive"] .ix-3d-wrap {
   padding: 32px 28px 28px;
   border: 1px solid var(--border-strong);
   border-radius: 18px;
-  background: rgba(28, 25, 21, 0.98);
-  box-shadow: 0 28px 100px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
 }
 
 .modal-close {
@@ -2746,7 +2798,7 @@ body[data-page="interactive"] .ix-3d-wrap {
   padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--surface-soft);
   color: var(--text);
   font: inherit;
   font-size: 0.95rem;
@@ -2762,8 +2814,8 @@ body[data-page="interactive"] .ix-3d-wrap {
   margin: 0;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  background: rgba(235, 87, 87, 0.12);
-  color: #eb5757;
+  background: var(--danger-soft);
+  color: var(--danger);
   font-size: 0.85rem;
 }
 
@@ -2842,7 +2894,7 @@ body[data-page="interactive"] .ix-3d-wrap {
 kbd {
   font-family: var(--font-mono);
   border-color: var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-alt);
   box-shadow: none;
 }
 
@@ -3015,21 +3067,21 @@ select:focus,
 .field input:not([type="checkbox"]):not([type="radio"]) {
   min-height: 48px;
   padding: 0 16px;
-  border-color: rgba(255, 244, 230, 0.07);
+  border-color: var(--border);
   border-radius: 14px;
-  background: rgba(255, 240, 224, 0.05);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.14);
+  background: var(--surface-soft);
+  box-shadow: none;
 }
 
 .field input:not([type="checkbox"]):not([type="radio"]):hover {
-  border-color: rgba(255, 244, 230, 0.11);
-  background: rgba(255, 240, 224, 0.07);
+  border-color: var(--border-strong);
+  background: var(--surface-soft);
 }
 
 .field input:not([type="checkbox"]):not([type="radio"]):focus {
   border-color: var(--accent-muted);
-  background: rgba(255, 240, 224, 0.09);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 3px var(--accent-soft);
+  background: var(--surface-soft);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .ghost-button,
@@ -3177,8 +3229,8 @@ select:focus,
   border-width: 1px;
   border-radius: var(--radius-lg);
   margin-bottom: 12px;
-  background: rgba(28, 25, 21, 0.9);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+  background: var(--surface);
+  box-shadow: none;
 }
 
 .ix-canvas-bg {
@@ -3366,7 +3418,7 @@ select:focus,
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--overlay-bg);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-pop);
   transform: translateX(-50%);
 }
 
@@ -3401,7 +3453,7 @@ select:focus,
 .exam-test-done {
   margin-left: auto;
   padding-left: 12px;
-  color: #6fcf8e;
+  color: var(--success);
   font-weight: 700;
   font-size: 0.85rem;
 }
@@ -3968,36 +4020,9 @@ label.settings-label {
 }
 
 body[data-page="exams"]{
-  /* Warm-neutral dark surface + single brass accent. */
-  --ex-bg: #16130f;
-  --ex-text: #e3dfd6;
-  --ex-heading: #f6f3ec;
-  --ex-muted: #9a948a;
-  --ex-faint: #7a756b;
-  --ex-brass: #bd8b4a;
-  --ex-brass-hover: #cb9954;
-  --ex-hair: rgba(255, 255, 255, 0.07);
-  --ex-hair-soft: rgba(255, 255, 255, 0.04);
-  --ex-surface: rgba(255, 255, 255, 0.014);
-  --ex-surface-2: rgba(255, 255, 255, 0.025);
-  --ex-brass-tint: rgba(189, 139, 74, 0.12);
-  --ex-brass-line: rgba(189, 139, 74, 0.55);
-  --ex-on-accent: #0c0b0a;
-  --ex-overlay: rgba(16, 14, 12, 0.98);
-  --ex-panel: rgba(16, 14, 12, 0.55);
-  --ex-bar: #16130f;
-  /* Restrained, warm semantic feedback for the post-submit review (kept muted
-     so brass remains the only decorative accent). */
-  --ex-good: #8fb083;
-  --ex-good-tint: rgba(143, 176, 131, 0.1);
-  --ex-good-line: rgba(143, 176, 131, 0.42);
-  --ex-bad: #cf8b6f;
-  --ex-bad-tint: rgba(207, 139, 111, 0.1);
-  --ex-bad-line: rgba(207, 139, 111, 0.42);
-  --ex-ui: "Hanken Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --ex-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  /* Dark base shared with the rest of the app. */
-  background-color: var(--ex-bg);
+  --ex-ui: var(--font-ui);
+  --ex-mono: var(--font-mono);
+  background-color: var(--bg);
 }
 
 /* ── Top bar (global chrome, restyled on exams only) ───────────────────── */
@@ -4158,10 +4183,11 @@ body[data-page="exams"] .exam-title-info{
   border: 1px solid var(--ex-hair);
   background: var(--ex-surface);
   color: var(--ex-muted);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-style: italic;
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 400;
+  font-synthesis-weight: none;
   line-height: 1;
   padding: 0;
   appearance: none;
@@ -4187,7 +4213,7 @@ body[data-page="exams"] .exam-tooltip{
   background: var(--ex-overlay);
   border: 1px solid var(--ex-hair);
   border-radius: 14px;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-pop);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-6px);
@@ -4253,7 +4279,7 @@ body[data-page="exams"] .exam-title-menu{
   border: 1px solid var(--ex-hair);
   border-radius: 16px;
   background: var(--ex-overlay);
-  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--shadow-pop);
 }
 
 body[data-page="exams"] .exam-title-option{
@@ -4412,7 +4438,7 @@ body[data-page="exams"] .exam-test-menu{
   border: 1px solid var(--ex-hair);
   border-radius: 12px;
   background: var(--ex-overlay);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-pop);
   transform: none;
 }
 
@@ -4617,7 +4643,7 @@ body[data-page="exams"] .exam-copy-btn:focus-visible{
 }
 
 body[data-page="exams"] .exam-preview-btn.is-active{
-  color: var(--ex-brass);
+  color: var(--ex-brass-hover);
   border-color: var(--ex-brass-line);
   background: var(--ex-brass-tint);
 }
@@ -4744,7 +4770,7 @@ body[data-page="exams"] .exam-option-control{
 }
 
 body[data-page="exams"] .exam-option:hover:not(.is-disabled){
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: var(--border-strong);
 }
 
 body[data-page="exams"] .exam-option-control:disabled{
@@ -4788,7 +4814,7 @@ body[data-page="exams"] .exam-option-explanation-toggle::-webkit-details-marker{
 body[data-page="exams"] .exam-option-explanation-toggle:hover,
 body[data-page="exams"] .exam-option-details[open] > summary{
   background: var(--ex-brass-tint);
-  color: var(--ex-brass);
+  color: var(--ex-brass-hover);
 }
 
 body[data-page="exams"] .exam-option-explanation-toggle:focus-visible{
@@ -4829,7 +4855,7 @@ body[data-page="exams"] .exam-option-letter{
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-soft);
   color: var(--ex-muted);
   font-family: var(--ex-mono);
   font-size: 0.82rem;
@@ -4839,17 +4865,17 @@ body[data-page="exams"] .exam-option-letter{
 
 body[data-page="exams"] .exam-option.is-selected:not(.is-answer):not(.is-wrong) .exam-option-letter{
   background: var(--ex-brass);
-  color: #0c0b0a;
+  color: var(--on-accent);
 }
 
 body[data-page="exams"] .exam-option.is-answer .exam-option-letter{
   background: var(--ex-good);
-  color: #0c0b0a;
+  color: var(--on-accent);
 }
 
 body[data-page="exams"] .exam-option.is-wrong .exam-option-letter{
   background: var(--ex-bad);
-  color: #0c0b0a;
+  color: var(--on-accent);
 }
 
 body[data-page="exams"] .exam-option-text{
@@ -5192,7 +5218,7 @@ body[data-page="exams"] .exam-review-filter strong{
   height: 1.45rem;
   padding: 0 0.42rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--surface-soft);
   color: var(--ex-text);
   font-family: var(--ex-mono);
   font-size: 0.7rem;
@@ -5210,7 +5236,7 @@ body[data-page="exams"] .exam-review-filter.is-active{
 
 body[data-page="exams"] .exam-review-filter.is-active strong{
   background: var(--ex-brass);
-  color: #0c0b0a;
+  color: var(--on-accent);
 }
 
 /* ── Results banner ────────────────────────────────────────────────────── */
@@ -5448,7 +5474,7 @@ body[data-page="exams"] .exam-actions-menu{
   border: 1px solid var(--ex-hair);
   border-radius: 12px;
   background: var(--ex-overlay);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+  box-shadow: var(--shadow-pop);
 }
 
 body[data-page="exams"] .exam-actions-menu button{
@@ -5595,7 +5621,7 @@ body[data-page="exams"] .exam-reset-confirm-button{
   border: 1px solid var(--ex-bad);
   border-radius: 9px;
   background: var(--ex-bad);
-  color: #fff;
+  color: var(--on-accent);
   font-family: var(--ex-ui);
   font-weight: 750;
   cursor: pointer;
@@ -5858,34 +5884,6 @@ body[data-page="exams"] .exam-q-topic{
 
 /* ── Exam focus mode and review navigation ─────────────────────────────── */
 
-/* ── Light theme ─────────────────────────────────────────────────────────
-   Warm off-white canvas with cool sky-blue surfaces. The theme is applied at
-   the root so every page, modal and lazy-loaded tool inherits it consistently. */
-html[data-theme="light"] body[data-page="exams"] {
-  --ex-bg: #f6f9fc;
-  --ex-text: #29495f;
-  --ex-heading: #112f44;
-  --ex-muted: #708797;
-  --ex-faint: #8fa0ac;
-  --ex-brass: #55b5e8;
-  --ex-brass-hover: #1686c2;
-  --ex-hair: rgba(36, 105, 150, 0.14);
-  --ex-hair-soft: rgba(85, 181, 232, 0.10);
-  --ex-surface: rgba(255, 255, 255, 0.68);
-  --ex-surface-2: rgba(105, 190, 239, 0.10);
-  --ex-brass-tint: rgba(85, 181, 232, 0.15);
-  --ex-brass-line: rgba(31, 145, 205, 0.42);
-  --ex-on-accent: #082b3f;
-  --ex-good: #438c67;
-  --ex-good-tint: rgba(67, 140, 103, 0.10);
-  --ex-good-line: rgba(67, 140, 103, 0.34);
-  --ex-bad: #bd5e55;
-  --ex-bad-tint: rgba(189, 94, 85, 0.09);
-  --ex-bad-line: rgba(189, 94, 85, 0.34);
-  --ex-overlay: rgba(255, 255, 255, 0.98);
-  --ex-panel: rgba(255, 255, 255, 0.78);
-  --ex-bar: #f6f9fc;
-}
 
 html[data-theme="light"] .ghost-button,
 html[data-theme="light"] .switch-chip,
@@ -5899,7 +5897,7 @@ html[data-theme="light"] .modal-shell,
 html[data-theme="light"] .auth-modal,
 html[data-theme="light"] .tool-tooltip,
 html[data-theme="light"] .exam-test-menu {
-  box-shadow: 0 18px 48px rgba(49, 104, 137, 0.12);
+  box-shadow: var(--shadow-pop);
 }
 
 html[data-theme="light"] .nav-menu-item:hover,
@@ -5910,7 +5908,7 @@ html[data-theme="light"] .nav-menu-item:focus-visible {
 html[data-theme="light"] body[data-page="exams"] .exam-tooltip,
 html[data-theme="light"] body[data-page="exams"] .exam-title-menu,
 html[data-theme="light"] body[data-page="exams"] .exam-test-menu {
-  box-shadow: 0 18px 48px rgba(49, 104, 137, 0.14);
+  box-shadow: var(--shadow-pop);
 }
 
 body[data-page="exams"] .exam-view-switch {
@@ -5920,7 +5918,7 @@ body[data-page="exams"] .exam-view-switch {
   padding: 3px;
   border: 1px solid var(--ex-hair);
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--surface-alt);
 }
 
 body[data-page="exams"] .exam-view-switch button {
@@ -5943,13 +5941,13 @@ body[data-page="exams"] .exam-view-switch button.is-active {
 body[data-page="exams"] .exam-flag-btn.is-active {
   border-color: var(--ex-brass-line);
   background: var(--ex-brass-tint);
-  color: var(--ex-brass);
+  color: var(--ex-brass-hover);
 }
 
 body[data-page="exams"] .exam-next-btn:disabled,
 body[data-page="exams"] .exam-submit-btn:disabled {
   border-color: var(--ex-hair);
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--surface-soft);
   color: var(--ex-faint);
   opacity: 0.6;
   cursor: not-allowed;
@@ -6154,78 +6152,6 @@ body[data-page="exams"] .exam-option-control:active:not(:disabled) {
   }
 }
 
-/* ── Minimal web refresh ──────────────────────────────────────────────────
-   A quiet, opaque interface: neutral surfaces, one safety-amber accent,
-   compact type, and clear borders. Decorative mesh, translucent panels,
-   backdrop blur, glows and oversized display type are intentionally absent. */
-
-:root {
-  --bg: #111212;
-  --surface: #181a1b;
-  --surface-alt: #202224;
-  --surface-soft: #272a2c;
-  --border: #2b2e30;
-  --border-strong: #414548;
-  --line: #242729;
-  --fill: #202224;
-  --text: #e8e8e5;
-  --text-strong: #f7f7f4;
-  --muted: #8f9497;
-  --muted-strong: #b4b7b8;
-  --text-muted: #8f9497;
-  --accent: #e2a63b;
-  --accent-soft: #2c261a;
-  --accent-strong: #f0b64c;
-  --accent-muted: #8d6a2d;
-  --accent-line: #8d6a2d;
-  --accent-line-strong: #b18435;
-  --accent-focus: #3a2f1c;
-  --on-accent: #17130b;
-  --danger: #e08067;
-  --shadow-card: none;
-  --shadow-glow: none;
-  --panel-glass: var(--surface);
-  --topbar-bg: var(--bg);
-  --overlay-bg: var(--surface);
-  --mobile-bar-bg: var(--surface);
-  --grid-line: transparent;
-  --radius-lg: 10px;
-  --radius-md: 8px;
-  --radius-sm: 6px;
-}
-
-html[data-theme="light"] {
-  --bg: #f5f5f2;
-  --surface: #ffffff;
-  --surface-alt: #efefeb;
-  --surface-soft: #e7e7e2;
-  --border: #deded8;
-  --border-strong: #bdbdb5;
-  --line: #e7e7e2;
-  --fill: #efefeb;
-  --text: #282a28;
-  --text-strong: #141614;
-  --muted: #777b77;
-  --muted-strong: #555a56;
-  --text-muted: #777b77;
-  --accent: #a75d12;
-  --accent-soft: #f3e7da;
-  --accent-strong: #82460c;
-  --accent-muted: #c49b72;
-  --accent-line: #c49b72;
-  --accent-line-strong: #a75d12;
-  --accent-focus: #ead6c1;
-  --on-accent: #ffffff;
-  --danger: #a64132;
-  --shadow-card: none;
-  --shadow-glow: none;
-  --panel-glass: var(--surface);
-  --topbar-bg: var(--bg);
-  --overlay-bg: var(--surface);
-  --mobile-bar-bg: var(--surface);
-  --grid-line: transparent;
-}
-
 body,
 #root {
   background: var(--bg);
@@ -6369,9 +6295,9 @@ html[data-theme="light"] body[data-page="exams"] {
   --ex-overlay: var(--surface);
   --ex-panel: var(--surface);
   --ex-bar: var(--bg);
-  --ex-good: #4f8a67;
-  --ex-good-tint: #e7f1eb;
-  --ex-good-line: #8db29d;
+  --ex-good: var(--success);
+  --ex-good-tint: var(--success-soft);
+  --ex-good-line: color-mix(in srgb, var(--success) 55%, var(--border));
   --ex-bad: var(--danger);
   --ex-bad-tint: color-mix(in srgb, var(--danger) 10%, var(--surface));
   --ex-bad-line: color-mix(in srgb, var(--danger) 55%, var(--border));
@@ -6496,7 +6422,7 @@ button:active:not(:disabled), [role="button"]:active { transform: none; }
 }
 .topbar-icon-button:hover, .topbar-account-btn:hover { color: var(--text-strong); background: var(--surface-alt); }
 .topbar-account-btn .account-avatar { width: 28px; height: 28px; background: var(--surface-soft); color: var(--text); border: 1px solid var(--border); }
-.nav-menu { max-height: calc(100dvh - 100px); overflow-y: auto; box-shadow: 0 12px 36px #00000012; }
+.nav-menu { max-height: calc(100dvh - 100px); overflow-y: auto; box-shadow: var(--shadow-pop); }
 .mobile-tabbar { display: none; }
 
 /* Calculators use one selected panel, with no horizontal carousel or nested scroll. */
@@ -6609,7 +6535,6 @@ body[data-page="exams"] .exam-progress-segment { min-height: 8px; }
 body[data-page="exams"] .exam-footer { margin: 0; padding: 12px 0; gap: 12px; }
 body[data-page="exams"] .exam-footer-actions { flex-wrap: wrap; }
 body[data-page="exams"] .exam-footer-actions > button { min-height: 44px; }
-html[data-theme="dark"] body[data-page="exams"] { --ex-good-tint: #1c3025; }
 
 @media (max-width: 980px) and (min-width: 721px) {
   .topbar { gap: 16px; }
@@ -6705,4 +6630,298 @@ html[data-theme="dark"] body[data-page="exams"] { --ex-good-tint: #1c3025; }
   body[data-page="exams"] .exam-footer { flex-wrap: wrap; }
   body[data-page="exams"] .exam-footer-status { flex-basis: 100%; }
   body[data-page="exams"] .exam-footer-actions { width: 100%; }
+}
+
+/* ── Visual refresh: Geist type, warm palette, quiet components ───────────
+   Final layer. Display headings use Geist Serif at weight 400 (the only weight
+   shipped, hence font-synthesis: none); kickers and meta use Geist Mono. */
+
+html { font-synthesis-weight: none; }
+
+.page-header h1,
+.page-header h2,
+.notes-header h1,
+.tool-library h1,
+.settings-header h1,
+.settings-section-heading h2,
+.modal-header h2,
+.auth-modal-title,
+.library-empty h2,
+.page-interactive .ix-header h1,
+.page-interactive .ix-header h2,
+body[data-page="exams"] .exam-hero-text h2,
+body[data-page="exams"] .exam-title-wrap h2,
+body[data-page="exams"] .exam-title-text,
+body[data-page="exams"] .exam-title-button,
+body[data-page="exams"] .exam-reset-dialog-copy h2,
+.exam-title-button,
+.brand strong {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  font-synthesis: none;
+}
+
+.page-header h1,
+.page-header h2,
+.notes-header h1,
+.tool-library h1,
+.settings-header h1 {
+  font-size: clamp(1.9rem, 3.6vw, 2.5rem);
+  line-height: 1.12;
+}
+
+.brand strong { font-size: 1.2rem; line-height: 1.1; }
+.settings-section-heading h2,
+.modal-header h2,
+.auth-modal-title { font-size: 1.35rem; line-height: 1.2; }
+
+h3,
+.tool-heading h3,
+.sheet-card-head h3,
+.guide-toggle strong,
+.note-toggle {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Kickers, meta and counts: Geist Mono caps. */
+.dashboard-kicker,
+.result-label,
+.containment-field span,
+.breakdown-item span,
+.search-result-tag,
+.history-tool,
+.ix-info-block h3,
+.ix-readout dt,
+.learning-topic > h2,
+.library-progress,
+body[data-page="exams"] .exam-eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.dashboard-kicker { color: var(--accent-strong); }
+.learning-topic > h2 { color: var(--muted); }
+body[data-page="exams"] .exam-eyebrow { color: var(--muted); font-size: 0.7rem; }
+
+kbd,
+.search-hint,
+.exam-q-badge,
+.exam-option-letter {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+kbd { min-width: 24px; min-height: 20px; padding: 0 5px; border-radius: 5px; font-size: 0.68rem; letter-spacing: 0.02em; }
+.search-hint { font-size: 0.68rem; border-radius: 5px; }
+
+.result-value,
+.exam-stat strong,
+.exam-results-percent,
+.mini-metrics strong,
+.ix-readout dd,
+.suffix { font-variant-numeric: tabular-nums; }
+
+/* Top bar and nav */
+.topbar { min-height: 60px; }
+.desktop-primary-nav-item { font-size: 0.875rem; font-weight: 400; color: var(--muted); transition: color 150ms var(--ease); }
+.desktop-primary-nav-item:hover,
+.desktop-primary-nav-item.is-active { color: var(--text); font-weight: 400; }
+.search-field { height: 36px; border-radius: var(--radius-md); background: var(--bg); font-size: 0.875rem; transition: border-color 150ms var(--ease); }
+.search-field:hover { border-color: var(--border-strong); }
+.topbar-icon-button,
+.topbar-account-btn { border-radius: var(--radius-md); }
+.nav-menu-item { border-radius: var(--radius-sm); font-weight: 500; }
+.nav-menu-item:hover,
+.nav-menu-item:focus-visible,
+html[data-theme="light"] .nav-menu-item:hover,
+html[data-theme="light"] .nav-menu-item:focus-visible { background: var(--surface-soft); }
+.nav-menu-item.is-active { background: var(--accent-soft); color: var(--text-strong); }
+.mobile-tab { font-weight: 500; }
+.mobile-tab.is-active { color: var(--accent-strong); background: var(--accent-soft); }
+
+/* Buttons: secondary = hairline outline; primary = primary/on-primary fill. */
+.ghost-button,
+.preset-button,
+.sheet-practice-btn,
+.settings-button,
+.add-containment-btn {
+  min-height: 36px;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), color 150ms var(--ease);
+}
+.ghost-button:hover,
+.preset-button:hover,
+.sheet-practice-btn:hover,
+.settings-button:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--surface-soft);
+  color: var(--text);
+}
+.exam-submit-btn,
+.ix-energize,
+.ix-welcome-go,
+.auth-submit,
+.guide-complete-button,
+.settings-button--primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 500;
+}
+.exam-submit-btn:hover:not(:disabled),
+.ix-energize:hover,
+.ix-welcome-go:hover,
+.auth-submit:hover,
+.guide-complete-button:hover,
+.settings-button--primary:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 88%, var(--bg));
+  color: var(--on-primary);
+}
+.guide-complete-button[aria-pressed="true"] { border-color: var(--border); background: var(--surface); color: var(--muted-strong); }
+
+/* Filter chips and tabs: pills, active = primary fill. */
+.switch-chip,
+.exam-review-filter {
+  border-radius: 999px;
+  color: var(--muted-strong);
+  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), color 150ms var(--ease);
+}
+.switch-chip.is-active,
+.segment.active,
+.exam-review-filter.is-active,
+.ix-tab.is-active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.exam-review-filter.is-active:hover,
+.switch-chip.is-active:hover,
+.ix-tab.is-active:hover { background: var(--primary); color: var(--on-primary); }
+body[data-page="exams"] .exam-review-filter.is-active strong { background: var(--on-primary); color: var(--primary); }
+.palette-result.is-active,
+.ix-palette-item.is-active,
+.exam-scoring-list li.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.palette-result.is-active .palette-result-subtitle,
+.ix-palette-item.is-active .ix-palette-icon,
+.ix-palette-item.is-active .ix-palette-label { color: var(--accent-strong); }
+.tool-library-item,
+.ix-tab { transition: background-color 150ms var(--ease), color 150ms var(--ease), border-color 150ms var(--ease); }
+
+/* Inputs: 36-40px, 8px radius, accent focus ring. */
+.field input:not([type="checkbox"]):not([type="radio"]),
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea { background: var(--bg); transition: border-color 150ms var(--ease), box-shadow 150ms var(--ease); }
+textarea { border-radius: var(--radius-md); }
+.tool-panel .field input,
+.tool-panel .field select,
+.notes-search input,
+.library-search input[type="search"] { background: var(--bg); border-radius: var(--radius-md); }
+.field input:not([type="checkbox"]):not([type="radio"]):hover,
+input:not([type="checkbox"]):not([type="radio"]):hover,
+select:hover { background: var(--bg); }
+.field input:not([type="checkbox"]):not([type="radio"]):focus,
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  background: var(--bg);
+  box-shadow: 0 0 0 3px var(--accent-focus);
+  outline: none;
+}
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] { accent-color: var(--accent); }
+
+/* Cards and panels: surface, hairline, 12px radius, hover border-strong. */
+.tool-panel,
+.learning-list,
+.sheet-card,
+.tutorial-card,
+.settings-section { border-radius: var(--radius-lg); }
+.tutorial-card,
+.sheet-card,
+.search-result { transition: border-color 150ms var(--ease); }
+.tutorial-card:hover,
+.sheet-card:hover { border-color: var(--border-strong); }
+body[data-page="exams"] .exam-question { border-radius: var(--radius-lg); }
+body[data-page="exams"] .exam-option-control { border-radius: var(--radius-md); }
+body[data-page="exams"] .exam-q-prompt { font-weight: 500; }
+.result-main,
+.learning-resume,
+.exam-explanation { border-left-color: var(--accent); }
+
+/* Menus, modals, tooltips */
+.modal-backdrop { background: var(--scrim); }
+.modal-shell,
+.auth-modal { border-radius: var(--radius-lg); }
+.tool-tooltip,
+body[data-page="exams"] .exam-tooltip { font-size: 0.8rem; line-height: 1.5; }
+
+/* Reference tables, badges, progress */
+.reference-table th { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+body[data-page="exams"] .exam-q-badge { letter-spacing: 0.06em; }
+body[data-page="exams"] .exam-option-letter { border-radius: var(--radius-sm); }
+.exam-section-breakdown-fill { background: var(--accent); }
+
+/* Tutorials and notes: quiet cards, mono meta. */
+.tutorial-card { overflow: hidden; }
+.sheet-card-head h3,
+.tutorial-card h3 { font-size: 1.02rem; }
+
+/* Light theme only gets the subtle card shadow. */
+html[data-theme="light"] .tool-panel,
+html[data-theme="light"] .sheet-card,
+html[data-theme="light"] .tutorial-card,
+html[data-theme="light"] .learning-list { box-shadow: var(--shadow-card); }
+
+@media (max-width: 720px) {
+  .page-header h1,
+  .page-header h2,
+  .notes-header h1,
+  .tool-library h1,
+  .settings-header h1 { font-size: 1.75rem; overflow-wrap: anywhere; }
+  .brand strong { font-size: 1.15rem; }
+  body[data-page="exams"] .exam-title-text { font-size: 1.5rem; }
+}
+
+/* Arrow + label pairs in the exam footer get real spacing. */
+body[data-page="exams"] .exam-previous-btn,
+body[data-page="exams"] .exam-next-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Exam primary actions use the primary fill like every other primary button. */
+body[data-page="exams"] .exam-next-btn,
+body[data-page="exams"] .exam-submit-btn {
+  border-color: var(--primary);
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+body[data-page="exams"] .exam-next-btn:hover:not(:disabled),
+body[data-page="exams"] .exam-submit-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 88%, var(--bg));
+}
+body[data-page="exams"] .exam-next-btn:disabled,
+body[data-page="exams"] .exam-submit-btn:disabled {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--muted);
 }

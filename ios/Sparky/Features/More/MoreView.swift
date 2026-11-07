@@ -95,7 +95,7 @@ private struct MoreDestinationCard: View {
         HStack(spacing: 14) {
             Image(systemName: symbol)
                 .font(.title2)
-                .foregroundStyle(Color.sparkyAccent)
+                .foregroundStyle(Color.sparkyAccentText)
                 .frame(width: 46, height: 46)
                 .background(Color.sparkyAccentSoft)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -103,10 +103,10 @@ private struct MoreDestinationCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 SparkyEyebrow(text: eyebrow)
                 Text(title)
-                    .font(.headline)
+                    .font(.sparky(.headline))
                     .foregroundStyle(Color.sparkyText)
                 Text(detail)
-                    .font(.caption)
+                    .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
                     .lineLimit(2)
             }
@@ -179,32 +179,36 @@ private struct TutorialCard: View {
                         .fill(Color.sparkyAccentSoft)
                     Image(systemName: "play.fill")
                         .font(.title3.bold())
-                        .foregroundStyle(Color.sparkyAccent)
+                        .foregroundStyle(Color.sparkyAccentText)
                 }
                 .frame(width: 54, height: 54)
 
                 VStack(alignment: .leading, spacing: 5) {
                     SparkyEyebrow(text: tutorial.category)
                     Text(tutorial.title)
-                        .font(.headline)
+                        .font(.sparky(.headline))
                         .foregroundStyle(Color.sparkyText)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(tutorial.channel)
-                        .font(.caption)
+                        .font(.sparky(.caption))
                         .foregroundStyle(Color.sparkyMuted)
                 }
             }
 
             Text(tutorial.workplaceUse)
-                .font(.subheadline)
+                .font(.sparky(.subheadline))
                 .foregroundStyle(Color.sparkyMuted)
 
             VStack(alignment: .leading, spacing: 7) {
                 ForEach(tutorial.practiceFocus, id: \.self) { focus in
                     Label(focus, systemImage: "checkmark.circle")
-                        .font(.caption)
+                        .font(.sparky(.caption))
                         .foregroundStyle(Color.sparkyText)
                 }
+            }
+
+            if let instructions = tutorial.instructions, !instructions.steps.isEmpty {
+                TutorialStepsDisclosure(instructions: instructions)
             }
 
             Link(destination: tutorial.sourceURL) {
@@ -215,6 +219,44 @@ private struct TutorialCard: View {
         }
         .sparkyCard(padding: 16)
         .padding(.horizontal, SparkyLayout.pageInset)
+    }
+}
+
+private struct TutorialStepsDisclosure: View {
+    let instructions: TutorialInstructions
+
+    var body: some View {
+        DisclosureGroup("Step-by-step (\(instructions.steps.count) steps)") {
+            VStack(alignment: .leading, spacing: 10) {
+                if let note = instructions.note {
+                    Text(note)
+                        .font(.sparky(.caption))
+                        .foregroundStyle(Color.sparkyMuted)
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            Color.sparkyAccentSoft,
+                            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        )
+                }
+
+                ForEach(Array(instructions.steps.enumerated()), id: \.offset) { index, step in
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text("\(index + 1).")
+                            .font(.sparky(.subheadline, weight: .bold).monospacedDigit())
+                            .foregroundStyle(Color.sparkyAccentText)
+                            .frame(minWidth: 22, alignment: .trailing)
+                        Text(step)
+                            .font(.sparky(.subheadline))
+                            .foregroundStyle(Color.sparkyText)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .padding(.top, 10)
+        }
+        .font(.sparky(.subheadline, weight: .semibold))
+        .tint(Color.sparkyAccent)
     }
 }
 
@@ -235,13 +277,13 @@ private struct CalculationHistoryView: View {
                     ForEach(studyState.recentCalculations) { item in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(item.tool)
-                                .font(.subheadline.weight(.semibold))
+                                .font(.sparky(.subheadline, weight: .semibold))
                                 .foregroundStyle(Color.sparkyText)
                             Text(item.value)
-                                .font(.title3.bold().monospacedDigit())
-                                .foregroundStyle(Color.sparkyAccent)
+                                .font(.sparky(.title3, weight: .bold).monospacedDigit())
+                                .foregroundStyle(Color.sparkyAccentText)
                             Text(item.date, format: .relative(presentation: .named))
-                                .font(.caption)
+                                .font(.sparky(.caption))
                                 .foregroundStyle(Color.sparkyMuted)
                         }
                         .listRowBackground(Color.sparkySurface)
@@ -349,7 +391,7 @@ struct SettingsView: View {
                 LabeledContent("Version", value: appVersion)
                 Link("Open Sparky on the web", destination: URL(string: "https://electrics.pages.dev")!)
                 Text("Made for UK electrical learning and site work.")
-                    .font(.caption)
+                    .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
             }
         }

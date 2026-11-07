@@ -8,14 +8,14 @@ struct StudyNotice: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "checkmark.shield.fill")
                 .font(.title3)
-                .foregroundStyle(Color.sparkyAccent)
+                .foregroundStyle(Color.sparkyAccentText)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.subheadline.weight(.bold))
+                    .font(.sparky(.subheadline, weight: .bold))
                     .foregroundStyle(Color.sparkyText)
                 Text(message)
-                    .font(.caption)
+                    .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -42,15 +42,15 @@ struct TagChip: View {
             }
             Text(title)
         }
-        .font(.caption.weight(.bold))
-        .foregroundStyle(selected ? Color.sparkyAccent : Color.sparkyMuted)
+        .font(.sparky(.caption, weight: .medium))
+        .foregroundStyle(selected ? Color.sparkyOnPrimary : Color.sparkyMuted)
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
-        .background(selected ? Color.sparkyAccentSoft : Color.sparkySurface)
+        .background(selected ? Color.sparkyPrimary : Color.clear)
         .clipShape(Capsule())
         .overlay {
             Capsule()
-                .stroke(selected ? Color.sparkyAccent.opacity(0.35) : Color.sparkyBorder, lineWidth: 1)
+                .stroke(selected ? Color.sparkyPrimary : Color.sparkyBorder, lineWidth: 1)
         }
     }
 }
@@ -72,7 +72,7 @@ struct ProgressRing: View {
                 )
                 .rotationEffect(.degrees(-90))
             Text(progress, format: .percent.precision(.fractionLength(0)))
-                .font(.caption2.bold().monospacedDigit())
+                .font(.sparky(.caption2, weight: .bold).monospacedDigit())
                 .foregroundStyle(Color.sparkyText)
         }
         .frame(width: size, height: size)
@@ -91,13 +91,13 @@ struct MetricTile: View {
         VStack(alignment: .leading, spacing: 7) {
             if let symbol {
                 Image(systemName: symbol)
-                    .foregroundStyle(Color.sparkyAccent)
+                    .foregroundStyle(Color.sparkyAccentText)
             }
             Text(value)
-                .font(.headline.monospacedDigit())
+                .font(.sparky(.headline).monospacedDigit())
                 .foregroundStyle(Color.sparkyText)
             Text(label)
-                .font(.caption)
+                .font(.sparky(.caption))
                 .foregroundStyle(Color.sparkyMuted)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -119,7 +119,7 @@ struct BrandNavigationTitle: View {
         HStack(spacing: 9) {
             SparkyBrandMark(size: 30)
             Text(title)
-                .font(.headline.weight(.bold))
+                .font(.sparky(.headline, weight: .bold))
                 .foregroundStyle(Color.sparkyText)
         }
     }

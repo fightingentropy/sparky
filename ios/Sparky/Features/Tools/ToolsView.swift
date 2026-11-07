@@ -104,19 +104,19 @@ struct ToolsView: View {
                                 Image(systemName: tool.symbol)
                                     .font(.headline)
                                 Text(tool.title)
-                                    .font(.subheadline.weight(.bold))
+                                    .font(.sparky(.subheadline, weight: .bold))
                                 Text(tool.subtitle)
-                                    .font(.caption2)
+                                    .font(.sparky(.caption2))
                                     .foregroundStyle(Color.sparkyMuted)
                                     .lineLimit(2)
                             }
-                            .foregroundStyle(selectedTool == tool ? Color.sparkyAccent : Color.sparkyText)
+                            .foregroundStyle(selectedTool == tool ? Color.sparkyAccentText : Color.sparkyText)
                             .frame(width: 142, height: 105, alignment: .topLeading)
                             .padding(13)
                             .background(selectedTool == tool ? Color.sparkyAccentSoft : Color.sparkySurface)
-                            .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous))
                             .overlay {
-                                RoundedRectangle(cornerRadius: 17, style: .continuous)
+                                RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous)
                                     .stroke(
                                         selectedTool == tool ? Color.sparkyAccent.opacity(0.38) : Color.sparkyBorder,
                                         lineWidth: 1
@@ -152,15 +152,15 @@ private struct CalculatorHeader: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.title3.weight(.bold))
+                    .font(.sparky(.title3, weight: .bold))
                     .foregroundStyle(Color.sparkyText)
                 Text(detail)
-                    .font(.caption)
+                    .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
             }
             Spacer()
             Button("Reset", action: onReset)
-                .font(.caption.weight(.semibold))
+                .font(.sparky(.caption, weight: .semibold))
                 .buttonStyle(.bordered)
                 .tint(Color.sparkyAccent)
         }
@@ -172,7 +172,7 @@ private struct ValidationCallout: View {
 
     var body: some View {
         Label(message, systemImage: "exclamationmark.triangle.fill")
-            .font(.caption)
+            .font(.sparky(.caption))
             .foregroundStyle(Color.sparkyDanger)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(12)
@@ -187,13 +187,13 @@ private struct FormulaDisclosure: View {
     var body: some View {
         DisclosureGroup("How it works") {
             Text(text)
-                .font(.caption.monospaced())
+                .font(.sparkyMono(.caption))
                 .foregroundStyle(Color.sparkyMuted)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 8)
         }
-        .font(.subheadline.weight(.semibold))
-        .foregroundStyle(Color.sparkyAccent)
+        .font(.sparky(.subheadline, weight: .semibold))
+        .foregroundStyle(Color.sparkyAccentText)
     }
 }
 
@@ -203,7 +203,7 @@ private struct PresetButton: View {
 
     var body: some View {
         Button(title, action: action)
-            .font(.caption.weight(.semibold))
+            .font(.sparky(.caption, weight: .semibold))
             .buttonStyle(.bordered)
             .tint(Color.sparkyAccent)
     }
@@ -326,7 +326,7 @@ private struct UnistrutCalculator: View {
             )
 
             Stepper("\(count) containment\(count == 1 ? "" : "s")", value: $count, in: 1...3)
-                .font(.subheadline.weight(.semibold))
+                .font(.sparky(.subheadline, weight: .semibold))
                 .tint(Color.sparkyAccent)
 
             VStack(spacing: 11) {
@@ -348,7 +348,7 @@ private struct UnistrutCalculator: View {
             VStack(spacing: 12) {
                 SparkyResultRow(label: "Final cut length", value: result.finalLengthValue, emphasized: true)
                 Text("Rounded up to the nearest 50 mm hole spacing")
-                    .font(.caption)
+                    .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Divider().overlay(Color.sparkyBorder)
@@ -372,22 +372,22 @@ private struct UnistrutCalculator: View {
     private func containmentRow(number: Int, label: String, width: Binding<String>) -> some View {
         HStack(spacing: 12) {
             Text("\(number)")
-                .font(.caption.bold().monospacedDigit())
-                .foregroundStyle(Color.sparkyAccent)
+                .font(.sparky(.caption, weight: .bold).monospacedDigit())
+                .foregroundStyle(Color.sparkyAccentText)
                 .frame(width: 28, height: 28)
                 .background(Color.sparkyAccentSoft)
                 .clipShape(Circle())
             VStack(alignment: .leading, spacing: 3) {
                 Text(label)
-                    .font(.caption.weight(.semibold))
+                    .font(.sparky(.caption, weight: .semibold))
                     .foregroundStyle(Color.sparkyMuted)
                 TextField("Width", text: width)
                     .keyboardType(.decimalPad)
-                    .font(.body.monospacedDigit())
+                    .font(.sparky(.body).monospacedDigit())
                     .foregroundStyle(Color.sparkyText)
             }
             Text("mm")
-                .font(.caption.bold())
+                .font(.sparky(.caption, weight: .bold))
                 .foregroundStyle(Color.sparkyMuted)
         }
         .padding(12)
@@ -444,7 +444,7 @@ private struct BendCutCalculator: View {
             VStack(spacing: 12) {
                 SparkyResultRow(label: "Cut each side", value: result.roundedSetbackValue, emphasized: true)
                 Text("\(result.cutsLabel), marked from centre")
-                    .font(.caption)
+                    .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Divider().overlay(Color.sparkyBorder)
@@ -532,7 +532,7 @@ private struct AngleDropCalculator: View {
                 .padding(.top, 10)
                 .tint(Color.sparkyAccent)
             }
-            .font(.subheadline.weight(.semibold))
+            .font(.sparky(.subheadline, weight: .semibold))
 
             VStack(spacing: 12) {
                 SparkyResultRow(label: "Angled piece", value: result.angledLengthValue, emphasized: true)
@@ -577,15 +577,15 @@ private struct ToolHistorySheet: View {
                 List(studyState.recentCalculations) { item in
                     HStack {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(item.tool).font(.subheadline.weight(.semibold))
+                            Text(item.tool).font(.sparky(.subheadline, weight: .semibold))
                             Text(item.date, style: .relative)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .font(.sparky(.caption))
+                                .foregroundStyle(Color.sparkyMuted)
                         }
                         Spacer()
                         Text(item.value)
-                            .font(.headline.monospacedDigit())
-                            .foregroundStyle(Color.sparkyAccent)
+                            .font(.sparky(.headline).monospacedDigit())
+                            .foregroundStyle(Color.sparkyAccentText)
                     }
                 }
             }

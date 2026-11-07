@@ -1,115 +1,62 @@
 import SwiftUI
 import UIKit
 
+private func sparkyHex(_ hex: UInt32, alpha: CGFloat = 1) -> UIColor {
+    UIColor(
+        red: CGFloat((hex >> 16) & 0xff) / 255,
+        green: CGFloat((hex >> 8) & 0xff) / 255,
+        blue: CGFloat(hex & 0xff) / 255,
+        alpha: alpha
+    )
+}
+
+private func sparkyDynamic(dark: UIColor, light: UIColor) -> UIColor {
+    UIColor { $0.userInterfaceStyle == .dark ? dark : light }
+}
+
+// Palette from the erlin.org-derived design spec (warm neutrals, one orange accent).
+extension UIColor {
+    static let sparkyText = sparkyDynamic(dark: sparkyHex(0xedebe6), light: sparkyHex(0x191512))
+}
+
 extension Color {
-    static let sparkyBackground = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 22 / 255, green: 19 / 255, blue: 15 / 255, alpha: 1)
-            : UIColor(red: 246 / 255, green: 249 / 255, blue: 252 / 255, alpha: 1)
-    })
+    static let sparkyBackground = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x100e0c), light: sparkyHex(0xfbfaf7)))
+    static let sparkySurface = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x171412), light: sparkyHex(0xfefdfc)))
+    static let sparkySurfaceRaised = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x1f1c1a), light: sparkyHex(0xf2f0ec)))
+    static let sparkyBorder = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x262422), light: sparkyHex(0xe0ddd9)))
 
-    static let sparkySurface = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 30 / 255, green: 26 / 255, blue: 21 / 255, alpha: 1)
-            : .white
-    })
+    // Highlight: active indicators, links, focus, selected, progress.
+    static let sparkyAccent = Color(uiColor: sparkyDynamic(dark: sparkyHex(0xfa7a45), light: sparkyHex(0xcf3c12)))
+    static let sparkyAccentBase = sparkyAccent
+    // Accent for text: accent-strong in light so it keeps 4.5:1 on accent-soft / surface-alt.
+    static let sparkyAccentText = Color(uiColor: sparkyDynamic(dark: sparkyHex(0xfa7a45), light: sparkyHex(0xb93004)))
+    static let sparkyAccentSoft = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x2c1b13), light: sparkyHex(0xf8ebe5)))
+    static let sparkyOnAccent = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x191512), light: sparkyHex(0xffffff)))
 
-    static let sparkySurfaceRaised = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 36 / 255, green: 31 / 255, blue: 25 / 255, alpha: 1)
-            : UIColor(red: 237 / 255, green: 247 / 255, blue: 1, alpha: 1)
-    })
+    // Primary buttons are foreground-filled, not orange.
+    static let sparkyPrimary = Color(uiColor: sparkyDynamic(dark: sparkyHex(0xedebe6), light: sparkyHex(0x191512)))
+    static let sparkyOnPrimary = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x191512), light: sparkyHex(0xfbfaf7)))
 
-    static let sparkyBorder = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor.white.withAlphaComponent(0.07)
-            : UIColor(red: 36 / 255, green: 105 / 255, blue: 150 / 255, alpha: 0.14)
-    })
+    static let sparkyText = Color(uiColor: .sparkyText)
+    static let sparkyMuted = Color(uiColor: sparkyDynamic(dark: sparkyHex(0xa29e98), light: sparkyHex(0x67625d)))
 
-    // Foreground accent: the web palette's contrast-safe --accent-strong token.
-    static let sparkyAccent = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 203 / 255, green: 153 / 255, blue: 84 / 255, alpha: 1)
-            : UIColor(red: 22 / 255, green: 134 / 255, blue: 194 / 255, alpha: 1)
-    })
+    static let sparkySuccess = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x62bb78), light: sparkyHex(0x267543)))
+    static let sparkyDanger = Color(uiColor: sparkyDynamic(dark: sparkyHex(0xff6467), light: sparkyHex(0xc2272d)))
 
-    // Filled controls and logo tiles use the web palette's --accent token.
-    static let sparkyAccentBase = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 189 / 255, green: 139 / 255, blue: 74 / 255, alpha: 1)
-            : UIColor(red: 85 / 255, green: 181 / 255, blue: 232 / 255, alpha: 1)
-    })
-
-    static let sparkyAccentSoft = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 189 / 255, green: 139 / 255, blue: 74 / 255, alpha: 0.12)
-            : UIColor(red: 85 / 255, green: 181 / 255, blue: 232 / 255, alpha: 0.15)
-    })
-
-    static let sparkyOnAccent = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 12 / 255, green: 11 / 255, blue: 10 / 255, alpha: 1)
-            : UIColor(red: 8 / 255, green: 43 / 255, blue: 63 / 255, alpha: 1)
-    })
-
-    static let sparkyText = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 227 / 255, green: 223 / 255, blue: 214 / 255, alpha: 1)
-            : UIColor(red: 23 / 255, green: 50 / 255, blue: 71 / 255, alpha: 1)
-    })
-
-    static let sparkyMuted = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 179 / 255, green: 172 / 255, blue: 160 / 255, alpha: 1)
-            : UIColor(red: 77 / 255, green: 104 / 255, blue: 123 / 255, alpha: 1)
-    })
-
-    static let sparkySuccess = Color(red: 52 / 255, green: 168 / 255, blue: 113 / 255)
-    static let sparkyDanger = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 207 / 255, green: 139 / 255, blue: 111 / 255, alpha: 1)
-            : UIColor(red: 199 / 255, green: 83 / 255, blue: 83 / 255, alpha: 1)
-    })
-
-    static let sparkyGridLine = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor.white.withAlphaComponent(0.05)
-            : UIColor(red: 72 / 255, green: 156 / 255, blue: 207 / 255, alpha: 0.10)
-    })
-
-    static let sparkyCardShadow = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? .clear
-            : UIColor(red: 49 / 255, green: 104 / 255, blue: 137 / 255, alpha: 0.08)
-    })
+    // Light mode only: a barely-there hairline lift. Dark mode uses no shadow.
+    static let sparkyCardShadow = Color(uiColor: sparkyDynamic(dark: .clear, light: sparkyHex(0x191512, alpha: 0.05)))
 }
 
 enum SparkyLayout {
     static let pageInset: CGFloat = 16
-    static let cardRadius: CGFloat = 22
-    static let controlRadius: CGFloat = 14
+    static let cardRadius: CGFloat = 14
+    static let controlRadius: CGFloat = 10
 }
 
 struct SparkyBackdrop: View {
     var body: some View {
-        ZStack {
-            Color.sparkyBackground
-
-            Canvas { context, size in
-                let spacing: CGFloat = 28
-                var path = Path()
-                stride(from: -size.height, through: size.width + size.height, by: spacing).forEach { offset in
-                    path.move(to: CGPoint(x: offset, y: 0))
-                    path.addLine(to: CGPoint(x: offset - size.height, y: size.height))
-                }
-                context.stroke(
-                    path,
-                    with: .color(Color.sparkyGridLine),
-                    lineWidth: 0.5
-                )
-            }
-        }
-        .ignoresSafeArea()
+        Color.sparkyBackground
+            .ignoresSafeArea()
     }
 }
 
@@ -125,7 +72,7 @@ struct SparkyCardModifier: ViewModifier {
                 RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous)
                     .stroke(Color.sparkyBorder, lineWidth: 1)
             }
-            .shadow(color: Color.sparkyCardShadow, radius: 18, y: 8)
+            .shadow(color: Color.sparkyCardShadow, radius: 2, y: 1)
     }
 }
 
@@ -140,9 +87,9 @@ struct SparkyEyebrow: View {
 
     var body: some View {
         Text(text.uppercased())
-            .font(.caption2.weight(.bold).monospaced())
-            .tracking(1.4)
-            .foregroundStyle(Color.sparkyAccent)
+            .font(.sparkyMono(.caption2, weight: .medium))
+            .tracking(0.7)
+            .foregroundStyle(Color.sparkyAccentText)
     }
 }
 
@@ -158,12 +105,13 @@ struct SparkySectionHeader: View {
             }
             HStack(alignment: .firstTextBaseline) {
                 Text(title)
-                    .font(.title3.weight(.bold))
+                    .font(.sparkySerif(.title3))
+                    .tracking(-0.3)
                     .foregroundStyle(Color.sparkyText)
                 Spacer(minLength: 8)
                 if let detail {
                     Text(detail)
-                        .font(.caption.weight(.semibold))
+                        .font(.sparky(.caption, weight: .semibold))
                         .foregroundStyle(Color.sparkyMuted)
                 }
             }
@@ -242,12 +190,12 @@ private struct SparkyLogoGlyph: View {
 struct SparkyPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.headline)
-            .foregroundStyle(Color.sparkyOnAccent)
+            .font(.sparky(.headline, weight: .medium))
+            .foregroundStyle(Color.sparkyOnPrimary)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(Color.sparkyAccentBase.opacity(configuration.isPressed ? 0.75 : 1))
+            .background(Color.sparkyPrimary.opacity(configuration.isPressed ? 0.8 : 1))
             .clipShape(RoundedRectangle(cornerRadius: SparkyLayout.controlRadius, style: .continuous))
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
@@ -257,15 +205,15 @@ struct SparkyPrimaryButtonStyle: ButtonStyle {
 struct SparkySecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Color.sparkyAccent)
+            .font(.sparky(.subheadline, weight: .medium))
+            .foregroundStyle(Color.sparkyText)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(Color.sparkyAccentSoft.opacity(configuration.isPressed ? 0.65 : 1))
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(Color.sparkySurfaceRaised.opacity(configuration.isPressed ? 1 : 0))
+            .clipShape(RoundedRectangle(cornerRadius: SparkyLayout.controlRadius, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color.sparkyAccent.opacity(0.25), lineWidth: 1)
+                RoundedRectangle(cornerRadius: SparkyLayout.controlRadius, style: .continuous)
+                    .stroke(Color.sparkyBorder, lineWidth: 1)
             }
     }
 }
@@ -278,16 +226,16 @@ struct SparkyField: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             Text(title)
-                .font(.caption.weight(.semibold))
+                .font(.sparky(.caption, weight: .semibold))
                 .foregroundStyle(Color.sparkyMuted)
             HStack(spacing: 8) {
                 TextField("0", text: $text)
                     .keyboardType(.decimalPad)
-                    .font(.body.monospacedDigit())
+                    .font(.sparky(.body).monospacedDigit())
                     .foregroundStyle(Color.sparkyText)
                 if let unit {
                     Text(unit)
-                        .font(.caption.weight(.bold))
+                        .font(.sparky(.caption, weight: .bold))
                         .foregroundStyle(Color.sparkyMuted)
                 }
             }
@@ -311,12 +259,12 @@ struct SparkyResultRow: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(label)
-                .font(.subheadline)
+                .font(.sparky(.subheadline))
                 .foregroundStyle(Color.sparkyMuted)
             Spacer()
             Text(value)
-                .font(emphasized ? .title3.bold().monospacedDigit() : .body.bold().monospacedDigit())
-                .foregroundStyle(emphasized ? Color.sparkyAccent : Color.sparkyText)
+                .font(emphasized ? .sparky(.title3, weight: .bold).monospacedDigit() : .sparky(.body, weight: .bold).monospacedDigit())
+                .foregroundStyle(emphasized ? Color.sparkyAccentText : Color.sparkyText)
                 .multilineTextAlignment(.trailing)
         }
         .accessibilityElement(children: .combine)

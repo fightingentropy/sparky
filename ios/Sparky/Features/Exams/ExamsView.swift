@@ -116,17 +116,17 @@ private struct ExamCatalogCard: View {
                         .fill(Color.sparkyAccentSoft)
                     Image(systemName: examSymbol)
                         .font(.title3.weight(.semibold))
-                        .foregroundStyle(Color.sparkyAccent)
+                        .foregroundStyle(Color.sparkyAccentText)
                 }
                 .frame(width: 50, height: 50)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(exam.title)
-                        .font(.headline)
+                        .font(.sparky(.headline))
                         .foregroundStyle(Color.sparkyText)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(exam.subtitle)
-                        .font(.caption)
+                        .font(.sparky(.caption))
                         .foregroundStyle(Color.sparkyMuted)
                         .lineLimit(2)
                 }
@@ -147,7 +147,7 @@ private struct ExamCatalogCard: View {
                     ProgressView(value: progress)
                         .tint(Color.sparkyAccent)
                     Text(completedTests == exam.testCount ? "Complete" : "\(completedTests)/\(exam.testCount) complete")
-                        .font(.caption.weight(.semibold))
+                        .font(.sparky(.caption, weight: .semibold))
                         .foregroundStyle(Color.sparkyMuted)
                 }
             }
@@ -264,11 +264,12 @@ private struct ExamDetailView: View {
         VStack(alignment: .leading, spacing: 15) {
             SparkyEyebrow(text: "Practice exam")
             Text(exam.title)
-                .font(.largeTitle.weight(.bold))
+                .font(.sparkySerif(.largeTitle))
+                .tracking(-0.4)
                 .foregroundStyle(Color.sparkyText)
                 .tracking(-1)
             Text(exam.description)
-                .font(.subheadline)
+                .font(.sparky(.subheadline))
                 .foregroundStyle(Color.sparkyMuted)
             HStack(spacing: 10) {
                 MetricTile(label: "Pass mark", value: "\(Int(exam.passPercent * 100))%")
@@ -284,13 +285,13 @@ private struct ExamDetailView: View {
             VStack(alignment: .leading, spacing: 9) {
                 ForEach(exam.priorities, id: \.self) { priority in
                     Label(priority, systemImage: "scope")
-                        .font(.caption)
+                        .font(.sparky(.caption))
                         .foregroundStyle(Color.sparkyMuted)
                 }
             }
             .padding(.top, 10)
         }
-        .font(.subheadline.weight(.semibold))
+        .font(.sparky(.subheadline, weight: .semibold))
         .foregroundStyle(Color.sparkyText)
         .sparkyCard(padding: 15)
     }
@@ -316,32 +317,32 @@ private struct TestCard: View {
                     .fill(progress.submitted ? Color.sparkySuccess.opacity(0.16) : Color.sparkyAccentSoft)
                 Image(systemName: progress.submitted ? "checkmark" : "pencil.line")
                     .font(.headline.bold())
-                    .foregroundStyle(progress.submitted ? Color.sparkySuccess : Color.sparkyAccent)
+                    .foregroundStyle(progress.submitted ? Color.sparkySuccess : Color.sparkyAccentText)
             }
             .frame(width: 48, height: 48)
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(test.title)
-                    .font(.headline)
+                    .font(.sparky(.headline))
                     .foregroundStyle(Color.sparkyText)
                 if progress.submitted {
                     Text("\(score.correct)/\(score.total) · \(score.percentage, format: .percent.precision(.fractionLength(0)))")
-                        .font(.subheadline.weight(.semibold).monospacedDigit())
+                        .font(.sparky(.subheadline, weight: .semibold).monospacedDigit())
                         .foregroundStyle(score.passed ? Color.sparkySuccess : Color.sparkyDanger)
                 } else if progress.answers.isEmpty {
                     Text("\(test.questionCount) questions · Not started")
-                        .font(.caption)
+                        .font(.sparky(.caption))
                         .foregroundStyle(Color.sparkyMuted)
                 } else {
                     Text("Continue · \(progress.answers.count)/\(test.questionCount) answered")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color.sparkyAccent)
+                        .font(.sparky(.caption, weight: .semibold))
+                        .foregroundStyle(Color.sparkyAccentText)
                 }
             }
             Spacer()
             Text(progress.submitted ? "Review" : (progress.answers.isEmpty ? "Start" : "Resume"))
-                .font(.caption.weight(.bold))
-                .foregroundStyle(Color.sparkyAccent)
+                .font(.sparky(.caption, weight: .bold))
+                .foregroundStyle(Color.sparkyAccentText)
             Image(systemName: "chevron.right")
                 .font(.caption.bold())
                 .foregroundStyle(Color.sparkyMuted)
@@ -552,7 +553,7 @@ private struct ExamSessionView: View {
                 SparkyEyebrow(text: sectionTitle(for: question))
                 Spacer()
                 Text("\(currentIndex + 1) / \(questions.count)")
-                    .font(.caption.bold().monospacedDigit())
+                    .font(.sparky(.caption, weight: .bold).monospacedDigit())
                     .foregroundStyle(Color.sparkyMuted)
             }
             ProgressView(value: Double(currentIndex + 1), total: Double(max(questions.count, 1)))
@@ -564,7 +565,7 @@ private struct ExamSessionView: View {
                     Label("\(progress.flaggedQuestions.count) flagged", systemImage: "flag")
                 }
             }
-            .font(.caption.weight(.semibold))
+            .font(.sparky(.caption, weight: .semibold))
             .foregroundStyle(Color.sparkyMuted)
         }
         .sparkyCard(padding: 14)
@@ -585,10 +586,10 @@ private struct ExamSessionView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     SparkyEyebrow(text: score.passed ? "Pass" : "Keep practising")
                     Text("\(score.correct) of \(score.total) correct")
-                        .font(.title2.bold().monospacedDigit())
+                        .font(.sparky(.title2, weight: .bold).monospacedDigit())
                         .foregroundStyle(Color.sparkyText)
                     Text(exam.scoringBand(for: score.percentage)?.label ?? "Review the feedback below")
-                        .font(.caption)
+                        .font(.sparky(.caption))
                         .foregroundStyle(Color.sparkyMuted)
                 }
                 Spacer()
@@ -804,8 +805,8 @@ private struct QuestionCard: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .center, spacing: 8) {
                 Text("Q\(question.number)")
-                    .font(.caption.bold().monospaced())
-                    .foregroundStyle(Color.sparkyAccent)
+                    .font(.sparkyMono(.caption, weight: .bold))
+                    .foregroundStyle(Color.sparkyAccentText)
                 Spacer()
 
                 if !submitted {
@@ -815,7 +816,7 @@ private struct QuestionCard: View {
                             systemImage: answerRevealed ? "eye.slash" : "eye"
                         )
                         .labelStyle(.iconOnly)
-                        .font(.caption.weight(.semibold))
+                        .font(.sparky(.caption, weight: .semibold))
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.circle)
@@ -845,7 +846,7 @@ private struct QuestionCard: View {
             }
 
             Text(question.prompt)
-                .font(.title3.weight(.semibold))
+                .font(.sparky(.title3, weight: .semibold))
                 .foregroundStyle(Color.sparkyText)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -926,13 +927,13 @@ private struct ExamOptionCard: View {
                                     .fill(selected || (showsAnswer && correct) ? accent : Color.clear)
                                 Circle().stroke(accent, lineWidth: 1.5)
                                 Text(choice.rawValue)
-                                    .font(.caption.bold().monospaced())
+                                    .font(.sparkyMono(.caption, weight: .bold))
                                     .foregroundStyle(selected || (showsAnswer && correct) ? Color.sparkyBackground : Color.sparkyText)
                             }
                             .frame(width: 30, height: 30)
 
                             Text(text)
-                                .font(.body)
+                                .font(.sparky(.body))
                                 .foregroundStyle(Color.sparkyText)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .multilineTextAlignment(.leading)
@@ -968,7 +969,7 @@ private struct ExamOptionCard: View {
                             Text("Why?")
                             Image(systemName: explanationExpanded ? "chevron.up" : "chevron.down")
                         }
-                        .font(.caption.weight(.semibold))
+                        .font(.sparky(.caption, weight: .semibold))
                         .foregroundStyle(Color.sparkyMuted)
                         .fixedSize()
                         .padding(.horizontal, 4)
@@ -989,7 +990,7 @@ private struct ExamOptionCard: View {
                     Image(systemName: correct ? "checkmark.circle" : "info.circle")
                         .foregroundStyle(accent)
                     Text(feedback.text)
-                        .font(.subheadline)
+                        .font(.sparky(.subheadline))
                         .foregroundStyle(Color.sparkyMuted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .multilineTextAlignment(.leading)
@@ -1027,7 +1028,7 @@ private struct SolutionTableView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(table.title)
-                .font(.subheadline.weight(.bold))
+                .font(.sparky(.subheadline, weight: .bold))
                 .foregroundStyle(Color.sparkyText)
 
             ScrollView(.horizontal) {
@@ -1035,7 +1036,7 @@ private struct SolutionTableView: View {
                     GridRow {
                         ForEach(Array(table.columns.enumerated()), id: \.offset) { _, column in
                             Text(column)
-                                .font(.caption.bold())
+                                .font(.sparky(.caption, weight: .bold))
                                 .foregroundStyle(Color.sparkyText)
                                 .frame(minWidth: 130, alignment: .leading)
                                 .padding(9)
@@ -1046,7 +1047,7 @@ private struct SolutionTableView: View {
                         GridRow {
                             ForEach(Array(row.enumerated()), id: \.offset) { _, value in
                                 Text(value)
-                                    .font(.caption.monospaced())
+                                    .font(.sparkyMono(.caption))
                                     .foregroundStyle(Color.sparkyMuted)
                                     .frame(minWidth: 130, alignment: .leading)
                                     .padding(9)
@@ -1061,16 +1062,16 @@ private struct SolutionTableView: View {
 
             if let note = table.note {
                 Text(note)
-                    .font(.caption2)
+                    .font(.sparky(.caption2))
                     .foregroundStyle(Color.sparkyMuted)
             }
 
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(table.source.publication)
-                        .font(.caption.weight(.semibold))
+                        .font(.sparky(.caption, weight: .semibold))
                     Text(table.source.locator)
-                        .font(.caption2)
+                        .font(.sparky(.caption2))
                 }
                 .foregroundStyle(Color.sparkyMuted)
                 Spacer()
@@ -1152,7 +1153,7 @@ private struct QuestionNavigatorSheet: View {
                                     } label: {
                                         ZStack(alignment: .topTrailing) {
                                             Text("\(question.number)")
-                                                .font(.subheadline.bold().monospacedDigit())
+                                                .font(.sparky(.subheadline, weight: .bold).monospacedDigit())
                                                 .frame(maxWidth: .infinity, minHeight: 48)
                                                 .foregroundStyle(numberColor(question))
                                                 .background(numberBackground(question))
@@ -1164,7 +1165,7 @@ private struct QuestionNavigatorSheet: View {
                                             if progress.flaggedQuestions.contains(question.number) {
                                                 Image(systemName: "flag.fill")
                                                     .font(.system(size: 8))
-                                                    .foregroundStyle(Color.sparkyAccent)
+                                                    .foregroundStyle(Color.sparkyAccentText)
                                                     .padding(5)
                                             }
                                         }

@@ -477,7 +477,7 @@ export default function App() {
     document.documentElement.dataset.theme = colorTheme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute(
       "content",
-      colorTheme === "light" ? "#f5f5f2" : "#111212"
+      colorTheme === "light" ? "#fbfaf7" : "#100e0c"
     );
   }, [colorTheme]);
 
@@ -1017,7 +1017,7 @@ export default function App() {
         title: "Tutorials",
         subtitle: "Workplace videos and demonstrations.",
         tag: "Page",
-        keywords: "tutorials videos demonstrations workplace trunking conduit tray unistrut supports",
+        keywords: "tutorials videos demonstrations workplace trunking conduit tray unistrut supports swa armoured cable gland terminations",
         action: () => navigateTo("tutorials")
       },
       {

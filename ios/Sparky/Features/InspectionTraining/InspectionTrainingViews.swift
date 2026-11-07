@@ -45,10 +45,11 @@ struct InspectionTrainingHomeView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     SparkyEyebrow(text: "Virtual test bench")
                     Text("Learn by making the decisions")
-                        .font(.title2.weight(.bold))
+                        .font(.sparkySerif(.title2))
+                        .tracking(-0.4)
                         .foregroundStyle(Color.sparkyText)
                     Text("Work through instrument setup, test arrangements, simulated readings and result interpretation.")
-                        .font(.subheadline)
+                        .font(.sparky(.subheadline))
                         .foregroundStyle(Color.sparkyMuted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -108,7 +109,7 @@ private struct InspectionTrainingLabCard: View {
                 HStack(alignment: .top, spacing: 13) {
                     Image(systemName: lab.symbolName)
                         .font(.title2.weight(.semibold))
-                        .foregroundStyle(Color.sparkyAccent)
+                        .foregroundStyle(Color.sparkyAccentText)
                         .frame(width: 48, height: 48)
                         .background(Color.sparkyAccentSoft)
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -117,12 +118,12 @@ private struct InspectionTrainingLabCard: View {
                         HStack(spacing: 7) {
                             InspectionTestModeBadge(mode: lab.testMode)
                             Text("\(lab.tasks.count) steps")
-                                .font(.caption2.weight(.bold).monospaced())
+                                .font(.sparkyMono(.caption2, weight: .bold))
                                 .foregroundStyle(Color.sparkyMuted)
                         }
 
                         Text(lab.title)
-                            .font(.title3.weight(.bold))
+                            .font(.sparky(.title3, weight: .bold))
                             .foregroundStyle(Color.sparkyText)
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
@@ -139,7 +140,7 @@ private struct InspectionTrainingLabCard: View {
                 }
 
                 Text(lab.summary)
-                    .font(.subheadline)
+                    .font(.sparky(.subheadline))
                     .foregroundStyle(Color.sparkyMuted)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
@@ -152,13 +153,13 @@ private struct InspectionTrainingLabCard: View {
                         Text("\(progress.completedTasks) of \(progress.totalTasks) decisions")
                         Spacer()
                         Text(actionTitle)
-                            .foregroundStyle(Color.sparkyAccent)
+                            .foregroundStyle(Color.sparkyAccentText)
                         Image(systemName: "arrow.right")
                             .font(.caption.bold())
-                            .foregroundStyle(Color.sparkyAccent)
+                            .foregroundStyle(Color.sparkyAccentText)
                             .accessibilityHidden(true)
                     }
-                    .font(.caption.weight(.semibold))
+                    .font(.sparky(.caption, weight: .semibold))
                     .foregroundStyle(Color.sparkyMuted)
                 }
             }
@@ -330,10 +331,11 @@ struct InspectionTrainingSessionView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         SparkyEyebrow(text: "Decision \(currentSession.currentTaskIndex + 1)")
                         Text(task.title)
-                            .font(.title2.weight(.bold))
+                            .font(.sparkySerif(.title2))
+                            .tracking(-0.4)
                             .foregroundStyle(Color.sparkyText)
                         Text(task.instruction)
-                            .font(.body)
+                            .font(.sparky(.body))
                             .foregroundStyle(Color.sparkyMuted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -350,7 +352,7 @@ struct InspectionTrainingSessionView: View {
                                 "Set the tester, place both probes, then press TEST or AUTO NULL when prompted.",
                                 systemImage: "lock.fill"
                             )
-                            .font(.caption.weight(.semibold))
+                            .font(.sparky(.caption, weight: .semibold))
                             .foregroundStyle(Color.sparkyMuted)
                         }
 
@@ -428,10 +430,10 @@ struct InspectionTrainingSessionView: View {
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(lab.shortTitle)
-                            .font(.headline.weight(.black))
+                            .font(.sparky(.headline, weight: .bold))
                             .foregroundStyle(.black.opacity(0.82))
                         Text("STEP \(currentSession.currentTaskIndex + 1) OF \(lab.tasks.count) · \(lab.testMode.rawValue)")
-                            .font(.caption2.weight(.black).monospaced())
+                            .font(.sparkyMono(.caption2, weight: .bold))
                             .foregroundStyle(.black.opacity(0.58))
                     }
                     .padding(.horizontal, 12)
@@ -593,10 +595,11 @@ struct InspectionTrainingSessionView: View {
                             VStack(alignment: .leading, spacing: 5) {
                                 SparkyEyebrow(text: "Lab complete")
                                 Text(lab.title)
-                                    .font(.title2.weight(.bold))
+                                    .font(.sparkySerif(.title2))
+                                    .tracking(-0.4)
                                     .foregroundStyle(Color.sparkyText)
                                 Text("You completed every guided decision in this scenario.")
-                                    .font(.subheadline)
+                                    .font(.sparky(.subheadline))
                                     .foregroundStyle(Color.sparkyMuted)
                             }
                         }
@@ -625,10 +628,10 @@ struct InspectionTrainingSessionView: View {
                                     .foregroundStyle(Color.sparkySuccess)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("\(index + 1). \(task.title)")
-                                        .font(.subheadline.weight(.semibold))
+                                        .font(.sparky(.subheadline, weight: .semibold))
                                         .foregroundStyle(Color.sparkyText)
                                     Text(task.successMessage)
-                                        .font(.caption)
+                                        .font(.sparky(.caption))
                                         .foregroundStyle(Color.sparkyMuted)
                                         .fixedSize(horizontal: false, vertical: true)
                                 }
@@ -678,7 +681,7 @@ private struct LabProgressHeader: View {
                 InspectionTestModeBadge(mode: lab.testMode)
                 Spacer()
                 Text("Step \(step) of \(total)")
-                    .font(.caption.weight(.bold).monospacedDigit())
+                    .font(.sparky(.caption, weight: .bold).monospacedDigit())
                     .foregroundStyle(Color.sparkyMuted)
             }
 
@@ -702,7 +705,7 @@ private struct InspectionTestModeBadge: View {
             mode.rawValue,
             systemImage: mode == .live ? "bolt.trianglebadge.exclamationmark.fill" : "lock.shield.fill"
         )
-        .font(.caption2.weight(.bold).monospaced())
+        .font(.sparkyMono(.caption2, weight: .bold))
         .foregroundStyle(color)
         .padding(.horizontal, 9)
         .padding(.vertical, 6)
@@ -739,13 +742,13 @@ private struct InspectionTrainingChoiceButton: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(choice.title)
-                        .font(.subheadline.weight(.bold))
+                        .font(.sparky(.subheadline, weight: .bold))
                         .foregroundStyle(Color.sparkyText)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
                     if !choice.detail.isEmpty {
                         Text(choice.detail)
-                            .font(.caption)
+                            .font(.sparky(.caption))
                             .foregroundStyle(Color.sparkyMuted)
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
@@ -838,17 +841,17 @@ private struct InspectionTrainingFeedbackCard: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
                     Text(evaluation.isCorrect ? "Correct" : "Try that again")
-                        .font(.headline)
+                        .font(.sparky(.headline))
                         .foregroundStyle(Color.sparkyText)
                     Spacer()
                     if evaluation.pointsAwarded > 0 {
                         Text("+\(evaluation.pointsAwarded)")
-                            .font(.caption.bold().monospacedDigit())
+                            .font(.sparky(.caption, weight: .bold).monospacedDigit())
                             .foregroundStyle(Color.sparkySuccess)
                     }
                 }
                 Text(evaluation.message)
-                    .font(.subheadline)
+                    .font(.sparky(.subheadline))
                     .foregroundStyle(Color.sparkyMuted)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -870,9 +873,9 @@ private struct HintCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 11) {
             Image(systemName: "lightbulb.max.fill")
-                .foregroundStyle(Color.sparkyAccent)
+                .foregroundStyle(Color.sparkyAccentText)
             Text(message)
-                .font(.subheadline)
+                .font(.sparky(.subheadline))
                 .foregroundStyle(Color.sparkyText)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -1325,16 +1328,16 @@ private struct InspectionTrainingWorkbench: View {
             VStack(alignment: .leading, spacing: 11) {
                 HStack {
                     Label("Hands-on test bench", systemImage: "hand.draw.fill")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(Color.sparkyAccent)
+                        .font(.sparky(.caption, weight: .bold))
+                        .foregroundStyle(Color.sparkyAccentText)
                     Spacer()
                     Text(lab.testMode.rawValue)
-                        .font(.caption2.bold().monospaced())
+                        .font(.sparkyMono(.caption2, weight: .bold))
                         .foregroundStyle(lab.testMode == .live ? Color.sparkyDanger : Color.sparkySuccess)
                 }
 
                 Text(setup.prompt)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.sparky(.subheadline, weight: .semibold))
                     .foregroundStyle(Color.sparkyText)
 
                 interactiveScene
@@ -1346,7 +1349,7 @@ private struct InspectionTrainingWorkbench: View {
                     }
 
                 Label(status.text, systemImage: status.symbol)
-                    .font(.caption.weight(.bold))
+                    .font(.sparky(.caption, weight: .bold))
                     .foregroundStyle(status.color)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(10)
@@ -1777,10 +1780,10 @@ private struct ImmersiveDecisionPanel: View {
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(task.title.uppercased())
-                        .font(.caption.weight(.black).monospaced())
+                        .font(.sparkyMono(.caption, weight: .bold))
                         .foregroundStyle(.black.opacity(0.60))
                     Text(task.instruction)
-                        .font(.subheadline.weight(.black))
+                        .font(.sparky(.subheadline, weight: .bold))
                         .foregroundStyle(.black.opacity(0.82))
                         .lineLimit(2)
                         .minimumScaleFactor(0.78)
@@ -1809,7 +1812,7 @@ private struct ImmersiveDecisionPanel: View {
                         .minimumScaleFactor(0.78)
                     Spacer(minLength: 0)
                 }
-                .font(.caption.weight(.bold))
+                .font(.sparky(.caption, weight: .bold))
                 .foregroundStyle(.black.opacity(0.78))
                 .padding(.horizontal, 11)
                 .padding(.vertical, 8)
@@ -1833,7 +1836,7 @@ private struct ImmersiveDecisionPanel: View {
                                 Text(feedbackActionTitle)
                                 Image(systemName: evaluation.isCorrect ? "arrow.right" : "arrow.counterclockwise")
                             }
-                            .font(.caption.weight(.black))
+                            .font(.sparky(.caption, weight: .bold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
@@ -1843,7 +1846,7 @@ private struct ImmersiveDecisionPanel: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .font(.caption.weight(.bold))
+                .font(.sparky(.caption, weight: .bold))
                 .foregroundStyle(.black.opacity(0.80))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
@@ -1870,7 +1873,7 @@ private struct ImmersiveDecisionPanel: View {
                     "Set the tester, place both probes, then press TEST or AUTO NULL when prompted.",
                     systemImage: "hand.draw.fill"
                 )
-                .font(.caption.weight(.black))
+                .font(.sparky(.caption, weight: .bold))
                 .foregroundStyle(.black.opacity(0.72))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 5)
@@ -1909,13 +1912,13 @@ private struct ImmersiveChoiceButton: View {
         Button(action: action) {
             HStack(spacing: 7) {
                 Text(["A", "B", "C", "D"][min(index, 3)])
-                    .font(.caption2.weight(.black).monospaced())
+                    .font(.sparkyMono(.caption2, weight: .bold))
                     .foregroundStyle(.black.opacity(0.62))
                     .frame(width: 22, height: 22)
                     .background(.white.opacity(0.58))
                     .clipShape(Circle())
                 Text(choice.title)
-                    .font(.caption.weight(.black))
+                    .font(.sparky(.caption, weight: .bold))
                     .foregroundStyle(.black.opacity(0.82))
                     .lineLimit(2)
                     .minimumScaleFactor(0.72)
@@ -1944,7 +1947,7 @@ private struct WorkbenchStageBadge: View {
 
     var body: some View {
         Label(text, systemImage: symbol)
-            .font(.caption2.weight(.black))
+            .font(.sparky(.caption2, weight: .bold))
             .foregroundStyle(.white)
             .lineLimit(2)
             .minimumScaleFactor(0.72)
@@ -2137,10 +2140,10 @@ private struct InteractiveMFTGraphic: View {
 
                 VStack(spacing: 4) {
                     Text("SPARKY MFT")
-                        .font(.system(size: max(7, height * 0.06), weight: .black, design: .rounded))
+                        .font(.sparkyFixed(size: max(7, height * 0.06), weight: .bold))
                         .foregroundStyle(.black.opacity(0.58))
                     Text(display)
-                        .font(.system(size: max(15, height * 0.17), weight: .black, design: .monospaced))
+                        .font(.sparkyMonoFixed(size: max(15, height * 0.17), weight: .bold))
                         .foregroundStyle(Color(red: 0.16, green: 0.24, blue: 0.16))
                         .lineLimit(1)
                         .minimumScaleFactor(0.52)
@@ -2158,7 +2161,7 @@ private struct InteractiveMFTGraphic: View {
                 VStack(spacing: height * 0.035) {
                     Button(action: onTest) {
                         Text("TEST")
-                            .font(.system(size: max(7, height * 0.065), weight: .black, design: .rounded))
+                            .font(.sparkyFixed(size: max(7, height * 0.065), weight: .bold))
                             .foregroundStyle(.black.opacity(testIsEnabled ? 0.82 : 0.42))
                             .frame(width: width * 0.11, height: height * 0.18)
                             .background(Color(red: 1.0, green: 0.72, blue: 0.10).opacity(testIsEnabled ? 1 : 0.48))
@@ -2169,7 +2172,7 @@ private struct InteractiveMFTGraphic: View {
 
                     Button(action: onAutoNull) {
                         Text("AUTO\nNULL")
-                            .font(.system(size: max(6, height * 0.047), weight: .black, design: .rounded))
+                            .font(.sparkyFixed(size: max(6, height * 0.047), weight: .bold))
                             .multilineTextAlignment(.center)
                             .foregroundStyle(.white.opacity(autoNullIsEnabled ? 1 : 0.46))
                             .frame(width: width * 0.11, height: height * 0.21)
@@ -2235,7 +2238,7 @@ private struct RotaryWorkbenchDial: View {
 
                     let radians = CGFloat((function.dialAngle - 90) * .pi / 180)
                     Text(function.shortLabel)
-                        .font(.system(size: max(6, radius * 0.21), weight: .black, design: .rounded))
+                        .font(.sparkyFixed(size: max(6, radius * 0.21), weight: .bold))
                         .foregroundStyle(.black.opacity(0.80))
                         .position(
                             x: centre.x + cos(radians) * radius * 1.05,
@@ -2328,7 +2331,7 @@ private struct IllustratedInspectionScene: View {
                 context.fill(Path(ellipseIn: badge), with: .color(Color.sparkySuccess))
                 context.stroke(Path(ellipseIn: badge), with: .color(.black.opacity(0.78)), lineWidth: 3)
                 context.draw(
-                    Text("✓").font(.title.bold()).foregroundStyle(.white),
+                    Text("✓").font(.sparky(.title, weight: .bold)).foregroundStyle(.white),
                     at: CGPoint(x: badge.midX, y: badge.midY)
                 )
             }
@@ -2453,7 +2456,7 @@ private struct IllustratedInspectionScene: View {
 
         context.draw(
             Text("SIMULATED DISTRIBUTION BOARD")
-                .font(.caption2.bold().monospaced())
+                .font(.sparkyMono(.caption2, weight: .bold))
                 .foregroundStyle(.white.opacity(0.72)),
             at: CGPoint(x: enclosure.midX, y: enclosure.minY + 18)
         )
@@ -2487,7 +2490,7 @@ private struct IllustratedInspectionScene: View {
 
         context.draw(
             Text("RING FINAL · ENDS A / B")
-                .font(.caption.bold().monospaced())
+                .font(.sparkyMono(.caption, weight: .bold))
                 .foregroundStyle(.black.opacity(0.60)),
             at: CGPoint(x: size.width * 0.76, y: size.height * 0.76)
         )
@@ -2508,7 +2511,7 @@ private struct IllustratedInspectionScene: View {
         context.stroke(Path(roundedRect: labelRect, cornerRadius: 5), with: .color(.black.opacity(0.72)), lineWidth: 2)
         context.draw(
             Text("REMOVE\nSENSITIVE\nEQUIPMENT")
-                .font(.caption2.bold().monospaced())
+                .font(.sparkyMono(.caption2, weight: .bold))
                 .foregroundStyle(.black.opacity(0.72)),
             at: CGPoint(x: labelRect.midX, y: labelRect.midY)
         )

@@ -45,10 +45,10 @@ struct LearnView: View {
                             } else if !contentStore.guides.isEmpty {
                                 VStack(alignment: .leading, spacing: 6) {
                                     Label("All guides complete", systemImage: "checkmark.circle.fill")
-                                        .font(.headline)
+                                        .font(.sparky(.headline))
                                         .foregroundStyle(Color.sparkySuccess)
                                     Text("Choose any guide below to revisit it.")
-                                        .font(.subheadline)
+                                        .font(.sparky(.subheadline))
                                         .foregroundStyle(Color.sparkyMuted)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -60,12 +60,13 @@ struct LearnView: View {
 
                         HStack(alignment: .firstTextBaseline) {
                             Text(hasSearch ? "Search results" : "Study guides")
-                                .font(.title2.bold())
+                                .font(.sparkySerif(.title2))
+                                .tracking(-0.4)
                                 .foregroundStyle(Color.sparkyText)
                                 .accessibilityAddTraits(.isHeader)
                             Spacer()
                             Text("\(visibleGuides.count)")
-                                .font(.subheadline.monospacedDigit())
+                                .font(.sparky(.subheadline).monospacedDigit())
                                 .foregroundStyle(Color.sparkyMuted)
                                 .accessibilityLabel("\(visibleGuides.count) guides")
                         }
@@ -84,7 +85,7 @@ struct LearnView: View {
                                 if !guides.isEmpty {
                                     VStack(alignment: .leading, spacing: 10) {
                                         Text(topic.title)
-                                            .font(.subheadline.weight(.semibold))
+                                            .font(.sparky(.subheadline, weight: .semibold))
                                             .foregroundStyle(Color.sparkyMuted)
                                             .accessibilityAddTraits(.isHeader)
 
@@ -187,23 +188,23 @@ private struct ContinueGuideCard: View {
                 HStack(alignment: .top, spacing: 16) {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(isReturning ? "Continue reading" : completedCount > 0 ? "Next unread guide" : "Start here")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color.sparkyAccent)
+                            .font(.sparky(.subheadline, weight: .semibold))
+                            .foregroundStyle(Color.sparkyAccentText)
                         Text(guide.title)
-                            .font(.headline)
+                            .font(.sparky(.headline))
                             .foregroundStyle(Color.sparkyText)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer(minLength: 0)
                     Image(systemName: "arrow.right")
                         .font(.headline)
-                        .foregroundStyle(Color.sparkyAccent)
+                        .foregroundStyle(Color.sparkyAccentText)
                         .padding(.top, 3)
                         .accessibilityHidden(true)
                 }
                 VStack(alignment: .leading, spacing: 7) {
                     Text("\(completedCount) of \(totalCount) guides complete")
-                        .font(.caption)
+                        .font(.sparky(.caption))
                         .foregroundStyle(Color.sparkyMuted)
                     ProgressView(value: Double(completedCount), total: Double(max(totalCount, 1)))
                         .tint(Color.sparkyAccent)
@@ -228,17 +229,17 @@ private struct InspectionTrainingLink: View {
             HStack(spacing: 12) {
                 Image(systemName: "waveform.path.ecg.rectangle")
                     .font(.title2)
-                    .foregroundStyle(Color.sparkyAccent)
+                    .foregroundStyle(Color.sparkyAccentText)
                     .frame(width: 44, height: 44)
                     .background(Color.sparkyAccentSoft)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Inspection & testing labs")
-                        .font(.headline)
+                        .font(.sparky(.headline))
                         .foregroundStyle(Color.sparkyText)
                     Text("\(InspectionTrainingCatalog.labs.count) interactive labs · \(trainingStore.completedLabCount) complete")
-                        .font(.caption)
+                        .font(.sparky(.caption))
                         .foregroundStyle(Color.sparkyMuted)
                 }
                 .fixedSize(horizontal: false, vertical: true)
@@ -268,7 +269,7 @@ private struct GuideRow: View {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(guide.title)
-                        .font(.headline)
+                        .font(.sparky(.headline))
                         .foregroundStyle(Color.sparkyText)
                         .fixedSize(horizontal: false, vertical: true)
                     HStack(spacing: 8) {
@@ -279,10 +280,10 @@ private struct GuideRow: View {
                                 .foregroundStyle(Color.sparkySuccess)
                         } else if isInProgress {
                             Text("In progress")
-                                .foregroundStyle(Color.sparkyAccent)
+                                .foregroundStyle(Color.sparkyAccentText)
                         }
                     }
-                    .font(.caption)
+                    .font(.sparky(.caption))
                 }
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right")
@@ -326,7 +327,7 @@ private struct GuideDetailView: View {
                         if !guide.sections.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("In this guide")
-                                    .font(.headline)
+                                    .font(.sparky(.headline))
                                     .foregroundStyle(Color.sparkyText)
                                     .accessibilityAddTraits(.isHeader)
                                 ForEach(Array(guide.sections.enumerated()), id: \.offset) { index, section in
@@ -337,15 +338,15 @@ private struct GuideDetailView: View {
                                     } label: {
                                         HStack(alignment: .firstTextBaseline, spacing: 10) {
                                             Text("\(index + 1).")
-                                                .font(.subheadline.monospacedDigit())
+                                                .font(.sparky(.subheadline).monospacedDigit())
                                             Text(section.title)
-                                                .font(.subheadline.weight(.semibold))
+                                                .font(.sparky(.subheadline, weight: .semibold))
                                                 .frame(maxWidth: .infinity, alignment: .leading)
                                             Image(systemName: "arrow.down")
                                                 .font(.caption)
                                                 .accessibilityHidden(true)
                                         }
-                                        .foregroundStyle(Color.sparkyAccent)
+                                        .foregroundStyle(Color.sparkyAccentText)
                                         .multilineTextAlignment(.leading)
                                         .frame(minHeight: 44)
                                         .contentShape(Rectangle())
@@ -362,7 +363,7 @@ private struct GuideDetailView: View {
                                 GuideFactsView(facts: guide.facts)
                                     .padding(.top, 10)
                             }
-                            .font(.subheadline.weight(.semibold))
+                            .font(.sparky(.subheadline, weight: .semibold))
                             .tint(Color.sparkyAccent)
                             .padding(.horizontal, 4)
                         }
@@ -413,13 +414,13 @@ private struct GuideDetailView: View {
     private var completionCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(isCompleted ? "Guide complete" : "Finished reading?")
-                .font(.headline)
+                .font(.sparky(.headline))
                 .foregroundStyle(isCompleted ? Color.sparkySuccess : Color.sparkyText)
             if isCompleted {
                 Button("Mark as not complete") {
                     studyState.toggleCompletedGuide(guide.id)
                 }
-                .font(.subheadline)
+                .font(.sparky(.subheadline))
                 .tint(Color.sparkyMuted)
                 .frame(minHeight: 44)
                 .accessibilityIdentifier("learn-mark-incomplete")
@@ -428,11 +429,11 @@ private struct GuideDetailView: View {
                     NavigationLink(value: LearnRoute.guide(nextGuide.id)) {
                         VStack(alignment: .leading, spacing: 5) {
                             Text("Next unread guide")
-                                .font(.caption)
+                                .font(.sparky(.caption))
                                 .foregroundStyle(Color.sparkyMuted)
                             Label(nextGuide.title, systemImage: "arrow.right")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Color.sparkyAccent)
+                                .font(.sparky(.subheadline, weight: .semibold))
+                                .foregroundStyle(Color.sparkyAccentText)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .multilineTextAlignment(.leading)
@@ -464,20 +465,21 @@ private struct GuideDetailHero: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(guide.category.title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Color.sparkyAccent)
+                .font(.sparky(.subheadline, weight: .semibold))
+                .foregroundStyle(Color.sparkyAccentText)
             Text(guide.title)
-                .font(.title.bold())
+                .font(.sparkySerif(.title))
+                .tracking(-0.4)
                 .foregroundStyle(Color.sparkyText)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
             Text(guide.summary)
-                .font(.body)
+                .font(.sparky(.body))
                 .foregroundStyle(Color.sparkyMuted)
                 .fixedSize(horizontal: false, vertical: true)
             if isCompleted {
                 Label("Completed", systemImage: "checkmark.circle.fill")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.sparky(.subheadline, weight: .semibold))
                     .foregroundStyle(Color.sparkySuccess)
             }
         }
@@ -496,11 +498,11 @@ private struct GuideFactsView: View {
             ForEach(Array(facts.enumerated()), id: \.offset) { index, fact in
                 HStack(alignment: .firstTextBaseline, spacing: 14) {
                     Text(fact.label)
-                        .font(.subheadline)
+                        .font(.sparky(.subheadline))
                         .foregroundStyle(Color.sparkyMuted)
                     Spacer(minLength: 16)
                     Text(fact.value)
-                        .font(.subheadline.weight(.bold))
+                        .font(.sparky(.subheadline, weight: .bold))
                         .foregroundStyle(Color.sparkyText)
                         .multilineTextAlignment(.trailing)
                         .fixedSize(horizontal: false, vertical: true)
@@ -555,15 +557,15 @@ private struct GuideCrossLinks: View {
                     } label: {
                         HStack(spacing: 10) {
                             Image(systemName: "doc.text.fill")
-                                .foregroundStyle(Color.sparkyAccent)
+                                .foregroundStyle(Color.sparkyAccentText)
                             Text(link.label)
-                                .font(.subheadline.weight(.semibold))
+                                .font(.sparky(.subheadline, weight: .semibold))
                                 .foregroundStyle(Color.sparkyText)
                                 .multilineTextAlignment(.leading)
                             Spacer(minLength: 8)
                             Image(systemName: "arrow.up.right")
                                 .font(.caption.bold())
-                                .foregroundStyle(Color.sparkyAccent)
+                                .foregroundStyle(Color.sparkyAccentText)
                                 .accessibilityHidden(true)
                         }
                         .padding(.horizontal, 14)
@@ -593,15 +595,15 @@ private struct GuideSectionCard: View {
         VStack(alignment: .leading, spacing: 13) {
             HStack(alignment: .top, spacing: 11) {
                 Text("\(number)")
-                    .font(.caption.bold().monospacedDigit())
-                    .foregroundStyle(Color.sparkyAccent)
+                    .font(.sparky(.caption, weight: .bold).monospacedDigit())
+                    .foregroundStyle(Color.sparkyAccentText)
                     .frame(width: 30, height: 30)
                     .background(Color.sparkyAccentSoft)
                     .clipShape(Circle())
                     .accessibilityHidden(true)
 
                 Text(section.title)
-                    .font(.title3.weight(.bold))
+                    .font(.sparky(.title3, weight: .bold))
                     .foregroundStyle(Color.sparkyText)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 2)
@@ -615,7 +617,7 @@ private struct GuideSectionCard: View {
                         .padding(.top, 8)
                         .accessibilityHidden(true)
                     Text(item)
-                        .font(.body)
+                        .font(.sparky(.body))
                         .foregroundStyle(Color.sparkyText)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -654,11 +656,11 @@ private struct GuideListCard: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(eyebrow.uppercased())
-                        .font(.caption2.weight(.bold).monospaced())
+                        .font(.sparkyMono(.caption2, weight: .bold))
                         .tracking(1)
                         .foregroundStyle(tone.color)
                     Text(title)
-                        .font(.title3.weight(.bold))
+                        .font(.sparky(.title3, weight: .bold))
                         .foregroundStyle(Color.sparkyText)
                 }
             }
@@ -666,7 +668,7 @@ private struct GuideListCard: View {
             ForEach(Array(items.enumerated()), id: \.offset) { index, item in
                 HStack(alignment: .top, spacing: 11) {
                     Text("\(index + 1)")
-                        .font(.caption2.bold().monospacedDigit())
+                        .font(.sparky(.caption2, weight: .bold).monospacedDigit())
                         .foregroundStyle(tone.color)
                         .frame(width: 24, height: 24)
                         .background(tone.color.opacity(0.12))
@@ -674,7 +676,7 @@ private struct GuideListCard: View {
                         .accessibilityHidden(true)
 
                     Text(item)
-                        .font(.subheadline)
+                        .font(.sparky(.subheadline))
                         .foregroundStyle(Color.sparkyText)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 2)

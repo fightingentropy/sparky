@@ -65,21 +65,21 @@
 }
 
 .ff-d-easy {
-  color: #86efac;
-  border-color: rgba(134, 239, 172, 0.4);
-  background: rgba(134, 239, 172, 0.08);
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
+  background: var(--success-soft);
 }
 
 .ff-d-medium {
   color: var(--accent-strong);
-  border-color: rgba(251, 191, 36, 0.4);
+  border-color: var(--accent-line);
   background: var(--accent-soft);
 }
 
 .ff-d-hard {
-  color: #fda4af;
-  border-color: rgba(253, 164, 175, 0.4);
-  background: rgba(253, 164, 175, 0.08);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  background: var(--danger-soft);
 }
 
 .ff-svg {
@@ -87,7 +87,7 @@
   min-height: 0;
   width: 100%;
   display: block;
-  background: #0d1014;
+  background: var(--bg);
 }
 
 /* Test points */
@@ -112,14 +112,12 @@
 .ff-tp:focus-visible .ff-tp-dot {
   stroke: var(--accent-strong);
   stroke-width: 2.4;
-  filter: drop-shadow(0 0 4px var(--accent-strong));
 }
 .ff-tp:focus-visible .ff-tp-tooltip { opacity: 1; }
 
 .ff-tp-red {
   fill: #ef5350 !important;
   stroke: #ffb4b4 !important;
-  filter: drop-shadow(0 0 8px rgba(239, 83, 80, 0.5));
   animation: ff-pop 220ms var(--ease);
 }
 
@@ -136,7 +134,7 @@
 }
 
 .ff-tp-label {
-  font-family: "SF Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   fill: var(--muted-strong);
   pointer-events: none;
@@ -221,12 +219,12 @@
 }
 
 .ff-segment-red {
-  background: rgba(239, 83, 80, 0.18);
-  color: #ffb4b4;
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 .ff-segment-black {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-soft);
   color: var(--text);
 }
 
@@ -237,7 +235,7 @@
   display: inline-block;
 }
 
-.ff-dot-red { background: #ef5350; box-shadow: 0 0 6px rgba(239, 83, 80, 0.6); }
+.ff-dot-red { background: #ef5350; }
 .ff-dot-black { background: #1a1a1a; border: 1px solid #555; }
 
 /* Right: HUD */
@@ -418,7 +416,6 @@
 
 .ff-flame {
   font-size: 1rem;
-  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.4));
 }
 
 .ff-streak-num {
@@ -447,12 +444,12 @@
 }
 
 .ff-mastery {
-  border-color: rgba(134, 239, 172, 0.4);
-  background: rgba(134, 239, 172, 0.06);
+  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
+  background: var(--success-soft);
 }
 
 .ff-mastery strong {
-  color: #86efac;
+  color: var(--success);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-size: 0.85rem;
@@ -519,7 +516,7 @@
 }
 
 .ff-screen-mode {
-  font-family: "SF Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.65rem;
   letter-spacing: 0.16em;
   color: rgba(190, 242, 100, 0.7);
@@ -530,7 +527,7 @@
 .ff-screen-led-row { display: inline-flex; gap: 6px; }
 
 .ff-screen-led {
-  font-family: "SF Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.55rem;
   letter-spacing: 0.1em;
   font-weight: 700;
@@ -560,7 +557,7 @@
 }
 
 .ff-screen-value {
-  font-family: "SF Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-feature-settings: "tnum";
   font-size: 2.4rem;
   font-weight: 700;
@@ -579,7 +576,7 @@
 }
 
 .ff-screen-unit {
-  font-family: "SF Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -655,7 +652,7 @@
 .ff-probe-status {
   display: flex;
   justify-content: space-between;
-  font-family: "SF Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.55);
 }
@@ -775,36 +772,36 @@
 .ff-choice-selected {
   border-color: var(--accent);
   background: var(--accent-soft);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 16px var(--accent-glow);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 .ff-choice-selected .ff-choice-key {
   background: var(--accent);
-  color: #1a1c1f;
+  color: var(--on-accent);
   border-color: var(--accent);
 }
 
 .ff-choice-correct {
-  border-color: rgba(134, 239, 172, 0.7);
-  background: rgba(134, 239, 172, 0.1);
-  color: #d1fae5;
+  border-color: var(--success);
+  background: var(--success-soft);
+  color: var(--text);
 }
 
 .ff-choice-correct .ff-choice-key {
-  background: #86efac;
-  color: #052e16;
-  border-color: #86efac;
+  background: var(--success);
+  color: var(--on-accent);
+  border-color: var(--success);
 }
 
 .ff-choice-wrong {
-  border-color: rgba(239, 83, 80, 0.6);
-  background: rgba(239, 83, 80, 0.08);
-  color: #fecaca;
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--text);
 }
 
 .ff-choice-wrong .ff-choice-key {
   background: var(--danger);
-  color: #fff;
+  color: var(--on-accent);
   border-color: var(--danger);
 }
 
@@ -815,12 +812,12 @@
   width: 100%;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: #1a1c1f;
-  font-weight: 700;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 500;
   font-size: 0.92rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   cursor: pointer;
   transition: filter 140ms var(--ease), transform 140ms var(--ease);
   display: inline-flex;
@@ -834,15 +831,15 @@
 .ff-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .ff-submit-next {
-  background: #4ade80;
-  border-color: #4ade80;
-  color: #052e16;
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--on-accent);
 }
 
 .ff-submit-retry {
-  background: #f87171;
-  border-color: #f87171;
-  color: #2a0a0d;
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--on-accent);
 }
 
 /* Banners */
@@ -865,23 +862,23 @@
 }
 
 .ff-banner-good {
-  background: rgba(134, 239, 172, 0.08);
-  border: 1px solid rgba(134, 239, 172, 0.3);
-  color: #d1fae5;
+  background: var(--success-soft);
+  border: 1px solid color-mix(in srgb, var(--success) 40%, var(--border));
+  color: var(--text);
 }
 
-.ff-banner-good .ff-banner-head { color: #86efac; }
+.ff-banner-good .ff-banner-head { color: var(--success); }
 
 .ff-banner-bad {
-  background: rgba(239, 83, 80, 0.08);
-  border: 1px solid rgba(239, 83, 80, 0.3);
-  color: #fecaca;
+  background: var(--danger-soft);
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--border));
+  color: var(--text);
 }
 
-.ff-banner-bad .ff-banner-head { color: #fda4af; }
+.ff-banner-bad .ff-banner-head { color: var(--danger); }
 .ff-banner p { margin: 0; }
 
-.ff-confirm { font-size: 0.82rem; color: rgba(255, 255, 255, 0.7); }
+.ff-confirm { font-size: 0.82rem; color: var(--muted-strong); }
 
 .ff-card-note {
   border-style: dashed;

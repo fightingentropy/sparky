@@ -118,10 +118,11 @@ private struct NotesOverview: View {
                 VStack(alignment: .leading, spacing: 5) {
                     SparkyEyebrow(text: "On-site knowledge")
                     Text("The details worth keeping close")
-                        .font(.title2.weight(.bold))
+                        .font(.sparkySerif(.title2))
+                        .tracking(-0.4)
                         .foregroundStyle(Color.sparkyText)
                     Text("Search formulas, standards notes, drawing legends and practical reference tables.")
-                        .font(.subheadline)
+                        .font(.sparky(.subheadline))
                         .foregroundStyle(Color.sparkyMuted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -158,7 +159,7 @@ private struct NoteCard: View {
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: note.symbolName)
                         .font(.headline)
-                        .foregroundStyle(Color.sparkyAccent)
+                        .foregroundStyle(Color.sparkyAccentText)
                         .frame(width: 40, height: 40)
                         .background(Color.sparkyAccentSoft)
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -166,12 +167,12 @@ private struct NoteCard: View {
 
                     VStack(alignment: .leading, spacing: 7) {
                         Text(note.title)
-                            .font(.headline)
+                            .font(.sparky(.headline))
                             .foregroundStyle(Color.sparkyText)
                             .multilineTextAlignment(.leading)
 
                         Text(note.summary)
-                            .font(.subheadline)
+                            .font(.sparky(.subheadline))
                             .foregroundStyle(Color.sparkyMuted)
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
@@ -184,7 +185,7 @@ private struct NoteCard: View {
                                 Label("\(tables.count) table\(tables.count == 1 ? "" : "s")", systemImage: "tablecells")
                             }
                         }
-                        .font(.caption.weight(.semibold))
+                        .font(.sparky(.caption, weight: .semibold))
                         .foregroundStyle(Color.sparkyMuted)
                     }
 
@@ -204,7 +205,7 @@ private struct NoteCard: View {
             Button(action: onToggleSaved) {
                 Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(isSaved ? Color.sparkyAccent : Color.sparkyMuted)
+                    .foregroundStyle(isSaved ? Color.sparkyAccentText : Color.sparkyMuted)
                     .frame(width: 44, height: 44)
                     .background(isSaved ? Color.sparkyAccentSoft : Color.sparkyBackground.opacity(0.75))
                     .clipShape(Circle())
@@ -220,7 +221,7 @@ private struct NoteCard: View {
             RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous)
                 .stroke(isSaved ? Color.sparkyAccent.opacity(0.42) : Color.sparkyBorder, lineWidth: 1)
         }
-        .shadow(color: Color.black.opacity(0.045), radius: 14, y: 7)
+        .shadow(color: Color.sparkyCardShadow, radius: 2, y: 1)
     }
 }
 
@@ -263,7 +264,7 @@ private struct NoteDetailView: View {
                         HStack(spacing: 10) {
                             Image(systemName: note.symbolName)
                                 .font(.headline)
-                                .foregroundStyle(Color.sparkyAccent)
+                                .foregroundStyle(Color.sparkyAccentText)
                                 .frame(width: 42, height: 42)
                                 .background(Color.sparkyAccentSoft)
                                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -271,12 +272,13 @@ private struct NoteDetailView: View {
                         }
 
                         Text(note.title)
-                            .font(.largeTitle.weight(.bold))
+                            .font(.sparkySerif(.largeTitle))
+                            .tracking(-0.4)
                             .foregroundStyle(Color.sparkyText)
                             .fixedSize(horizontal: false, vertical: true)
 
                         Text(note.summary)
-                            .font(.body)
+                            .font(.sparky(.body))
                             .foregroundStyle(Color.sparkyMuted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -349,15 +351,15 @@ private struct NotePointRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Text("\(number)")
-                .font(.caption.bold().monospacedDigit())
-                .foregroundStyle(Color.sparkyAccent)
+                .font(.sparky(.caption, weight: .bold).monospacedDigit())
+                .foregroundStyle(Color.sparkyAccentText)
                 .frame(width: 28, height: 28)
                 .background(Color.sparkyAccentSoft)
                 .clipShape(Circle())
                 .accessibilityHidden(true)
 
             Text(text)
-                .font(.body)
+                .font(.sparky(.body))
                 .foregroundStyle(Color.sparkyText)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 3)
@@ -374,7 +376,7 @@ private struct NoteLegendRow: View {
             LegendSwatchView(item: item)
 
             Text(item.label)
-                .font(.subheadline.weight(.medium))
+                .font(.sparky(.subheadline, weight: .medium))
                 .foregroundStyle(Color.sparkyText)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -473,7 +475,7 @@ private struct NoteReferenceTableView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 9) {
             Text(table.title)
-                .font(.subheadline.weight(.bold))
+                .font(.sparky(.subheadline, weight: .bold))
                 .foregroundStyle(Color.sparkyText)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -509,8 +511,8 @@ private struct NoteTableRow: View {
         HStack(alignment: .top, spacing: 0) {
             ForEach(Array(cells.enumerated()), id: \.offset) { index, cell in
                 Text(cell)
-                    .font(isHeader ? .caption.weight(.bold) : .caption)
-                    .foregroundStyle(isHeader ? Color.sparkyAccent : Color.sparkyText)
+                    .font(isHeader ? .sparky(.caption, weight: .bold) : .sparky(.caption))
+                    .foregroundStyle(isHeader ? Color.sparkyAccentText : Color.sparkyText)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(width: 142, alignment: .leading)
                     .padding(.horizontal, 11)

@@ -164,12 +164,12 @@ struct AccountAvatarView: View {
                     .scaledToFill()
             } else if let initial {
                 Text(initial)
-                    .font(.system(size: size * 0.42, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.sparkyAccent)
+                    .font(.sparkyFixed(size: size * 0.42, weight: .bold))
+                    .foregroundStyle(Color.sparkyAccentText)
             } else {
                 Image(systemName: "person.fill")
                     .font(.system(size: size * 0.42, weight: .semibold))
-                    .foregroundStyle(Color.sparkyAccent)
+                    .foregroundStyle(Color.sparkyAccentText)
             }
         }
         .frame(width: size, height: size)
@@ -207,10 +207,11 @@ private struct SignedOutAccountView: View {
             VStack(spacing: 12) {
                 SparkyBrandMark(size: 66)
                 Text("Welcome back")
-                    .font(.title.bold())
+                    .font(.sparkySerif(.title))
+                    .tracking(-0.4)
                     .foregroundStyle(Color.sparkyText)
                 Text("Use the same Sparky account as the website to keep your profile and study progress together.")
-                    .font(.subheadline)
+                    .font(.sparky(.subheadline))
                     .foregroundStyle(Color.sparkyMuted)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -267,7 +268,7 @@ private struct SignedOutAccountView: View {
                 .accessibilityHint("Signs in securely and saves only your session token")
 
                 Label("Your password is sent only to Sparky to sign in. It is never saved in the app.", systemImage: "lock.fill")
-                    .font(.caption)
+                    .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -345,7 +346,7 @@ private struct SignedInAccountView<SyncStatusContent: View>: View {
                 isConfirmingLogout = true
             } label: {
                 Label("Log out", systemImage: "rectangle.portrait.and.arrow.right")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.sparky(.subheadline, weight: .semibold))
                     .foregroundStyle(Color.sparkyDanger)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 13)
@@ -396,11 +397,12 @@ private struct SignedInAccountView<SyncStatusContent: View>: View {
 
             VStack(spacing: 3) {
                 Text(previewDisplayName)
-                    .font(.title2.bold())
+                    .font(.sparkySerif(.title2))
+                    .tracking(-0.4)
                     .foregroundStyle(Color.sparkyText)
                     .multilineTextAlignment(.center)
                 Text(user.email)
-                    .font(.subheadline)
+                    .font(.sparky(.subheadline))
                     .foregroundStyle(Color.sparkyMuted)
                     .textSelection(.enabled)
             }
@@ -449,7 +451,7 @@ private struct SignedInAccountView<SyncStatusContent: View>: View {
             }
 
             Text("Leave this blank to use your email. Photos are centre-cropped and resized to 256 × 256 before upload.")
-                .font(.caption)
+                .font(.sparky(.caption))
                 .foregroundStyle(Color.sparkyMuted)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -602,10 +604,10 @@ private struct AccountRestoringView: View {
                 .controlSize(.large)
                 .tint(Color.sparkyAccent)
             Text("Restoring your account…")
-                .font(.headline)
+                .font(.sparky(.headline))
                 .foregroundStyle(Color.sparkyText)
             Text("Your secure session is being checked.")
-                .font(.subheadline)
+                .font(.sparky(.subheadline))
                 .foregroundStyle(Color.sparkyMuted)
         }
         .padding(24)
@@ -622,7 +624,7 @@ private struct AccountFieldLabel<FieldContent: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             Text(title)
-                .font(.caption.weight(.semibold))
+                .font(.sparky(.caption, weight: .semibold))
                 .foregroundStyle(Color.sparkyMuted)
             content
         }
@@ -632,7 +634,7 @@ private struct AccountFieldLabel<FieldContent: View>: View {
 private struct AccountInputModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.body)
+            .font(.sparky(.body))
             .foregroundStyle(Color.sparkyText)
             .padding(.horizontal, 14)
             .frame(minHeight: 50)
@@ -658,7 +660,7 @@ private struct AccountMessageBanner: View {
 
     var body: some View {
         Label(message, systemImage: symbol)
-            .font(.caption.weight(.semibold))
+            .font(.sparky(.caption, weight: .semibold))
             .foregroundStyle(tint)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(12)

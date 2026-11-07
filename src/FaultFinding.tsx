@@ -1010,7 +1010,7 @@ export function FaultFinding(): React.ReactElement {
         >
           <defs>
             <pattern id="ff-grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="1" />
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--line)" strokeWidth="1" />
             </pattern>
           </defs>
           <rect width={SVG_W} height={SVG_H} fill="url(#ff-grid)" />
@@ -1048,7 +1048,7 @@ export function FaultFinding(): React.ReactElement {
                   {tp.label}
                 </text>
                 <g className="ff-tp-tooltip">
-                  <rect x={tooltipX} y={tooltipY} width={150} height={32} rx="4" fill="#16120d" stroke="var(--border-strong)" />
+                  <rect x={tooltipX} y={tooltipY} width={150} height={32} rx="4" fill="var(--surface)" stroke="var(--border-strong)" />
                   <text x={tooltipX + 8} y={tooltipY + 13} fontSize="10" fill="var(--text)" fontWeight={600}>{tp.label}</text>
                   <text x={tooltipX + 8} y={tooltipY + 26} fontSize="9" fill="var(--muted-strong)">{tp.description}</text>
                 </g>

@@ -7,6 +7,13 @@ export type Tutorial = {
   category: string;
   workplaceUse: string;
   practiceFocus: string[];
+  instructions?: TutorialInstructions;
+};
+
+export type TutorialInstructions = {
+  /** Shown above the steps, e.g. where the method differs from the video. */
+  note?: string;
+  steps: string[];
 };
 
 export const TUTORIALS: Tutorial[] = [
@@ -22,7 +29,24 @@ export const TUTORIALS: Tutorial[] = [
       "Marking out the corner before cutting",
       "Keeping grinder cuts square and controlled",
       "Dressing sharp edges before installation"
-    ]
+    ],
+    instructions: {
+      note: "The video uses 50 × 50 mm steel trunking with 100 mm from the end to the back of the bend. Scale the measurements to your own trunking and job.",
+      steps: [
+        "Decide the finished length from the end of the trunking to the back of the bend. In the video this is 100 mm on 50 × 50 mm steel trunking.",
+        "Square a line right round the trunking at the back-of-bend position. If the line does not meet up where it started, your square is out, so use a better one.",
+        "Using a 45° set square, mark a 45° line on each side of that centre mark so the two lines form a V.",
+        "No 45° square? Measure the trunking width along the line, measure the same distance across, then join the two points with a diagonal. In the video this comes to 50 mm on 50 mm trunking. Repeat on the opposite side.",
+        "Mark out the waste on one side only, whichever you prefer. The whole of that side's top lip comes out, along with the triangles.",
+        "Hold the trunking firmly and cut out the triangles with an angle grinder. The video uses a 1 mm blade and stops short of cutting through the back. The presenter wore no PPE for filming, so wear eye protection and gloves yourself.",
+        "Remove the lip by turning the trunking on its side and cutting along it square to the face, taking out only the lip. Cutting at an angle takes too much out and leaves a gap when the joint closes. A hacksaw does this job, and the video prefers it to filing.",
+        "Deburr every cut edge, because trunking is there to protect cable. Run your fingers carefully over the edges afterwards and, if they feel sharp, keep going. The offcuts are hot straight after cutting, so let them cool.",
+        "Fold the trunking in so the cut edges sit one inside the other, like a mitred joint. Check that the corners line up and that the bend is a true 90° with the square.",
+        "Drill through both layers of metal on each side of the corner, keeping the corner at 90°. The video drills a couple of holes per side, so repeat on the opposite side.",
+        "Fit trunking nuts and bolts in the holes. The video uses M5 with the bolt head on the inside and the nut on the outside.",
+        "Tighten up with a spanner (8 mm in the video), then measure from the end to the back of the bend to confirm it matches your target, 100 mm in the video."
+      ]
+    }
   },
   {
     id: "flat-90-trunking",
@@ -36,7 +60,27 @@ export const TUTORIALS: Tutorial[] = [
       "Setting out the flat 90° cut lines accurately",
       "Controlling grinder cuts and keeping hands clear",
       "Folding, dressing, and checking lid fit before fixing"
-    ]
+    ],
+    instructions: {
+      note: "The video works through one example: a flat 90° turn to the right with bends 150 mm apart (the video says only '150', so mm is assumed) and 45° cuts. The trunking size, bolt size and drill size are not given. Gloves and eye protection are an added standard safety point, not shown in the video.",
+      steps: [
+        "Decide which way the run needs to turn before you mark anything. In the video it turns right, and marking the wrong way means cutting the wrong way.",
+        "Measure along the trunking from the back of one bend to the back of the next. The video's example uses 150 between bends.",
+        "Work from the back of the trunking when you measure and mark. The open front can flex or squash and throw your marks out.",
+        "Use a try square to carry each mark right round the trunking. Then mark a 45° line from the bend point in the direction of the turn, and mirror it the opposite way on the other side.",
+        "Check the lines meet at the back, where the cuts will close up. A small mismatch at the front can happen if the trunking has been squashed.",
+        "On the top, mark the waste you will remove, including the small triangle. Leave the flat that tucks in, and mark the two edges of the small lip to be cut out. Pick whichever side is easiest.",
+        "Cut the small notches along the 45° lines, normally with a hacksaw. Stop at the marked point so you do not cut through the part you are keeping, keep your fingers well clear, and wear gloves and eye protection.",
+        "Bend the loose offcuts over and remove them. Do not leave them lying about, as they are very sharp.",
+        "Bend the trunking back and cut down the remaining edges with a hacksaw, as close to the line as you can. Use a vice if you have one, or brace it against a ledge such as the edge of a cable drum, and leave the little flat in place.",
+        "File every cut edge until it is smooth, because trunking is containment and must not damage the cable. Carefully run a finger round each edge to check for sharp spots.",
+        "Score the fold line with a hacksaw so the trunking bends exactly on that point. This matters most on short sections, and the video avoids a grinder for this.",
+        "Remove any burrs, then bend the trunking round to 90°, tucking the flat in on the inside for a smooth inner face. Check the cut edges close up.",
+        "Drill the overlapping flanges, give the holes a quick file, and fit a nut and bolt in each. Tighten with an 8 mm spanner, but check the corner is a true 90° before the final tighten.",
+        "Cut off the projecting bolt ends and file them smooth so they cannot catch the cable. Keep your thumb and fingers well clear of the cutting tool, as the presenter nearly cut himself here.",
+        "If you will fix the trunking to a wall through the back, add a screw hole for that fixing."
+      ]
+    }
   },
   {
     id: "trunking-45-set",
@@ -50,7 +94,26 @@ export const TUTORIALS: Tutorial[] = [
       "Transferring the offset measurement accurately",
       "Keeping both sides of the set in line",
       "Checking lid fit before fixing permanently"
-    ]
+    ],
+    instructions: {
+      note: "In the video the worked example is 50 mm trunking, giving a 20.7 mm offset. For other widths, work out the offset as tan 22.5° multiplied by the trunking width, or use the folded paper method.",
+      steps: [
+        "Decide where the set starts, as this depends on your installation, and mark that point on the trunking. The set is made from one internal 45° bend and one external 45° bend.",
+        "Do not simply cut either side of the half-width point. Half of 50 mm is 25 mm, which gives a bend that is more than 45° and quite tight.",
+        "Work out the true offset as tan 22.5° multiplied by the trunking width. In the video, 50 mm trunking gives about 20.7 mm (roughly 21 mm) either side of the centre mark.",
+        "To avoid a calculator, fold a square sheet of paper across its 90° corner to make 45°, then fold again to make 22.5°. Lay it on the centre mark with its edge along the trunking end, and mark where its edges meet the trunking.",
+        "Square the marks round the trunking and draw diagonals, so the cuts are on the correct side of the centre mark on both sides of the trunking.",
+        "Wear eye protection. Fit a thin blade in the angle grinder (a hacksaw does the same job) and cut out the marked pieces, keeping your thumb well clear.",
+        "Follow the 22.5° angle of the marks rather than cutting square, which leaves a hole in the bend. Never cut beyond your marks.",
+        "Remove the top lips, then file all the cut edges smooth. This is containment that protects the cable, so deburr it well.",
+        "Close the bend to 45° and check it against a square. Drill a couple of holes either side of the joint and bolt it. Earth continuity is kept because the trunking is not cut right through.",
+        "For the external bend, offer the trunking to the 50 mm face and mark where it touches. This is the start of the bend, so measure 20.7 mm from it (or use the paper) to find the centre, then square round, mark the lid side and bottom, and draw diagonals.",
+        "Cut out the marked pieces at the angle with the grinder or hacksaw, but leave the top uncut because it is all that holds the bend together. Pick up the offcuts straight away so nobody steps on them.",
+        "Open the trunking slightly so a hacksaw can reach and remove the small corner pieces. File off every sharp edge.",
+        "Score the small flaps, only about 20 mm long, as you would score card so they fold over neatly. Fold the bend into shape, mark the fixing holes, drill them and bolt it together.",
+        "Offer the finished set up to the trunking. You can also drill through the top flap to fix it to the wall."
+      ]
+    }
   },
   {
     id: "trunking-flat-90-gusset",
@@ -64,7 +127,26 @@ export const TUTORIALS: Tutorial[] = [
       "Marking both 45° cuts from the centre line",
       "Keeping the trunking width consistent through the bend",
       "Deburring and dressing edges before lid fit"
-    ]
+    ],
+    instructions: {
+      note: "The video's worked example uses 50 as the trunking size, which gives a 20.7 mm offset (50 x tan 22.5). Work out your own figure if your trunking is a different size. It makes a flat 90° bend from two 45° folds.",
+      steps: [
+        "Decide which way the run needs to turn. Marking is done on the back of the trunking, so the direction is reversed when you transfer it from the front.",
+        "Mark the centre of the bend on the back of the trunking and carry the line right round all sides. The video quotes a 200 figure for this back bend, without stating units.",
+        "Mark the first 45° line away from the centre mark, again right round the trunking. Work on the back, because the front can close up and make the marks less accurate.",
+        "To get the cut angle, fold a piece of paper in half and in half again. This gives 22.5°, which is the angle on each side of the fold centre.",
+        "If you cannot use paper, calculate the offset as the trunking size multiplied by the tangent of 22.5°. In the video, 50 gives 20.7 mm; mark that distance on the side and on the top.",
+        "Mark the same angled lines on the other side of the centre mark so both folds match. Then mark the waste to be removed, either the whole wedge as in the video or just one diagonal.",
+        "Check every mark before cutting. Measure twice, cut once.",
+        "Cut out the waste safely using your preferred method, wearing suitable PPE. In the video a saw is tilted to follow the angle of the lines down through the sides, so there are no gaps when the bend closes.",
+        "Take off the top edges and remove the loose offcuts. Do not leave the offcuts lying about.",
+        "File every cut edge smooth, because trunking protects the cables. Go over any edge that still feels rough.",
+        "Score along the fold lines so the trunking is easier to bend by hand.",
+        "Bend the trunking, slide one side inside the other and line up the 45° mark. If it will not close fully, score deeper or use pliers to bend the sections down, as the presenter did.",
+        "Drill fixing holes in the back of the trunking. Nuts and bolts will not fit on the back, but fixings can go through the sides.",
+        "With hindsight, the presenter would leave the tags on the other pieces so nuts and bolts could sit on the straight sections either side."
+      ]
+    }
   },
   {
     id: "tray-gusset-bend",
@@ -78,7 +160,26 @@ export const TUTORIALS: Tutorial[] = [
       "Marking both 45° cuts from the centre line",
       "Maintaining tray width through the bend",
       "Deburring and finishing before cable install"
-    ]
+    ],
+    instructions: {
+      note: "The video has spoken narration but no captions, so these steps come from the narration and footage. The video uses 100 mm wide perforated tray with a 50 mm internal gusset; treat these sizes as examples. The eye protection and gloves step is a standard safety addition and is not shown in the video.",
+      steps: [
+        "Draw a straight line across the tray at right angles to the sides to mark the centre of the first bend. In the video, the tray is 100 mm wide.",
+        "Do not simply halve the 45° lines of a normal 90° mitre. The video shows that this gives an angle over 45°, so the bend would be wrong.",
+        "Work out the offset for each side of the centre line. Multiply the tan of 22.5° by the tray width. In the video, tan 22.5° × 100 mm = 41.4 mm.",
+        "Measure that distance either side of the centre line and mark it. Redraw the diagonals from those marks to give a 45° bend line on each side.",
+        "To skip the calculator, fold a sheet of paper with a square corner in half to get 45°, then in half again to get 22.5°. Use the folded corner against the tray to mark the same lines, which the video shows landing in the same place.",
+        "Decide the gusset size from the cable you need to carry. In the video, a 50 mm internal measurement is used.",
+        "Find the centre of the bend with the folded paper and draw the diagonals from that point. Use the paper again to find and mark the next bend.",
+        "Before cutting, check the marked bends turn the tray the way you need. Mark the triangles to be removed.",
+        "Wear eye protection and gloves when grinding, cutting and filing, and hold the tray firmly while you cut.",
+        "Cut out the marked triangles with an angle grinder, hacksaw or jigsaw. The more accurate the cuts, the better the joint. In the video, an angle grinder is used.",
+        "Remove the cut-off pieces and file every cut edge until it is clean and smooth before assembly.",
+        "Fold the tray along the cut lines to form the bend. Check it is 90°.",
+        "The holes will not line up, so line up the overlapping sections and drill new fixing holes with a cordless drill.",
+        "Fit gutter bolts or roofing bolts through the new holes and tighten them. Check the finished bend is still 90°."
+      ]
+    }
   },
   {
     id: "steel-conduit-measurement",
@@ -92,7 +193,24 @@ export const TUTORIALS: Tutorial[] = [
       "Accounting for bend take-up",
       "Measuring to the finished position",
       "Checking the bend before threading or fixing"
-    ]
+    ],
+    instructions: {
+      note: "In the video the worked example is a 90° bend in steel conduit with the back of the bend 300 mm from the threaded end, made on a conduit bending machine. Use your own measurement in place of 300 mm. This set-up suits short legs; the presenters point out that a leg over about a metre would hit the floor, and cover that in a later video.",
+      steps: [
+        "Measure along the conduit from the threaded end to the position of the back of the bend (in the video, 300 mm). Mark it clearly.",
+        "Load the conduit into the bender from the end you measured from, with the roller bar pulled up. Check the conduit sits under the stop.",
+        "Put a piece of scrap conduit into the former. It shows where the finished leg of your bend will sit.",
+        "Hold a set square so it touches both the scrap piece and the conduit you are bending, keeping the two at 90° to each other. Alternatively, rest the square against the edge of the former.",
+        "Slide the conduit along until your mark lines up with the edge of the set square. This places the back of the bend at your measurement.",
+        "Bend on the machine, then stop when you think you are close and step back to look. Aim to finish slightly under-bent, because adding bend later is easier than removing it.",
+        "Take the conduit out and offer the set square to it. If the square touches at the bottom and opens to a gap further up, the bend is under 90° and needs a little more.",
+        "Refit the conduit in the bender exactly as it was before, with the mark in the same place.",
+        "Add a small amount of bend with gentle pressure, little more than the weight of your arm. Heavy pulling makes it easy to overshoot.",
+        "Check again with the set square against a fixed edge such as the wall. Repeat the small adjustments until the bend is a true 90°.",
+        "Measure from the back of the bend to the end of the conduit to confirm your dimension (in the video, exactly 300 mm).",
+        "If the run finishes at a box or other accessory, allow for half a coupler, about 15 mm in the video. Either deduct it from your measurement before bending, or trim it off afterwards and re-cut the thread."
+      ]
+    }
   },
   {
     id: "fast-unistrut-trapeze",
@@ -106,6 +224,53 @@ export const TUTORIALS: Tutorial[] = [
       "Setting out rod centres before drilling",
       "Confirming substrate and fixing rating",
       "Keeping Unistrut level and square"
-    ]
+    ],
+    instructions: {
+      note: "These steps were written from the video footage because it has no narration. No sizes are shown on screen, so use the fixing size, drill bit, rod size and spacing given in the manufacturer's data and your specification.",
+      steps: [
+        "Wear gloves and eye protection. Hold the Unistrut against the underside of the concrete soffit to set out the two fixing positions.",
+        "Drill a pilot hole upwards into the soffit at the first fixing position. Use the drill bit size the screw manufacturer specifies.",
+        "Offer up a Deligo rod-to-masonry screw. It has a washer and a hex coupling section fitted below the threaded masonry screw.",
+        "Fit a socket on a ratchet over the hex section. Drive the screw up into the pilot hole.",
+        "Keep turning until the washer sits flush and tight against the concrete.",
+        "Drill the second pilot hole and fit the second screw in the same way.",
+        "Measure the drop you need and cut the threaded rod to length with a rod cutter. Keep your fingers clear of the jaws.",
+        "Screw a threaded rod into the hex coupling on each fixing until it is fully engaged.",
+        "Thread a nut and washer onto the rod, then slide the Unistrut onto it. Thread a spring channel nut onto the rod below the strut and turn it into the channel, with the spring underneath.",
+        "Run the nut and washer down onto the strut and tighten the nut with an adjustable spanner. Repeat on the second rod.",
+        "Check the finished trapeze hangs level beneath the soffit, ready for the tray, basket or pipe to be fixed to it."
+      ]
+    }
+  },
+  {
+    id: "swa-gland-make-off",
+    videoId: "WQuoQvppvRQ",
+    title: "How to Make off a SWA Cable Gland (Steel Wire Armored Cable) Step By Step Demonstration",
+    channel: "GSH Electrical",
+    sourceUrl: "https://youtu.be/WQuoQvppvRQ",
+    category: "Terminations",
+    workplaceUse: "Terminating SWA into a consumer unit, isolator, or other enclosure with a CW gland so the armour is clamped and earthed.",
+    practiceFocus: [
+      "Matching the gland size to the cable's cores and size",
+      "Cutting the armour to length without damaging the cores",
+      "Seating every armour wire on the cone before tightening"
+    ],
+    instructions: {
+      note: "Steps 4–7 differ from the video: an adjustable pipe cutter rings the outer sheath, so it comes off in one piece and the hacksaw only touches bare armour.",
+      steps: [
+        "Read the cable's number of cores and size, then pick the gland from the chart on the gland pack (3-core 2.5 mm² takes a 20S).",
+        "Work out how much cable you need inside the enclosure and mark where the outer sheath will stop. Leave room for the bare armour the gland clamps: about 10 mm for this gland, but check the pack.",
+        "Trim the shroud tip with a knife so it grips the cable, then slide on the shroud and the gland nut (thread towards the cable end). Push both back out of the way.",
+        "Ring the outer sheath at the mark with an adjustable pipe cutter. Tighten about a quarter turn per revolution and stop as soon as the wheel reaches the armour. Overtightening notches the wires where they enter the gland.",
+        "Slit the sheath lengthways from the ring to the cable end and peel it off in one piece. The armour protects the cores, so the knife can be firm; cut away from yourself.",
+        "Wrap tape round the bare armour with its edge at the armour cut point, about 10 mm from the end of the sheath.",
+        "Junior hacksaw round the armour against the tape, about halfway through each wire. With the sheath gone you can see every wire, so check none are missed. Don't use the pipe cutter on the armour: it flattens the wires instead of cutting them.",
+        "Unwind the wires 4–5 at a time and rock them back and forth until they snap at the cut. Remove the tape.",
+        "Push the gland body onto the cable, cone first, and twist it to spread the armour so the wires sit over the cone without going past it.",
+        "Start the gland nut on the thread by hand. Hold the body with one spanner and tighten the nut with another; spanners rather than grips, so the brass isn't chewed.",
+        "Score the inner bedding lightly with a knife 10–15 mm beyond the gland and twist it off. Don't use the pipe cutter here: there's nothing hard underneath, so the wheel would cut into the core insulation.",
+        "Check all the way round that no armour wires missed the cone or crossed over. Fit the gland to the enclosure with the earth tag outside and the locknut inside."
+      ]
+    }
   }
 ];

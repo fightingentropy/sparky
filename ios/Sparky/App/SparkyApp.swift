@@ -19,6 +19,11 @@ struct SparkyApp: App {
     @AppStorage("comfortableText") private var comfortableText = false
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        SparkyFonts.registerAll()
+        SparkyAppearance.configureNavigationBar()
+    }
+
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -49,6 +54,7 @@ struct SparkyApp: App {
                 }
             }
             .tint(Color.sparkyAccent)
+            .font(.sparky(.body))
             .preferredColorScheme(AppAppearance(rawValue: appearance)?.colorScheme)
             .lineSpacing(comfortableText ? 2 : 0)
             .task {

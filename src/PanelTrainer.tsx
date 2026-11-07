@@ -988,7 +988,7 @@ export function PanelTrainer({ active = true }: { active?: boolean }) {
           camera={{ position: [0, 1.1, 1.45], fov: 32 }}
           aria-label="3D view of the consumer unit. Use the Installed Circuits list below to add and edit protective devices."
         >
-          <color attach="background" args={["#16120d"]} />
+          <color attach="background" args={["#100e0c"]} />
           <ambientLight intensity={0.55} />
           <directionalLight position={[2, 4, 3]} intensity={1.4} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
           <directionalLight position={[-2, 2, 1]} intensity={0.4} color="#fff5e0" />

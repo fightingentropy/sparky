@@ -22,7 +22,7 @@ export function TutorialsPage({ isActive }: Props) {
         <div>
           <h1>Workplace Tutorials</h1>
           <p className="page-copy">
-            Practical videos for containment, conduit, tray bends, and support installs.
+            Practical videos for containment, conduit, tray bends, support installs, and cable terminations.
           </p>
         </div>
         <span className="tutorial-count">{filteredTutorials.length} videos</span>
@@ -63,6 +63,20 @@ export function TutorialsPage({ isActive }: Props) {
                   <li key={item}>{item}</li>
                 ))}
               </ul>
+              {tutorial.instructions ? (
+                <details className="tutorial-steps">
+                  <summary>
+                    <span>Step-by-step ({tutorial.instructions.steps.length} steps)</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+                  </summary>
+                  {tutorial.instructions.note ? <p className="tutorial-steps-note">{tutorial.instructions.note}</p> : null}
+                  <ol>
+                    {tutorial.instructions.steps.map((step) => (
+                      <li key={step}>{step}</li>
+                    ))}
+                  </ol>
+                </details>
+              ) : null}
               <a className="ghost-button tutorial-source-link" href={tutorial.sourceUrl} target="_blank" rel="noreferrer">
                 Open on YouTube
               </a>

@@ -10,10 +10,10 @@ struct LoadingStateView: View {
                 .tint(Color.sparkyAccent)
                 .controlSize(.large)
             Text(title)
-                .font(.headline)
+                .font(.sparky(.headline))
                 .foregroundStyle(Color.sparkyText)
             Text(message)
-                .font(.subheadline)
+                .font(.sparky(.subheadline))
                 .foregroundStyle(Color.sparkyMuted)
         }
         .multilineTextAlignment(.center)
