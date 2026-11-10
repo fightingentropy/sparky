@@ -314,21 +314,29 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
     if (selectedExamId !== selectedExamEntry.id) setSelectedExamId(selectedExamEntry.id);
   }, [selectedExamEntry.id, selectedExamId, setSelectedExamId]);
   const [loadedExam, setLoadedExam] = useState<Exam | null>(null);
+  const [examLoadError, setExamLoadError] = useState(false);
+  const [examLoadAttempt, setExamLoadAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     setLoadedExam(null);
+    setExamLoadError(false);
 
-    selectedExamEntry.load().then((loadedExam) => {
-      if (!cancelled) {
-        setLoadedExam(loadedExam);
+    selectedExamEntry.load().then(
+      (loadedExam) => {
+        if (!cancelled) {
+          setLoadedExam(loadedExam);
+        }
+      },
+      () => {
+        if (!cancelled) setExamLoadError(true);
       }
-    });
+    );
 
     return () => {
       cancelled = true;
     };
-  }, [selectedExamEntry]);
+  }, [selectedExamEntry, examLoadAttempt]);
   const exam = loadedExam?.id === selectedExamEntry.id ? loadedExam : null;
   const selectedExamIdRef = useRef(selectedExamEntry.id);
   selectedExamIdRef.current = selectedExamEntry.id;
@@ -1282,7 +1290,14 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
           </div>
         ) : null}
 
-        {!exam ? (
+        {!exam && examLoadError ? (
+          <div className="empty-state" role="alert">
+            <p>Could not load {selectedExamEntry.title}. Check your connection and try again.</p>
+            <button type="button" onClick={() => setExamLoadAttempt((n) => n + 1)}>
+              Retry
+            </button>
+          </div>
+        ) : !exam ? (
           <p className="empty-state" role="status">Loading {selectedExamEntry.title}...</p>
         ) : null}
 

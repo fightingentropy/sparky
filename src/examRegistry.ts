@@ -47,7 +47,9 @@ function loadExamAsset(id: ExamAssetId): Promise<Exam> {
   const cached = examCache.get(id);
   if (cached) return cached;
 
-  const request = fetch(EXAM_ASSET_URLS[id]).then(async (response) => {
+  // A failed load (offline, 5xx) must not stay cached, or every retry would
+  // reuse the rejected promise until a full reload.
+  const request: Promise<Exam> = fetch(EXAM_ASSET_URLS[id]).then(async (response) => {
     if (!response.ok) {
       throw new Error(`Failed to load exam ${id}: ${response.status}`);
     }
@@ -59,6 +61,9 @@ function loadExamAsset(id: ExamAssetId): Promise<Exam> {
     return applyExamContentSource(
       applyExamSolutionTables(applyExamExplanationEnhancements(exam))
     );
+  });
+  request.catch(() => {
+    if (examCache.get(id) === request) examCache.delete(id);
   });
 
   examCache.set(id, request);
@@ -74,17 +79,27 @@ function makeExamEntry<T extends ExamAssetId>(id: T, title: string): ExamRegistr
 }
 
 function loadFundamentalInspectionExam(): Promise<Exam> {
-  fundamentalExamCache ??= loadExamAsset("initial-verification").then(
+  if (fundamentalExamCache) return fundamentalExamCache;
+  const request = loadExamAsset("initial-verification").then(
     (sourceExam) => applyExamContentSource(buildFundamentalInspectionExam(sourceExam))
   );
-  return fundamentalExamCache;
+  request.catch(() => {
+    if (fundamentalExamCache === request) fundamentalExamCache = undefined;
+  });
+  fundamentalExamCache = request;
+  return request;
 }
 
 function loadInitialVerificationExam(): Promise<Exam> {
-  initialVerificationExamCache ??= loadExamAsset("initial-verification").then(
+  if (initialVerificationExamCache) return initialVerificationExamCache;
+  const request = loadExamAsset("initial-verification").then(
     (sourceExam) => applyExamContentSource(buildInitialVerificationExam(sourceExam))
   );
-  return initialVerificationExamCache;
+  request.catch(() => {
+    if (initialVerificationExamCache === request) initialVerificationExamCache = undefined;
+  });
+  initialVerificationExamCache = request;
+  return request;
 }
 
 export const EXAM_REGISTRY = [
