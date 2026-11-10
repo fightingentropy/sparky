@@ -123,6 +123,15 @@ export default defineConfig({
             }
           },
           {
+            // Same-origin font for the 3D trainer's troika text labels.
+            urlPattern: /\/fonts\/Roboto-Regular\.ttf$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "trainer-fonts",
+              expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 60 }
+            }
+          },
+          {
             // Per-question diagram images under /exam-images, loaded with their
             // exam. Runtime-cached so they work offline after first view without
             // bloating the install precache.

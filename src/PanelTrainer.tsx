@@ -1,8 +1,16 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, type ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, OrbitControls, Text } from "@react-three/drei";
 import type { Group, Mesh } from "three";
 import "./PanelTrainer.css";
+
+// troika-three-text fetches a default font and unicode fallback data from a CDN
+// when no font is given; the production CSP blocks that. Every label uses this
+// same-origin font, which covers all the label text (Latin letters and digits).
+export const PANEL_FONT_URL = "/fonts/Roboto-Regular.ttf";
+function PanelText(props: ComponentProps<typeof Text>) {
+  return <Text font={PANEL_FONT_URL} {...props} />;
+}
 
 type Pole = 1 | 2;
 type CableCsa = 1 | 1.5 | 2.5 | 4 | 6 | 10 | 16;
@@ -224,18 +232,18 @@ function DoorDirectory() {
   const ySpan = PANEL.height * 0.6;
   return (
     <group position={[0, 0, -0.0005]} rotation={[0, Math.PI, 0]}>
-      <Text fontSize={0.014} color="#202024" position={[0, PANEL.height * 0.32, 0]} anchorX="center" anchorY="middle">
+      <PanelText fontSize={0.014} color="#202024" position={[0, PANEL.height * 0.32, 0]} anchorX="center" anchorY="middle">
         CIRCUIT DIRECTORY
-      </Text>
+      </PanelText>
       {items.map((n) => {
         const col = (n - 1) % 2;
         const row = Math.floor((n - 1) / 2);
         const x = -xSpan / 2 + col * xSpan;
         const y = ySpan / 2 - 0.02 - (row * ySpan) / 20;
         return (
-          <Text key={`dir-${n}`} fontSize={0.0085} color="#444" position={[x, y, 0]} anchorX="left" anchorY="middle">
+          <PanelText key={`dir-${n}`} fontSize={0.0085} color="#444" position={[x, y, 0]} anchorX="left" anchorY="middle">
             {`${n}.`}
-          </Text>
+          </PanelText>
         );
       })}
     </group>
@@ -319,9 +327,9 @@ function BarRail({ x, color, label }: { x: number; color: string; label: string 
           <meshStandardMaterial color="#d4d8de" metalness={0.9} roughness={0.25} />
         </mesh>
       ))}
-      <Text fontSize={0.008} color="#dfe2e7" position={[0, h / 2 + 0.012, 0.004]} anchorX="center" anchorY="middle">
+      <PanelText fontSize={0.008} color="#dfe2e7" position={[0, h / 2 + 0.012, 0.004]} anchorX="center" anchorY="middle">
         {label}
-      </Text>
+      </PanelText>
     </group>
   );
 }
@@ -350,12 +358,12 @@ function MainBreaker() {
         <boxGeometry args={[0.04, 0.004, 0.004]} />
         <meshStandardMaterial color="#e2e2e2" metalness={0.1} roughness={0.5} />
       </mesh>
-      <Text fontSize={0.012} color="#f5f5f5" position={[0, 0.018, SLOT_DEPTH / 2 + 0.001]} anchorX="center" anchorY="middle">
+      <PanelText fontSize={0.012} color="#f5f5f5" position={[0, 0.018, SLOT_DEPTH / 2 + 0.001]} anchorX="center" anchorY="middle">
         MAIN 100A
-      </Text>
-      <Text fontSize={0.008} color="#bbb" position={[0, -0.018, SLOT_DEPTH / 2 + 0.001]} anchorX="center" anchorY="middle">
+      </PanelText>
+      <PanelText fontSize={0.008} color="#bbb" position={[0, -0.018, SLOT_DEPTH / 2 + 0.001]} anchorX="center" anchorY="middle">
         230V
-      </Text>
+      </PanelText>
     </group>
   );
 }
@@ -445,9 +453,9 @@ function WarningBadge({ bodyHeight }: { bodyHeight: number }) {
         <planeGeometry args={[0.024, 0.018]} />
         <meshStandardMaterial color="#ef5350" emissive="#ef5350" emissiveIntensity={0.4} />
       </mesh>
-      <Text fontSize={0.012} color="#fff" position={[0, 0, 0.001]} anchorX="center" anchorY="middle">
+      <PanelText fontSize={0.012} color="#fff" position={[0, 0, 0.001]} anchorX="center" anchorY="middle">
         !
-      </Text>
+      </PanelText>
     </group>
   );
 }
@@ -494,7 +502,7 @@ function BreakerObject({ breaker, selected, hovered, warnings, onClick, onPointe
         <cylinderGeometry args={[0.002, 0.002, 0.002, 12]} />
         <meshStandardMaterial color="#c0392b" metalness={0.2} roughness={0.4} />
       </mesh>
-      <Text
+      <PanelText
         fontSize={0.012}
         color="#f5f5f5"
         position={[0, isDouble ? -bodyHeight / 4 : 0, SLOT_DEPTH / 2 + 0.001]}
@@ -502,11 +510,11 @@ function BreakerObject({ breaker, selected, hovered, warnings, onClick, onPointe
         anchorY="middle"
       >
         {`${breaker.rating}A`}
-      </Text>
+      </PanelText>
       {isDouble ? (
-        <Text fontSize={0.008} color="#bbb" position={[0, bodyHeight / 4, SLOT_DEPTH / 2 + 0.001]} anchorX="center" anchorY="middle">
+        <PanelText fontSize={0.008} color="#bbb" position={[0, bodyHeight / 4, SLOT_DEPTH / 2 + 0.001]} anchorX="center" anchorY="middle">
           230V
-        </Text>
+        </PanelText>
       ) : null}
       <BreakerToggle on={breaker.on} tripped={breaker.tripped} />
       {breaker.hasWire ? <WireBundle bodyHeight={bodyHeight} side={breaker.side} /> : null}
