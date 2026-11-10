@@ -232,6 +232,41 @@ final class ExamProgressSyncTests: XCTestCase {
     }
 
     @MainActor
+    func testAccountSwitchDuringFetchAppliesNothingToTheNewAccount() async throws {
+        let fixture = try makeFixture()
+        let test = try XCTUnwrap(fixture.catalog.exams.first?.tests.first)
+        fixture.store.bind(toAccountID: "account-a")
+        let remote = MockExamProgressRemote(
+            collection: RemoteExamProgressCollection(
+                progress: [
+                    fixture.examID: RemoteExamProgress(
+                        variants: [test.index: RemoteExamVariantProgress(answers: [1: .a], submitted: true)],
+                        current: test.index,
+                        updatedAt: date("2026-07-22T12:00:00Z")
+                    )
+                ]
+            ),
+            onFetch: { await MainActor.run { fixture.store.bind(toAccountID: "account-b") } }
+        )
+
+        do {
+            _ = try await ExamProgressSyncService(remote: remote).synchronize(
+                store: fixture.store,
+                catalog: fixture.catalog,
+                bearerToken: "token-a"
+            )
+            XCTFail("Expected the sync to abort")
+        } catch {
+            XCTAssertEqual(error as? ExamProgressSyncError, .accountChanged)
+        }
+
+        XCTAssertEqual(fixture.store.boundAccountID, "account-b")
+        XCTAssertTrue(fixture.store.progress(examID: fixture.examID, testID: test.id).answers.isEmpty)
+        let updates = await remote.recordedUpdates()
+        XCTAssertTrue(updates.isEmpty)
+    }
+
+    @MainActor
     func testEditDuringItsOwnPutIsRebasedAfterServerWrite() async throws {
         let clock = TestClock(date("2026-07-22T12:00:00Z"))
         let fixture = try makeFixture(now: { clock.value })
@@ -419,14 +454,17 @@ private actor MockExamProgressRemote: ExamProgressRemote {
     private let fetchError: ExamProgressSyncError?
     private let putError: ExamProgressSyncError?
     private let onPut: (@Sendable (RemoteExamProgressUpdate) async -> Void)?
+    private let onFetch: (@Sendable () async -> Void)?
     private var updates: [RemoteExamProgressUpdate] = []
 
     init(
         collection: RemoteExamProgressCollection,
         fetchError: ExamProgressSyncError? = nil,
         putError: ExamProgressSyncError? = nil,
-        onPut: (@Sendable (RemoteExamProgressUpdate) async -> Void)? = nil
+        onPut: (@Sendable (RemoteExamProgressUpdate) async -> Void)? = nil,
+        onFetch: (@Sendable () async -> Void)? = nil
     ) {
+        self.onFetch = onFetch
         self.collection = collection
         self.fetchError = fetchError
         self.putError = putError
@@ -434,6 +472,7 @@ private actor MockExamProgressRemote: ExamProgressRemote {
     }
 
     func fetchAll(bearerToken: String) async throws -> RemoteExamProgressCollection {
+        await onFetch?()
         if let fetchError { throw fetchError }
         return collection
     }

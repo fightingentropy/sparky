@@ -40,6 +40,7 @@ protocol ExamProgressRemote: Sendable {
 
 enum ExamProgressSyncError: Error, Equatable, LocalizedError, Sendable {
     case notAuthenticated
+    case accountChanged
     case invalidConfiguration
     case invalidResponse
     case invalidPayload
@@ -61,6 +62,8 @@ enum ExamProgressSyncError: Error, Equatable, LocalizedError, Sendable {
         switch self {
         case .notAuthenticated:
             "Sign in to sync exam progress."
+        case .accountChanged:
+            "The signed-in account changed during sync."
         case .invalidConfiguration:
             "Sparky's progress service is not configured correctly."
         case .invalidResponse, .invalidPayload:
@@ -239,8 +242,18 @@ final class ExamProgressSyncService {
         let token = bearerToken.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !token.isEmpty else { throw ExamProgressSyncError.notAuthenticated }
 
+        // The store belongs to one account for the whole run. If the user signs
+        // out or switches account while a request is in flight, this run must
+        // not apply that account's data to, or mark clean, the new namespace.
+        let accountID = store.boundAccountID
+        func ensureSameAccount() throws {
+            try Task.checkCancellation()
+            guard store.boundAccountID == accountID else { throw ExamProgressSyncError.accountChanged }
+        }
+
         // A failed GET leaves the local store byte-for-byte untouched.
         let remoteCollection = try await remote.fetchAll(bearerToken: token)
+        try ensureSameAccount()
         let snapshot = store.syncSnapshot()
         let plan = Self.makePlan(
             local: snapshot,
@@ -257,8 +270,10 @@ final class ExamProgressSyncService {
         for upload in plan.uploads {
             // Another answer can change while an earlier request is in flight.
             // Never send a plan entry that is already stale.
+            try ensureSameAccount()
             guard store.matchesSyncUpload(upload) else { continue }
             try await remote.put(upload, bearerToken: token)
+            try ensureSameAccount()
             uploaded += 1
             store.markSynced(upload)
         }

@@ -108,6 +108,15 @@ final class ProgressSyncController {
                 if store.localMutationRevision != revisionAtStart {
                     needsAnotherPass = true
                 }
+            } catch ExamProgressSyncError.accountChanged {
+                // The account changed mid-request and nothing was applied.
+                // Start over for whoever is signed in now.
+                if authStore.user != nil {
+                    Task { [weak self] in
+                        await self?.syncNow(store: store, catalog: catalog, authStore: authStore)
+                    }
+                }
+                return
             } catch let error as ExamProgressSyncError {
                 if error.isAuthenticationFailure {
                     authStore.logout()
