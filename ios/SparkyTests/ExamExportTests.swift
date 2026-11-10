@@ -122,6 +122,21 @@ final class ExamExportTests: XCTestCase {
         XCTAssertEqual(document.questions[0].explanation, question.explanation)
     }
 
+    func testPDFRendererRunsOffTheMainThread() async throws {
+        let document = ExamExport.pdfDocument(
+            sections: [makeSection(questions: [question])],
+            baseURL: URL(string: "https://sparky.example/exams")!
+        )
+        // Calling the renderer from a detached task only compiles when it is
+        // not main-actor isolated.
+        let result = await Task.detached { () -> (Bool, Data) in
+            (Thread.isMainThread, ExamPDFRenderer.render(document))
+        }.value
+
+        XCTAssertFalse(result.0)
+        XCTAssertTrue(result.1.starts(with: Data("%PDF".utf8)))
+    }
+
     @MainActor
     func testPDFRendererProducesAValidAppleFrameworkPDF() throws {
         let document = ExamExport.pdfDocument(

@@ -150,7 +150,6 @@ enum ExamExport {
         pdfDocument(sections: test.sections, imageData: imageData, baseURL: baseURL)
     }
 
-    @MainActor
     static func pdfData(
         sections: [ExamTestSection],
         imageData: [String: Data] = [:],
@@ -161,7 +160,6 @@ enum ExamExport {
         )
     }
 
-    @MainActor
     static func pdfData(
         test: ExamTest,
         imageData: [String: Data] = [:],
@@ -305,7 +303,6 @@ struct ExamPDFImage: Equatable, Sendable {
     let data: Data?
 }
 
-@MainActor
 enum ExamPDFRenderer {
     static func render(_ document: ExamPDFDocument) -> Data {
         let bounds = CGRect(
@@ -335,7 +332,6 @@ enum ExamPDFRenderer {
     }
 }
 
-@MainActor
 private struct PDFLayout {
     let document: ExamPDFDocument
     let context: UIGraphicsPDFRendererContext?

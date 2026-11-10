@@ -734,13 +734,18 @@ private struct ExamSessionView: View {
         guard !isPreparingPDF else { return }
         isPreparingPDF = true
 
+        // Rendering and image loading take only value types and run off the
+        // main actor so the UI stays responsive for large exams.
+        let test = test
+        let baseURL = Self.websiteBaseURL
         Task { @MainActor in
-            await Task.yield()
-            let data = ExamExport.pdfData(
-                test: test,
-                imageData: ExamImageResource.data(for: test),
-                baseURL: Self.websiteBaseURL
-            )
+            let data = await Task.detached(priority: .userInitiated) {
+                ExamExport.pdfData(
+                    test: test,
+                    imageData: ExamImageResource.data(for: test),
+                    baseURL: baseURL
+                )
+            }.value
 
             isPreparingPDF = false
             guard !data.isEmpty else {
