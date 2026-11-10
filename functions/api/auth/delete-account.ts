@@ -66,8 +66,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     await env.DB.batch([
       env.DB.prepare("DELETE FROM exam_progress WHERE user_id = ?").bind(row.id),
       env.DB.prepare("DELETE FROM users WHERE id = ?").bind(row.id),
-      env.DB.prepare("DELETE FROM rate_limits WHERE bucket IN (?, ?, ?)")
-        .bind(`login:email:${email}`, `delete:email:${email}`, `signup:email:${email}`),
+      // Login buckets are keyed per IP (login:email:<ip>:<email>), so match any IP.
+      env.DB.prepare("DELETE FROM rate_limits WHERE bucket IN (?, ?) OR bucket LIKE ? ESCAPE '\\'")
+        .bind(`delete:email:${email}`, `signup:email:${email}`, `login:email:%:${email.replace(/[\\%_]/g, "\\$&")}`),
     ]);
     const response = json({ deleted: true });
     response.headers.set("Cache-Control", "no-store");
