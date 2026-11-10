@@ -54,3 +54,37 @@ export function coalescePendingSave(
   }
   return { flush: null, pending: next };
 }
+
+function slotHasContent(slot: SyncVariantSlot | undefined): boolean {
+  return !!slot && (slot.submitted || Object.keys(slot.answers).length > 0);
+}
+
+function sameSlot(a: SyncVariantSlot | undefined, b: SyncVariantSlot | undefined): boolean {
+  if (!slotHasContent(a) && !slotHasContent(b)) return true;
+  if (!a || !b) return false;
+  if (a.submitted !== b.submitted) return false;
+  const aKeys = Object.keys(a.answers);
+  if (aKeys.length !== Object.keys(b.answers).length) return false;
+  return aKeys.every((key) => a.answers[key] === b.answers[key]);
+}
+
+// Local test slots the server should receive: those that differ from the
+// server's copy, when the server has no row for the exam or the local copy was
+// edited after the server's. Each is one save request (the API takes one test
+// per request).
+export function planLocalPush(
+  local: SyncExamProgress | null,
+  localUpdatedAt: number,
+  server: { variants: Record<string, SyncVariantSlot>; updatedAt: number } | null
+): Array<Omit<PendingSave, "examId">> {
+  if (!local) return [];
+  if (server && localUpdatedAt <= server.updatedAt) return [];
+  const pushes: Omit<PendingSave, "examId">[] = [];
+  for (const [key, slot] of Object.entries(local.variants)) {
+    if (sameSlot(slot, server?.variants[key])) continue;
+    const index = Number(key);
+    if (!Number.isInteger(index) || index < 0) continue;
+    pushes.push({ current: local.current, variant: { index, answers: slot.answers, submitted: slot.submitted } });
+  }
+  return pushes;
+}

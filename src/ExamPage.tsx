@@ -23,7 +23,12 @@ import {
 import { usePersistedState } from "./usePersistedState";
 import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
-import { coalescePendingSave, isExamProgressStorageKey, type PendingSave } from "./examProgressSync";
+import {
+  coalescePendingSave,
+  isExamProgressStorageKey,
+  planLocalPush,
+  type PendingSave
+} from "./examProgressSync";
 import { writeClipboardText } from "./clipboard";
 import { getExamClipboardText, getQuestionClipboardText } from "./examClipboard";
 import { getQuestionChatGPTUrl } from "./chatgptQuestion";
@@ -390,31 +395,56 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
     }
   }, [selectedExamEntry.id, variantIndex]);
 
+  // The user the server copy was last merged for. Set only once a pull has
+  // succeeded and every local-only change was sent, so a failed attempt is
+  // retried on the next trigger (coming back online, or changing exam).
   const syncedForUserRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!user || syncedForUserRef.current === user.id) return;
-    syncedForUserRef.current = user.id;
+  const pullInFlightRef = useRef(false);
+  const pullFromServer = useCallback(() => {
+    if (!user || syncedForUserRef.current === user.id || pullInFlightRef.current) return;
+    pullInFlightRef.current = true;
+    const userId = user.id;
     getExamProgress()
-      .then((res) => {
-        for (const [examId, data] of Object.entries(res.progress)) {
+      .then(async (res) => {
+        // The account changed while the request ran: this data is not theirs.
+        if (userIdRef.current !== userId) return false;
+        const pushes: Array<{ examId: string } & Omit<PendingSave, "examId">> = [];
+        for (const examId of getValidExamIds()) {
           try {
-            // Skip examIds we don't recognise — protects against poisoned rows.
-            if (!isKnownExamId(examId)) continue;
-            // Built as unknown: the API types answers as Record<string,string>;
-            // isExamProgress validates the shape and narrows it to ExamProgress.
-            const serverProgress: unknown = { variants: data.variants, current: data.current };
-            if (!isExamProgress(serverProgress)) continue;
             const progressKey = `${EXAM_PROGRESS_STORAGE_PREFIX}${examId}`;
             const localUpdatedKey = `${EXAM_UPDATED_STORAGE_PREFIX}${examId}`;
-            const hasLocal = localStorage.getItem(progressKey) !== null;
+            const storedLocal = localStorage.getItem(progressKey);
+            const localParsed: unknown = storedLocal === null ? null : JSON.parse(storedLocal);
+            const localProgress = isExamProgress(localParsed) ? localParsed : null;
             const localUpdatedAt = Number(localStorage.getItem(localUpdatedKey)) || 0;
+            const data = Object.prototype.hasOwnProperty.call(res.progress, examId) ? res.progress[examId] : undefined;
+
+            // Built as unknown: the API types answers as Record<string,string>;
+            // isExamProgress validates the shape and narrows it to ExamProgress.
+            const serverProgress: unknown = data ? { variants: data.variants, current: data.current } : null;
+            if (!data || !isExamProgress(serverProgress)) {
+              // Nothing usable on the server (or a poisoned row): offer local data.
+              if (!data) {
+                for (const push of planLocalPush(localProgress, localUpdatedAt, null)) pushes.push({ examId, ...push });
+              }
+              continue;
+            }
             const serverUpdatedAt = parseServerUpdatedAt(data.updatedAt);
             const remoteResetAt = EXAM_REMOTE_PROGRESS_RESET_AT[examId] ?? 0;
             if (remoteResetAt > 0 && serverUpdatedAt < remoteResetAt) continue;
             // Use the server copy if there's nothing local, or if it's strictly newer.
-            if (!hasLocal || serverUpdatedAt > localUpdatedAt) {
+            if (!localProgress || serverUpdatedAt > localUpdatedAt) {
               localStorage.setItem(progressKey, JSON.stringify(serverProgress));
               localStorage.setItem(localUpdatedKey, String(serverUpdatedAt || Date.now()));
+            } else {
+              // Local is newer or equal: send what the server is missing, e.g.
+              // answers given while offline.
+              for (const push of planLocalPush(localProgress, localUpdatedAt, {
+                variants: serverProgress.variants,
+                updatedAt: serverUpdatedAt
+              })) {
+                pushes.push({ examId, ...push });
+              }
             }
           } catch {}
         }
@@ -427,9 +457,38 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
             if (isExamProgress(parsed)) setProgress(parsed);
           }
         } catch {}
+        for (const push of pushes) {
+          await saveExamProgress(
+            push.examId,
+            push.current,
+            push.variant
+              ? { index: push.variant.index, answers: push.variant.answers, submitted: push.variant.submitted }
+              : undefined
+          );
+        }
+        return true;
       })
-      .catch(() => {});
-  }, [user, selectedExamEntry.id, setProgress]);
+      .then(
+        (ok) => {
+          pullInFlightRef.current = false;
+          // Ignore the result if the account changed while the request ran.
+          if (ok && userIdRef.current === userId) syncedForUserRef.current = userId;
+        },
+        () => {
+          // Leave the ref unset so the next trigger retries.
+          pullInFlightRef.current = false;
+        }
+      );
+  }, [user, setProgress]);
+  const userIdRef = useRef<string | null>(null);
+  userIdRef.current = user?.id ?? null;
+  useEffect(() => {
+    pullFromServer();
+  }, [pullFromServer, selectedExamEntry.id]);
+  useEffect(() => {
+    window.addEventListener("online", pullFromServer);
+    return () => window.removeEventListener("online", pullFromServer);
+  }, [pullFromServer]);
 
   // After logging out, drop the previous account's answers from memory (the
   // stored copies are cleared by the logout itself) so they are not written
@@ -500,7 +559,12 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
       variant
         ? { index: variant.index, answers: variant.answers as Record<string, string>, submitted: variant.submitted }
         : undefined
-    ).catch(() => {});
+    ).catch(() => {
+      // The answers stay in localStorage with a newer timestamp than the
+      // server's copy; allow the next pull (coming back online, or reopening
+      // the app) to send them.
+      syncedForUserRef.current = null;
+    });
   }, [user]);
   const syncToServer = useCallback(
     (payload: { current: number; variant?: { index: number; answers: Answers; submitted: boolean } }) => {

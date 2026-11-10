@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { clearLocalExamProgress, coalescePendingSave, type PendingSave } from "./examProgressSync";
+import {
+  clearLocalExamProgress,
+  coalescePendingSave,
+  planLocalPush,
+  type PendingSave
+} from "./examProgressSync";
 
 class FakeStorage {
   private data = new Map<string, string>();
@@ -79,5 +84,48 @@ describe("coalescePendingSave", () => {
   it("lets a newer save for the same test replace the older one", () => {
     const next = save("e", 0, 0, true);
     expect(coalescePendingSave(save("e", 0, 0), next)).toEqual({ flush: null, pending: next });
+  });
+});
+
+describe("planLocalPush", () => {
+  const local = {
+    current: 2,
+    variants: { "0": { answers: { 1: "A" } as Record<string, string>, submitted: false } }
+  };
+
+  it("sends local answers when the server has no row for the exam", () => {
+    expect(planLocalPush(local, 100, null)).toEqual([
+      { current: 2, variant: { index: 0, answers: { 1: "A" }, submitted: false } }
+    ]);
+  });
+
+  it("sends local answers that are newer than the server copy", () => {
+    const server = { variants: {}, updatedAt: 50 };
+    expect(planLocalPush(local, 100, server)).toHaveLength(1);
+  });
+
+  it("sends nothing when the server copy is at least as new", () => {
+    expect(planLocalPush(local, 100, { variants: {}, updatedAt: 100 })).toEqual([]);
+  });
+
+  it("skips slots the server already has", () => {
+    const server = { variants: { "0": { answers: { 1: "A" } as Record<string, string>, submitted: false } }, updatedAt: 50 };
+    expect(planLocalPush(local, 100, server)).toEqual([]);
+  });
+
+  it("sends a locally reset test so the server does not keep the old answers", () => {
+    const reset = { current: 0, variants: { "0": { answers: {}, submitted: false } } };
+    const server = { variants: { "0": { answers: { 1: "A" } as Record<string, string>, submitted: true } }, updatedAt: 50 };
+    expect(planLocalPush(reset, 100, server)).toEqual([
+      { current: 0, variant: { index: 0, answers: {}, submitted: false } }
+    ]);
+  });
+
+  it("does not send empty slots to an exam the server lacks", () => {
+    expect(planLocalPush({ current: 0, variants: { "0": { answers: {}, submitted: false } } }, 100, null)).toEqual([]);
+  });
+
+  it("sends nothing without local progress", () => {
+    expect(planLocalPush(null, 100, null)).toEqual([]);
   });
 });
