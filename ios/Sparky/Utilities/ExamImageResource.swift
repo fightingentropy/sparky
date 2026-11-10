@@ -16,9 +16,17 @@ enum ExamImageResource {
         .first
     }
 
+    // Decoded images are cached so SwiftUI body re-evaluations do not repeat the
+    // bundle lookups and disk read. NSCache evicts under memory pressure.
+    private static let imageCache = NSCache<NSString, UIImage>()
+
     static func image(for path: String, bundle: Bundle = .main) -> UIImage? {
-        guard let url = url(for: path, bundle: bundle) else { return nil }
-        return UIImage(contentsOfFile: url.path)
+        let key = "\(bundle.bundlePath)|\(path)" as NSString
+        if let cached = imageCache.object(forKey: key) { return cached }
+        guard let url = url(for: path, bundle: bundle),
+              let image = UIImage(contentsOfFile: url.path) else { return nil }
+        imageCache.setObject(image, forKey: key)
+        return image
     }
 
     static func data(for path: String, bundle: Bundle = .main) -> Data? {
