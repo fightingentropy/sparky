@@ -22,13 +22,16 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
   const password = typeof body.password === "string" ? body.password : "";
   if (!email || !password) return json({ error: "Email and password required" }, 400);
 
-  // Throttle credential stuffing: cap attempts per source IP and per targeted
-  // email within a 15-minute window. Returns a generic 429 so it leaks nothing.
+  // Throttle credential stuffing: cap attempts per source IP, and per
+  // (email, source IP) pair, within a 15-minute window. The email bucket is
+  // scoped to the IP so a third party cannot exhaust the account owner's
+  // allowance and lock them out; the per-IP cap stays the primary throttle.
+  // Returns a generic 429 so it leaks nothing.
   const now = Date.now();
   const ip = clientIp(request);
   const [ipOk, emailOk] = await Promise.all([
     rateLimit(env, `login:ip:${ip}`, 30, RATE_WINDOW_MS, now),
-    rateLimit(env, `login:email:${email}`, 10, RATE_WINDOW_MS, now),
+    rateLimit(env, `login:email:${ip}:${email}`, 10, RATE_WINDOW_MS, now),
   ]);
   if (!ipOk || !emailOk) return json({ error: "Too many attempts. Try again later." }, 429);
   waitUntil(maybeCleanupRateLimits(env, now));
