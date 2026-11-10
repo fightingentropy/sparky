@@ -23,7 +23,7 @@ import {
 import { usePersistedState } from "./usePersistedState";
 import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
-import { isExamProgressStorageKey } from "./examProgressSync";
+import { coalescePendingSave, isExamProgressStorageKey, type PendingSave } from "./examProgressSync";
 import { writeClipboardText } from "./clipboard";
 import { getExamClipboardText, getQuestionClipboardText } from "./examClipboard";
 import { getQuestionChatGPTUrl } from "./chatgptQuestion";
@@ -485,9 +485,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   }, [examMenuOpen, progress, visibleExamRegistry]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingSaveRef = useRef<
-    { examId: string; current: number; variant?: { index: number; answers: Answers; submitted: boolean } } | null
-  >(null);
+  const pendingSaveRef = useRef<PendingSave | null>(null);
   const flushSave = useCallback(() => {
     if (!user || !pendingSaveRef.current) return;
     if (saveTimerRef.current) {
@@ -511,7 +509,17 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
         localStorage.setItem(localUpdatedKey, String(Date.now()));
       } catch {}
       if (!user) return;
-      pendingSaveRef.current = { examId: selectedExamEntry.id, ...payload };
+      // A save for another test or exam must not replace one still waiting out
+      // its debounce, or the earlier answers never reach the server.
+      const { flush, pending } = coalescePendingSave(pendingSaveRef.current, {
+        examId: selectedExamEntry.id,
+        ...payload
+      });
+      if (flush) {
+        pendingSaveRef.current = flush;
+        flushSave();
+      }
+      pendingSaveRef.current = pending;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(flushSave, 1000);
     },
