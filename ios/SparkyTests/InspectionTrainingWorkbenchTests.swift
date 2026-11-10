@@ -37,6 +37,15 @@ final class InspectionTrainingWorkbenchTests: XCTestCase {
         )
     }
 
+    func testDockedProbesWithTesterOffResolveToParkedForRetryReset() {
+        // The workbench rebuilds its topology from docked probes when a step is
+        // retried or the lab restarted; an OFF-function step must come back ready.
+        XCTAssertEqual(
+            resolve(red: .redDock, black: .blackDock, function: .off, expected: .parked),
+            .parked
+        )
+    }
+
     func testLiveConnectionsRequireRedProbeOnLine() {
         XCTAssertEqual(
             resolve(

@@ -185,6 +185,7 @@ struct InspectionTrainingSessionView: View {
     @State private var selectedWorkbenchFunction: WorkbenchFunction?
     @State private var selectedLeadTopology: WorkbenchLeadTopology?
     @State private var workbenchActionCompleted = false
+    @State private var workbenchResetToken = 0
     @AccessibilityFocusState private var feedbackIsFocused: Bool
 
     private var session: InspectionTrainingSession {
@@ -325,6 +326,7 @@ struct InspectionTrainingSessionView: View {
                         selectedFunction: $selectedWorkbenchFunction,
                         selectedTopology: $selectedLeadTopology,
                         actionCompleted: $workbenchActionCompleted,
+                        resetToken: workbenchResetToken,
                         immersive: false
                     )
 
@@ -417,6 +419,7 @@ struct InspectionTrainingSessionView: View {
                 selectedFunction: $selectedWorkbenchFunction,
                 selectedTopology: $selectedLeadTopology,
                 actionCompleted: $workbenchActionCompleted,
+                resetToken: workbenchResetToken,
                 immersive: true
             )
             .ignoresSafeArea()
@@ -534,6 +537,10 @@ struct InspectionTrainingSessionView: View {
         selectedWorkbenchFunction = .off
         selectedLeadTopology = nil
         workbenchActionCompleted = false
+        // The workbench only re-infers the lead topology when its function or
+        // task changes; on a retry neither does (steps whose answer is OFF stay
+        // OFF), so tell it to rebuild its probe state and topology.
+        workbenchResetToken &+= 1
         feedbackIsFocused = false
     }
 
@@ -1239,6 +1246,7 @@ private struct InspectionTrainingWorkbench: View {
     @Binding var selectedFunction: WorkbenchFunction?
     @Binding var selectedTopology: WorkbenchLeadTopology?
     @Binding var actionCompleted: Bool
+    let resetToken: Int
     let immersive: Bool
 
     @State private var redAttachment: WorkbenchTerminalID = .redDock
@@ -1444,6 +1452,9 @@ private struct InspectionTrainingWorkbench: View {
             resetProbeState()
         }
         .onChange(of: taskKey) { _, _ in
+            resetProbeState()
+        }
+        .onChange(of: resetToken) { _, _ in
             resetProbeState()
         }
         .onChange(of: selectedFunction) { _, newValue in
