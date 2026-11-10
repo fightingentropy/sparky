@@ -133,12 +133,37 @@ export function serializeProgress(progress: StoredProgress): string {
   return JSON.stringify({ __v: 2, variants: progress.variants, current: progress.current });
 }
 
-// Best-effort parse of a JSON request body. Returns null on empty/malformed input.
-export async function readJsonBody<T>(request: Request): Promise<T | null> {
+export const DEFAULT_JSON_BODY_BYTES = 4 * 1024;
+
+// Best-effort parse of a JSON request body. Returns null on empty, malformed or
+// oversized input. The body is read through a bounded reader, so a large or
+// unterminated upload is cancelled instead of being buffered in full.
+export async function readJsonBody<T>(request: Request, maxBytes = DEFAULT_JSON_BODY_BYTES): Promise<T | null> {
   try {
-    const text = await request.text();
-    if (!text) return null;
-    return JSON.parse(text) as T;
+    const declared = Number(request.headers.get("Content-Length"));
+    if (Number.isFinite(declared) && declared > maxBytes) return null;
+    const reader = request.body?.getReader();
+    if (!reader) return null;
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maxBytes) {
+        await reader.cancel();
+        return null;
+      }
+      chunks.push(value);
+    }
+    if (size === 0) return null;
+    const bytes = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    return JSON.parse(new TextDecoder().decode(bytes)) as T;
   } catch {
     return null;
   }

@@ -6,13 +6,16 @@ function userResponse(id: string, row: ProfileRow) {
   return { user: { id, email: row.email, nickname: row.nickname ?? null, avatar: row.avatar ?? null } };
 }
 
+// Avatar data URL (256 KB) plus JSON overhead.
+const PROFILE_BODY_BYTES = 320 * 1024;
+
 // Update the signed-in user's profile. Only the fields present in the body are
 // touched, so the client can save the nickname and the avatar independently.
 export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
   const user = await getUserFromRequest(request, env);
   if (!user) return json({ error: "Unauthorized" }, 401);
 
-  const body = await readJsonBody<{ nickname?: unknown; avatar?: unknown }>(request);
+  const body = await readJsonBody<{ nickname?: unknown; avatar?: unknown }>(request, PROFILE_BODY_BYTES);
   if (!body) return json({ error: "Invalid JSON body" }, 400);
 
   const sets: string[] = [];

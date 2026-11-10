@@ -13,6 +13,8 @@ import {
 
 const MAX_PROGRESS_BYTES = 256 * 1024;
 const MAX_WRITE_ATTEMPTS = 5;
+// One variant's answers are capped at 16 KB; leave room for JSON overhead.
+const PROGRESS_BODY_BYTES = 32 * 1024;
 
 export const onRequestPut: PagesFunction<Env> = async ({ request, env, params }) => {
   const user = await getUserFromRequest(request, env);
@@ -21,7 +23,7 @@ export const onRequestPut: PagesFunction<Env> = async ({ request, env, params })
   const examId = Array.isArray(params.examId) ? params.examId[0] : params.examId;
   if (!examId || !VALID_EXAM_IDS.has(examId)) return json({ error: "Unknown exam" }, 400);
 
-  const body = await readJsonBody<{ current?: unknown; variant?: unknown }>(request);
+  const body = await readJsonBody<{ current?: unknown; variant?: unknown }>(request, PROGRESS_BODY_BYTES);
   if (!body) return json({ error: "Invalid JSON body" }, 400);
 
   // Validate the incoming variant once, up front; it does not depend on stored state.
