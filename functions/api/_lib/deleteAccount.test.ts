@@ -3,22 +3,9 @@ import { onRequestPost } from "../auth/delete-account";
 import { hashPassword } from "./crypto";
 import type { Env } from "./auth";
 
-// Translate a SQL LIKE pattern (with backslash escape) into a RegExp.
-function likeToRegExp(pattern: string): RegExp {
-  let out = "";
-  for (let i = 0; i < pattern.length; i++) {
-    const c = pattern[i];
-    if (c === "\\") out += pattern[++i].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    else if (c === "%") out += ".*";
-    else if (c === "_") out += ".";
-    else out += c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
-  return new RegExp(`^${out}$`, "s");
-}
-
 describe("account deletion rate-limit cleanup", () => {
   it("clears per-IP login buckets for the email but not other emails", async () => {
-    const email = "a_b@example.com";
+    const email = "a_b_c_d.very.long.address.for.testing@subdomain.example.com";
     const password = "correct-horse-battery";
     const hash = await hashPassword(password);
     const buckets = new Set([
@@ -26,9 +13,15 @@ describe("account deletion rate-limit cleanup", () => {
       `login:email:2001:db8::1:${email}`,
       `delete:email:${email}`,
       `signup:email:${email}`,
-      "login:email:1.1.1.1:axb@example.com",
+      `login:email:1.1.1.1:x:${email}`,
       "login:email:1.1.1.1:other@example.com",
     ]);
+    // Mimics D1: LIKE/GLOB patterns over 50 bytes are rejected.
+    const rejectLongPatterns = (sql: string, args: unknown[]) => {
+      if (/\b(LIKE|GLOB)\b/i.test(sql) && args.some((a) => typeof a === "string" && a.length > 50 && a.includes("%"))) {
+        throw new Error("LIKE or GLOB pattern too complex");
+      }
+    };
     const DB = {
       prepare(sql: string) {
         return {
@@ -37,6 +30,11 @@ describe("account deletion rate-limit cleanup", () => {
               sql,
               args,
               first: async () => (sql.includes("FROM users") ? { id: "u1", password_hash: hash } : { count: 1 }),
+              all: async () => {
+                rejectLongPatterns(sql, args);
+                const suffix = String(args[0]);
+                return { results: [...buckets].filter((b) => b.endsWith(suffix) && b.startsWith("login:email:")).map((bucket) => ({ bucket })) };
+              },
               run: async () => ({}),
             };
           },
@@ -45,9 +43,9 @@ describe("account deletion rate-limit cleanup", () => {
       async batch(stmts: { sql: string; args: unknown[] }[]) {
         for (const s of stmts) {
           if (!s.sql.includes("rate_limits")) continue;
-          const like = s.sql.includes("LIKE") ? likeToRegExp(String(s.args[s.args.length - 1])) : null;
-          const exact = s.args.slice(0, like ? -1 : undefined).map(String);
-          for (const b of [...buckets]) if (exact.includes(b) || like?.test(b)) buckets.delete(b);
+          rejectLongPatterns(s.sql, s.args);
+          const exact = new Set([String(s.args[0]), String(s.args[1]), ...(JSON.parse(String(s.args[2])) as string[])]);
+          for (const b of [...buckets]) if (exact.has(b)) buckets.delete(b);
         }
         return [];
       },
@@ -61,7 +59,7 @@ describe("account deletion rate-limit cleanup", () => {
     const res = await onRequestPost({ request, env, waitUntil: () => {} } as unknown as Parameters<typeof onRequestPost>[0]);
     expect(res.status).toBe(200);
     expect([...buckets].sort()).toEqual(
-      ["login:email:1.1.1.1:axb@example.com", "login:email:1.1.1.1:other@example.com"].sort(),
+      [`login:email:1.1.1.1:x:${email}`, "login:email:1.1.1.1:other@example.com"].sort(),
     );
   });
 });

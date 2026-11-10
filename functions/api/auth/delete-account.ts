@@ -4,6 +4,19 @@ import { clientIp, maybeCleanupRateLimits, rateLimit } from "../_lib/rateLimit";
 
 const DUMMY_HASH = "00000000000000000000000000000000:" + "0".repeat(64);
 
+// What clientIp() can return: "local", an IPv4 or an IPv6 address.
+function isClientAddress(value: string): boolean {
+  if (value === "local") return true;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(value)) return true;
+  if (!value.includes(":") || !/^[0-9a-fA-F:.]+$/.test(value)) return false;
+  try {
+    new URL(`http://[${value}]/`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   const origin = request.headers.get("Origin");
@@ -62,13 +75,25 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const valid = await verifyPassword(password, row?.password_hash ?? DUMMY_HASH);
     if (!row || !valid) return json({ error: "Invalid email or password" }, 401);
 
+    // Login buckets are keyed per IP (login:email:<ip>:<email>). Find this
+    // email's buckets with a range plus suffix comparison (no LIKE: D1 caps
+    // pattern length) and keep only those whose middle part is a real client
+    // address, so another email ending in ":<email>" is never matched.
+    const suffix = `:${email}`;
+    const candidates = await env.DB.prepare(
+      "SELECT bucket FROM rate_limits WHERE bucket >= 'login:email:' AND bucket < 'login:email;' AND substr(bucket, -length(?1)) = ?1",
+    ).bind(suffix).all<{ bucket: string }>();
+    const loginBuckets = (candidates.results ?? [])
+      .map((r) => r.bucket)
+      .filter((b) => isClientAddress(b.slice("login:email:".length, b.length - suffix.length)));
+
     // D1 batches are atomic: progress cannot be removed without its account.
     await env.DB.batch([
       env.DB.prepare("DELETE FROM exam_progress WHERE user_id = ?").bind(row.id),
       env.DB.prepare("DELETE FROM users WHERE id = ?").bind(row.id),
-      // Login buckets are keyed per IP (login:email:<ip>:<email>), so match any IP.
-      env.DB.prepare("DELETE FROM rate_limits WHERE bucket IN (?, ?) OR bucket LIKE ? ESCAPE '\\'")
-        .bind(`delete:email:${email}`, `signup:email:${email}`, `login:email:%:${email.replace(/[\\%_]/g, "\\$&")}`),
+      env.DB.prepare(
+        "DELETE FROM rate_limits WHERE bucket IN (?, ?) OR bucket IN (SELECT value FROM json_each(?))",
+      ).bind(`delete:email:${email}`, `signup:email:${email}`, JSON.stringify(loginBuckets)),
     ]);
     const response = json({ deleted: true });
     response.headers.set("Cache-Control", "no-store");
