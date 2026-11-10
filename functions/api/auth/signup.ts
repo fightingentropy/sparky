@@ -29,12 +29,16 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
   const passwordHash = await hashPassword(password);
   try {
     await env.DB.prepare("INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)").bind(id, email, passwordHash).run();
-  } catch {
-    // The email's UNIQUE constraint is the only thing that can fail here, so a
-    // failure means another request registered the same address between our
-    // existence check above and this insert. Return the same 409 rather than a
-    // 500, closing the signup TOCTOU race.
-    return json({ error: "Email already registered" }, 409);
+  } catch (error) {
+    // A UNIQUE violation means another request registered the same address
+    // between our existence check above and this insert (the signup TOCTOU
+    // race), so answer with the same 409. Anything else is a real failure
+    // (transient D1 error, outage) and must not be reported as a duplicate.
+    if (error instanceof Error && /UNIQUE constraint/i.test(error.message)) {
+      return json({ error: "Email already registered" }, 409);
+    }
+    console.error("signup insert failed", error);
+    return json({ error: "Service temporarily unavailable. Try again." }, 503);
   }
 
   const token = await createJWT(
