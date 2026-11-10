@@ -26,6 +26,7 @@ import { getExamProgress, saveExamProgress } from "./api";
 import {
   coalescePendingSave,
   isExamProgressStorageKey,
+  mergeNewerServerProgress,
   planLocalPush,
   type PendingSave
 } from "./examProgressSync";
@@ -442,7 +443,11 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
             if (remoteResetAt > 0 && serverUpdatedAt < remoteResetAt) continue;
             // Use the server copy if there's nothing local, or if it's strictly newer.
             if (!localProgress || serverUpdatedAt > localUpdatedAt) {
-              localStorage.setItem(progressKey, JSON.stringify(serverProgress));
+              // Keep local-only tests (a retry after a partly sent push) and
+              // send them instead of overwriting them with the server copy.
+              const { merged, pushes: localOnly } = mergeNewerServerProgress(localProgress, serverProgress);
+              for (const push of localOnly) pushes.push({ examId, ...push });
+              localStorage.setItem(progressKey, JSON.stringify(merged));
               localStorage.setItem(localUpdatedKey, String(serverUpdatedAt || Date.now()));
             } else {
               // Local is newer or equal: send what the server is missing, e.g.

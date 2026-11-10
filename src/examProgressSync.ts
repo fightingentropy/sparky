@@ -89,6 +89,28 @@ export function planLocalPush(
   return pushes;
 }
 
+// Merge a server copy that is newer than the local one into the local copy
+// without losing local-only work. Test slots the server has nothing for but the
+// local copy does (e.g. a retried sync where an earlier test was saved and a
+// later one failed) are kept and returned as saves to send. Where both have
+// content the server copy wins.
+export function mergeNewerServerProgress(
+  local: SyncExamProgress | null,
+  server: SyncExamProgress
+): { merged: SyncExamProgress; pushes: Array<Omit<PendingSave, "examId">> } {
+  const merged: SyncExamProgress = { current: server.current, variants: { ...server.variants } };
+  const pushes: Array<Omit<PendingSave, "examId">> = [];
+  if (!local) return { merged, pushes };
+  for (const [key, slot] of Object.entries(local.variants)) {
+    if (!slotHasContent(slot) || slotHasContent(server.variants[key])) continue;
+    const index = Number(key);
+    if (!Number.isInteger(index) || index < 0) continue;
+    merged.variants[key] = slot;
+    pushes.push({ current: server.current, variant: { index, answers: slot.answers, submitted: slot.submitted } });
+  }
+  return { merged, pushes };
+}
+
 // A rejected session means the answers stored on this device belong to an
 // account that is no longer signed in here. Returns whether it cleared them.
 export function clearLocalExamProgressOnAuthFailure(

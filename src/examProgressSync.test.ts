@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   clearLocalExamProgress,
   clearLocalExamProgressOnAuthFailure,
+  mergeNewerServerProgress,
   coalescePendingSave,
   planLocalPush,
   type PendingSave
@@ -154,5 +155,30 @@ describe("clearLocalExamProgressOnAuthFailure", () => {
       expect(clearLocalExamProgressOnAuthFailure(status, storage)).toBe(false);
       expect(storage.keys()).toHaveLength(3);
     }
+  });
+});
+
+describe("mergeNewerServerProgress", () => {
+  const slot = (a: Record<string, string>, submitted = false) => ({ answers: a, submitted });
+
+  it("keeps and resends a local test the server lacks after a partly sent push", () => {
+    const local = { current: 1, variants: { "0": slot({ 1: "A" }), "1": slot({ 1: "B" }) } };
+    const server = { current: 1, variants: { "0": slot({ 1: "A" }) } };
+    const { merged, pushes } = mergeNewerServerProgress(local, server);
+    expect(merged.variants["1"]).toEqual(slot({ 1: "B" }));
+    expect(pushes).toEqual([{ current: 1, variant: { index: 1, answers: { 1: "B" }, submitted: false } }]);
+  });
+
+  it("lets the server copy win where both have content", () => {
+    const local = { current: 0, variants: { "0": slot({ 1: "A" }) } };
+    const server = { current: 2, variants: { "0": slot({ 1: "C" }) } };
+    const { merged, pushes } = mergeNewerServerProgress(local, server);
+    expect(merged).toEqual(server);
+    expect(pushes).toEqual([]);
+  });
+
+  it("returns the server copy when there is nothing local", () => {
+    const server = { current: 0, variants: { "0": slot({ 1: "A" }) } };
+    expect(mergeNewerServerProgress(null, server)).toEqual({ merged: server, pushes: [] });
   });
 });
