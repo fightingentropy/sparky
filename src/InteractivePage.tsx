@@ -10,6 +10,7 @@ import {
   type Wire
 } from "./circuitEngine";
 import { useFocusTrap } from "./useFocusTrap";
+import { isTextEntryTarget } from "./keyboardTarget";
 
 const PanelTrainer = lazy(() => import("./PanelTrainer").then((m) => ({ default: m.PanelTrainer })));
 const FaultFinding = lazy(() => import("./FaultFinding").then((m) => ({ default: m.FaultFinding })));
@@ -629,7 +630,8 @@ export function InteractivePage({ isActive }: Props) {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (!isActive) return;
+      if (!isActive || tab !== "circuits") return;
+      if (isTextEntryTarget(e.target)) return;
       if (e.key === "Escape") {
         setPendingWire(null);
         setSelectedId(null);
@@ -637,8 +639,6 @@ export function InteractivePage({ isActive }: Props) {
       }
       if (e.key === "Delete" || e.key === "Backspace") {
         if (!selectedId) return;
-        const target = e.target as HTMLElement | null;
-        if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
         const isWire = circuit.wires.some((w) => w.id === selectedId);
         if (isWire) deleteWire(selectedId);
         else deleteComponent(selectedId);
@@ -651,7 +651,7 @@ export function InteractivePage({ isActive }: Props) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isActive, selectedId, circuit]);
+  }, [isActive, tab, selectedId, circuit]);
 
   // Dismiss the welcome dialog on Escape (it's aria-modal, so it must be
   // keyboard-dismissible; focus is trapped/restored by useFocusTrap above).
