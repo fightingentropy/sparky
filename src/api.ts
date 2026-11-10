@@ -99,10 +99,13 @@ export async function getExamProgress(): Promise<ProgressResponse> {
 export async function saveExamProgress(
   examId: string,
   current: number,
-  variant?: { index: number; answers: Record<string, string>; submitted: boolean }
+  variant?: { index: number; answers: Record<string, string>; submitted: boolean },
+  options: { keepalive?: boolean } = {}
 ): Promise<void> {
   await request(`/exams/progress/${examId}`, {
     method: "PUT",
     body: JSON.stringify({ current, variant }),
+    // Lets the request finish while the page unloads or the app is backgrounded.
+    ...(options.keepalive ? { keepalive: true } : {}),
   });
 }

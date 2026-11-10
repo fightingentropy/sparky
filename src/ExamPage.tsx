@@ -545,7 +545,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSaveRef = useRef<PendingSave | null>(null);
-  const flushSave = useCallback(() => {
+  const flushSave = useCallback((options: { keepalive?: boolean } = {}) => {
     if (!user || !pendingSaveRef.current) return;
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
@@ -558,7 +558,8 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
       current,
       variant
         ? { index: variant.index, answers: variant.answers as Record<string, string>, submitted: variant.submitted }
-        : undefined
+        : undefined,
+      options
     ).catch(() => {
       // The answers stay in localStorage with a newer timestamp than the
       // server's copy; allow the next pull (coming back online, or reopening
@@ -585,7 +586,7 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
       }
       pendingSaveRef.current = pending;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-      saveTimerRef.current = setTimeout(flushSave, 1000);
+      saveTimerRef.current = setTimeout(() => flushSave(), 1000);
     },
     [user, selectedExamEntry.id, flushSave]
   );
@@ -593,7 +594,8 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
   // Flush any pending save when the user closes/refreshes the tab or unmounts the page.
   useEffect(() => {
     const handler = () => {
-      if (pendingSaveRef.current) flushSave();
+      // keepalive so the request survives the page going away.
+      if (pendingSaveRef.current) flushSave({ keepalive: true });
     };
     window.addEventListener("beforeunload", handler);
     window.addEventListener("pagehide", handler);
