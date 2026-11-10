@@ -88,3 +88,14 @@ export function planLocalPush(
   }
   return pushes;
 }
+
+// A rejected session means the answers stored on this device belong to an
+// account that is no longer signed in here. Returns whether it cleared them.
+export function clearLocalExamProgressOnAuthFailure(
+  status: number | undefined,
+  storage: Pick<Storage, "length" | "key" | "removeItem">
+): boolean {
+  if (status !== 401 && status !== 403) return false;
+  clearLocalExamProgress(storage);
+  return true;
+}

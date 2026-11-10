@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
-import { clearLocalExamProgress } from "./examProgressSync";
+import { clearLocalExamProgress, clearLocalExamProgressOnAuthFailure } from "./examProgressSync";
 import { login as apiLogin, signup as apiSignup, getMe, updateProfile as apiUpdateProfile, setToken, ApiError, type ApiUser, type ProfileUpdate } from "./api";
 
 type User = ApiUser;
@@ -51,6 +51,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // when the connection comes back.
         if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
           setToken(null);
+          // The next account to sign in here must not inherit or upload the
+          // answers of the session that just expired (logout() does the same).
+          try {
+            clearLocalExamProgressOnAuthFailure(err.status, localStorage);
+          } catch {}
         }
       })
       .finally(() => setLoading(false));

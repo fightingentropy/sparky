@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   clearLocalExamProgress,
+  clearLocalExamProgressOnAuthFailure,
   coalescePendingSave,
   planLocalPush,
   type PendingSave
@@ -127,5 +128,31 @@ describe("planLocalPush", () => {
 
   it("sends nothing without local progress", () => {
     expect(planLocalPush(null, 100, null)).toEqual([]);
+  });
+});
+
+describe("clearLocalExamProgressOnAuthFailure", () => {
+  const filled = () => {
+    const storage = new FakeStorage();
+    storage.setItem("exam-progress-e", "x");
+    storage.setItem("exam-updated-e", "1");
+    storage.setItem("pref-color-theme", "x");
+    return storage;
+  };
+
+  it("clears stored answers when the session is rejected", () => {
+    for (const status of [401, 403]) {
+      const storage = filled();
+      expect(clearLocalExamProgressOnAuthFailure(status, storage)).toBe(true);
+      expect(storage.keys()).toEqual(["pref-color-theme"]);
+    }
+  });
+
+  it("keeps stored answers on other failures", () => {
+    for (const status of [500, 404, undefined]) {
+      const storage = filled();
+      expect(clearLocalExamProgressOnAuthFailure(status, storage)).toBe(false);
+      expect(storage.keys()).toHaveLength(3);
+    }
   });
 });
