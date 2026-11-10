@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 
 enum AppTab: String, CaseIterable, Hashable, Identifiable {
@@ -39,25 +40,41 @@ final class AppRouter {
     var pendingNoteID: String?
     var isPresentingSettings = false
 
-    init(selectedTab: AppTab = .tools) {
+    private let defaults: UserDefaults
+
+    init(selectedTab: AppTab = .tools, defaults: UserDefaults = .standard) {
         self.selectedTab = selectedTab
+        self.defaults = defaults
+    }
+
+    /// Deep links target a specific tab. If the user hid it in Settings, show it
+    /// again (the preference is reversible in Settings) so the link has somewhere
+    /// to land instead of silently doing nothing.
+    private func select(_ tab: AppTab) {
+        let stored = defaults.string(forKey: NavigationPreferences.storageKey)
+            ?? NavigationPreferences.defaultStorageValue
+        let revealed = NavigationPreferences.storageValue(revealing: tab, in: stored)
+        if revealed != NavigationPreferences.storageValue(for: NavigationPreferences.hiddenTabs(from: stored)) {
+            defaults.set(revealed, forKey: NavigationPreferences.storageKey)
+        }
+        selectedTab = tab
     }
 
     func openExam(_ examID: String) {
         pendingExamID = examID
         pendingTestID = nil
-        selectedTab = .exams
+        select(.exams)
     }
 
     func openExam(_ examID: String, testID: String) {
         pendingExamID = examID
         pendingTestID = testID
-        selectedTab = .exams
+        select(.exams)
     }
 
     func openNote(_ noteID: String) {
         pendingNoteID = noteID
-        selectedTab = .notes
+        select(.notes)
     }
 
     func clearPendingExam(_ examID: String) {

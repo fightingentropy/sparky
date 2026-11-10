@@ -30,6 +30,12 @@ enum NavigationPreferences {
         return value
     }
 
+    static func storageValue(revealing tab: AppTab, in storageValue: String) -> String {
+        var hidden = hiddenTabs(from: storageValue)
+        hidden.remove(tab)
+        return Self.storageValue(for: hidden)
+    }
+
     static func visibleTabs(from storageValue: String) -> [AppTab] {
         let hiddenTabs = hiddenTabs(from: storageValue)
         let visible = AppTab.allCases.filter { !hiddenTabs.contains($0) }
