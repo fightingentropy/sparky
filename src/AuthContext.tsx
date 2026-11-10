@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import { clearLocalExamProgress } from "./examProgressSync";
 import { login as apiLogin, signup as apiSignup, getMe, updateProfile as apiUpdateProfile, setToken, ApiError, type ApiUser, type ProfileUpdate } from "./api";
 
 type User = ApiUser;
@@ -73,6 +74,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
+    // Answers stored on this device belong to the account that just left; the
+    // server keeps them. Without this the next account to sign in here would
+    // inherit and upload them.
+    try {
+      clearLocalExamProgress(localStorage);
+    } catch {}
   }, []);
 
   return (

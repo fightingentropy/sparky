@@ -23,6 +23,7 @@ import {
 import { usePersistedState } from "./usePersistedState";
 import { useAuth } from "./AuthContext";
 import { getExamProgress, saveExamProgress } from "./api";
+import { isExamProgressStorageKey } from "./examProgressSync";
 import { writeClipboardText } from "./clipboard";
 import { getExamClipboardText, getQuestionClipboardText } from "./examClipboard";
 import { getQuestionChatGPTUrl } from "./chatgptQuestion";
@@ -142,13 +143,7 @@ function clearStaleExamProgress() {
 
       // Sweep current-shape keys for retired exams, plus any keys left by older
       // storage shapes/versions (per-exam answers/submitted/variant).
-      const isExamProgressKey =
-        key.startsWith("exam-progress-") ||
-        key.startsWith("exam-updated-") ||
-        key.startsWith("exam-answers-") ||
-        key.startsWith("exam-submitted-") ||
-        key.startsWith("exam-variant-");
-      if (isExamProgressKey && !validStorageKeys.has(key)) {
+      if (isExamProgressStorageKey(key) && !validStorageKeys.has(key)) {
         localStorage.removeItem(key);
       }
     }
@@ -435,6 +430,24 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
       })
       .catch(() => {});
   }, [user, selectedExamEntry.id, setProgress]);
+
+  // After logging out, drop the previous account's answers from memory (the
+  // stored copies are cleared by the logout itself) so they are not written
+  // back to storage or sent to the next account.
+  const previousUserIdRef = useRef<string | null>(user?.id ?? null);
+  useEffect(() => {
+    const previous = previousUserIdRef.current;
+    previousUserIdRef.current = user?.id ?? null;
+    if (previous && !user) {
+      syncedForUserRef.current = null;
+      pendingSaveRef.current = null;
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      setProgress(EMPTY_PROGRESS);
+    }
+  }, [user, setProgress]);
 
   // Recompute which categories are fully done whenever the menu opens (and when
   // the active exam's progress changes while it's open). Variant counts come from
