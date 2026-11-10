@@ -26,6 +26,20 @@ final class InspectionTrainingWorkbenchTests: XCTestCase {
         }
     }
 
+    func testLoopImpedanceReadingsMatchTheQuestionAndDoNotRevealZs() throws {
+        let lab = try XCTUnwrap(
+            InspectionTrainingCatalog.labs.first { $0.id == "earth-fault-loop-impedance" }
+        )
+        let calculation = lab.tasks[3].instruction
+        XCTAssertTrue(calculation.contains("Ze is 0.35 ohms"))
+        XCTAssertTrue(calculation.contains("R1+R2 is 0.25 ohms"))
+
+        // Dead-test step shows R1+R2; the live step precedes the Zs calculation.
+        XCTAssertEqual(WorkbenchSetup.earthFaultLoopReading(taskIndex: 1), "0.25 Ω")
+        XCTAssertNotEqual(WorkbenchSetup.earthFaultLoopReading(taskIndex: 2), "0.60 Ω")
+        XCTAssertEqual(WorkbenchSetup.earthFaultLoopReading(taskIndex: 2), "0.35 Ω")
+    }
+
     func testRemovedLeadsRequireExplicitLeadCaseTargets() {
         XCTAssertEqual(
             resolve(red: .redDock, black: .blackDock, expected: .removed),

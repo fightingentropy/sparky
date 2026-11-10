@@ -988,6 +988,13 @@ enum WorkbenchRequiredAction: Equatable {
 }
 
 struct WorkbenchSetup {
+    /// Readings shown by the virtual tester in the loop-impedance lab. They must
+    /// agree with the stated values (Ze 0.35 ohm, R1+R2 0.25 ohm) and must not
+    /// show the Zs answer (0.60 ohm) before the calculation step asks for it.
+    static func earthFaultLoopReading(taskIndex: Int) -> String {
+        taskIndex == 1 ? "0.25 Ω" : "0.35 Ω"
+    }
+
     let prompt: String
     let functions: [WorkbenchFunction]
     let correctFunction: WorkbenchFunction
@@ -1288,7 +1295,7 @@ private struct InspectionTrainingWorkbench: View {
         case "insulation-resistance":
             return taskIndex >= 3 ? "2.80 MΩ" : ">999 MΩ"
         case "earth-fault-loop-impedance":
-            return taskIndex == 2 ? "0.60 Ω" : "0.38 Ω"
+            return WorkbenchSetup.earthFaultLoopReading(taskIndex: taskIndex)
         case "prospective-fault-current":
             return taskIndex == 3 ? "PEFC 1.20kA" : "PSCC 1.85kA"
         default:
