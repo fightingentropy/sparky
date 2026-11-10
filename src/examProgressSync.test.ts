@@ -5,6 +5,7 @@ import {
   mergeNewerServerProgress,
   coalescePendingSave,
   planLocalPush,
+  stampAfterServerImport,
   type PendingSave
 } from "./examProgressSync";
 
@@ -169,6 +170,15 @@ describe("mergeNewerServerProgress", () => {
     expect(pushes).toEqual([{ current: 1, variant: { index: 1, answers: { 1: "B" }, submitted: false } }]);
   });
 
+  it("does not refill a slot the server holds empty after a reset elsewhere", () => {
+    const local = { current: 0, variants: { "0": slot({ 1: "A" }), "1": slot({ 1: "B" }) } };
+    const server = { current: 0, variants: { "0": slot({}, false) } };
+    const { merged, pushes } = mergeNewerServerProgress(local, server);
+    expect(merged.variants["0"]).toEqual(slot({}));
+    expect(merged.variants["1"]).toEqual(slot({ 1: "B" }));
+    expect(pushes).toEqual([{ current: 0, variant: { index: 1, answers: { 1: "B" }, submitted: false } }]);
+  });
+
   it("lets the server copy win where both have content", () => {
     const local = { current: 0, variants: { "0": slot({ 1: "A" }) } };
     const server = { current: 2, variants: { "0": slot({ 1: "C" }) } };
@@ -180,5 +190,30 @@ describe("mergeNewerServerProgress", () => {
   it("returns the server copy when there is nothing local", () => {
     const server = { current: 0, variants: { "0": slot({ 1: "A" }) } };
     expect(mergeNewerServerProgress(null, server)).toEqual({ merged: server, pushes: [] });
+  });
+});
+
+describe("stampAfterServerImport", () => {
+  const slot = (a: Record<string, string>) => ({ answers: a, submitted: false });
+
+  it("keeps the old stamp so a failed push of a local-only test is planned again", () => {
+    const server: { current: number; variants: Record<string, ReturnType<typeof slot>> } = {
+      current: 0,
+      variants: { "0": slot({ 1: "A" }) }
+    };
+    let local: { current: number; variants: Record<string, ReturnType<typeof slot>> } = {
+      current: 0,
+      variants: { "0": slot({ 1: "A" }), "1": slot({ 1: "B" }) }
+    };
+    let localUpdatedAt = 10;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      expect(server.variants["1"]).toBeUndefined();
+      const { merged, pushes } = mergeNewerServerProgress(local, server);
+      expect(pushes).toHaveLength(1);
+      local = merged;
+      localUpdatedAt = stampAfterServerImport(pushes.length, localUpdatedAt, 20);
+      expect(localUpdatedAt).toBe(10); // still behind the server (20): imported again next sync
+    }
+    expect(stampAfterServerImport(0, 10, 20)).toBe(20);
   });
 });

@@ -27,6 +27,7 @@ import {
   coalescePendingSave,
   isExamProgressStorageKey,
   mergeNewerServerProgress,
+  stampAfterServerImport,
   planLocalPush,
   type PendingSave
 } from "./examProgressSync";
@@ -448,7 +449,12 @@ export function ExamPage({ isActive, practiceTarget, hiddenExamIds = [] }: Props
               const { merged, pushes: localOnly } = mergeNewerServerProgress(localProgress, serverProgress);
               for (const push of localOnly) pushes.push({ examId, ...push });
               localStorage.setItem(progressKey, JSON.stringify(merged));
-              localStorage.setItem(localUpdatedKey, String(serverUpdatedAt || Date.now()));
+              // Until the local-only tests are on the server the stamp stays old,
+              // so a failed push is planned again on the next sync.
+              localStorage.setItem(
+                localUpdatedKey,
+                String(stampAfterServerImport(localOnly.length, localUpdatedAt, serverUpdatedAt || Date.now()))
+              );
             } else {
               // Local is newer or equal: send what the server is missing, e.g.
               // answers given while offline.

@@ -90,10 +90,11 @@ export function planLocalPush(
 }
 
 // Merge a server copy that is newer than the local one into the local copy
-// without losing local-only work. Test slots the server has nothing for but the
-// local copy does (e.g. a retried sync where an earlier test was saved and a
+// without losing local-only work. Test slots the server has no entry for but the
+// local copy has content for (e.g. a retried sync where an earlier test was saved and a
 // later one failed) are kept and returned as saves to send. Where both have
-// content the server copy wins.
+// content the server copy wins. A slot the server holds but with no content was
+// cleared by a reset (possibly on another device), so it is not refilled.
 export function mergeNewerServerProgress(
   local: SyncExamProgress | null,
   server: SyncExamProgress
@@ -102,13 +103,20 @@ export function mergeNewerServerProgress(
   const pushes: Array<Omit<PendingSave, "examId">> = [];
   if (!local) return { merged, pushes };
   for (const [key, slot] of Object.entries(local.variants)) {
-    if (!slotHasContent(slot) || slotHasContent(server.variants[key])) continue;
+    if (!slotHasContent(slot) || Object.prototype.hasOwnProperty.call(server.variants, key)) continue;
     const index = Number(key);
     if (!Number.isInteger(index) || index < 0) continue;
     merged.variants[key] = slot;
     pushes.push({ current: server.current, variant: { index, answers: slot.answers, submitted: slot.submitted } });
   }
   return { merged, pushes };
+}
+
+// The exam-updated stamp to store after importing a newer server copy. While
+// local-only tests still have to be sent the old stamp is kept, so a failed
+// push is planned again on the next sync instead of looking already in sync.
+export function stampAfterServerImport(pushCount: number, localUpdatedAt: number, serverStamp: number): number {
+  return pushCount > 0 ? localUpdatedAt : serverStamp;
 }
 
 // A rejected session means the answers stored on this device belong to an
