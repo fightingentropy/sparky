@@ -232,6 +232,39 @@ final class ExamProgressSyncTests: XCTestCase {
     }
 
     @MainActor
+    func testCleanLocalSlotMissingRemotelyIsRemovedNotReuploaded() async throws {
+        let fixture = try makeFixture()
+        let exam = try XCTUnwrap(fixture.catalog.exams.first)
+        let test = try XCTUnwrap(exam.tests.first)
+        let row = RemoteExamProgress(
+            variants: [test.index: RemoteExamVariantProgress(answers: [1: .a], submitted: false)],
+            current: test.index,
+            updatedAt: date("2026-07-01T10:00:00Z")
+        )
+        let first = MockExamProgressRemote(collection: .init(progress: [exam.id: row]))
+        _ = try await ExamProgressSyncService(remote: first).synchronize(
+            store: fixture.store,
+            catalog: fixture.catalog,
+            bearerToken: "token"
+        )
+        XCTAssertEqual(fixture.store.progress(examID: exam.id, testID: test.id).answers, [1: .a])
+        XCTAssertEqual(fixture.store.syncMetadata[exam.id]?[test.id]?.isDirty, false)
+
+        // Another device reset the test, so the server no longer has the slot.
+        let second = MockExamProgressRemote(collection: .init(progress: [:]))
+        let result = try await ExamProgressSyncService(remote: second).synchronize(
+            store: fixture.store,
+            catalog: fixture.catalog,
+            bearerToken: "token"
+        )
+
+        let updates = await second.recordedUpdates()
+        XCTAssertTrue(updates.isEmpty)
+        XCTAssertEqual(result.uploadedVariants, 0)
+        XCTAssertTrue(fixture.store.progress(examID: exam.id, testID: test.id).answers.isEmpty)
+    }
+
+    @MainActor
     func testAccountSwitchDuringFetchAppliesNothingToTheNewAccount() async throws {
         let fixture = try makeFixture()
         let test = try XCTUnwrap(fixture.catalog.exams.first?.tests.first)

@@ -412,6 +412,12 @@ final class ExamProgressSyncService {
             return .importRemote(remote.nativeProgress(preserving: nil))
         case (let local?, nil):
             guard !local.remoteProjection.isEmpty else { return .nothing }
+            // A clean slot was last in step with the server, so its absence
+            // now means another device reset it. Uploading it again would
+            // undo that reset. Only dirty or never-synced slots are uploaded.
+            if metadata?.isDirty == false {
+                return .clean(nil)
+            }
             return .upload(local, isConflict: false)
         case (let local?, let remote?):
             if local.remoteProjection == remote {
