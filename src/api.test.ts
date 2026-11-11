@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { saveExamProgress } from "./api";
+import { getMe, saveExamProgress } from "./api";
 
 function stubFetch() {
   const fetchMock = vi.fn(async () => new Response("{}", { status: 200 }));
@@ -23,5 +23,28 @@ describe("saveExamProgress", () => {
     await saveExamProgress("exam-1", 3);
     const init = (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1];
     expect(init.keepalive).toBeUndefined();
+  });
+});
+
+describe("request timeout", () => {
+  it("rejects with a timeout error when the server never answers", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(
+          (_url: string, init: RequestInit) =>
+            new Promise((_resolve, reject) => {
+              init.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+            })
+        )
+      );
+      const pending = getMe();
+      const assertion = expect(pending).rejects.toMatchObject({ status: 408 });
+      await vi.advanceTimersByTimeAsync(16_000);
+      await assertion;
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

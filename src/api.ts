@@ -1,4 +1,5 @@
 const API_BASE = "/api";
+const REQUEST_TIMEOUT_MS = 15_000;
 export const TOKEN_STORAGE_KEY = "sparky-token";
 
 export type ApiUser = { id: string; email: string; nickname: string | null; avatar: string | null };
@@ -40,11 +41,28 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = { "Content-Type": "application/json", ...((options.headers as Record<string, string>) ?? {}) };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  // The timeout also covers reading the body, so a stalled connection cannot
+  // leave callers (and their loading states) waiting indefinitely.
+  const timeoutController = new AbortController();
+  const timer = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
+  const signal = options.signal ? AbortSignal.any([options.signal, timeoutController.signal]) : timeoutController.signal;
+
+  let res: Response;
+  let raw: string;
+  try {
+    res = await fetch(`${API_BASE}${path}`, { ...options, headers, signal });
+    raw = await res.text();
+  } catch (error) {
+    if (timeoutController.signal.aborted && !options.signal?.aborted) {
+      throw new ApiError("The request timed out. Check your connection and try again.", 408);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 
   // Read the body once. Try JSON; fall back to text. Tolerate 204/empty.
   let payload: unknown = undefined;
-  const raw = await res.text();
   if (raw.length > 0) {
     try {
       payload = JSON.parse(raw);
