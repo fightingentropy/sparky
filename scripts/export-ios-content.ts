@@ -547,7 +547,6 @@ async function main(): Promise<void> {
   exportedExams.push(exportedFundamentalExam);
   examOutputs.set(fundamentalFileName, exportedFundamentalExam);
 
-  await removeStaleExamExports(new Set([...examFileNames, fundamentalFileName]));
   await Promise.all(exportedExams.map(validateExportedExam));
   await Promise.all(
     [...examOutputs].map(([fileName, exam]) =>
@@ -605,6 +604,9 @@ async function main(): Promise<void> {
     ...[...examOutputs.keys()].map((fileName) => `exams/${fileName}`),
   ];
   await writeContentManifest(contentPaths);
+  // Only drop exam files that are no longer exported once everything else,
+  // including the manifest, has been written successfully.
+  await removeStaleExamExports(new Set([...examFileNames, fundamentalFileName]));
 
   const questionCount = indexEntries.reduce(
     (count, exam) => count + exam.questionCount,
