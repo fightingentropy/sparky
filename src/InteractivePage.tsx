@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { MAX_SAVED_CIRCUITS, planCircuitSave } from "./savedCircuits";
 import {
   simulate,
   makeComponent,
@@ -416,7 +417,7 @@ export function InteractivePage({ isActive }: Props) {
   }
 
   function persistSavedCircuits(next: SavedCircuit[]) {
-    const sorted = [...next].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 24);
+    const sorted = [...next].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, MAX_SAVED_CIRCUITS);
     setSavedCircuits(sorted);
     writeSavedCircuits(sorted);
   }
@@ -424,8 +425,15 @@ export function InteractivePage({ isActive }: Props) {
   function saveCurrentCircuit() {
     const name = circuitName.trim() || `Circuit ${savedCircuits.length + 1}`;
     const now = Date.now();
-    const existingId = selectedSavedCircuitId || "";
-    const id = existingId || uid("saved");
+    const plan = planCircuitSave(savedCircuits, selectedSavedCircuitId, name, () => uid("saved"));
+    if (plan.dropped.length > 0) {
+      const names = plan.dropped.map((entry) => `"${entry.name}"`).join(", ");
+      const proceed = window.confirm(
+        `You can keep ${MAX_SAVED_CIRCUITS} saved circuits. Saving this one will delete the oldest: ${names}. Continue?`
+      );
+      if (!proceed) return;
+    }
+    const id = plan.id;
     const saved: SavedCircuit = {
       id,
       name,
