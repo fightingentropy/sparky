@@ -423,9 +423,10 @@ export function InteractivePage({ isActive }: Props) {
   }
 
   function saveCurrentCircuit() {
-    const name = circuitName.trim() || `Circuit ${savedCircuits.length + 1}`;
+    const requestedName = circuitName.trim() || `Circuit ${savedCircuits.length + 1}`;
     const now = Date.now();
-    const plan = planCircuitSave(savedCircuits, selectedSavedCircuitId, name, () => uid("saved"));
+    const plan = planCircuitSave(savedCircuits, selectedSavedCircuitId, requestedName, () => uid("saved"));
+    const name = plan.name;
     if (plan.dropped.length > 0) {
       const names = plan.dropped.map((entry) => `"${entry.name}"`).join(", ");
       const proceed = window.confirm(

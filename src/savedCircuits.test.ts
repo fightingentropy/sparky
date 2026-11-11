@@ -6,7 +6,7 @@ const entry = (id: string, name: string, updatedAt = 1) => ({ id, name, updatedA
 describe("planCircuitSave", () => {
   it("updates the selected entry when the name is unchanged", () => {
     const plan = planCircuitSave([entry("a", "A")], "a", "A", () => "new");
-    expect(plan).toEqual({ id: "a", replacesExisting: true, dropped: [] });
+    expect(plan).toEqual({ id: "a", name: "A", replacesExisting: true, dropped: [] });
   });
 
   it("creates a new entry when the selected circuit is saved under another name", () => {
@@ -24,5 +24,14 @@ describe("planCircuitSave", () => {
     const plan = planCircuitSave(full, "", "Fresh", () => "new");
     expect(plan.dropped.map((e) => e.id)).toEqual(["id0"]);
     expect(planCircuitSave(full, "id3", "C3", () => "new").dropped).toEqual([]);
+  });
+
+  it("does not give a new entry the name of another entry", () => {
+    const list = [entry("a", "A"), entry("b", "B")];
+    const renamed = planCircuitSave(list, "a", "B", () => "new");
+    expect(renamed).toMatchObject({ id: "new", name: "B (2)", replacesExisting: false });
+    expect(planCircuitSave(list, "", "B", () => "new").name).toBe("B (2)");
+    expect(planCircuitSave([...list, entry("c", "B (2)")], "a", "B", () => "new").name).toBe("B (3)");
+    expect(planCircuitSave(list, "b", "B", () => "new").name).toBe("B");
   });
 });
