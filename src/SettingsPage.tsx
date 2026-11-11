@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
+import { collectLocalData } from "./localDataExport";
 import { useAuth } from "./AuthContext";
 import { AccountAvatar } from "./AccountAvatar";
 import { ApiError } from "./api";
@@ -203,20 +204,7 @@ export function SettingsPage({
   }
 
   function exportLocalData() {
-    const data: Record<string, unknown> = {};
-    try {
-      for (let index = 0; index < localStorage.length; index += 1) {
-        const key = localStorage.key(index);
-        if (!key) continue;
-        const raw = localStorage.getItem(key);
-        if (raw === null) continue;
-        try {
-          data[key] = JSON.parse(raw);
-        } catch {
-          data[key] = raw;
-        }
-      }
-    } catch {}
+    const data = collectLocalData(localStorage);
 
     const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), data }, null, 2)], {
       type: "application/json"

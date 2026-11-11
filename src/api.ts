@@ -1,4 +1,5 @@
 const API_BASE = "/api";
+export const TOKEN_STORAGE_KEY = "sparky-token";
 
 export type ApiUser = { id: string; email: string; nickname: string | null; avatar: string | null };
 type AuthResponse = { token: string; user: ApiUser };
@@ -14,7 +15,7 @@ type ProgressResponse = {
 
 function getToken(): string | null {
   try {
-    return localStorage.getItem("sparky-token");
+    return localStorage.getItem(TOKEN_STORAGE_KEY);
   } catch {
     return null;
   }
@@ -22,8 +23,8 @@ function getToken(): string | null {
 
 export function setToken(token: string | null) {
   try {
-    if (token) localStorage.setItem("sparky-token", token);
-    else localStorage.removeItem("sparky-token");
+    if (token) localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    else localStorage.removeItem(TOKEN_STORAGE_KEY);
   } catch {}
 }
 
