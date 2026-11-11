@@ -116,6 +116,35 @@ function emptyScenarioStats(): FaultScenarioStats {
   };
 }
 
+/**
+ * A first-try solve only counts towards streaks and first-try stats the first
+ * time a scenario is solved. Per-scenario attempts are in memory only, so a
+ * reload would otherwise let the same scenario be replayed for credit.
+ */
+export function isFirstTrySolve(stats: FaultScenarioStats | undefined, attempts: number): boolean {
+  return attempts === 1 && (stats?.solves ?? 0) === 0;
+}
+
+export function recordSubmission(
+  current: FaultScenarioStats,
+  input: { correct: boolean; attempts: number; newHints: number; elapsedSeconds: number; now: number }
+): FaultScenarioStats {
+  const { correct, attempts, newHints, elapsedSeconds, now } = input;
+  return {
+    attempts: current.attempts + 1,
+    solves: current.solves + (correct ? 1 : 0),
+    firstTrySolves: current.firstTrySolves + (correct && isFirstTrySolve(current, attempts) ? 1 : 0),
+    hintsUsed: current.hintsUsed + newHints,
+    totalSeconds: current.totalSeconds + elapsedSeconds,
+    bestSeconds: correct
+      ? current.bestSeconds === null
+        ? elapsedSeconds
+        : Math.min(current.bestSeconds, elapsedSeconds)
+      : current.bestSeconds,
+    lastSolvedAt: correct ? now : current.lastSolvedAt
+  };
+}
+
 function readFaultStats(): FaultStats {
   try {
     const raw = localStorage.getItem(FAULT_STATS_KEY);
@@ -918,19 +947,7 @@ export function FaultFinding(): React.ReactElement {
     });
     setFaultStats((prev) => {
       const current = prev.scenarios[scenario.id] ?? emptyScenarioStats();
-      const next: FaultScenarioStats = {
-        attempts: current.attempts + 1,
-        solves: current.solves + (correct ? 1 : 0),
-        firstTrySolves: current.firstTrySolves + (correct && attempts === 1 ? 1 : 0),
-        hintsUsed: current.hintsUsed + newHints,
-        totalSeconds: current.totalSeconds + elapsedSeconds,
-        bestSeconds: correct
-          ? current.bestSeconds === null
-            ? elapsedSeconds
-            : Math.min(current.bestSeconds, elapsedSeconds)
-          : current.bestSeconds,
-        lastSolvedAt: correct ? Date.now() : current.lastSolvedAt
-      };
+      const next = recordSubmission(current, { correct, attempts, newHints, elapsedSeconds, now: Date.now() });
       return {
         scenarios: {
           ...prev.scenarios,
@@ -939,7 +956,7 @@ export function FaultFinding(): React.ReactElement {
       };
     });
     if (correct) {
-      if (attempts === 1) {
+      if (isFirstTrySolve(faultStats.scenarios[scenario.id], attempts)) {
         // streak is fresh in this event handler; compute next outside the
         // updaters so neither setter runs a side effect inside the other.
         const nextStreak = streak + 1;
