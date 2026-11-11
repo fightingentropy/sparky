@@ -186,6 +186,11 @@ struct InspectionTrainingSessionView: View {
     @State private var selectedLeadTopology: WorkbenchLeadTopology?
     @State private var workbenchActionCompleted = false
     @State private var workbenchResetToken = 0
+    // Probe progress lives here so rotating the device, which swaps the
+    // workbench between the portrait and immersive layouts, does not lose it.
+    @State private var workbenchRedAttachment: WorkbenchTerminalID = .redDock
+    @State private var workbenchBlackAttachment: WorkbenchTerminalID = .blackDock
+    @State private var workbenchCompletedRingPairs: Set<WorkbenchRingPair> = []
     @AccessibilityFocusState private var feedbackIsFocused: Bool
 
     private var session: InspectionTrainingSession {
@@ -326,6 +331,9 @@ struct InspectionTrainingSessionView: View {
                         selectedFunction: $selectedWorkbenchFunction,
                         selectedTopology: $selectedLeadTopology,
                         actionCompleted: $workbenchActionCompleted,
+                        redAttachment: $workbenchRedAttachment,
+                        blackAttachment: $workbenchBlackAttachment,
+                        completedRingPairs: $workbenchCompletedRingPairs,
                         resetToken: workbenchResetToken,
                         immersive: false
                     )
@@ -419,6 +427,9 @@ struct InspectionTrainingSessionView: View {
                 selectedFunction: $selectedWorkbenchFunction,
                 selectedTopology: $selectedLeadTopology,
                 actionCompleted: $workbenchActionCompleted,
+                redAttachment: $workbenchRedAttachment,
+                blackAttachment: $workbenchBlackAttachment,
+                completedRingPairs: $workbenchCompletedRingPairs,
                 resetToken: workbenchResetToken,
                 immersive: true
             )
@@ -529,7 +540,14 @@ struct InspectionTrainingSessionView: View {
         selectedWorkbenchFunction = .off
         selectedLeadTopology = nil
         workbenchActionCompleted = false
+        resetWorkbenchProbes()
         feedbackIsFocused = false
+    }
+
+    private func resetWorkbenchProbes() {
+        workbenchRedAttachment = .redDock
+        workbenchBlackAttachment = .blackDock
+        workbenchCompletedRingPairs = []
     }
 
     private func resetWorkbench() {
@@ -537,6 +555,7 @@ struct InspectionTrainingSessionView: View {
         selectedWorkbenchFunction = .off
         selectedLeadTopology = nil
         workbenchActionCompleted = false
+        resetWorkbenchProbes()
         // The workbench only re-infers the lead topology when its function or
         // task changes; on a retry neither does (steps whose answer is OFF stay
         // OFF), so tell it to rebuild its probe state and topology.
@@ -1253,15 +1272,15 @@ private struct InspectionTrainingWorkbench: View {
     @Binding var selectedFunction: WorkbenchFunction?
     @Binding var selectedTopology: WorkbenchLeadTopology?
     @Binding var actionCompleted: Bool
+    @Binding var redAttachment: WorkbenchTerminalID
+    @Binding var blackAttachment: WorkbenchTerminalID
+    @Binding var completedRingPairs: Set<WorkbenchRingPair>
     let resetToken: Int
     let immersive: Bool
 
-    @State private var redAttachment: WorkbenchTerminalID = .redDock
-    @State private var blackAttachment: WorkbenchTerminalID = .blackDock
     @State private var draggingProbe: WorkbenchProbe?
     @State private var dragLocation: CGPoint?
     @State private var candidateTarget: WorkbenchTerminalID?
-    @State private var completedRingPairs: Set<WorkbenchRingPair> = []
 
     private var taskKey: String { "\(lab.id)-\(taskIndex)" }
     private var functionIsReady: Bool { selectedFunction == setup.correctFunction }
@@ -1454,9 +1473,6 @@ private struct InspectionTrainingWorkbench: View {
             .accessibilityRepresentation {
                 accessibleWorkbenchControls(targets: targets)
             }
-        }
-        .onAppear {
-            resetProbeState()
         }
         .onChange(of: taskKey) { _, _ in
             resetProbeState()
