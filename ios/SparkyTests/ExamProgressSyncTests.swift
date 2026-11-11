@@ -2,6 +2,13 @@ import XCTest
 @testable import Sparky
 
 final class ExamProgressSyncTests: XCTestCase {
+    func testOnlyUnauthorizedResponsesCountAsAuthenticationFailures() {
+        XCTAssertTrue(ExamProgressSyncError.server(statusCode: 401, message: "").isAuthenticationFailure)
+        XCTAssertTrue(ExamProgressSyncError.notAuthenticated.isAuthenticationFailure)
+        XCTAssertFalse(ExamProgressSyncError.server(statusCode: 403, message: "").isAuthenticationFailure)
+        XCTAssertFalse(ExamProgressSyncError.server(statusCode: 500, message: "").isAuthenticationFailure)
+    }
+
     @MainActor
     func testImportsRemoteNumericVariantIntoNativeTestID() async throws {
         let fixture = try makeFixture()

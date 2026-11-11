@@ -52,7 +52,7 @@ enum ExamProgressSyncError: Error, Equatable, LocalizedError, Sendable {
         case .notAuthenticated:
             true
         case .server(let statusCode, _):
-            statusCode == 401 || statusCode == 403
+            statusCode == 401
         default:
             false
         }
