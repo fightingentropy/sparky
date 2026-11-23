@@ -6,17 +6,16 @@ import {
   formulas
 } from "./calculators";
 import { usePersistedState } from "./usePersistedState";
-import { useHistory } from "./useHistory";
 import { useFocusTrap } from "./useFocusTrap";
 import { writeClipboardText } from "./clipboard";
 import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
 import { isBoolean } from "./validators";
 import { AngleDropDiagram } from "./AngleDropDiagram";
 import { BendCutDiagram } from "./BendCutDiagram";
-import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
 import {
-  clearLegacyContainmentRodStorage
+  clearLegacyContainmentRodStorage,
+  clearRetiredStorage
 } from "./calculatorStorage";
 import {
   DEFAULT_HIDDEN_EXAM_IDS,
@@ -351,8 +350,6 @@ function getPageHref(page: PageId): string {
 }
 
 export default function App() {
-  const { entries: historyEntries, addEntry: addHistoryEntry, clearHistory } = useHistory();
-  const [historyOpen, setHistoryOpen] = useState(false);
   const { user, logout } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
   const [reduceMotion, setReduceMotion] = usePersistedState<boolean>("pref-reduce-motion", false, isBoolean);
@@ -426,7 +423,6 @@ export default function App() {
 
   const paletteTrapRef = useFocusTrap<HTMLDivElement>(paletteOpen);
   const helpTrapRef = useFocusTrap<HTMLDivElement>(helpOpen);
-  const historyTrapRef = useFocusTrap<HTMLDivElement>(historyOpen);
 
   // ── Persisted calculator state ──
 
@@ -461,6 +457,7 @@ export default function App() {
 
   useEffect(() => {
     clearLegacyContainmentRodStorage();
+    clearRetiredStorage();
   }, []);
 
   // useCallback so the page components below stay referentially stable as
@@ -644,13 +641,6 @@ export default function App() {
         action: () => setHelpOpen(true)
       },
       {
-        title: "History",
-        subtitle: "View past calculations.",
-        tag: "Action",
-        keywords: "history recent calculations log",
-        action: () => setHistoryOpen(true)
-      },
-      {
         title: "Profile & settings",
         subtitle: "Your account, appearance, and study preferences.",
         tag: "Page",
@@ -753,7 +743,6 @@ export default function App() {
       if (event.key === "Escape") {
         setPaletteOpen(false);
         setHelpOpen(false);
-        setHistoryOpen(false);
         setNavMenuOpen(false);
       }
     };
@@ -1062,9 +1051,6 @@ export default function App() {
                 <h1 id="tool-library-title">Tools</h1>
                 <p className="page-copy">Quick calculations for work on site.</p>
               </div>
-              <button type="button" className="ghost-button" aria-label="Calculation history" onClick={() => setHistoryOpen(true)}>
-                History
-              </button>
             </div>
             <ul className="tool-library-list">
               {filteredApplets.map((applet, index) => (
@@ -1190,16 +1176,7 @@ export default function App() {
                   <div className="result-main">
                     <p className="result-label">Cut each side</p>
                     <p className="result-value">
-                      <CopyableResult
-                        value={trayBendCutResult.roundedSetbackValue}
-                        onCopy={() =>
-                          addHistoryEntry(
-                            "Containment bend cut",
-                            "Cut each side",
-                            trayBendCutResult.roundedSetbackValue
-                          )
-                        }
-                      />
+                      {trayBendCutResult.roundedSetbackValue}
                     </p>
                     <p className="result-sub">
                       {trayBendCutResult.cutsLabel}, marked from centre · nearest mm
@@ -1220,9 +1197,7 @@ export default function App() {
                     </div>
                     <div>
                       <span>Each side (exact)</span>
-                      <strong>
-                        <CopyableResult value={trayBendCutResult.setbackValue} />
-                      </strong>
+                      <strong>{trayBendCutResult.setbackValue}</strong>
                     </div>
                   </div>
                 </div>
@@ -1405,18 +1380,18 @@ export default function App() {
                   <div className="result-main">
                     <p className="result-label">Angled piece</p>
                     <p className="result-value">
-                      <CopyableResult value={angleResult.angledLengthValue} onCopy={() => addHistoryEntry("Angle drop", "Angled piece", angleResult.angledLengthValue)} />
+                      {angleResult.angledLengthValue}
                     </p>
                   </div>
                   {angleAdvanced ? (
                     <div className="mini-metrics">
                       <div>
                         <span>Horizontal offset</span>
-                        <strong><CopyableResult value={angleResult.offsetValue} /></strong>
+                        <strong>{angleResult.offsetValue}</strong>
                       </div>
                       <div>
                         <span>Total developed length</span>
-                        <strong><CopyableResult value={angleResult.totalLengthValue} /></strong>
+                        <strong>{angleResult.totalLengthValue}</strong>
                       </div>
                     </div>
                   ) : null}
@@ -1796,54 +1771,6 @@ export default function App() {
                   </button>
                 </div>
               ) : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {historyOpen ? (
-        <div className="modal-backdrop" onClick={() => setHistoryOpen(false)}>
-          <div
-            ref={historyTrapRef}
-            className="modal-shell history-shell"
-            role="dialog"
-            aria-modal="true"
-            aria-label="History"
-            tabIndex={-1}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header">
-              <div>
-                <h2>History</h2>
-                <p className="page-copy">Recent calculations</p>
-              </div>
-              <div className="modal-header-actions">
-                {historyEntries.length > 0 && (
-                  <button className="ghost-button" type="button" onClick={clearHistory}>
-                    Clear all
-                  </button>
-                )}
-                <button className="ghost-button" type="button" onClick={() => setHistoryOpen(false)}>
-                  Close
-                </button>
-              </div>
-            </div>
-
-            <div className="history-list">
-              {historyEntries.length ? (
-                historyEntries.map((entry) => (
-                  <div key={entry.id} className="history-entry">
-                    <span className="history-tool">{entry.tool}</span>
-                    <span className="history-label">{entry.label}</span>
-                    <strong className="history-value">{entry.value}</strong>
-                    <span className="history-time">
-                      {new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <div className="empty-state">No history yet. Copy a result to start tracking.</div>
-              )}
             </div>
           </div>
         </div>

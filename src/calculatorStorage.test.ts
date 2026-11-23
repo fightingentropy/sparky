@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   CONTAINMENT_ROD_STORAGE_KEYS,
-  clearLegacyContainmentRodStorage
+  clearLegacyContainmentRodStorage,
+  clearRetiredStorage
 } from "./calculatorStorage";
 
 describe("containment rod storage", () => {
@@ -39,5 +40,13 @@ describe("containment rod storage", () => {
     });
 
     expect(removed).toEqual(["cr-height", "cr-top", "cr-buffer", "cr-depth"]);
+  });
+});
+
+describe("retired storage", () => {
+  it("clears the removed calculation history", () => {
+    const removed: string[] = [];
+    clearRetiredStorage({ removeItem: (key) => void removed.push(key) });
+    expect(removed).toEqual(["sparky-history"]);
   });
 });

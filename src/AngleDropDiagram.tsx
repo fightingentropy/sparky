@@ -72,6 +72,8 @@ export function AngleDropDiagram(props: Props) {
   }, [target]);
 
   const { top, bottom, dropPx, offsetPx } = geometry(angle);
+  // Shallow angles shrink the whole drawing (drop included) so the long run fits.
+  const scaledToFit = dropPx < MAX_DROP - 0.5;
   const drop = parseNumber(props.drop);
   const bendHeight = parseNumber(props.bendHeight);
   const bendFraction =
@@ -157,7 +159,10 @@ export function AngleDropDiagram(props: Props) {
     <div className={`bend-diagram${dragging ? " is-dragging" : ""}`}>
       <div className="bend-diagram-head">
         <span className="bend-diagram-eyebrow">Drag to set the angle</span>
-        <span className="bend-diagram-angle">{Math.round(angle)}°</span>
+        <span className="bend-diagram-head-end">
+          {scaledToFit ? <span className="drop-scale-note">Scaled to fit</span> : null}
+          <span className="bend-diagram-angle">{Math.round(angle)}°</span>
+        </span>
       </div>
 
       <svg ref={svgRef} className="bend-diagram-preview" viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}>

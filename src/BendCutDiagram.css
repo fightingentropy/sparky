@@ -171,3 +171,17 @@
 }
 
 .bend-dimension.is-muted text { fill: var(--muted); }
+
+.bend-diagram-head-end {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.drop-scale-note {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}

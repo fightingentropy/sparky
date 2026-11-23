@@ -1093,10 +1093,6 @@ input:disabled {
   z-index: 1;
 }
 
-.result-value:has(.copyable-result.is-placeholder) {
-  color: var(--muted);
-}
-
 .mini-metrics strong {
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
@@ -1846,54 +1842,6 @@ input:disabled {
   }
 }
 
-/* ── Copyable result ───────────────────── */
-
-.copyable-result {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0;
-  border: none;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  transition: color 0.15s var(--ease);
-}
-
-.copyable-result.is-placeholder {
-  cursor: default;
-}
-
-.copyable-result:not(.is-placeholder):hover {
-  color: inherit;
-}
-
-.copyable-result .copy-icon {
-  opacity: 0;
-  transition: opacity 0.15s var(--ease);
-  color: var(--muted);
-  display: inline-flex;
-}
-
-.copyable-result:hover .copy-icon,
-.copyable-result.is-copied .copy-icon,
-.copyable-result.is-failed .copy-icon {
-  opacity: 1;
-}
-
-.copyable-result.is-copied .copy-icon {
-  color: var(--accent-strong);
-}
-
-.copyable-result.is-failed {
-  color: var(--danger-text);
-}
-
-.copyable-result.is-failed .copy-icon {
-  color: var(--danger-text);
-}
-
 /* ── Formula toggle ────────────────────── */
 
 .formula-toggle {
@@ -1938,60 +1886,6 @@ input:disabled {
   font-size: 0.75rem;
   color: var(--muted);
   font-style: italic;
-}
-
-/* ── History modal ─────────────────────── */
-
-.history-shell {
-  max-width: 480px;
-}
-
-.modal-header-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.history-list {
-  padding: 4px 16px 16px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.history-entry {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 4px 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-  align-items: baseline;
-}
-
-.history-tool {
-  font-size: 0.75rem;
-  color: var(--accent-strong);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.history-time {
-  font-size: 0.72rem;
-  color: var(--muted);
-  grid-column: 3;
-  grid-row: 1;
-}
-
-.history-label {
-  font-size: 0.82rem;
-  color: var(--muted-strong);
-  grid-column: 1 / -1;
-}
-
-.history-value {
-  font-size: 0.92rem;
-  color: var(--text);
-  grid-column: 1 / -1;
 }
 
 /* ── Exam page ─────────────────────────── */
@@ -3031,7 +2925,6 @@ kbd {
 .palette-result,
 .search-result,
 .help-row,
-.history-entry,
 .ix-palette-item,
 .ix-readout > div,
 .formula-content,
@@ -3176,7 +3069,6 @@ select:focus,
 .result-value,
 .exam-tooltip-subtitle,
 .exam-results-percent,
-.history-tool,
 .search-result-tag,
 .exam-explanation-label,
 .ix-selected-kind,
@@ -6236,7 +6128,6 @@ body[data-page="exams"] .exam-actions-menu {
 .search-result,
 .palette-result,
 .help-row,
-.history-entry,
 .ix-palette-item,
 .ix-readout > div,
 .formula-content {
@@ -6677,7 +6568,6 @@ h3,
 .containment-field span,
 .breakdown-item span,
 .search-result-tag,
-.history-tool,
 .ix-info-block h3,
 .ix-readout dt,
 .ix-selected-kind,

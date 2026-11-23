@@ -15,7 +15,7 @@ struct MoreView: View {
 
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        SparkyPageHeader("More", subtitle: "Account, labs, tutorials, history and settings")
+                        SparkyPageHeader("More", subtitle: "Account, labs, tutorials and settings")
                         SparkyAccountSummaryCard()
 
                         NavigationLink {
@@ -40,18 +40,6 @@ struct MoreView: View {
                                 title: "Workplace tutorials",
                                 detail: "\(tutorials.count) measured, practical demonstrations",
                                 symbol: "play.rectangle.fill"
-                            )
-                        }
-                        .buttonStyle(.plain)
-
-                        NavigationLink {
-                            CalculationHistoryView(studyState: studyState)
-                        } label: {
-                            MoreDestinationCard(
-                                eyebrow: "Recent work",
-                                title: "Calculation history",
-                                detail: historyDetail,
-                                symbol: "clock.arrow.circlepath"
                             )
                         }
                         .buttonStyle(.plain)
@@ -84,13 +72,6 @@ struct MoreView: View {
             .navigationTitle("More")
             .toolbar(.hidden, for: .navigationBar)
         }
-    }
-
-    private var historyDetail: String {
-        guard let latest = studyState.recentCalculations.first else {
-            return "Your copied calculator results will appear here"
-        }
-        return "Latest: \(latest.tool) · \(latest.value)"
     }
 
 }
@@ -270,51 +251,6 @@ private struct TutorialStepsDisclosure: View {
     }
 }
 
-private struct CalculationHistoryView: View {
-    let studyState: StudyStateStore
-
-    var body: some View {
-        ZStack {
-            SparkyBackdrop()
-            if studyState.recentCalculations.isEmpty {
-                ContentUnavailableCard(
-                    title: "No calculations yet",
-                    message: "Copy a result from any tool and it will be kept here.",
-                    symbol: "clock"
-                )
-            } else {
-                List {
-                    ForEach(studyState.recentCalculations) { item in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(item.tool)
-                                .font(.sparky(.subheadline, weight: .semibold))
-                                .foregroundStyle(Color.sparkyText)
-                            Text(item.value)
-                                .font(.sparky(.title3, weight: .bold).monospacedDigit())
-                                .foregroundStyle(Color.sparkyAccentText)
-                            Text(item.date, format: .relative(presentation: .named))
-                                .font(.sparky(.caption))
-                                .foregroundStyle(Color.sparkyMuted)
-                        }
-                        .listRowBackground(Color.sparkySurface)
-                    }
-                }
-                .scrollContentBackground(.hidden)
-            }
-        }
-        .navigationTitle("History")
-        .toolbar {
-            if !studyState.recentCalculations.isEmpty {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Clear", role: .destructive) {
-                        studyState.clearCalculationHistory()
-                    }
-                }
-            }
-        }
-    }
-}
-
 struct SettingsView: View {
     @Environment(InspectionTrainingStore.self) private var inspectionTrainingStore
 
@@ -427,7 +363,7 @@ struct SettingsView: View {
                 inspectionTrainingStore.resetAll()
             }
         } message: {
-            Text("This removes saved notes, calculation history and inspection-training progress from this device. Exam attempts are kept.")
+            Text("This removes saved notes and inspection-training progress from this device. Exam attempts are kept.")
         }
         .confirmationDialog(
             "Reset every exam attempt?",

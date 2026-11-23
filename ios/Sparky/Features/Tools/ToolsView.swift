@@ -29,10 +29,7 @@ private enum ToolKind: String, CaseIterable, Identifiable {
 }
 
 struct ToolsView: View {
-    let studyState: StudyStateStore
-
     @AppStorage("selectedTool") private var selectedToolRaw = ToolKind.bendCut.rawValue
-    @State private var showingHistory = false
     @Environment(KeyboardVisibility.self) private var keyboard
 
     private var selectedTool: ToolKind {
@@ -47,11 +44,7 @@ struct ToolsView: View {
 
                 ScrollView {
                     LazyVStack(spacing: 18) {
-                        SparkyPageHeader("Tools", subtitle: "Offline site calculators") {
-                            SparkyHeaderButton(systemImage: "clock.arrow.circlepath") {
-                                showingHistory = true
-                            }
-                            .accessibilityLabel("Calculation history")
+                        SparkyPageHeader("Tools") {
                             SparkyAccountToolbarItem()
                         }
                         toolPicker
@@ -79,23 +72,11 @@ struct ToolsView: View {
                     .background(Color.sparkyBackground)
                 }
             }
-            .sheet(isPresented: $showingHistory) {
-                NavigationStack {
-                    ToolHistorySheet(studyState: studyState)
-                }
-                .presentationDetents([.medium, .large])
-            }
         }
     }
 
     private var toolPicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SparkySectionHeader(
-                eyebrow: "Calculator library",
-                title: "2 site and design tools",
-                detail: "Offline"
-            )
-
             ScrollView(.horizontal) {
                 HStack(spacing: 10) {
                     ForEach(ToolKind.allCases) { tool in
@@ -134,9 +115,9 @@ struct ToolsView: View {
     private var selectedCalculator: some View {
         switch selectedTool {
         case .bendCut:
-            BendCutCalculator(studyState: studyState)
+            BendCutCalculator()
         case .angleDrop:
-            AngleDropCalculator(studyState: studyState)
+            AngleDropCalculator()
         }
     }
 }
@@ -194,7 +175,6 @@ private struct FormulaDisclosure: View {
 }
 
 private struct BendCutCalculator: View {
-    let studyState: StudyStateStore
 
     @AppStorage("bendCut.angle") private var angle = "90"
     @AppStorage("bendCut.cuts") private var cuts = "1"
@@ -238,9 +218,6 @@ private struct BendCutCalculator: View {
                 SparkyResultRow(label: "Total bend", value: result.totalBendValue)
                 SparkyResultRow(label: "Bend per cut", value: result.bendPerCutValue)
                 SparkyResultRow(label: "Exact mark", value: result.setbackValue)
-                CopyButton(value: result.roundedSetbackValue, label: "Copy cut mark") {
-                    studyState.recordCalculation(tool: "Bend cut", value: result.roundedSetbackValue)
-                }
             }
             .padding(15)
             .background(Color.sparkyAccentSoft)
@@ -261,7 +238,6 @@ private struct BendCutCalculator: View {
 }
 
 private struct AngleDropCalculator: View {
-    let studyState: StudyStateStore
 
     @AppStorage("angle.drop") private var drop = "10"
     @AppStorage("angle.degrees") private var angle = "45"
@@ -337,9 +313,6 @@ private struct AngleDropCalculator: View {
                 Divider().overlay(Color.sparkyBorder)
                 SparkyResultRow(label: "Horizontal offset", value: result.offsetValue)
                 SparkyResultRow(label: "Total with allowances", value: result.totalLengthValue)
-                CopyButton(value: result.angledLengthValue, label: "Copy angled piece") {
-                    studyState.recordCalculation(tool: "Angle drop", value: result.angledLengthValue)
-                }
             }
             .padding(15)
             .background(Color.sparkyAccentSoft)
@@ -356,55 +329,5 @@ private struct AngleDropCalculator: View {
         top = values.topStraight; bottom = values.bottomStraight; allowance = values.allowance
         topBend = values.topBend; bottomBend = values.bottomBend; bendHeight = values.bendHeight
         Haptics.selection()
-    }
-}
-
-private struct ToolHistorySheet: View {
-    let studyState: StudyStateStore
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        Group {
-            if studyState.recentCalculations.isEmpty {
-                ContentUnavailableView(
-                    "No calculations yet",
-                    systemImage: "clock",
-                    description: Text("Copy a result and it will appear here.")
-                )
-            } else {
-                List(studyState.recentCalculations) { item in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(item.tool).font(.sparky(.subheadline, weight: .semibold))
-                            Text(item.date, style: .relative)
-                                .font(.sparky(.caption))
-                                .foregroundStyle(Color.sparkyMuted)
-                        }
-                        Spacer()
-                        Text(item.value)
-                            .font(.sparkyMono(.headline, weight: .medium))
-                            .foregroundStyle(Color.sparkyText)
-                    }
-                    .listRowBackground(Color.sparkySurface)
-                }
-                .scrollContentBackground(.hidden)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(SparkyBackdrop())
-        .navigationTitle("Calculation history")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Done") { dismiss() }
-            }
-            if !studyState.recentCalculations.isEmpty {
-                ToolbarItem(placement: .destructiveAction) {
-                    Button("Clear", role: .destructive) {
-                        studyState.clearCalculationHistory()
-                    }
-                }
-            }
-        }
     }
 }

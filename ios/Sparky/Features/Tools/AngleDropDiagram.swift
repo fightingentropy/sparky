@@ -31,6 +31,15 @@ struct AngleDropDiagram: View {
         return min(max(parsed, Self.range.lowerBound), Self.range.upperBound)
     }
 
+    @State private var diagramSize: CGSize = .zero
+
+    private var isScaledToFit: Bool {
+        guard diagramSize.width > 0 else { return false }
+        let layout = DropLayout(size: diagramSize)
+        let (top, bottom) = layout.points(angle: angle)
+        return bottom.y - top.y < layout.maxDrop - 0.5
+    }
+
     private var bendCount: Int { (topBend ? 1 : 0) + (bottomBend ? 1 : 0) }
 
     private var bendFraction: Double {
@@ -49,9 +58,14 @@ struct AngleDropDiagram: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
+            HStack(alignment: .firstTextBaseline) {
                 SparkyEyebrow(text: "Drag to set the angle")
                 Spacer()
+                if isScaledToFit {
+                    // Shallow angles shrink the whole drawing (drop included) so the long run fits.
+                    SparkyEyebrow(text: "Scaled to fit")
+                        .transition(.opacity)
+                }
                 Text("\(angle.formatted(.number.precision(.fractionLength(0...1))))°")
                     .font(.sparkyMono(.subheadline, weight: .medium))
                     .foregroundStyle(Color.sparkyText)
@@ -76,6 +90,7 @@ struct AngleDropDiagram: View {
             }
             .frame(height: 200)
             .coordinateSpace(name: Self.space)
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { diagramSize = $0 }
 
             Text(note)
                 .font(.sparky(.caption))

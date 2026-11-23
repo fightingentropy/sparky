@@ -70,7 +70,7 @@ struct RootView: View {
     private func tabContent(_ tab: AppTab) -> some View {
         switch tab {
         case .tools:
-            ToolsView(studyState: studyState)
+            ToolsView()
         case .notes:
             NotesView()
         case .exams:
