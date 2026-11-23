@@ -321,6 +321,17 @@ private struct AngleDropCalculator: View {
             }
             .font(.sparky(.subheadline, weight: .semibold))
 
+            AngleDropDiagram(
+                angleText: $angle,
+                drop: drop,
+                unit: unit,
+                topBend: topBend,
+                bottomBend: bottomBend,
+                bendHeight: bendHeight,
+                angledLength: result.angledLengthValue,
+                offset: result.offsetValue
+            )
+
             VStack(spacing: 12) {
                 SparkyResultRow(label: "Angled piece", value: result.angledLengthValue, emphasized: true)
                 Divider().overlay(Color.sparkyBorder)

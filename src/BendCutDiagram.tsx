@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useTweened } from "./diagramMotion";
 import "./BendCutDiagram.css";
 
 /*
@@ -67,43 +68,6 @@ function bendGeometry(angle: number, cuts: number) {
   const outsideEnd = add(end, outward(angle), STRIP);
   const handle = add(add(end, outward(angle), STRIP / 2), dir(angle), 6);
   return { corners, end, mitres, outsideStart, outsideEnd, handle };
-}
-
-function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") return true;
-  return (
-    document.documentElement.classList.contains("reduce-motion") ||
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true
-  );
-}
-
-/** Follows `target`, easing towards it unless dragging or reduced motion. */
-function useTweened(target: number, immediate: boolean): number {
-  const [value, setValue] = useState(target);
-  const valueRef = useRef(target);
-
-  useEffect(() => {
-    const from = valueRef.current;
-    if (immediate || from === target || prefersReducedMotion()) {
-      valueRef.current = target;
-      setValue(target);
-      return;
-    }
-    let frame = 0;
-    const startedAt = performance.now();
-    const duration = 320;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - startedAt) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      valueRef.current = from + (target - from) * eased;
-      setValue(valueRef.current);
-      if (t < 1) frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [target, immediate]);
-
-  return value;
 }
 
 export function BendCutDiagram({ angle: angleText, cuts: cutsText, cutEachSide, onAngleChange }: Props) {

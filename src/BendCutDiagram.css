@@ -138,3 +138,36 @@
 }
 
 .bend-diagram-note.is-warning { color: var(--warning-text); }
+
+/* Angle drop (side view) — shares the bend diagram's frame, handle and dimensions. */
+
+.drop-ghost {
+  stroke: var(--muted);
+  stroke-opacity: 0.45;
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.drop-run {
+  fill: none;
+  stroke: var(--text);
+  stroke-opacity: 0.22;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.drop-cut {
+  stroke: var(--success);
+  stroke-linecap: butt;
+}
+
+.drop-joint { fill: var(--text-strong); }
+
+.drop-length {
+  fill: var(--text-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.bend-dimension.is-muted text { fill: var(--muted); }

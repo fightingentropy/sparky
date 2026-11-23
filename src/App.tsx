@@ -11,6 +11,7 @@ import { useFocusTrap } from "./useFocusTrap";
 import { writeClipboardText } from "./clipboard";
 import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
 import { isBoolean } from "./validators";
+import { AngleDropDiagram } from "./AngleDropDiagram";
 import { BendCutDiagram } from "./BendCutDiagram";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
@@ -1386,6 +1387,18 @@ export default function App() {
                       </label>
                     </>
                   ) : null}
+
+                  <AngleDropDiagram
+                    angle={angleValue}
+                    drop={angleDrop}
+                    unit={angleUnit}
+                    topBend={angleTopBend}
+                    bottomBend={angleBottomBend}
+                    bendHeight={angleBendHeight}
+                    angledLength={angleResult.angledLengthValue}
+                    offset={angleResult.offsetValue}
+                    onAngleChange={setAngleValue}
+                  />
                 </div>
 
                 <div className="tool-output">
