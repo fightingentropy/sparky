@@ -37,7 +37,7 @@ export default defineConfig({
       manifest: {
         name: "Sparky",
         short_name: "Sparky",
-        description: "Electrical practice exams, notes, tutorials, and site tools.",
+        description: "Electrical practice exams, notes, and site tools.",
         start_url: "/",
         scope: "/",
         display: "standalone",
@@ -63,7 +63,6 @@ export default defineConfig({
           "assets/three-core-*.js",
           "assets/three-examples-*.js",
           "assets/ExamPage-*.js",
-          "assets/TutorialsPage-*.js",
           "assets/InteractivePage-*.js",
           "assets/FaultFinding-*.*",
           "assets/PanelTrainer-*.*",
@@ -114,7 +113,7 @@ export default defineConfig({
             // Vite-hashed URLs make CacheFirst safe without adding megabytes to
             // the service worker's initial install transaction.
             urlPattern:
-              /\/assets\/(ExamPage|TutorialsPage|InteractivePage|FaultFinding|PanelTrainer|pdfmake|vfs_fonts)-.*\.(?:js|css)$/,
+              /\/assets\/(ExamPage|InteractivePage|FaultFinding|PanelTrainer|pdfmake|vfs_fonts)-.*\.(?:js|css)$/,
             handler: "CacheFirst",
             options: {
               cacheName: `lazy-pages-${CONTENT_CACHE_VERSION}`,

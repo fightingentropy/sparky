@@ -4,14 +4,14 @@ Sparky is an electrician toolkit and study companion with a Bun/React web app an
 
 The iOS app includes:
 
-- two native site-calculator surfaces with saved calculation history
+- two site calculators (containment bend cut and angle drop) with draggable, live diagrams
 - searchable, saveable technical notes
-- guided learning routes and seven tutorials
 - 12 exam subjects, 99 tests, and 3,983 deterministic served questions
 - per-option answer feedback, question flags, scores, and offline progress
+- optional sign-in that syncs exam progress with the web app
 - native navigation, Dynamic Type, haptics, and light/dark appearances
 
-The React/WebGL interactive trainers and cloud account sync remain in the web client for now.
+The React/WebGL interactive trainers remain in the web client.
 
 ## Run locally
 

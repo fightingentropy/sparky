@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 
 const indexHtml = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const headers = readFileSync(new URL("../public/_headers", import.meta.url), "utf8");
-const tutorialsPage = readFileSync(new URL("./TutorialsPage.tsx", import.meta.url), "utf8");
 
 function cspDirectives(): Map<string, string[]> {
   const line = headers.split("\n").find((entry) => entry.trim().startsWith("Content-Security-Policy:"));
@@ -32,11 +31,10 @@ describe("production security headers", () => {
     expect(csp.get("script-src")).not.toContain("'unsafe-inline'");
   });
 
-  it("lets Workplace Tutorials load thumbnails and play embeds", () => {
-    expect(tutorialsPage).toContain("https://i.ytimg.com/vi/");
-    expect(tutorialsPage).toContain("https://www.youtube-nocookie.com/embed/");
-    expect(csp.get("img-src")).toContain("https://i.ytimg.com");
-    expect(csp.get("frame-src")).toEqual(["https://www.youtube-nocookie.com"]);
+  it("loads images and frames from no third-party origin", () => {
+    expect(csp.get("img-src")).toEqual(["'self'", "data:", "blob:"]);
+    expect(csp.has("frame-src")).toBe(false);
+    expect(csp.get("default-src")).toEqual(["'self'"]);
   });
 
   it("keeps the app itself unframeable", () => {

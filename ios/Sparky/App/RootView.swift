@@ -78,7 +78,6 @@ struct RootView: View {
         case .more:
             MoreView(
                 contentStore: contentStore,
-                tutorials: contentStore.tutorials,
                 studyState: studyState,
                 progressStore: progressStore
             )

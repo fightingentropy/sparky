@@ -7,13 +7,11 @@
 #  - style-src 'unsafe-inline': the app uses inline style attributes for
 #    progress-bar widths and CSS custom properties. Fonts are self-hosted.
 #  - img-src: question diagram images are bundled locally under /exam-images;
-#    data:/blob: cover canvas/texture sources; i.ytimg.com serves the
-#    Workplace Tutorials video thumbnails.
-#  - frame-src: Workplace Tutorials embeds play from youtube-nocookie.com, and
-#    only after the viewer presses Play.
+#    data:/blob: cover canvas/texture sources. Nothing is framed or loaded
+#    from a third-party origin, so frames fall back to default-src 'self'.
 #  - connect-src 'self': the only network calls are the same-origin /api routes.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-XGveDDUZdww36atTbyeAIpwOSV+azQbNhyLFi8FPcgg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com; frame-src https://www.youtube-nocookie.com; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-XGveDDUZdww36atTbyeAIpwOSV+azQbNhyLFi8FPcgg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin

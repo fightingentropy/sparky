@@ -40,7 +40,6 @@ final class ContentStore {
     let manifest: ContentManifest
     let catalog: ExamCatalog
     let notes: [CheatSheetSection]
-    let tutorials: [Tutorial]
     let calculators: [CalculatorDefinition]
 
     @ObservationIgnored private let loader: ContentResourceLoader
@@ -79,11 +78,6 @@ final class ContentStore {
             at: "cheat-sheet.json",
             manifest: manifest
         )
-        tutorials = try loader.decodeVerified(
-            [Tutorial].self,
-            at: "tutorials.json",
-            manifest: manifest
-        )
         calculators = try loader.decodeVerified(
             [CalculatorDefinition].self,
             at: "calculators.json",
@@ -105,8 +99,7 @@ final class ContentStore {
             [
                 "calculators.json",
                 "cheat-sheet.json",
-                "exam-index.json",
-                "tutorials.json"
+                "exam-index.json"
             ] + examIDs.map { "exams/\($0).json" }
         )
         let manifestPaths = Set(manifest.files.map(\.path))
@@ -125,10 +118,6 @@ final class ContentStore {
 
     func note(id: String) -> CheatSheetSection? {
         notes.first { $0.id == id }
-    }
-
-    func tutorial(id: String) -> Tutorial? {
-        tutorials.first { $0.id == id }
     }
 
     func calculator(id: String) -> CalculatorDefinition? {

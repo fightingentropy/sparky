@@ -32,9 +32,7 @@ import {
 // unchanged. Their props are referentially stable across keystrokes (isActive
 // is a boolean; the navigation callbacks below are useCallback'd).
 const ExamPage = memo(lazy(() => import("./ExamPage").then((m) => ({ default: m.ExamPage }))));
-const TutorialsPage = memo(lazy(() => import("./TutorialsPage").then((m) => ({ default: m.TutorialsPage }))));
 const InteractivePage = memo(lazy(() => import("./InteractivePage").then((m) => ({ default: m.InteractivePage }))));
-import { TUTORIALS } from "./tutorials";
 import { useAuth } from "./AuthContext";
 import { AuthModal } from "./AuthModal";
 import { SettingsPage } from "./SettingsPage";
@@ -52,7 +50,7 @@ import {
   type ReferenceTable
 } from "./cheatSheetSections";
 
-type PageId = NavigationPageId | "tutorials" | "interactive" | "settings";
+type PageId = NavigationPageId | "interactive" | "settings";
 
 type Applet = {
   id: string;
@@ -85,14 +83,13 @@ const DEFAULT_PAGE: NavigationPageId = "exams";
 
 const PAGE_NAV_ITEMS: { id: PageId; label: string }[] = [
   ...NAVIGATION_ITEMS,
-  { id: "tutorials", label: "Tutorials" },
   { id: "interactive", label: "Interactive" }
 ];
 
 const PRIMARY_NAV_ITEMS = NAVIGATION_ITEMS;
 
 // The primary pages surfaced in the mobile bottom tab bar. The remaining pages
-// (Tutorials, Interactive, Settings) stay reachable from the avatar menu and the
+// (Interactive, Settings) stay reachable from the avatar menu and the
 // command palette, both of which list every page. Exam actions sit above the
 // tab bar so primary navigation remains available during practice.
 const MOBILE_TAB_ITEMS: { id: NavigationPageId; label: string; icon: ReactNode }[] = [
@@ -313,9 +310,10 @@ function PresetButtons({
   );
 }
 
-// The Learn page and its study guides were removed. Old bookmarks and history
-// entries land on the default page with the address rewritten to match.
-const REMOVED_PAGE_PATHS = new Set(["/learn", "/guides"]);
+// The Learn page with its study guides, and the Workplace Tutorials page, were
+// removed. Old bookmarks and history entries land on the default page with the
+// address rewritten to match.
+const REMOVED_PAGE_PATHS = new Set(["/learn", "/guides", "/tutorials"]);
 
 function currentPath(): string {
   return window.location.pathname.replace(/\/+$/, "") || "/";
@@ -326,7 +324,6 @@ function getPageFromLocation(): PageId {
   if (path === "/" || path === "/exams") return "exams";
   if (path === "/tools") return "home";
   if (path === "/notes" || path === "/cheatsheet") return "cheatsheet";
-  if (path === "/tutorials") return "tutorials";
   if (path === "/interactive") return "interactive";
   if (path === "/settings") return "settings";
   return DEFAULT_PAGE;
@@ -340,8 +337,6 @@ function getPageHref(page: PageId): string {
       return "/notes";
     case "exams":
       return "/";
-    case "tutorials":
-      return "/tutorials";
     case "interactive":
       return "/interactive";
     case "settings":
@@ -620,13 +615,6 @@ export default function App() {
         action: () => navigateTo("home")
       },
       {
-        title: "Tutorials",
-        subtitle: "Workplace videos and demonstrations.",
-        tag: "Page",
-        keywords: "tutorials videos demonstrations workplace trunking conduit tray unistrut supports swa armoured cable gland terminations",
-        action: () => navigateTo("tutorials")
-      },
-      {
         title: "Interactive",
         subtitle: "Build and energize circuits with floating tips.",
         tag: "Page",
@@ -669,14 +657,7 @@ export default function App() {
           keywords: `${section.title} ${item}`,
           action: () => navigateTo("cheatsheet", section.id)
         }))
-      ]),
-      ...TUTORIALS.map((tutorial) => ({
-        title: tutorial.title,
-        subtitle: tutorial.workplaceUse,
-        tag: "Video",
-        keywords: `${tutorial.title} ${tutorial.channel} ${tutorial.category} ${tutorial.workplaceUse} ${tutorial.practiceFocus.join(" ")}`,
-        action: () => navigateTo("tutorials", tutorial.id)
-      }))
+      ])
     ];
   }, [navigateTo]);
 
@@ -705,7 +686,6 @@ export default function App() {
       home: "Tools",
       cheatsheet: "Notes",
       exams: "Practice Exams",
-      tutorials: "Workplace Tutorials",
       interactive: "Interactive Training",
       settings: "Profile & settings"
     };
@@ -1638,7 +1618,6 @@ export default function App() {
               hiddenExamIds={hiddenExamIds}
             />
           ) : null}
-          {visitedPages.has("tutorials") ? <TutorialsPage isActive={page === "tutorials"} /> : null}
           {visitedPages.has("interactive") ? <InteractivePage isActive={page === "interactive"} /> : null}
         </Suspense>
 
@@ -1672,7 +1651,7 @@ export default function App() {
             <div className="modal-header">
               <div>
                 <h2>Command palette</h2>
-                <p className="page-copy">Search pages, tools, notes, and videos.</p>
+                <p className="page-copy">Search pages, tools and notes.</p>
               </div>
               <button className="ghost-button" type="button" onClick={() => setPaletteOpen(false)}>
                 Close
@@ -1685,7 +1664,7 @@ export default function App() {
                 ref={paletteInputRef}
                 id="palette-input"
                 type="search"
-                placeholder="Go to tools, notes, videos"
+                placeholder="Go to tools and notes"
                 autoComplete="off"
                 value={paletteQuery}
                 onChange={(e) => setPaletteQuery(e.target.value)}

@@ -78,36 +78,6 @@ struct ContentManifest: Codable, Hashable, Sendable {
     let files: [ContentManifestFile]
 }
 
-struct Tutorial: Codable, Hashable, Identifiable, Sendable {
-    let id: String
-    let videoID: String
-    let title: String
-    let channel: String
-    let sourceURL: URL
-    let category: String
-    let workplaceUse: String
-    let practiceFocus: [String]
-    let instructions: TutorialInstructions?
-
-    private enum CodingKeys: String, CodingKey {
-        case id
-        case videoID = "videoId"
-        case title
-        case channel
-        case sourceURL = "sourceUrl"
-        case category
-        case workplaceUse
-        case practiceFocus
-        case instructions
-    }
-}
-
-struct TutorialInstructions: Codable, Hashable, Sendable {
-    /// Shown above the steps, e.g. where the method differs from the video.
-    let note: String?
-    let steps: [String]
-}
-
 enum LegendSwatch: Codable, Hashable, Sendable {
     case color(String)
     case colors([String])

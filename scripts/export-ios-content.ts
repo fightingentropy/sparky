@@ -22,7 +22,6 @@ import {
 } from "../src/examUtils";
 import type { Exam, ExamQuestion } from "../src/exams/types";
 import { PRIMARY_EXAM_IDS } from "../src/examTaxonomy";
-import { TUTORIALS } from "../src/tutorials";
 
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const EXAM_SOURCE_DIR = join(ROOT_DIR, "src", "exam-data");
@@ -183,7 +182,6 @@ function requireUniqueIds(
 
 function validateStudyCollections(): void {
   requireUniqueIds(CHEAT_SHEET_SECTIONS, "cheat sheets");
-  requireUniqueIds(TUTORIALS, "tutorials");
   requireUniqueIds(CALCULATOR_DEFINITIONS, "calculator definitions");
   const calculatorSources = CALCULATOR_DEFINITIONS.flatMap((calculator) => [
     calculator.source,
@@ -568,7 +566,6 @@ async function main(): Promise<void> {
     });
 
   await Promise.all([
-    writeCompactJson(join(CONTENT_OUTPUT_DIR, "tutorials.json"), TUTORIALS),
     writeCompactJson(
       join(CONTENT_OUTPUT_DIR, "calculators.json"),
       CALCULATOR_DEFINITIONS,
@@ -596,7 +593,6 @@ async function main(): Promise<void> {
     "calculators.json",
     "cheat-sheet.json",
     "exam-index.json",
-    "tutorials.json",
     ...[...examOutputs.keys()].map((fileName) => `exams/${fileName}`),
   ];
   await writeContentManifest(contentPaths);
@@ -609,8 +605,7 @@ async function main(): Promise<void> {
     0,
   );
   console.log(
-    `Exported ${TUTORIALS.length} tutorials, ` +
-      `${cheatSheetSections.length} cheat sheets, and ${questionCount} questions ` +
+    `Exported ${cheatSheetSections.length} cheat sheets and ${questionCount} questions ` +
       `across ${indexEntries.length} exams to ${CONTENT_OUTPUT_DIR}`,
   );
 }

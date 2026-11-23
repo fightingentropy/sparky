@@ -9,25 +9,16 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertEqual(store.manifest.schemaVersion, 1)
         XCTAssertEqual(store.manifest.contentSchemaVersion, 3)
         XCTAssertEqual(store.manifest.contentHash.count, 64)
-        XCTAssertEqual(store.manifest.files.count, 16)
+        XCTAssertEqual(store.manifest.files.count, 15)
         XCTAssertEqual(store.catalog.schemaVersion, 3)
         XCTAssertEqual(store.catalog.examCount, 12)
         XCTAssertEqual(store.catalog.exams.count, 12)
         XCTAssertEqual(store.catalog.variantCount, 99)
         XCTAssertEqual(store.catalog.questionCount, 3_983)
         XCTAssertEqual(store.notes.count, 43)
-        XCTAssertEqual(store.tutorials.count, 8)
         XCTAssertEqual(store.calculators.count, 10)
 
         XCTAssertNotNil(store.note(id: "cheat-core-formulas"))
-        XCTAssertNotNil(store.tutorial(id: "internal-90-trunking"))
-        XCTAssertEqual(store.tutorial(id: "swa-gland-make-off")?.instructions?.steps.count, 12)
-        for tutorial in store.tutorials {
-            XCTAssertFalse(
-                tutorial.instructions?.steps.isEmpty ?? true,
-                "\(tutorial.id) has no step-by-step instructions"
-            )
-        }
         XCTAssertEqual(store.calculator(id: "tray-bend-cut")?.algorithmVersion, 2)
         XCTAssertEqual(
             store.calculator(id: "structural-limits")?.additionalSources?.first?.classification,

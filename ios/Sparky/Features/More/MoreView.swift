@@ -2,11 +2,8 @@ import SwiftUI
 
 struct MoreView: View {
     let contentStore: ContentStore
-    let tutorials: [Tutorial]
     let studyState: StudyStateStore
     let progressStore: ProgressStore
-
-    @Environment(InspectionTrainingStore.self) private var inspectionTrainingStore
 
     var body: some View {
         NavigationStack {
@@ -15,34 +12,8 @@ struct MoreView: View {
 
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        SparkyPageHeader("More", subtitle: "Account, labs, tutorials and settings")
+                        SparkyPageHeader("More", subtitle: "Account and settings")
                         SparkyAccountSummaryCard()
-
-                        NavigationLink {
-                            InspectionTrainingHomeView()
-                        } label: {
-                            MoreDestinationCard(
-                                eyebrow: "Hands-on practice",
-                                title: "Inspection & testing labs",
-                                detail: "\(InspectionTrainingCatalog.labs.count) interactive labs · \(inspectionTrainingStore.completedLabCount) complete",
-                                symbol: "waveform.path.ecg.rectangle"
-                            )
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("more-inspection-labs")
-                        .accessibilityHint("Practise using a virtual tester and interpreting results")
-
-                        NavigationLink {
-                            TutorialsView(tutorials: tutorials)
-                        } label: {
-                            MoreDestinationCard(
-                                eyebrow: "Watch & practise",
-                                title: "Workplace tutorials",
-                                detail: "\(tutorials.count) measured, practical demonstrations",
-                                symbol: "play.rectangle.fill"
-                            )
-                        }
-                        .buttonStyle(.plain)
 
                         NavigationLink {
                             SettingsView(
@@ -59,10 +30,6 @@ struct MoreView: View {
                             )
                         }
                         .buttonStyle(.plain)
-
-                        StudyNotice(
-                            message: "Sparky is a study aid. Confirm current regulations, standards and assessment requirements with official sources."
-                        )
                     }
                     .padding(.horizontal, SparkyLayout.pageInset)
                     .padding(.bottom, 28)
@@ -111,149 +78,7 @@ private struct MoreDestinationCard: View {
     }
 }
 
-private struct TutorialsView: View {
-    let tutorials: [Tutorial]
-    @State private var selectedCategory = "All"
-
-    private var categories: [String] {
-        ["All"] + Set(tutorials.map(\.category)).sorted()
-    }
-
-    private var filteredTutorials: [Tutorial] {
-        selectedCategory == "All"
-            ? tutorials
-            : tutorials.filter { $0.category == selectedCategory }
-    }
-
-    var body: some View {
-        ZStack {
-            SparkyBackdrop()
-            ScrollView {
-                LazyVStack(spacing: 14) {
-                    ScrollView(.horizontal) {
-                        HStack(spacing: 8) {
-                            ForEach(categories, id: \.self) { category in
-                                Button {
-                                    selectedCategory = category
-                                    Haptics.selection()
-                                } label: {
-                                    TagChip(title: category, selected: selectedCategory == category)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(.horizontal, SparkyLayout.pageInset)
-                    }
-                    .scrollIndicators(.hidden)
-
-                    ForEach(filteredTutorials) { tutorial in
-                        TutorialCard(tutorial: tutorial)
-                    }
-                }
-                .padding(.vertical, 8)
-                .padding(.bottom, 24)
-            }
-        }
-        .navigationTitle("Tutorials")
-        .navigationBarTitleDisplayMode(.large)
-    }
-}
-
-private struct TutorialCard: View {
-    let tutorial: Tutorial
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(Color.sparkyAccentSoft)
-                    Image(systemName: "play.fill")
-                        .font(.title3.bold())
-                        .foregroundStyle(Color.sparkyAccentText)
-                }
-                .frame(width: 54, height: 54)
-
-                VStack(alignment: .leading, spacing: 5) {
-                    SparkyEyebrow(text: tutorial.category)
-                    Text(tutorial.title)
-                        .font(.sparky(.headline))
-                        .foregroundStyle(Color.sparkyText)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(tutorial.channel)
-                        .font(.sparky(.caption))
-                        .foregroundStyle(Color.sparkyMuted)
-                }
-            }
-
-            Text(tutorial.workplaceUse)
-                .font(.sparky(.subheadline))
-                .foregroundStyle(Color.sparkyMuted)
-
-            VStack(alignment: .leading, spacing: 7) {
-                ForEach(tutorial.practiceFocus, id: \.self) { focus in
-                    Label(focus, systemImage: "checkmark.circle")
-                        .font(.sparky(.caption))
-                        .foregroundStyle(Color.sparkyText)
-                }
-            }
-
-            if let instructions = tutorial.instructions, !instructions.steps.isEmpty {
-                TutorialStepsDisclosure(instructions: instructions)
-            }
-
-            Link(destination: tutorial.sourceURL) {
-                Label("Watch on YouTube", systemImage: "arrow.up.right.square")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(SparkyPrimaryButtonStyle())
-        }
-        .sparkyCard(padding: 16)
-        .padding(.horizontal, SparkyLayout.pageInset)
-    }
-}
-
-private struct TutorialStepsDisclosure: View {
-    let instructions: TutorialInstructions
-
-    var body: some View {
-        DisclosureGroup("Step-by-step (\(instructions.steps.count) steps)") {
-            VStack(alignment: .leading, spacing: 10) {
-                if let note = instructions.note {
-                    Text(note)
-                        .font(.sparky(.caption))
-                        .foregroundStyle(Color.sparkyMuted)
-                        .padding(10)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            Color.sparkyAccentSoft,
-                            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        )
-                }
-
-                ForEach(Array(instructions.steps.enumerated()), id: \.offset) { index, step in
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text("\(index + 1).")
-                            .font(.sparky(.subheadline, weight: .bold).monospacedDigit())
-                            .foregroundStyle(Color.sparkyAccentText)
-                            .frame(minWidth: 22, alignment: .trailing)
-                        Text(step)
-                            .font(.sparky(.subheadline))
-                            .foregroundStyle(Color.sparkyText)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-            }
-            .padding(.top, 10)
-        }
-        .font(.sparky(.subheadline, weight: .semibold))
-        .tint(Color.sparkyText)
-    }
-}
-
 struct SettingsView: View {
-    @Environment(InspectionTrainingStore.self) private var inspectionTrainingStore
-
     let contentStore: ContentStore
     let studyState: StudyStateStore
     let progressStore: ProgressStore
@@ -317,7 +142,7 @@ struct SettingsView: View {
             }
 
             Section {
-                Button("Reset study and training progress", role: .destructive) {
+                Button("Clear saved notes", role: .destructive) {
                     showingResetConfirmation = true
                 }
                 Button("Reset all exam attempts", role: .destructive) {
@@ -354,16 +179,15 @@ struct SettingsView: View {
         .tint(Color.sparkyText)
         .navigationTitle("Settings")
         .confirmationDialog(
-            "Reset local study data?",
+            "Clear saved notes?",
             isPresented: $showingResetConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Reset data", role: .destructive) {
+            Button("Clear saved notes", role: .destructive) {
                 studyState.resetStudyProgress()
-                inspectionTrainingStore.resetAll()
             }
         } message: {
-            Text("This removes saved notes and inspection-training progress from this device. Exam attempts are kept.")
+            Text("This removes every saved note from this device. Exam attempts are kept.")
         }
         .confirmationDialog(
             "Reset every exam attempt?",

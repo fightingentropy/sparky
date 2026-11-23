@@ -15,7 +15,6 @@ export const CONTENT_CACHE_INPUT_PATHS = [
   "src/examSolutionTables.ts",
   "src/fundamentalInspectionExam.ts",
   "src/initialVerificationExam.ts",
-  "src/tutorials.ts",
 ] as const;
 
 function portableRelativePath(rootDir: string, file: string): string {

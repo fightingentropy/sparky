@@ -6,8 +6,14 @@ import Observation
 final class StudyStateStore {
     private enum Keys {
         static let savedNotes = "savedNoteIDs"
-        /// Written by removed features (study guides, calculation history).
-        static let retired = ["completedGuideIDs", "lastOpenedGuideID", "recentCalculations"]
+        /// Written by removed features (study guides, calculation history,
+        /// inspection & testing labs).
+        static let retired = [
+            "completedGuideIDs",
+            "lastOpenedGuideID",
+            "recentCalculations",
+            "sparky.inspection-training.v1"
+        ]
     }
 
     private let defaults: UserDefaults
@@ -17,8 +23,8 @@ final class StudyStateStore {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         savedNoteIDs = Set(defaults.stringArray(forKey: Keys.savedNotes) ?? [])
-        // Calculation history is gone; drop what earlier versions stored.
-        defaults.removeObject(forKey: "recentCalculations")
+        // Those features are gone; drop what earlier versions stored.
+        Keys.retired.forEach(defaults.removeObject(forKey:))
     }
 
     func isNoteSaved(_ id: String) -> Bool {
@@ -37,6 +43,5 @@ final class StudyStateStore {
     func resetStudyProgress() {
         savedNoteIDs = []
         defaults.removeObject(forKey: Keys.savedNotes)
-        Keys.retired.forEach(defaults.removeObject(forKey:))
     }
 }

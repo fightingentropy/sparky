@@ -3,13 +3,10 @@ import SwiftUI
 @main
 @MainActor
 struct SparkyApp: App {
-    @UIApplicationDelegateAdaptor(SparkyAppDelegate.self) private var appDelegate
-
     @State private var contentStore: ContentStore?
     @State private var contentError: String?
     @State private var progressStore = ProgressStore()
     @State private var studyState = StudyStateStore()
-    @State private var inspectionTrainingStore = InspectionTrainingStore()
     @State private var router = AppRouter(selectedTab: Self.initialTab)
     @State private var authStore = AuthStore()
     @State private var progressSyncController = ProgressSyncController()
@@ -39,7 +36,6 @@ struct SparkyApp: App {
                     .environment(contentStore)
                     .environment(progressStore)
                     .environment(studyState)
-                    .environment(inspectionTrainingStore)
                     .environment(router)
                     .environment(authStore)
                     .environment(progressSyncController)
