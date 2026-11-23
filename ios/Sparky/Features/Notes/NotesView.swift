@@ -22,6 +22,20 @@ struct NotesView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 14) {
+                        SparkyPageHeader("Notes", subtitle: "Formulas, tables and standards to keep close") {
+                            SparkyHeaderButton(
+                                systemImage: showsSavedOnly ? "bookmark.fill" : "bookmark",
+                                isActive: showsSavedOnly
+                            ) {
+                                withAnimation(.easeInOut(duration: 0.18)) {
+                                    showsSavedOnly.toggle()
+                                }
+                            }
+                            .accessibilityLabel(showsSavedOnly ? "Show all notes" : "Show saved notes")
+                            .accessibilityValue(showsSavedOnly ? "Saved notes only" : "All notes")
+                            SparkyAccountToolbarItem()
+                        }
+                        SparkySearchField(prompt: "Search notes, formulas and tables", text: $searchText)
                         NotesOverview(
                             totalCount: contentStore.notes.count,
                             savedCount: studyState.savedNoteIDs.count
@@ -57,29 +71,7 @@ struct NotesView: View {
                 .scrollDismissesKeyboard(.interactively)
             }
             .navigationTitle("Notes")
-            .navigationBarTitleDisplayMode(.large)
-            .searchable(text: $searchText, prompt: "Search notes, formulas and tables")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    SparkyBrandMark(size: 31)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.18)) {
-                            showsSavedOnly.toggle()
-                        }
-                    } label: {
-                        Image(systemName: showsSavedOnly ? "bookmark.fill" : "bookmark")
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .accessibilityLabel(showsSavedOnly ? "Show all notes" : "Show saved notes")
-                    .accessibilityValue(showsSavedOnly ? "Saved notes only" : "All notes")
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    SparkyAccountToolbarItem()
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { noteID in
                 if let note = contentStore.note(id: noteID) {
                     NoteDetailView(note: note)
@@ -111,36 +103,23 @@ private struct NotesOverview: View {
     let savedCount: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 13) {
-                SparkyBrandMark(size: 44)
-
-                VStack(alignment: .leading, spacing: 5) {
-                    SparkyEyebrow(text: "On-site knowledge")
-                    Text("The details worth keeping close")
-                        .font(.sparkySerif(.title2))
-                        .tracking(-0.4)
-                        .foregroundStyle(Color.sparkyText)
-                    Text("Search formulas, standards notes, drawing legends and practical reference tables.")
-                        .font(.sparky(.subheadline))
-                        .foregroundStyle(Color.sparkyMuted)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 10) {
-                    MetricTile(label: "Reference notes", value: "\(totalCount)", symbol: "books.vertical.fill")
-                    MetricTile(label: "Saved", value: "\(savedCount)", symbol: "bookmark.fill")
-                }
-
-                VStack(spacing: 10) {
-                    MetricTile(label: "Reference notes", value: "\(totalCount)", symbol: "books.vertical.fill")
-                    MetricTile(label: "Saved", value: "\(savedCount)", symbol: "bookmark.fill")
-                }
-            }
+        // Side by side like Rota's stat grid; stacks when large text won't fit.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) { cards }
+            VStack(spacing: 12) { cards }
         }
-        .sparkyCard(padding: 17)
+    }
+
+    @ViewBuilder
+    private var cards: some View {
+        SparkyStatCard(label: "Reference notes", value: "\(totalCount)", foot: "Available offline")
+            .frame(minWidth: 150)
+        SparkyStatCard(
+            label: "Saved",
+            value: "\(savedCount)",
+            foot: savedCount == 0 ? "Tap a bookmark to keep one" : "In your library"
+        )
+        .frame(minWidth: 150)
     }
 }
 
@@ -205,9 +184,9 @@ private struct NoteCard: View {
             Button(action: onToggleSaved) {
                 Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(isSaved ? Color.sparkyAccentText : Color.sparkyMuted)
+                    .foregroundStyle(isSaved ? Color.sparkyOnPrimary : Color.sparkyMuted)
                     .frame(width: 44, height: 44)
-                    .background(isSaved ? Color.sparkyAccentSoft : Color.sparkyBackground.opacity(0.75))
+                    .background(isSaved ? Color.sparkyPrimary : Color.sparkySurfaceRaised)
                     .clipShape(Circle())
                     .contentShape(Circle())
             }
@@ -215,13 +194,7 @@ private struct NoteCard: View {
             .accessibilityLabel(isSaved ? "Remove \(note.title) from saved notes" : "Save \(note.title)")
         }
         .padding(16)
-        .background(Color.sparkySurface)
-        .clipShape(RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous)
-                .stroke(isSaved ? Color.sparkyAccent.opacity(0.42) : Color.sparkyBorder, lineWidth: 1)
-        }
-        .shadow(color: Color.sparkyCardShadow, radius: 2, y: 1)
+        .background(Color.sparkySurface, in: RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous))
     }
 }
 
@@ -383,8 +356,7 @@ private struct NoteLegendRow: View {
             Spacer(minLength: 0)
         }
         .padding(10)
-        .background(Color.sparkyBackground.opacity(0.7))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color.sparkySurfaceRaised, in: RoundedRectangle(cornerRadius: SparkyLayout.innerRadius, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 }

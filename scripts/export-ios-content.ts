@@ -10,7 +10,6 @@ import {
   CONTENT_SCHEMA_VERSION,
   type ContentSource,
 } from "../src/contentSchema";
-import { COURSE_GUIDES } from "../src/courseGuides";
 import { applyExamContentSource } from "../src/examContentSource";
 import { applyExamExplanationEnhancements } from "../src/examExplanationEnhancements";
 import { buildOptionFeedback } from "../src/examOptionExplanations";
@@ -184,7 +183,6 @@ function requireUniqueIds(
 
 function validateStudyCollections(): void {
   requireUniqueIds(CHEAT_SHEET_SECTIONS, "cheat sheets");
-  requireUniqueIds(COURSE_GUIDES, "course guides");
   requireUniqueIds(TUTORIALS, "tutorials");
   requireUniqueIds(CALCULATOR_DEFINITIONS, "calculator definitions");
   const calculatorSources = CALCULATOR_DEFINITIONS.flatMap((calculator) => [
@@ -570,7 +568,6 @@ async function main(): Promise<void> {
     });
 
   await Promise.all([
-    writeCompactJson(join(CONTENT_OUTPUT_DIR, "course-guides.json"), COURSE_GUIDES),
     writeCompactJson(join(CONTENT_OUTPUT_DIR, "tutorials.json"), TUTORIALS),
     writeCompactJson(
       join(CONTENT_OUTPUT_DIR, "calculators.json"),
@@ -598,7 +595,6 @@ async function main(): Promise<void> {
   const contentPaths = [
     "calculators.json",
     "cheat-sheet.json",
-    "course-guides.json",
     "exam-index.json",
     "tutorials.json",
     ...[...examOutputs.keys()].map((fileName) => `exams/${fileName}`),
@@ -613,7 +609,7 @@ async function main(): Promise<void> {
     0,
   );
   console.log(
-    `Exported ${COURSE_GUIDES.length} guides, ${TUTORIALS.length} tutorials, ` +
+    `Exported ${TUTORIALS.length} tutorials, ` +
       `${cheatSheetSections.length} cheat sheets, and ${questionCount} questions ` +
       `across ${indexEntries.length} exams to ${CONTENT_OUTPUT_DIR}`,
   );

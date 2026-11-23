@@ -535,7 +535,7 @@ const SCENARIOS: Scenario[] = [
           <Receptacle x={295} y={245} label="SOCKET A" />
           <Wire d="M 350 200 L 450 200" />
           <Wire d="M 350 290 L 450 290" broken />
-          <text x="370" y="282" fontSize="9" fill="var(--danger)">loose link conductor</text>
+          <text x="370" y="282" fontSize="9" fill="var(--danger-text)">loose link conductor</text>
           <Receptacle x={495} y={245} label="SOCKET B" />
           <Wire d="M 520 200 L 600 200" />
           <Wire d="M 520 290 L 600 290" />
@@ -650,7 +650,7 @@ const SCENARIOS: Scenario[] = [
           <ThreeWaySwitch x={570} y={250} position="up" label="S2" />
           <Wire d="M 320 200 L 540 200" broken />
           <Wire d="M 320 300 L 540 300" />
-          <text x="420" y="190" fontSize="9" fill="var(--danger)">strapper #1 (open)</text>
+          <text x="420" y="190" fontSize="9" fill="var(--danger-text)">strapper #1 (open)</text>
           <text x="420" y="318" fontSize="9" fill="var(--muted)">strapper #2</text>
           <Wire d="M 630 250 L 700 250 L 700 130" />
           <Lamp x={700} y={130} label="LIGHT" />
@@ -765,7 +765,7 @@ const SCENARIOS: Scenario[] = [
           <Wire d="M 532 228 L 660 270" />
           <Wire d="M 510 240 L 510 360" />
           <Wire d="M 460 320 L 510 320" broken />
-          <text x="380" y="338" fontSize="9" fill="var(--danger)">incorrect N–CPC connection</text>
+          <text x="380" y="338" fontSize="9" fill="var(--danger-text)">incorrect N–CPC connection</text>
           <Receptacle x={660} y={220} label="SOCKET C" />
           <Wire d="M 660 240 L 660 360" />
         </g>

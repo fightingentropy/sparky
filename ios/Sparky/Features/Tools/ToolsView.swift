@@ -33,6 +33,7 @@ struct ToolsView: View {
 
     @AppStorage("selectedTool") private var selectedToolRaw = ToolKind.bendCut.rawValue
     @State private var showingHistory = false
+    @Environment(KeyboardVisibility.self) private var keyboard
 
     private var selectedTool: ToolKind {
         get { ToolKind(rawValue: selectedToolRaw) ?? .bendCut }
@@ -46,6 +47,13 @@ struct ToolsView: View {
 
                 ScrollView {
                     LazyVStack(spacing: 18) {
+                        SparkyPageHeader("Tools", subtitle: "Offline site calculators") {
+                            SparkyHeaderButton(systemImage: "clock.arrow.circlepath") {
+                                showingHistory = true
+                            }
+                            .accessibilityLabel("Calculation history")
+                            SparkyAccountToolbarItem()
+                        }
                         toolPicker
                         selectedCalculator
                     }
@@ -56,24 +64,19 @@ struct ToolsView: View {
                 .scrollIndicators(.hidden)
             }
             .navigationTitle("Tools")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    SparkyBrandMark(size: 31)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingHistory = true
-                    } label: {
-                        Image(systemName: "clock.arrow.circlepath")
+            .toolbar(.hidden, for: .navigationBar)
+            // The keyboard toolbar doesn't show while the navigation bar is hidden, so the
+            // decimal pad gets its own Done pill.
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if keyboard.isVisible {
+                    HStack {
+                        Spacer()
+                        Button("Done") { Keyboard.dismiss() }
+                            .buttonStyle(SparkySecondaryButtonStyle())
                     }
-                    .accessibilityLabel("Calculation history")
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    SparkyAccountToolbarItem()
-                }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") { Keyboard.dismiss() }
+                    .padding(.horizontal, SparkyLayout.pageInset)
+                    .padding(.vertical, 8)
+                    .background(Color.sparkyBackground)
                 }
             }
             .sheet(isPresented: $showingHistory) {
@@ -107,21 +110,16 @@ struct ToolsView: View {
                                     .font(.sparky(.subheadline, weight: .bold))
                                 Text(tool.subtitle)
                                     .font(.sparky(.caption2))
-                                    .foregroundStyle(Color.sparkyMuted)
+                                    .opacity(0.65)
                                     .lineLimit(2)
                             }
-                            .foregroundStyle(selectedTool == tool ? Color.sparkyAccentText : Color.sparkyText)
+                            .foregroundStyle(selectedTool == tool ? Color.sparkyOnPrimary : Color.sparkyText)
                             .frame(width: 142, height: 105, alignment: .topLeading)
                             .padding(13)
-                            .background(selectedTool == tool ? Color.sparkyAccentSoft : Color.sparkySurface)
-                            .clipShape(RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous)
-                                    .stroke(
-                                        selectedTool == tool ? Color.sparkyAccent.opacity(0.38) : Color.sparkyBorder,
-                                        lineWidth: 1
-                                    )
-                            }
+                            .background(
+                                selectedTool == tool ? Color.sparkyPrimary : Color.sparkySurface,
+                                in: RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous)
+                            )
                         }
                         .buttonStyle(.plain)
                         .accessibilityAddTraits(selectedTool == tool ? .isSelected : [])
@@ -160,9 +158,7 @@ private struct CalculatorHeader: View {
             }
             Spacer()
             Button("Reset", action: onReset)
-                .font(.sparky(.caption, weight: .semibold))
-                .buttonStyle(.bordered)
-                .tint(Color.sparkyAccent)
+                .buttonStyle(SparkySecondaryButtonStyle())
         }
     }
 }
@@ -225,6 +221,12 @@ private struct BendCutCalculator: View {
             if let message = result.validationMessage {
                 ValidationCallout(message: message)
             }
+
+            BendCutDiagram(
+                angleText: $angle,
+                cuts: Int(cuts.trimmingCharacters(in: .whitespaces)) ?? 1,
+                cutEachSide: result.validationMessage == nil ? result.roundedSetbackValue : ""
+            )
 
             VStack(spacing: 12) {
                 SparkyResultRow(label: "Cut each side", value: result.roundedSetbackValue, emphasized: true)
@@ -315,7 +317,7 @@ private struct AngleDropCalculator: View {
                     }
                 }
                 .padding(.top, 10)
-                .tint(Color.sparkyAccent)
+                .tint(Color.sparkyText)
             }
             .font(.sparky(.subheadline, weight: .semibold))
 
@@ -369,13 +371,18 @@ private struct ToolHistorySheet: View {
                         }
                         Spacer()
                         Text(item.value)
-                            .font(.sparky(.headline).monospacedDigit())
-                            .foregroundStyle(Color.sparkyAccentText)
+                            .font(.sparkyMono(.headline, weight: .medium))
+                            .foregroundStyle(Color.sparkyText)
                     }
+                    .listRowBackground(Color.sparkySurface)
                 }
+                .scrollContentBackground(.hidden)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(SparkyBackdrop())
         .navigationTitle("Calculation history")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Done") { dismiss() }

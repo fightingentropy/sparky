@@ -1,61 +1,9 @@
-import CoreText
 import SwiftUI
 import UIKit
 
-/// Geist typography for Sparky. Faces are bundled as .ttf resources and
-/// registered at launch; every helper scales with Dynamic Type via
-/// `relativeTo:` / `UIFontMetrics`.
+/// Sparky type, matching Rota: SF Pro for text, SF Mono for numerals, counts and
+/// readouts, and no serif. Every helper scales with Dynamic Type.
 enum SparkyFonts {
-    static let sans = "Geist"
-    static let mono = "Geist Mono"
-    static let serif = "Geist Serif"
-
-    /// Every bundled face (PostScript names).
-    static let postScriptNames = [
-        "Geist-Regular", "Geist-Medium", "Geist-SemiBold", "Geist-Bold",
-        "GeistMono-Regular", "GeistMono-Medium", "GeistMono-SemiBold", "GeistMono-Bold",
-        "GeistSerif-Regular"
-    ]
-
-    nonisolated(unsafe) private static var didRegister = false
-    private static let lock = NSLock()
-
-    /// Registers the bundled fonts for this process. Safe to call repeatedly.
-    @discardableResult
-    static func registerAll(in bundle: Bundle = .main) -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-        guard !didRegister else { return true }
-        let urls = (bundle.urls(forResourcesWithExtension: "ttf", subdirectory: nil) ?? [])
-            + (bundle.urls(forResourcesWithExtension: "ttf", subdirectory: "Fonts") ?? [])
-        guard !urls.isEmpty else { return false }
-        for url in urls {
-            var error: Unmanaged<CFError>?
-            // Already-registered errors are expected on a second call and harmless.
-            CTFontManagerRegisterFontsForURL(url as CFURL, .process, &error)
-        }
-        didRegister = true
-        return true
-    }
-
-    static func sansName(for weight: Font.Weight) -> String {
-        switch weight {
-        case .medium: "Geist-Medium"
-        case .semibold: "Geist-SemiBold"
-        case .bold, .heavy, .black: "Geist-Bold"
-        default: "Geist-Regular"
-        }
-    }
-
-    static func monoName(for weight: Font.Weight) -> String {
-        switch weight {
-        case .medium: "GeistMono-Medium"
-        case .semibold: "GeistMono-SemiBold"
-        case .bold, .heavy, .black: "GeistMono-Bold"
-        default: "GeistMono-Regular"
-        }
-    }
-
     /// Apple's default point size for each text style.
     static func pointSize(for style: Font.TextStyle) -> CGFloat {
         switch style {
@@ -90,62 +38,76 @@ enum SparkyFonts {
         }
     }
 
-    /// A Geist UIFont scaled with Dynamic Type for a text style.
-    static func uiFont(_ postScriptName: String, style: UIFont.TextStyle, size: CGFloat) -> UIFont {
-        let base = UIFont(name: postScriptName, size: size) ?? UIFont.systemFont(ofSize: size)
-        return UIFontMetrics(forTextStyle: style).scaledFont(for: base)
-    }
 }
 
 extension Font {
-    /// Geist at Apple's default size for `style`, scaling with Dynamic Type.
-    /// Headline defaults to semibold; everything else to regular.
+    /// SF Pro for a text style. Headline defaults to semibold; everything else to regular.
     static func sparky(_ style: Font.TextStyle, weight: Font.Weight? = nil) -> Font {
-        let resolved = weight ?? (style == .headline ? .semibold : .regular)
-        return .custom(SparkyFonts.sansName(for: resolved), size: SparkyFonts.pointSize(for: style), relativeTo: style)
+        .system(style, design: .default, weight: weight ?? (style == .headline ? .semibold : .regular))
     }
 
-    /// Geist Serif (400 only) for display headings.
+    /// Display headings: bold SF Pro (pair with negative tracking at the call site).
     static func sparkySerif(_ style: Font.TextStyle) -> Font {
-        .custom("GeistSerif-Regular", size: SparkyFonts.pointSize(for: style), relativeTo: style)
+        .system(style, design: .default, weight: style == .largeTitle || style == .title ? .bold : .semibold)
     }
 
-    /// Geist Mono for meta labels, counts and numeric readouts.
+    /// SF Mono for meta labels, counts and numeric readouts.
     static func sparkyMono(_ style: Font.TextStyle, weight: Font.Weight? = nil) -> Font {
-        let resolved = weight ?? (style == .headline ? .semibold : .regular)
-        return .custom(SparkyFonts.monoName(for: resolved), size: SparkyFonts.pointSize(for: style), relativeTo: style)
-    }
-
-    /// Size-based Geist (fixed design size that still scales relative to `style`).
-    static func sparky(size: CGFloat, weight: Font.Weight = .regular, relativeTo style: Font.TextStyle = .body) -> Font {
-        .custom(SparkyFonts.sansName(for: weight), size: size, relativeTo: style)
-    }
-
-    static func sparkyMono(size: CGFloat, weight: Font.Weight = .regular, relativeTo style: Font.TextStyle = .body) -> Font {
-        .custom(SparkyFonts.monoName(for: weight), size: size, relativeTo: style)
+        .system(style, design: .monospaced, weight: weight ?? (style == .headline ? .semibold : .regular))
     }
 
     /// Fixed-size variants for text drawn inside diagrams that must not scale.
     static func sparkyFixed(size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        .custom(SparkyFonts.sansName(for: weight), fixedSize: size)
+        .system(size: size, weight: weight, design: .default)
     }
 
     static func sparkyMonoFixed(size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        .custom(SparkyFonts.monoName(for: weight), fixedSize: size)
+        .system(size: size, weight: weight, design: .monospaced)
     }
 }
 
-/// Navigation bar titles: Geist Serif large titles, Geist SemiBold inline titles.
+/// A fixed design size (Rota's 11pt eyebrow, 26pt wordmark…) that follows Dynamic Type,
+/// including runtime changes and `.dynamicTypeSize` overrides, via `@ScaledMetric`.
+private struct SparkyScaledFont: ViewModifier {
+    @ScaledMetric private var size: CGFloat
+    let weight: Font.Weight
+    let design: Font.Design
+
+    init(size: CGFloat, weight: Font.Weight, design: Font.Design, relativeTo style: Font.TextStyle) {
+        _size = ScaledMetric(wrappedValue: size, relativeTo: style)
+        self.weight = weight
+        self.design = design
+    }
+
+    func body(content: Content) -> some View {
+        content.font(.system(size: size, weight: weight, design: design))
+    }
+}
+
+extension View {
+    func sparkyFont(size: CGFloat, weight: Font.Weight = .regular, relativeTo style: Font.TextStyle = .body) -> some View {
+        modifier(SparkyScaledFont(size: size, weight: weight, design: .default, relativeTo: style))
+    }
+
+    func sparkyMonoFont(size: CGFloat, weight: Font.Weight = .regular, relativeTo style: Font.TextStyle = .body) -> some View {
+        modifier(SparkyScaledFont(size: size, weight: weight, design: .monospaced, relativeTo: style))
+    }
+}
+
+/// Navigation bars: bold, tightly tracked large titles and semibold inline titles on
+/// the warm background, like Rota's headers.
 enum SparkyAppearance {
     static func configureNavigationBar() {
-        let largeFont = SparkyFonts.uiFont("GeistSerif-Regular", style: .largeTitle, size: 34)
-        let inlineFont = SparkyFonts.uiFont("Geist-SemiBold", style: .headline, size: 17)
+        let largeFont = UIFontMetrics(forTextStyle: .largeTitle)
+            .scaledFont(for: .systemFont(ofSize: 30, weight: .bold))
+        let inlineFont = UIFontMetrics(forTextStyle: .headline)
+            .scaledFont(for: .systemFont(ofSize: 17, weight: .semibold))
         let text = UIColor.sparkyText
 
         func make(configure: (UINavigationBarAppearance) -> Void) -> UINavigationBarAppearance {
             let appearance = UINavigationBarAppearance()
             configure(appearance)
-            appearance.largeTitleTextAttributes = [.font: largeFont, .foregroundColor: text]
+            appearance.largeTitleTextAttributes = [.font: largeFont, .foregroundColor: text, .kern: -0.8]
             appearance.titleTextAttributes = [.font: inlineFont, .foregroundColor: text]
             return appearance
         }

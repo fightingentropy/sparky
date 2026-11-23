@@ -11,6 +11,7 @@ import { useFocusTrap } from "./useFocusTrap";
 import { writeClipboardText } from "./clipboard";
 import { scrollIntoViewSafely, scrollToSafely } from "./scroll";
 import { isBoolean } from "./validators";
+import { BendCutDiagram } from "./BendCutDiagram";
 import { CopyableResult } from "./CopyableResult";
 import { FormulaToggle } from "./FormulaToggle";
 import {
@@ -31,11 +32,9 @@ import {
 // unchanged. Their props are referentially stable across keystrokes (isActive
 // is a boolean; the navigation callbacks below are useCallback'd).
 const ExamPage = memo(lazy(() => import("./ExamPage").then((m) => ({ default: m.ExamPage }))));
-const LearningPage = memo(lazy(() => import("./LearningPage").then((m) => ({ default: m.LearningPage }))));
 const TutorialsPage = memo(lazy(() => import("./TutorialsPage").then((m) => ({ default: m.TutorialsPage }))));
 const InteractivePage = memo(lazy(() => import("./InteractivePage").then((m) => ({ default: m.InteractivePage }))));
 import { TUTORIALS } from "./tutorials";
-import { COURSE_GUIDES, GUIDE_CATEGORY_LABELS } from "./courseGuides";
 import { useAuth } from "./AuthContext";
 import { AuthModal } from "./AuthModal";
 import { SettingsPage } from "./SettingsPage";
@@ -105,17 +104,6 @@ const MOBILE_TAB_ITEMS: { id: NavigationPageId; label: string; icon: ReactNode }
         <rect width="8" height="4" x="8" y="2" rx="1" />
         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
         <path d="m9 14 2 2 4-4" />
-      </>
-    )
-  },
-  {
-    id: "learn",
-    label: "Learn",
-    icon: (
-      <>
-        <path d="M22 10 12 5 2 10l10 5z" />
-        <path d="M6 12v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4" />
-        <path d="M22 10v5" />
       </>
     )
   },
@@ -325,12 +313,19 @@ function PresetButtons({
   );
 }
 
+// The Learn page and its study guides were removed. Old bookmarks and history
+// entries land on the default page with the address rewritten to match.
+const REMOVED_PAGE_PATHS = new Set(["/learn", "/guides"]);
+
+function currentPath(): string {
+  return window.location.pathname.replace(/\/+$/, "") || "/";
+}
+
 function getPageFromLocation(): PageId {
-  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  const path = currentPath();
   if (path === "/" || path === "/exams") return "exams";
   if (path === "/tools") return "home";
   if (path === "/notes" || path === "/cheatsheet") return "cheatsheet";
-  if (path === "/learn" || path === "/guides") return "learn";
   if (path === "/tutorials") return "tutorials";
   if (path === "/interactive") return "interactive";
   if (path === "/settings") return "settings";
@@ -343,8 +338,6 @@ function getPageHref(page: PageId): string {
       return "/tools";
     case "cheatsheet":
       return "/notes";
-    case "learn":
-      return "/learn";
     case "exams":
       return "/";
     case "tutorials":
@@ -392,7 +385,7 @@ export default function App() {
     document.documentElement.dataset.theme = colorTheme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute(
       "content",
-      colorTheme === "light" ? "#fbfaf7" : "#100e0c"
+      colorTheme === "light" ? "#f5f3ef" : "#100e0c"
     );
   }, [colorTheme]);
 
@@ -428,7 +421,6 @@ export default function App() {
   const [savedNoteIds, setSavedNoteIds] = usePersistedState<string[]>("saved-note-ids", [], isStringArrayValue);
   const [showSavedNotes, setShowSavedNotes] = useState(false);
   const [expandedNoteIds, setExpandedNoteIds] = useState<Set<string>>(() => new Set());
-  const [highlightedNoteId, setHighlightedNoteId] = useState<string | null>(null);
   const [examPracticeTarget, setExamPracticeTarget] = useState<{ examId: ExamId; nonce: number } | null>(null);
 
   const paletteTrapRef = useFocusTrap<HTMLDivElement>(paletteOpen);
@@ -518,16 +510,6 @@ export default function App() {
       });
     },
     [setHiddenNavigationPageIds]
-  );
-
-  const handleOpenNote = useCallback(
-    (noteId: string) => {
-      setExpandedNoteIds((current) => new Set(current).add(noteId));
-      setHighlightedNoteId(noteId);
-      navigateTo("cheatsheet", noteId);
-      window.setTimeout(() => setHighlightedNoteId((current) => (current === noteId ? null : current)), 2200);
-    },
-    [navigateTo]
   );
 
   function selectTool(index: number) {
@@ -626,13 +608,6 @@ export default function App() {
         action: () => navigateTo("exams")
       },
       {
-        title: "Learn",
-        subtitle: "Course routes, assessment checklists, and category guides.",
-        tag: "Page",
-        keywords: "learn guides course route pathway assessment checklist qualification 2391 2396 pat am2 ecs part p 18th edition",
-        action: () => navigateTo("learn")
-      },
-      {
         title: "Notes",
         subtitle: "Open the cheat sheet.",
         tag: "Page",
@@ -704,13 +679,6 @@ export default function App() {
           action: () => navigateTo("cheatsheet", section.id)
         }))
       ]),
-      ...COURSE_GUIDES.map((guide) => ({
-        title: guide.title,
-        subtitle: guide.summary,
-        tag: "Guide",
-        keywords: `${guide.title} ${guide.kicker} ${GUIDE_CATEGORY_LABELS[guide.category]} ${guide.summary} ${guide.facts.map((fact) => `${fact.label} ${fact.value}`).join(" ")} ${guide.sections.flatMap((section) => [section.title, ...section.items]).join(" ")} ${guide.pitfalls.join(" ")} ${guide.nextActions.join(" ")}`,
-        action: () => navigateTo("learn", guide.id)
-      })),
       ...TUTORIALS.map((tutorial) => ({
         title: tutorial.title,
         subtitle: tutorial.workplaceUse,
@@ -730,7 +698,12 @@ export default function App() {
   );
 
   useEffect(() => {
-    const updatePage = () => setPage(getPageFromLocation());
+    const updatePage = () => {
+      const nextPage = getPageFromLocation();
+      if (REMOVED_PAGE_PATHS.has(currentPath())) window.history.replaceState(null, "", getPageHref(nextPage));
+      setPage(nextPage);
+    };
+    updatePage();
     window.addEventListener("popstate", updatePage);
     return () => window.removeEventListener("popstate", updatePage);
   }, []);
@@ -740,7 +713,6 @@ export default function App() {
     const pageTitle: Record<PageId, string> = {
       home: "Tools",
       cheatsheet: "Notes",
-      learn: "Learning Guides",
       exams: "Practice Exams",
       tutorials: "Workplace Tutorials",
       interactive: "Interactive Training",
@@ -919,41 +891,6 @@ export default function App() {
             navigateTo(DEFAULT_PAGE);
           }}
         >
-          <svg
-            className="brand-mark"
-            viewBox="0 0 40 40"
-            aria-hidden="true"
-            fill="none"
-          >
-            <path
-              d="M10 13h9l-3.6 7.1h7.2L16.8 30l2.1-7.2H10z"
-              fill="currentColor"
-            />
-            <path
-              d="M8 24.5h4.5"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-            <path
-              d="M27.5 15.5H32"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-            <path
-              d="M8 9.5C8 8.12 9.12 7 10.5 7h5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <path
-              d="M24.5 33h5A2.5 2.5 0 0 0 32 30.5v-5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
           <strong>Sparky</strong>
         </a>
 
@@ -1239,6 +1176,13 @@ export default function App() {
                       {trayBendCutResult.validationMessage}
                     </p>
                   ) : null}
+
+                  <BendCutDiagram
+                    angle={trayBendAngle}
+                    cuts={trayBendCuts}
+                    cutEachSide={trayBendCutResult.validationMessage ? "" : trayBendCutResult.roundedSetbackValue}
+                    onAngleChange={setTrayBendAngle}
+                  />
                 </div>
 
                 <div className="tool-output">
@@ -1510,7 +1454,7 @@ export default function App() {
               <article
                 key={section.id}
                 id={section.id}
-                className={`sheet-card${expanded ? " is-expanded" : ""}${highlightedNoteId === section.id ? " is-highlighted" : ""}`}
+                className={`sheet-card${expanded ? " is-expanded" : ""}`}
               >
                 <div className="sheet-card-head">
                   <h3>
@@ -1699,13 +1643,6 @@ export default function App() {
         </section>
 
         <Suspense fallback={null}>
-          {visitedPages.has("learn") ? (
-            <LearningPage
-              isActive={page === "learn"}
-              onOpenExam={openPracticeExam}
-              onOpenNote={handleOpenNote}
-            />
-          ) : null}
           {visitedPages.has("exams") ? (
             <ExamPage
               isActive={page === "exams"}
@@ -1747,7 +1684,7 @@ export default function App() {
             <div className="modal-header">
               <div>
                 <h2>Command palette</h2>
-                <p className="page-copy">Search pages, tools, notes, and guides.</p>
+                <p className="page-copy">Search pages, tools, notes, and videos.</p>
               </div>
               <button className="ghost-button" type="button" onClick={() => setPaletteOpen(false)}>
                 Close
@@ -1760,7 +1697,7 @@ export default function App() {
                 ref={paletteInputRef}
                 id="palette-input"
                 type="search"
-                placeholder="Go to tools, notes, guides"
+                placeholder="Go to tools, notes, videos"
                 autoComplete="off"
                 value={paletteQuery}
                 onChange={(e) => setPaletteQuery(e.target.value)}

@@ -21,12 +21,8 @@ struct StudyNotice: View {
             }
         }
         .padding(14)
-        .background(Color.sparkyAccentSoft)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.sparkyAccent.opacity(0.22), lineWidth: 1)
-        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.sparkySurface, in: RoundedRectangle(cornerRadius: SparkyLayout.cardRadius, style: .continuous))
     }
 }
 
@@ -42,8 +38,8 @@ struct TagChip: View {
             }
             Text(title)
         }
-        .font(.sparky(.caption, weight: .medium))
-        .foregroundStyle(selected ? Color.sparkyOnPrimary : Color.sparkyMuted)
+        .font(.sparky(.caption, weight: .semibold))
+        .foregroundStyle(selected ? Color.sparkyOnPrimary : Color.sparkyText)
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
         .background(selected ? Color.sparkyPrimary : Color.clear)
@@ -59,20 +55,21 @@ struct ProgressRing: View {
     let progress: Double
     var size: CGFloat = 54
     var lineWidth: CGFloat = 6
+    var color: Color = .sparkyText
 
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.sparkyBorder, lineWidth: lineWidth)
+                .stroke(Color.sparkyText.opacity(0.1), lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: min(max(progress, 0), 1))
                 .stroke(
-                    Color.sparkyAccent,
+                    color,
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
             Text(progress, format: .percent.precision(.fractionLength(0)))
-                .font(.sparky(.caption2, weight: .bold).monospacedDigit())
+                .font(.sparkyMono(.caption2, weight: .medium))
                 .foregroundStyle(Color.sparkyText)
         }
         .frame(width: size, height: size)
@@ -94,20 +91,16 @@ struct MetricTile: View {
                     .foregroundStyle(Color.sparkyAccentText)
             }
             Text(value)
-                .font(.sparky(.headline).monospacedDigit())
+                .font(.sparkyMono(.title3, weight: .medium))
+                .tracking(-0.5)
                 .foregroundStyle(Color.sparkyText)
-            Text(label)
-                .font(.sparky(.caption))
-                .foregroundStyle(Color.sparkyMuted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            SparkyEyebrow(text: label)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(13)
-        .background(Color.sparkySurfaceRaised.opacity(0.72))
-        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 15, style: .continuous)
-                .stroke(Color.sparkyBorder, lineWidth: 1)
-        }
+        .background(Color.sparkySurfaceRaised, in: RoundedRectangle(cornerRadius: SparkyLayout.innerRadius, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 }

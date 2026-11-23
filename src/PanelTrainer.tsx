@@ -385,8 +385,8 @@ function EmptySlotMarker({ slot, hovered, onPointerOver, onPointerOut }: EmptySl
     <mesh position={[x, y, z - SLOT_DEPTH / 2 + 0.002]} onPointerOver={stop(onPointerOver)} onPointerOut={stop(onPointerOut)}>
       <boxGeometry args={[SLOT_WIDTH * 0.95, SLOT_HEIGHT * 0.92, 0.002]} />
       <meshStandardMaterial
-        color={hovered ? "#f59e0b" : "#1f2228"}
-        emissive={hovered ? "#f59e0b" : "#000000"}
+        color={hovered ? "#62d286" : "#1f2228"}
+        emissive={hovered ? "#62d286" : "#000000"}
         emissiveIntensity={hovered ? 0.55 : 0}
         roughness={0.85}
         metalness={0.05}
@@ -478,8 +478,9 @@ function BreakerObject({ breaker, selected, hovered, warnings, onClick, onPointe
   const yMid = isDouble ? (y + yPartner) / 2 : y;
   const bodyHeight = isDouble ? Math.abs(y - yPartner) + SLOT_HEIGHT * 0.92 : SLOT_HEIGHT * 0.92;
   const hasError = warnings.some((w) => w.level === "error");
-  const emissive = selected ? "#fbbf24" : hovered ? "#f59e0b" : breaker.tripped ? "#ef5350" : "#000000";
-  const emissiveIntensity = selected ? 0.5 : hovered ? 0.4 : breaker.tripped ? 0.4 : 0;
+  // Selection is ink (a strong light glow); green stays reserved for live state.
+  const emissive = selected ? "#f0eeeb" : hovered ? "#f0eeeb" : breaker.tripped ? "#ef5350" : "#000000";
+  const emissiveIntensity = selected ? 0.7 : hovered ? 0.3 : breaker.tripped ? 0.4 : 0;
   const stop = (cb: () => void) => (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
     cb();
@@ -493,8 +494,8 @@ function BreakerObject({ breaker, selected, hovered, warnings, onClick, onPointe
       <mesh position={[0, bodyHeight / 2 - 0.003, SLOT_DEPTH / 2 + 0.0005]}>
         <boxGeometry args={[SLOT_WIDTH * 0.92, 0.003, 0.001]} />
         <meshStandardMaterial
-          color={breaker.tripped ? "#f59e0b" : "#2a2d33"}
-          emissive={breaker.tripped ? "#f59e0b" : "#000000"}
+          color={breaker.tripped ? "#f0b54c" : "#2a2d33"}
+          emissive={breaker.tripped ? "#f0b54c" : "#000000"}
           emissiveIntensity={breaker.tripped ? 0.8 : 0}
         />
       </mesh>

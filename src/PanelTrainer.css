@@ -1,4 +1,4 @@
-/* PanelTrainer styles — warm neutrals, orange accent. All classes prefixed with pt-. */
+/* PanelTrainer styles — Rota palette: flat cards, ink selection, green accent. All classes prefixed with pt-. */
 
 .pt-shell {
   width: 100%;
@@ -6,8 +6,8 @@
   min-height: 600px;
   display: flex;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -87,8 +87,8 @@
 
 .pt-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
   padding: 12px 14px;
   box-shadow: var(--shadow-card);
   transition: transform 180ms var(--ease), box-shadow 180ms var(--ease), border-color 180ms var(--ease);
@@ -152,7 +152,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  background: var(--surface-soft);
+  background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text);
@@ -171,8 +171,8 @@
 
 .pt-library-button:focus-visible {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--text-strong);
+  box-shadow: 0 0 0 3px var(--accent-focus);
 }
 
 .pt-library-button.is-pulsing {
@@ -181,8 +181,8 @@
 
 @keyframes pt-pulse {
   0% {
-    box-shadow: 0 0 0 0 var(--accent-muted);
-    border-color: var(--accent);
+    box-shadow: 0 0 0 0 var(--accent-focus);
+    border-color: var(--text-strong);
   }
   60% {
     box-shadow: 0 0 0 6px transparent;
@@ -203,7 +203,8 @@
 .pt-library-rating {
   font-size: 1.4rem;
   font-weight: 800;
-  color: var(--accent-strong);
+  color: var(--text-strong);
+  font-family: var(--font-mono);
   line-height: 1;
   font-feature-settings: "tnum";
   letter-spacing: -0.02em;
@@ -248,7 +249,7 @@
   justify-content: center;
   border-radius: 50%;
   background: var(--surface-soft);
-  color: var(--accent-strong);
+  color: var(--muted-strong);
   font-size: 0.85rem;
   font-weight: 700;
 }
@@ -262,21 +263,21 @@
 }
 
 .pt-circuit {
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid transparent;
+  border-radius: 12px;
   padding: 10px 12px;
   cursor: pointer;
   transition: border-color 180ms var(--ease), background 180ms var(--ease), box-shadow 180ms var(--ease), transform 180ms var(--ease);
 }
 
 .pt-circuit:hover {
-  border-color: var(--border);
+  border-color: var(--border-strong);
 }
 
 .pt-circuit.is-selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
+  border-color: var(--text-strong);
+  background: var(--surface-alt);
   box-shadow: var(--shadow-glow);
 }
 
@@ -306,7 +307,8 @@
 .pt-circuit-rating {
   font-size: 1rem;
   font-weight: 800;
-  color: var(--accent-strong);
+  color: var(--text-strong);
+  font-family: var(--font-mono);
   font-feature-settings: "tnum";
   letter-spacing: -0.01em;
 }
@@ -315,10 +317,10 @@
   display: inline-flex;
   align-items: center;
   padding: 1px 6px;
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-muted);
+  background: var(--surface-soft);
+  border: 1px solid transparent;
   border-radius: 4px;
-  color: var(--accent-strong);
+  color: var(--muted-strong);
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -364,7 +366,7 @@
 }
 
 .pt-circuit-name:focus {
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--text-strong);
 }
 
 /* Field row */
@@ -419,8 +421,8 @@
 
 .pt-select:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--text-strong);
+  box-shadow: 0 0 0 3px var(--accent-focus);
 }
 
 .pt-select option {
@@ -456,8 +458,8 @@
 }
 
 .pt-amp-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--text-strong);
+  box-shadow: 0 0 0 3px var(--accent-focus);
 }
 
 .pt-amp-input::-webkit-inner-spin-button,
@@ -530,7 +532,7 @@
 }
 
 .pt-switch-input:focus-visible + .pt-switch-track {
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: 0 0 0 3px var(--accent-focus);
 }
 
 .pt-switch-track.is-tripped {
@@ -551,7 +553,7 @@
 }
 
 .pt-switch-label.is-tripped {
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 /* Actions row */
@@ -588,8 +590,8 @@
 
 .pt-icon-btn:focus-visible {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--text-strong);
+  box-shadow: 0 0 0 3px var(--accent-focus);
 }
 
 .pt-icon-btn.is-danger:hover {
@@ -628,14 +630,14 @@
 
 .pt-warning-chip.is-error {
   background: var(--danger-soft);
-  border: 1px solid color-mix(in srgb, var(--danger) 50%, var(--border));
-  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger-text) 50%, var(--border));
+  color: var(--danger-text);
 }
 
 .pt-warning-chip.is-warn {
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-line);
-  color: var(--accent-strong);
+  background: var(--warning-soft);
+  border: 1px solid color-mix(in srgb, var(--warning-text) 50%, var(--border));
+  color: var(--warning-text);
 }
 
 .pt-warning-icon {
@@ -651,12 +653,12 @@
 }
 
 .pt-warning-chip.is-error .pt-warning-icon {
-  background: var(--danger);
+  background: var(--danger-text);
   color: var(--on-accent);
 }
 
 .pt-warning-chip.is-warn .pt-warning-icon {
-  background: var(--accent);
+  background: var(--warning-text);
   color: var(--on-accent);
 }
 
@@ -673,7 +675,7 @@
   flex-direction: column;
   gap: 4px;
   padding: 10px 12px;
-  background: var(--surface-soft);
+  background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   transition: border-color 180ms var(--ease), background 180ms var(--ease);
@@ -706,7 +708,7 @@
 }
 
 .pt-stat.is-alert .pt-stat-value {
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 .pt-stat-unit {
@@ -726,7 +728,7 @@
 }
 
 .pt-selected-note strong {
-  color: var(--accent-strong);
+  color: var(--text-strong);
   font-weight: 700;
 }
 
@@ -743,7 +745,7 @@
   top: 12px;
   bottom: 12px;
   width: 3px;
-  background: var(--accent);
+  background: var(--green);
   border-radius: 2px;
 }
 
@@ -791,6 +793,6 @@
 
 .pt-ghost-btn:focus-visible {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--text-strong);
+  box-shadow: 0 0 0 3px var(--accent-focus);
 }

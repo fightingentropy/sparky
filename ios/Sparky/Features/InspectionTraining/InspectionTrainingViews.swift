@@ -146,8 +146,10 @@ private struct InspectionTrainingLabCard: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 VStack(spacing: 7) {
-                    ProgressView(value: progress.fractionCompleted)
-                        .tint(progress.isCompleted ? Color.sparkySuccess : Color.sparkyAccent)
+                    SparkyProgressTrack(
+                        value: progress.fractionCompleted,
+                        color: progress.isCompleted ? Color.sparkySuccess : Color.sparkyText
+                    )
 
                     HStack {
                         Text("\(progress.completedTasks) of \(progress.totalTasks) decisions")
@@ -217,7 +219,7 @@ struct InspectionTrainingSessionView: View {
         }
         .navigationTitle(lab.shortTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(session.isCompleted ? .visible : .hidden, for: .tabBar)
+        .sparkyTabBarHidden(!session.isCompleted)
         .toolbar(session.isCompleted ? .visible : .hidden, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -711,8 +713,7 @@ private struct LabProgressHeader: View {
                     .foregroundStyle(Color.sparkyMuted)
             }
 
-            ProgressView(value: fraction)
-                .tint(Color.sparkyAccent)
+            SparkyProgressTrack(value: fraction)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(lab.testMode.rawValue), step \(step) of \(total)")
@@ -809,7 +810,7 @@ private enum ChoiceTone {
 
     var color: Color {
         switch self {
-        case .neutral: Color.sparkyAccent
+        case .neutral: Color.sparkyText
         case .correct: Color.sparkySuccess
         case .incorrect: Color.sparkyDanger
         case .muted: Color.sparkyMuted
@@ -1327,7 +1328,7 @@ private struct InspectionTrainingWorkbench: View {
             return ("Setup locked for this answer", "lock.fill", Color.sparkyMuted)
         }
         if selectedFunction == nil {
-            return ("Turn the tester dial", "dial.medium", Color.sparkyAccent)
+            return ("Turn the tester dial", "dial.medium", Color.sparkyText)
         }
         if !functionIsReady {
             return ("Choose the correct tester range", "exclamationmark.triangle.fill", Color.sparkyDanger)
@@ -1336,19 +1337,19 @@ private struct InspectionTrainingWorkbench: View {
             return (
                 "Measure r1, rn and r2 end to end · \(completedRingPairs.count)/3 complete",
                 "point.3.filled.connected.trianglepath.dotted",
-                Color.sparkyAccent
+                Color.sparkyText
             )
         }
         if selectedTopology == nil {
-            return ("Drag both probes onto the test points", "hand.draw.fill", Color.sparkyAccent)
+            return ("Drag both probes onto the test points", "hand.draw.fill", Color.sparkyText)
         }
         if !topologyIsReady {
             return ("Move a probe to the correct terminal", "exclamationmark.triangle.fill", Color.sparkyDanger)
         }
         if !actionIsReady {
             return setup.requiredAction == .autoNull
-                ? ("Press AUTO NULL to compensate the leads", "button.programmable", Color.sparkyAccent)
-                : ("Press TEST to take the reading", "button.programmable", Color.sparkyAccent)
+                ? ("Press AUTO NULL to compensate the leads", "button.programmable", Color.sparkyText)
+                : ("Press TEST to take the reading", "button.programmable", Color.sparkyText)
         }
         return ("Reading ready — choose your answer", "checkmark.circle.fill", Color.sparkySuccess)
     }
@@ -1501,7 +1502,7 @@ private struct InspectionTrainingWorkbench: View {
         var targets = [
             WorkbenchTerminalTarget(id: .blackDock, normalizedPoint: CGPoint(x: 0.82, y: 0.18), color: .black, visible: false),
             WorkbenchTerminalTarget(id: .redDock, normalizedPoint: CGPoint(x: 0.91, y: 0.18), color: red, visible: false),
-            WorkbenchTerminalTarget(id: .nullingPost, normalizedPoint: CGPoint(x: 0.54, y: 0.79), color: Color.sparkyAccent, visible: setup.topologies.contains(.shorted)),
+            WorkbenchTerminalTarget(id: .nullingPost, normalizedPoint: CGPoint(x: 0.54, y: 0.79), color: Color(red: 1.0, green: 0.74, blue: 0.13), visible: setup.topologies.contains(.shorted)),
             WorkbenchTerminalTarget(id: .blackRemoved, normalizedPoint: CGPoint(x: 0.87, y: 0.82), color: .black, visible: setup.correctTopology == .removed),
             WorkbenchTerminalTarget(id: .redRemoved, normalizedPoint: CGPoint(x: 0.94, y: 0.82), color: red, visible: setup.correctTopology == .removed),
         ]
@@ -2045,7 +2046,7 @@ private struct WorkbenchTerminalHotspot: View {
             Circle()
                 .fill(color.opacity(isConnected ? 0.95 : 0.62))
                 .frame(width: isCandidate ? 34 : 26, height: isCandidate ? 34 : 26)
-                .shadow(color: isCandidate ? Color.sparkyAccent.opacity(0.85) : .clear, radius: 9)
+                .shadow(color: isCandidate ? Color.white.opacity(0.9) : .clear, radius: 9)
             Circle()
                 .stroke(.white.opacity(0.92), lineWidth: 3)
                 .frame(width: 17, height: 17)

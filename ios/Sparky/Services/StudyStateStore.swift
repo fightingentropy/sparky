@@ -6,23 +6,19 @@ import Observation
 final class StudyStateStore {
     private enum Keys {
         static let savedNotes = "savedNoteIDs"
-        static let completedGuides = "completedGuideIDs"
-        static let lastOpenedGuide = "lastOpenedGuideID"
+        /// Written by the removed study-guide feature; only cleared on reset now.
+        static let retiredGuideKeys = ["completedGuideIDs", "lastOpenedGuideID"]
         static let recentCalculations = "recentCalculations"
     }
 
     private let defaults: UserDefaults
 
     private(set) var savedNoteIDs: Set<String>
-    private(set) var completedGuideIDs: Set<String>
-    private(set) var lastOpenedGuideID: String?
     private(set) var recentCalculations: [CalculationHistoryItem]
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         savedNoteIDs = Set(defaults.stringArray(forKey: Keys.savedNotes) ?? [])
-        completedGuideIDs = Set(defaults.stringArray(forKey: Keys.completedGuides) ?? [])
-        lastOpenedGuideID = defaults.string(forKey: Keys.lastOpenedGuide)
 
         if let data = defaults.data(forKey: Keys.recentCalculations),
            let decoded = try? JSONDecoder().decode([CalculationHistoryItem].self, from: data) {
@@ -45,32 +41,6 @@ final class StudyStateStore {
         defaults.set(savedNoteIDs.sorted(), forKey: Keys.savedNotes)
     }
 
-    func isGuideCompleted(_ id: String) -> Bool {
-        completedGuideIDs.contains(id)
-    }
-
-    func recordOpenedGuide(_ id: String) {
-        lastOpenedGuideID = id
-        defaults.set(id, forKey: Keys.lastOpenedGuide)
-    }
-
-    func suggestedGuide(in guides: [CourseGuide]) -> CourseGuide? {
-        if let lastOpenedGuideID,
-           let guide = guides.first(where: { $0.id == lastOpenedGuideID && !isGuideCompleted($0.id) }) {
-            return guide
-        }
-        return guides.first { !isGuideCompleted($0.id) }
-    }
-
-    func toggleCompletedGuide(_ id: String) {
-        if completedGuideIDs.contains(id) {
-            completedGuideIDs.remove(id)
-        } else {
-            completedGuideIDs.insert(id)
-        }
-        defaults.set(completedGuideIDs.sorted(), forKey: Keys.completedGuides)
-    }
-
     func recordCalculation(tool: String, value: String) {
         guard !value.contains("--") else { return }
         recentCalculations.removeAll { $0.tool == tool && $0.value == value }
@@ -89,12 +59,9 @@ final class StudyStateStore {
 
     func resetStudyProgress() {
         savedNoteIDs = []
-        completedGuideIDs = []
-        lastOpenedGuideID = nil
         recentCalculations = []
         defaults.removeObject(forKey: Keys.savedNotes)
-        defaults.removeObject(forKey: Keys.completedGuides)
-        defaults.removeObject(forKey: Keys.lastOpenedGuide)
+        Keys.retiredGuideKeys.forEach(defaults.removeObject(forKey:))
         defaults.removeObject(forKey: Keys.recentCalculations)
     }
 

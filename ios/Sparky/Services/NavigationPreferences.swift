@@ -16,7 +16,10 @@ enum NavigationPreferences {
             return defaultHiddenTabs
         }
 
-        return Set(decoded.compactMap(AppTab.init(rawValue:)))
+        // Unknown ids (such as the removed "learn" tab) are dropped. If what is left hides
+        // every tab, keep Tools visible so Settings and the tab bar agree on what is shown.
+        let hidden = Set(decoded.compactMap(AppTab.init(rawValue:)))
+        return hidden.count == AppTab.allCases.count ? hidden.subtracting([.tools]) : hidden
     }
 
     static func storageValue(for hiddenTabs: Set<AppTab>) -> String {

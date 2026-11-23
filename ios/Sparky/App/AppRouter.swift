@@ -4,7 +4,6 @@ import Observation
 enum AppTab: String, CaseIterable, Hashable, Identifiable {
     case tools
     case notes
-    case learn
     case exams
     case more
 
@@ -14,7 +13,6 @@ enum AppTab: String, CaseIterable, Hashable, Identifiable {
         switch self {
         case .tools: "Tools"
         case .notes: "Notes"
-        case .learn: "Learn"
         case .exams: "Exams"
         case .more: "More"
         }
@@ -24,7 +22,6 @@ enum AppTab: String, CaseIterable, Hashable, Identifiable {
         switch self {
         case .tools: "wrench.adjustable"
         case .notes: "doc.text"
-        case .learn: "graduationcap"
         case .exams: "checklist"
         case .more: "ellipsis.circle"
         }
@@ -39,6 +36,25 @@ final class AppRouter {
     var pendingTestID: String?
     var pendingNoteID: String?
     var isPresentingSettings = false
+    /// How many on-screen views in each tab currently ask for the tab bar to be hidden.
+    /// A count (not a flag) so an outgoing screen's disappear can't undo an incoming one.
+    private(set) var tabBarHideRequests: [AppTab: Int] = [:]
+
+    /// Bumped when the selected tab is tapped again; RootView re-creates that tab at its root.
+    private(set) var tabResetTokens: [AppTab: Int] = [:]
+
+    func reselect(_ tab: AppTab) {
+        tabResetTokens[tab, default: 0] += 1
+    }
+
+    func isTabBarHidden(for tab: AppTab) -> Bool {
+        (tabBarHideRequests[tab] ?? 0) > 0
+    }
+
+    func requestTabBarHidden(_ hidden: Bool, for tab: AppTab) {
+        let count = max(0, (tabBarHideRequests[tab] ?? 0) + (hidden ? 1 : -1))
+        tabBarHideRequests[tab] = count == 0 ? nil : count
+    }
 
     private let defaults: UserDefaults
 

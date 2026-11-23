@@ -9,19 +9,17 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertEqual(store.manifest.schemaVersion, 1)
         XCTAssertEqual(store.manifest.contentSchemaVersion, 3)
         XCTAssertEqual(store.manifest.contentHash.count, 64)
-        XCTAssertEqual(store.manifest.files.count, 17)
+        XCTAssertEqual(store.manifest.files.count, 16)
         XCTAssertEqual(store.catalog.schemaVersion, 3)
         XCTAssertEqual(store.catalog.examCount, 12)
         XCTAssertEqual(store.catalog.exams.count, 12)
         XCTAssertEqual(store.catalog.variantCount, 99)
         XCTAssertEqual(store.catalog.questionCount, 3_983)
         XCTAssertEqual(store.notes.count, 43)
-        XCTAssertEqual(store.guides.count, 13)
         XCTAssertEqual(store.tutorials.count, 8)
         XCTAssertEqual(store.calculators.count, 10)
 
         XCTAssertNotNil(store.note(id: "cheat-core-formulas"))
-        XCTAssertNotNil(store.guide(id: "becoming-an-electrician-route"))
         XCTAssertNotNil(store.tutorial(id: "internal-90-trunking"))
         XCTAssertEqual(store.tutorial(id: "swa-gland-make-off")?.instructions?.steps.count, 12)
         for tutorial in store.tutorials {
@@ -262,7 +260,7 @@ final class ContentStoreTests: XCTestCase {
 
     func testNavigationPreferencesCanShowOnlyExamsAndLaunchThere() {
         let stored = NavigationPreferences.storageValue(
-            for: [.tools, .notes, .learn, .more]
+            for: [.tools, .notes, .more]
         )
 
         XCTAssertEqual(NavigationPreferences.visibleTabs(from: stored), [.exams])
@@ -277,6 +275,20 @@ final class ContentStoreTests: XCTestCase {
 
         let allHidden = NavigationPreferences.storageValue(for: Set(AppTab.allCases))
         XCTAssertEqual(NavigationPreferences.visibleTabs(from: allHidden), [.tools])
+        XCTAssertFalse(NavigationPreferences.hiddenTabs(from: allHidden).contains(.tools))
+    }
+
+    func testNavigationPreferencesFromBeforeLearnWasRemovedStillDecode() {
+        // Hiding Learn alongside other tabs leaves only the remaining preferences.
+        XCTAssertEqual(
+            NavigationPreferences.visibleTabs(from: #"["learn","notes"]"#),
+            [.tools, .exams, .more]
+        )
+        // A saved choice that showed only Learn must not leave Settings claiming every tab is off.
+        let onlyLearnVisible = #"["exams","more","notes","tools"]"#
+        XCTAssertEqual(NavigationPreferences.visibleTabs(from: onlyLearnVisible), [.tools])
+        XCTAssertEqual(NavigationPreferences.hiddenTabs(from: onlyLearnVisible), [.notes, .exams, .more])
+        XCTAssertEqual(NavigationPreferences.preferredTab(from: onlyLearnVisible), .tools)
     }
 
     @MainActor

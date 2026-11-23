@@ -1,0 +1,140 @@
+/* Interactive bend preview + flat notch template for the containment bend-cut tool. */
+
+.bend-diagram {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.bend-diagram-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.bend-diagram-eyebrow {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.bend-diagram-angle {
+  color: var(--text-strong);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.bend-diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.bend-diagram-preview { max-height: 260px; }
+
+.bend-ghost line {
+  stroke: var(--muted);
+  stroke-opacity: 0.45;
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.bend-arc {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.bend-body { fill: var(--surface-alt); }
+
+/* The inside edge, where the notches closed, reads stronger than the outside. */
+.bend-inside {
+  fill: none;
+  stroke: var(--text);
+  stroke-opacity: 0.55;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.bend-outside {
+  fill: none;
+  stroke: var(--text);
+  stroke-opacity: 0.25;
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+
+.bend-seam,
+.bend-notch {
+  stroke: var(--success);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.bend-handle {
+  cursor: grab;
+  touch-action: none;
+  outline: none;
+}
+
+.bend-diagram.is-dragging .bend-handle { cursor: grabbing; }
+
+.bend-handle-hit { fill: transparent; }
+
+.bend-handle-dot {
+  fill: var(--primary);
+  transition: r 150ms var(--ease);
+}
+
+.bend-diagram.is-dragging .bend-handle-dot { r: 15; }
+
+.bend-handle-glyph {
+  fill: none;
+  stroke: var(--on-primary);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.bend-handle:focus-visible .bend-handle-hit {
+  stroke: var(--text-strong);
+  stroke-width: 2;
+}
+
+.bend-template-strip { fill: var(--surface-alt); }
+
+.bend-notch { fill: var(--surface); }
+
+.bend-mark {
+  stroke: var(--text);
+  stroke-opacity: 0.5;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.bend-dimension path {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.bend-dimension text {
+  fill: var(--text-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.bend-diagram-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.bend-diagram-note.is-warning { color: var(--warning-text); }

@@ -40,7 +40,6 @@ final class ContentStore {
     let manifest: ContentManifest
     let catalog: ExamCatalog
     let notes: [CheatSheetSection]
-    let guides: [CourseGuide]
     let tutorials: [Tutorial]
     let calculators: [CalculatorDefinition]
 
@@ -80,11 +79,6 @@ final class ContentStore {
             at: "cheat-sheet.json",
             manifest: manifest
         )
-        guides = try loader.decodeVerified(
-            [CourseGuide].self,
-            at: "course-guides.json",
-            manifest: manifest
-        )
         tutorials = try loader.decodeVerified(
             [Tutorial].self,
             at: "tutorials.json",
@@ -111,7 +105,6 @@ final class ContentStore {
             [
                 "calculators.json",
                 "cheat-sheet.json",
-                "course-guides.json",
                 "exam-index.json",
                 "tutorials.json"
             ] + examIDs.map { "exams/\($0).json" }
@@ -132,10 +125,6 @@ final class ContentStore {
 
     func note(id: String) -> CheatSheetSection? {
         notes.first { $0.id == id }
-    }
-
-    func guide(id: String) -> CourseGuide? {
-        guides.first { $0.id == id }
     }
 
     func tutorial(id: String) -> Tutorial? {

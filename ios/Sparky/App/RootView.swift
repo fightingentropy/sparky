@@ -8,6 +8,7 @@ struct RootView: View {
 
     @AppStorage(NavigationPreferences.storageKey)
     private var hiddenTabsStorage = NavigationPreferences.defaultStorageValue
+    @Environment(KeyboardVisibility.self) private var keyboard
 
     private var visibleTabs: [AppTab] {
         NavigationPreferences.visibleTabs(from: hiddenTabsStorage)
@@ -16,13 +17,31 @@ struct RootView: View {
     var body: some View {
         @Bindable var router = router
 
-        TabView(selection: $router.selectedTab) {
+        // Every tab stays alive so navigation and scroll state survive switching (as in Rota).
+        ZStack {
             ForEach(visibleTabs) { tab in
+                let isSelected = router.selectedTab == tab
                 tabContent(tab)
-                    .tag(tab)
-                    .tabItem { Label(tab.title, systemImage: tab.systemImage) }
+                    .environment(\.sparkyCurrentTab, tab)
+                    .id(router.tabResetTokens[tab, default: 0])
+                    // Hidden pages stay alive but shouldn't compete for status-bar scroll-to-top.
+                    .scrollDisabled(!isSelected)
+                    .opacity(isSelected ? 1 : 0)
+                    .allowsHitTesting(isSelected)
+                    .accessibilityHidden(!isSelected)
             }
         }
+        .background(SparkyBackdrop())
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if showsTabBar {
+                SparkyTabBar(tabs: visibleTabs, selection: $router.selectedTab) { tab in
+                    Haptics.selection()
+                    router.reselect(tab)
+                }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.snappy(duration: 0.3), value: showsTabBar)
         .onChange(of: router.selectedTab) { _, _ in Haptics.selection() }
         .onChange(of: hiddenTabsStorage) { _, _ in selectVisibleTabIfNeeded() }
         .onAppear { selectVisibleTabIfNeeded() }
@@ -43,6 +62,10 @@ struct RootView: View {
         }
     }
 
+    private var showsTabBar: Bool {
+        !keyboard.isVisible && !router.isTabBarHidden(for: router.selectedTab)
+    }
+
     @ViewBuilder
     private func tabContent(_ tab: AppTab) -> some View {
         switch tab {
@@ -50,8 +73,6 @@ struct RootView: View {
             ToolsView(studyState: studyState)
         case .notes:
             NotesView()
-        case .learn:
-            LearnView()
         case .exams:
             ExamsView(contentStore: contentStore, progressStore: progressStore)
         case .more:

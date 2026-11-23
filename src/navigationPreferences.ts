@@ -2,7 +2,6 @@ export const NAVIGATION_VISIBILITY_STORAGE_KEY = "pref-hidden-navigation-page-id
 
 export const NAVIGATION_ITEMS = [
   { id: "exams", label: "Exams" },
-  { id: "learn", label: "Learn" },
   { id: "cheatsheet", label: "Notes" },
   { id: "home", label: "Tools" }
 ] as const;
@@ -31,4 +30,31 @@ export function visibleNavigationItems(hiddenPageIds: readonly NavigationPageId[
 
 export function preferredLandingPage(hiddenPageIds: readonly NavigationPageId[]): NavigationPageId {
   return visibleNavigationItems(hiddenPageIds)[0].id;
+}
+
+// Pages that used to be in the primary navigation. Visibility preferences saved
+// before they were removed may still list them, which would otherwise fail
+// validation and discard every other hidden-tab choice.
+const REMOVED_NAVIGATION_PAGE_IDS = new Set(["learn"]);
+
+// Progress for the removed Learn page's study guides; nothing reads it now.
+const REMOVED_LEARNING_STORAGE_KEYS = ["learning-completed-guides", "learning-last-opened-guide"];
+
+type MigratableStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+export function migrateRemovedNavigationPages(storage: MigratableStorage = localStorage): void {
+  try {
+    const stored = storage.getItem(NAVIGATION_VISIBILITY_STORAGE_KEY);
+    const parsed = stored === null ? null : (JSON.parse(stored) as unknown);
+    if (Array.isArray(parsed) && parsed.some((id) => REMOVED_NAVIGATION_PAGE_IDS.has(id as string))) {
+      const kept = parsed.filter((id) => !REMOVED_NAVIGATION_PAGE_IDS.has(id as string));
+      storage.setItem(NAVIGATION_VISIBILITY_STORAGE_KEY, JSON.stringify(kept));
+    }
+  } catch {}
+
+  for (const key of REMOVED_LEARNING_STORAGE_KEYS) {
+    try {
+      storage.removeItem(key);
+    } catch {}
+  }
 }

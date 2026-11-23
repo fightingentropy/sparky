@@ -174,8 +174,9 @@ struct ProgressSyncStatusCard: View {
     private var tint: Color {
         switch controller.phase {
         case .failed: .sparkyDanger
-        case .synced: .sparkySuccess
-        default: .sparkyAccent
+        case .synced, .syncing: .sparkySuccess
+        case .signedOut: .sparkyMuted
+        default: .sparkyText
         }
     }
 

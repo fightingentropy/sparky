@@ -14,13 +14,13 @@ struct SparkyApp: App {
     @State private var authStore = AuthStore()
     @State private var progressSyncController = ProgressSyncController()
     @State private var didRestoreAccount = false
+    @State private var keyboard = KeyboardVisibility()
 
     @AppStorage("appAppearance") private var appearance = AppAppearance.system.rawValue
     @AppStorage("comfortableText") private var comfortableText = false
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
-        SparkyFonts.registerAll()
         SparkyAppearance.configureNavigationBar()
     }
 
@@ -43,6 +43,7 @@ struct SparkyApp: App {
                     .environment(router)
                     .environment(authStore)
                     .environment(progressSyncController)
+                    .environment(keyboard)
                 } else if let contentError {
                     ContentUnavailableCard(
                         title: "Sparky couldn't start",
@@ -50,10 +51,11 @@ struct SparkyApp: App {
                         symbol: "bolt.slash"
                     )
                 } else {
-                    LoadingStateView(title: "Starting Sparky", message: "Loading your offline study bank…")
+                    LaunchLoadingView()
                 }
             }
-            .tint(Color.sparkyAccent)
+            .tint(Color.sparkyText)
+            .toggleStyle(SwitchToggleStyle(tint: Color.sparkyAccent))
             .font(.sparky(.body))
             .preferredColorScheme(AppAppearance(rawValue: appearance)?.colorScheme)
             .lineSpacing(comfortableText ? 2 : 0)
@@ -118,6 +120,10 @@ struct SparkyApp: App {
 
     private func loadContentIfNeeded() {
         guard contentStore == nil, contentError == nil else { return }
+#if DEBUG
+        // Keeps the launch screen up so it can be checked in the simulator.
+        if ProcessInfo.processInfo.arguments.contains("-sparkyHoldLaunch") { return }
+#endif
         do {
             let loadedContent = try ContentStore()
             contentStore = loadedContent
@@ -175,7 +181,6 @@ struct SparkyApp: App {
         if let previewTab = ProcessInfo.processInfo.environment["SPARKY_PREVIEW_TAB"] {
             switch previewTab.lowercased() {
             case "notes": return .notes
-            case "learn": return .learn
             case "exams": return .exams
             case "more": return .more
             default: return .tools
@@ -188,7 +193,6 @@ struct SparkyApp: App {
            arguments.indices.contains(marker + 1) {
             switch arguments[marker + 1].lowercased() {
             case "notes": return .notes
-            case "learn": return .learn
             case "exams": return .exams
             case "more": return .more
             default: return .tools

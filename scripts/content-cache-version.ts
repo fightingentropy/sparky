@@ -9,7 +9,6 @@ export const CONTENT_CACHE_INPUT_PATHS = [
   "public/exam-images",
   "src/cheatSheetSections.ts",
   "src/contentSchema.ts",
-  "src/courseGuides.ts",
   "src/examContentSource.ts",
   "src/examExplanationEnhancements.ts",
   "src/examOptionExplanations.ts",

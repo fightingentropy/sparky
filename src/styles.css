@@ -101,100 +101,111 @@
   .notes-search { flex-basis: auto; width: 100%; }
   .notes-header h1 { font-size: 2rem; }
 }
-/* Fonts: Geist families are self-hosted under public/fonts and precached. */
-@font-face { font-family: "Geist"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/Geist-Variable.woff2") format("woff2"); }
-@font-face { font-family: "Geist"; font-style: italic; font-weight: 100 900; font-display: swap; src: url("/fonts/Geist-Italic-Variable.woff2") format("woff2"); }
-@font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/GeistMono-Variable.woff2") format("woff2"); }
-@font-face { font-family: "Geist Serif"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/GeistSerif-Regular.woff2") format("woff2"); }
-@font-face { font-family: "Geist Fallback"; src: local("Arial"); size-adjust: 106.28%; ascent-override: 94.56%; descent-override: 27.76%; line-gap-override: 0%; }
-@font-face { font-family: "Geist Serif Fallback"; src: local("Times New Roman"); size-adjust: 114.49%; ascent-override: 87.78%; descent-override: 25.77%; line-gap-override: 0%; }
-@font-face { font-family: "Geist Mono Fallback"; src: local("Courier New"); size-adjust: 99.98%; ascent-override: 100.52%; descent-override: 29.5%; line-gap-override: 0%; }
-
-/* Design tokens: one source per theme (warm neutrals, orange accent, no blue).
-   Dark is the default; html[data-theme="light"] overrides below. */
+/* Design tokens: Rota palette — warm near-black, low-contrast cards, mono numerals.
+   Ink (fg) carries primary emphasis and selection; green is the one accent
+   (live / active / success / progress). Dark is the default;
+   html[data-theme="light"] overrides below. */
 :root {
   color-scheme: dark;
   --bg: #100e0c;
-  --surface: #171412;
-  --surface-alt: #1f1c1a;
-  --surface-soft: #2a2725;
-  --fill: #1f1c1a;
-  --border: #262422;
-  --border-strong: #363433;
-  --line: #1e1c1b;
-  --text: #edebe6;
-  --text-strong: #f7f5f0;
-  --muted: #a29e98;
-  --muted-strong: #cdcac5;
-  --text-muted: #a29e98;
-  --accent: #fa7a45;
-  --accent-strong: #fe8f5b;
-  --accent-soft: #2c1b13;
-  --accent-focus: #3a2116;
-  --accent-muted: #623420;
-  --accent-line: #623420;
-  --accent-line-strong: #854429;
+  --surface: #191714;
+  --surface-alt: #24211e;
+  --surface-soft: #2b2825;
+  --fill: #24211e;
+  --border: #2b2825;
+  --border-strong: #3a3632;
+  --line: #2b2825;
+  --text: #f0eeeb;
+  --text-strong: #f0eeeb;
+  --muted: #9b9893;
+  --muted-strong: #c6c3be;
+  --text-muted: #9b9893;
+  --faint: #5c5853;
+  --green: #62d286;
+  --amber: #f0b54c;
+  --red: #f07a63;
+  --accent: #62d286;
+  --accent-strong: #62d286;
+  --accent-soft: #1c2a1d;
+  --accent-focus: rgba(240, 238, 235, 0.18);
+  --accent-muted: #2d5337;
+  --accent-line: #2d5337;
+  --accent-line-strong: #3f7a50;
   --accent-glow: transparent;
-  --on-accent: #191512;
-  --primary: #edebe6;
-  --on-primary: #191512;
-  --danger: #ff6467;
-  --danger-soft: #311a19;
-  --success: #62bb78;
-  --success-soft: #1c261b;
-  --warning: #e9b452;
+  --on-accent: #100e0c;
+  --primary: #f0eeeb;
+  --on-primary: #100e0c;
+  --track: rgba(240, 238, 235, 0.1);
+  --danger: #f07a63;
+  --danger-soft: #2f1d18;
+  --success: #62d286;
+  --success-soft: #1c2a1d;
+  --warning: #f0b54c;
+  --warning-soft: #2e2416;
+  /* Status colours used as text or hairlines; fills keep the base values. */
+  --success-text: #62d286;
+  --warning-text: #f0b54c;
+  --danger-text: #f07a63;
   --shadow-card: none;
   --shadow-glow: none;
-  --shadow-pop: none;
+  --shadow-pop: 0 14px 36px rgba(0, 0, 0, 0.5);
   --panel-glass: var(--surface);
   --topbar-bg: var(--bg);
   --overlay-bg: var(--surface);
   --mobile-bar-bg: var(--surface);
   --grid-line: transparent;
   --scrim: rgba(0, 0, 0, 0.6);
-  --radius-lg: 12px;
-  --radius-md: 8px;
-  --radius-sm: 6px;
+  --radius-lg: 16px;
+  --radius-md: 11px;
+  --radius-sm: 8px;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
-  --font-ui: "Geist", "Geist Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --font-heading: "Geist", "Geist Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --font-serif: "Geist Serif", "Geist Serif Fallback", Georgia, "Times New Roman", serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 html[data-theme="light"] {
   color-scheme: light;
-  --bg: #fbfaf7;
-  --surface: #fefdfc;
-  --surface-alt: #f2f0ec;
-  --surface-soft: #eae7e3;
-  --fill: #f2f0ec;
-  --border: #e0ddd9;
-  --border-strong: #c7c3be;
-  --line: #ebe8e4;
-  --text: #191512;
-  --text-strong: #0d0b09;
-  --muted: #67625d;
-  --muted-strong: #46413e;
-  --text-muted: #67625d;
-  --accent: #cf3c12;
-  --accent-strong: #b93004;
-  --accent-soft: #f8ebe5;
-  --accent-focus: #f3d8ce;
-  --accent-muted: #ecb7a7;
-  --accent-line: #ecb7a7;
-  --accent-line-strong: #cf3c12;
+  --bg: #f5f3ef;
+  --surface: #ebe8e3;
+  --surface-alt: #e0dcd6;
+  --surface-soft: #e6e2dd;
+  --fill: #e0dcd6;
+  --border: #d6d2cb;
+  --border-strong: #c2bdb5;
+  --line: #d6d2cb;
+  --text: #171513;
+  --text-strong: #171513;
+  --muted: #625e58;
+  --muted-strong: #48443f;
+  --text-muted: #625e58;
+  --faint: #a9a59f;
+  --green: #1e9b52;
+  --amber: #b86e0a;
+  --red: #c8432d;
+  --accent: #1e9b52;
+  --accent-strong: #156d3a; /* green text: AA on card, raised and tint */
+  --accent-soft: #dde9dc;
+  --accent-focus: rgba(23, 21, 19, 0.16);
+  --accent-muted: #aad4b8;
+  --accent-line: #aad4b8;
+  --accent-line-strong: #1e9b52;
   --on-accent: #ffffff;
-  --primary: #191512;
-  --on-primary: #fbfaf7;
-  --danger: #c2272d;
-  --danger-soft: #f7e5e2;
-  --success: #267543;
-  --success-soft: #e6ede5;
-  --warning: #9d6300;
-  --shadow-card: 0 1px 2px rgba(25, 21, 18, 0.05);
-  --shadow-pop: 0 8px 24px rgba(25, 21, 18, 0.08);
-  --scrim: rgba(25, 21, 18, 0.35);
+  --primary: #171513;
+  --on-primary: #f5f3ef;
+  --track: rgba(23, 21, 19, 0.1);
+  --danger: #c8432d;
+  --danger-soft: #f1e1dc;
+  --success: #1e9b52;
+  --success-soft: #dde9dc;
+  --warning: #b86e0a;
+  --warning-soft: #f1e5d2;
+  --success-text: #156d3a;
+  --warning-text: #8a5207;
+  --danger-text: #a8361f;
+  --shadow-card: none;
+  --shadow-pop: 0 14px 36px rgba(23, 21, 19, 0.12);
+  --scrim: rgba(23, 21, 19, 0.35);
 }
 
 * {
@@ -207,7 +218,7 @@ body,
 }
 
 /* Slightly larger root than the 16px default so all rem-based type reads a touch
-   bigger; Geist reads large at this size, so 16px is plenty.
+   bigger; the system font reads well at 16px.
    Per-component reading sizes are bumped further below. */
 html {
   font-size: 16px;
@@ -688,7 +699,7 @@ kbd {
 }
 
 .tutorial-steps li::marker {
-  color: var(--accent);
+  color: var(--accent-strong);
   font-weight: 700;
 }
 
@@ -743,7 +754,7 @@ kbd {
   padding: 0;
   border: 0;
   background: #100e0c;
-  color: #f7f5f0;
+  color: #f0eeeb;
   cursor: pointer;
 }
 
@@ -789,7 +800,7 @@ kbd {
   padding: 7px 10px;
   border-radius: 999px;
   background: rgba(16, 14, 12, 0.82);
-  color: #f7f5f0;
+  color: #f0eeeb;
   font-size: 0.76rem;
   font-weight: 700;
 }
@@ -1177,7 +1188,7 @@ input:disabled {
 
 .field-error {
   margin: -2px 0 0;
-  color: var(--danger);
+  color: var(--danger-text);
   font-size: 0.78rem;
   line-height: 1.4;
 }
@@ -1872,15 +1883,15 @@ input:disabled {
 }
 
 .copyable-result.is-copied .copy-icon {
-  color: var(--accent);
+  color: var(--accent-strong);
 }
 
 .copyable-result.is-failed {
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 .copyable-result.is-failed .copy-icon {
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 /* ── Formula toggle ────────────────────── */
@@ -2331,12 +2342,12 @@ body[data-page="interactive"] .ix-3d-wrap {
 }
 
 .ix-terminal:hover {
-  fill: var(--accent);
+  fill: var(--text-strong);
 }
 
 .ix-terminal.is-pending {
-  fill: var(--accent);
-  stroke: var(--accent-strong);
+  fill: var(--text-strong);
+  stroke: var(--text-strong);
 }
 
 /* Visible keyboard focus for the canvas's focusable components and terminals. */
@@ -2347,8 +2358,8 @@ body[data-page="interactive"] .ix-3d-wrap {
 }
 
 .ix-terminal:focus-visible {
-  fill: var(--accent);
-  stroke: var(--accent-strong);
+  fill: var(--text-strong);
+  stroke: var(--text-strong);
 }
 
 .ix-wire {
@@ -2418,7 +2429,7 @@ body[data-page="interactive"] .ix-3d-wrap {
 .ix-status.is-warning {
   background: var(--danger-soft);
   border-color: var(--danger);
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 .ix-info {
@@ -2815,7 +2826,7 @@ body[data-page="interactive"] .ix-3d-wrap {
   padding: 8px 12px;
   border-radius: var(--radius-sm);
   background: var(--danger-soft);
-  color: var(--danger);
+  color: var(--danger-text);
   font-size: 0.85rem;
 }
 
@@ -3244,8 +3255,6 @@ select:focus,
   stroke: var(--text);
 }
 
-.ix-terminal:hover,
-.ix-terminal.is-pending,
 .account-avatar {
   background: var(--accent);
   color: var(--on-accent);
@@ -3453,7 +3462,7 @@ select:focus,
 .exam-test-done {
   margin-left: auto;
   padding-left: 12px;
-  color: var(--success);
+  color: var(--success-text);
   font-weight: 700;
   font-size: 0.85rem;
 }
@@ -3702,7 +3711,7 @@ select:focus,
 
 .settings-error {
   margin: 0;
-  color: var(--danger);
+  color: var(--danger-text);
   font-size: 0.85rem;
   line-height: 1.5;
 }
@@ -4183,7 +4192,7 @@ body[data-page="exams"] .exam-title-info{
   border: 1px solid var(--ex-hair);
   background: var(--ex-surface);
   color: var(--ex-muted);
-  font-family: var(--font-serif);
+  font-family: var(--font-heading);
   font-style: italic;
   font-size: 0.78rem;
   font-weight: 400;
@@ -6396,7 +6405,6 @@ button:active:not(:disabled), [role="button"]:active { transform: none; }
   border-bottom: 1px solid var(--border); background: var(--bg);
 }
 .brand { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
-.brand-mark { width: 26px; height: 26px; flex: none; color: var(--accent); }
 .brand strong { font-size: 1rem; font-weight: 750; letter-spacing: -0.03em; color: var(--text-strong); }
 .desktop-primary-nav { display: flex; gap: 22px; align-self: stretch; }
 .desktop-primary-nav-item {
@@ -6450,49 +6458,8 @@ button:active:not(:disabled), [role="button"]:active { transform: none; }
 .result-main { border-left: 3px solid var(--accent); }
 .mini-metrics > div { border: 0; padding: 8px 0; border-radius: 0; background: transparent; }
 
-/* Learn is a scanable library; details stay inside the guide the reader opens. */
-.page-learning.is-active { max-width: 800px; margin-inline: auto; }
-.learning-header { align-items: end; }
-.library-progress { flex: none; color: var(--muted); font-size: 0.8rem; }
-.library-search { position: relative; display: flex; align-items: center; }
-.library-search > svg { position: absolute; left: 14px; width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
-.library-search input[type="search"] { width: 100%; min-height: 46px; padding: 10px 14px 10px 42px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 1rem; }
-.learning-resume { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; padding: 14px 18px; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--surface); color: var(--text); text-align: left; }
-.learning-resume > span:first-child { display: grid; gap: 4px; }
-.learning-resume small { color: var(--muted); font-size: 0.78rem; }
-.learning-resume strong { font-weight: 600; font-size: 0.96rem; line-height: 1.4; }
-.learning-resume > span:last-child { color: var(--accent-strong); font-size: 1.25rem; }
-.learning-resume:hover { border-color: var(--accent-line); }
-.library-complete, .library-results { color: var(--muted-strong); font-size: 0.88rem; margin: 0; }
-.learning-topic > h2 { color: var(--muted-strong); font-size: 0.82rem; font-weight: 650; margin-bottom: 10px; letter-spacing: 0; }
-.learning-list { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
-.guide-row { scroll-margin-top: 84px; }
-.guide-row + .guide-row { border-top: 1px solid var(--border); }
-.guide-toggle { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: 100%; min-height: 78px; padding: 16px 18px; border: 0; border-radius: 6px; background: transparent; color: var(--text); text-align: left; }
-.guide-toggle > span { display: grid; gap: 3px; min-width: 0; }
-.guide-toggle strong { font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
-.guide-toggle small { color: var(--muted); font-size: 0.78rem; font-weight: 400; }
-.guide-toggle svg, .note-toggle svg { flex: none; width: 17px; height: 17px; color: var(--muted); }
-.guide-toggle[aria-expanded="true"] svg, .note-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
-.guide-toggle:hover { background: var(--fill); }
-.guide-content { display: grid; gap: 24px; padding: 0 24px 24px; font-size: 0.96rem; line-height: 1.65; }
-.guide-summary { margin: 0; color: var(--muted-strong); }
-.guide-facts { border-block: 1px solid var(--border); }
-.guide-facts summary { min-height: 44px; padding: 10px 0; color: var(--muted-strong); font-size: 0.88rem; cursor: pointer; }
-.guide-facts dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin: 8px 0 18px; }
-.guide-facts dt { color: var(--muted); font-size: 0.78rem; }
-.guide-facts dd { margin: 2px 0 0; font-size: 0.88rem; }
-.guide-section h4, .guide-related h4 { margin: 0 0 10px; font-size: 0.98rem; font-weight: 650; color: var(--text-strong); }
-.guide-section ul { margin: 0; padding-left: 20px; }
-.guide-section li + li { margin-top: 9px; }
-.guide-next-steps { display: grid; gap: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
-.guide-completion { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.guide-complete-button { min-height: 44px; padding: 10px 16px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: var(--on-accent); font-size: 0.9rem; font-weight: 600; }
-.guide-complete-button[aria-pressed="true"] { background: var(--surface); border-color: var(--border); color: var(--muted-strong); }
-.guide-related { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 20px; }
-.guide-related h4 { flex-basis: 100%; }
-.library-empty { padding: 32px 0; color: var(--muted); text-align: center; }
-.library-empty h2 { font-size: 1.1rem; color: var(--text); }
+.note-toggle svg { flex: none; width: 17px; height: 17px; color: var(--muted); }
+.note-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
 
 /* Notes share a quiet list structure with a full-sized heading control. */
 .page-notes.is-active { max-width: 960px; margin-inline: auto; }
@@ -6506,7 +6473,6 @@ button:active:not(:disabled), [role="button"]:active { transform: none; }
 .sheet-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
 .sheet-card { min-width: 0; padding: 14px 18px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); scroll-margin-top: 88px; }
 .sheet-card.is-expanded { grid-column: 1 / -1; }
-.sheet-card.is-highlighted { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sheet-card-head { display: flex; align-items: start; gap: 4px; }
 .sheet-card-head h3 { flex: 1; min-width: 0; }
 .note-toggle { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 4px 0; border: 0; background: transparent; color: var(--text-strong); text-align: left; font-size: 0.97rem; font-weight: 600; line-height: 1.4; }
@@ -6574,10 +6540,6 @@ body[data-page="exams"] .exam-footer-actions > button { min-height: 44px; }
   .mobile-tab-icon { width: 21px; height: 21px; }
   .mobile-tab-label { line-height: 1.2; }
   .mobile-tab.is-active { color: var(--accent-strong); background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface)); }
-  .learning-header { flex-direction: column; align-items: start; gap: 8px; }
-  .guide-toggle { padding: 14px 16px; min-height: 76px; }
-  .guide-content { padding: 0 16px 20px; }
-  .guide-completion > button { flex: 1 1 auto; }
   .notes-header { gap: 20px; }
   .notes-controls input { font-size: 1rem; }
   .sheet-grid { grid-template-columns: minmax(0, 1fr); gap: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
@@ -6632,12 +6594,30 @@ body[data-page="exams"] .exam-footer-actions > button { min-height: 44px; }
   body[data-page="exams"] .exam-footer-actions { width: 100%; }
 }
 
-/* ── Visual refresh: Geist type, warm palette, quiet components ───────────
-   Final layer. Display headings use Geist Serif at weight 400 (the only weight
-   shipped, hence font-synthesis: none); kickers and meta use Geist Mono. */
+/* ── Rota layer: system type, warm near-black, flat cards, ink + green ───
+   Final layer. Mirrors the Rota iOS app: borderless cards on a warm base,
+   raised nested blocks, uppercase muted eyebrows, mono numerals, ink-filled
+   pill buttons and a single green accent for live / success / progress. */
 
-html { font-synthesis-weight: none; }
+/* Exam page tokens: selection in ink, hairlines in line. */
+body[data-page="exams"],
+html[data-theme="light"] body[data-page="exams"] {
+  --ex-brass: var(--text-strong);
+  --ex-brass-hover: var(--text-strong);
+  --ex-brass-tint: var(--surface-alt);
+  --ex-brass-line: var(--border-strong);
+  --ex-on-accent: var(--on-primary);
+  --ex-hair: var(--line);
+  /* Text-safe status colours: badges, labels, marks and score text sit on
+     tints, and filled letters carry on-accent text, so both need AA. */
+  --ex-good: var(--success-text);
+  --ex-bad: var(--danger-text);
+  --ex-good-line: color-mix(in srgb, var(--green) 55%, transparent);
+  --ex-bad-line: color-mix(in srgb, var(--red) 55%, transparent);
+  --ex-bad-tint: var(--danger-soft);
+}
 
+/* Type: system sans everywhere, bold display headings with tight tracking. */
 .page-header h1,
 .page-header h2,
 .notes-header h1,
@@ -6646,7 +6626,6 @@ html { font-synthesis-weight: none; }
 .settings-section-heading h2,
 .modal-header h2,
 .auth-modal-title,
-.library-empty h2,
 .page-interactive .ix-header h1,
 .page-interactive .ix-header h2,
 body[data-page="exams"] .exam-hero-text h2,
@@ -6654,12 +6633,10 @@ body[data-page="exams"] .exam-title-wrap h2,
 body[data-page="exams"] .exam-title-text,
 body[data-page="exams"] .exam-title-button,
 body[data-page="exams"] .exam-reset-dialog-copy h2,
-.exam-title-button,
-.brand strong {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  font-synthesis: none;
+.exam-title-button {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .page-header h1,
@@ -6671,22 +6648,30 @@ body[data-page="exams"] .exam-reset-dialog-copy h2,
   line-height: 1.12;
 }
 
-.brand strong { font-size: 1.2rem; line-height: 1.1; }
+/* Wordmark: page titles end in a green period, like "rota." */
+.page-header h1::after,
+.notes-header h1::after,
+.tool-library h1::after,
+.settings-header h1::after,
+.page-interactive .ix-header h1::after {
+  content: ".";
+  color: var(--green);
+}
+
 .settings-section-heading h2,
 .modal-header h2,
-.auth-modal-title { font-size: 1.35rem; line-height: 1.2; }
+.auth-modal-title { font-size: 1.3rem; line-height: 1.2; }
 
 h3,
 .tool-heading h3,
 .sheet-card-head h3,
-.guide-toggle strong,
 .note-toggle {
   font-family: var(--font-heading);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
-/* Kickers, meta and counts: Geist Mono caps. */
+/* Eyebrows: 11px, medium, uppercase, letter-spaced, muted. */
 .dashboard-kicker,
 .result-label,
 .containment-field span,
@@ -6695,106 +6680,190 @@ h3,
 .history-tool,
 .ix-info-block h3,
 .ix-readout dt,
-.learning-topic > h2,
-.library-progress,
-body[data-page="exams"] .exam-eyebrow {
-  font-family: var(--font-mono);
+.ix-selected-kind,
+.ix-welcome h3,
+.reference-table th,
+body[data-page="exams"] .exam-eyebrow,
+body[data-page="exams"] .exam-stat > span,
+body[data-page="exams"] .exam-results-label,
+body[data-page="exams"] .exam-explanation-label,
+body[data-page="exams"] .exam-solution-table-kicker {
+  font-family: var(--font-ui);
+  font-size: 11px;
   font-weight: 500;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
+  color: var(--muted);
 }
-.dashboard-kicker { color: var(--accent-strong); }
-.learning-topic > h2 { color: var(--muted); }
-body[data-page="exams"] .exam-eyebrow { color: var(--muted); font-size: 0.7rem; }
 
+/* Numerals, readouts and meta: system mono, tabular. */
 kbd,
 .search-hint,
-.exam-q-badge,
-.exam-option-letter {
-  font-family: var(--font-mono);
-  font-weight: 500;
-}
-kbd { min-width: 24px; min-height: 20px; padding: 0 5px; border-radius: 5px; font-size: 0.68rem; letter-spacing: 0.02em; }
-.search-hint { font-size: 0.68rem; border-radius: 5px; }
-
 .result-value,
-.exam-stat strong,
-.exam-results-percent,
 .mini-metrics strong,
 .ix-readout dd,
-.suffix { font-variant-numeric: tabular-nums; }
+.suffix,
+body[data-page="exams"] .exam-q-number,
+body[data-page="exams"] .exam-q-badge,
+body[data-page="exams"] .exam-option-letter,
+body[data-page="exams"] .exam-stat strong,
+body[data-page="exams"] .exam-test-switch,
+body[data-page="exams"] .exam-results-score,
+body[data-page="exams"] .exam-results-percent {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+kbd { min-width: 24px; min-height: 20px; padding: 0 5px; border-radius: 5px; font-size: 0.68rem; font-weight: 500; }
+.search-hint { font-size: 0.68rem; border-radius: 5px; }
+.result-value { color: var(--text-strong); font-weight: 500; letter-spacing: -0.03em; }
+.mini-metrics strong { font-weight: 500; }
+.ix-readout dd { color: var(--text-strong); }
+.content-notice strong { color: var(--text-strong); }
+body[data-page="exams"] .exam-stat strong { font-weight: 500; letter-spacing: -0.02em; }
 
-/* Top bar and nav */
-.topbar { min-height: 60px; }
-.desktop-primary-nav-item { font-size: 0.875rem; font-weight: 400; color: var(--muted); transition: color 150ms var(--ease); }
+/* Top bar: wordmark brand, ink underline for the active page. */
+.topbar { min-height: 60px; border-bottom-color: var(--line); }
+.brand { gap: 0; }
+.brand strong {
+  font-family: var(--font-heading);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.8px;
+  text-transform: lowercase;
+  color: var(--text-strong);
+}
+.brand strong::after { content: "."; color: var(--green); }
+.desktop-primary-nav-item { font-size: 0.875rem; font-weight: 500; color: var(--muted); transition: color 150ms var(--ease); }
 .desktop-primary-nav-item:hover,
-.desktop-primary-nav-item.is-active { color: var(--text); font-weight: 400; }
-.search-field { height: 36px; border-radius: var(--radius-md); background: var(--bg); font-size: 0.875rem; transition: border-color 150ms var(--ease); }
-.search-field:hover { border-color: var(--border-strong); }
+.desktop-primary-nav-item.is-active { color: var(--text-strong); font-weight: 500; }
+.desktop-primary-nav-item.is-active,
+.tool-library-item.is-active { border-bottom-color: var(--text-strong); }
+.search-field { height: 36px; border-color: transparent; border-radius: var(--radius-md); background: var(--surface); font-size: 0.875rem; transition: background-color 150ms var(--ease); }
+.search-field:hover { border-color: transparent; background: var(--surface-alt); }
 .topbar-icon-button,
 .topbar-account-btn { border-radius: var(--radius-md); }
+.topbar-account-btn .account-avatar,
+.account-avatar { border: 0; background: var(--surface-alt); color: var(--text-strong); }
+
+/* Menus and popovers: card fill, hairline, soft drop. */
+.nav-menu,
+.exam-test-menu,
+body[data-page="exams"] .exam-test-menu,
+body[data-page="exams"] .exam-title-menu,
+body[data-page="exams"] .exam-actions-menu,
+.tool-tooltip,
+body[data-page="exams"] .exam-tooltip {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+}
+.tool-tooltip,
+body[data-page="exams"] .exam-tooltip { font-size: 0.8rem; line-height: 1.5; }
 .nav-menu-item { border-radius: var(--radius-sm); font-weight: 500; }
 .nav-menu-item:hover,
 .nav-menu-item:focus-visible,
 html[data-theme="light"] .nav-menu-item:hover,
-html[data-theme="light"] .nav-menu-item:focus-visible { background: var(--surface-soft); }
-.nav-menu-item.is-active { background: var(--accent-soft); color: var(--text-strong); }
-.mobile-tab { font-weight: 500; }
-.mobile-tab.is-active { color: var(--accent-strong); background: var(--accent-soft); }
+html[data-theme="light"] .nav-menu-item:focus-visible { background: var(--surface-alt); box-shadow: none; }
+.nav-menu-item.is-active { background: var(--surface-alt); color: var(--text-strong); font-weight: 600; }
+.exam-test-option.is-active,
+body[data-page="exams"] .exam-test-option.is-active,
+body[data-page="exams"] .exam-title-option.is-active { background: var(--surface-alt); color: var(--text-strong); }
 
-/* Buttons: secondary = hairline outline; primary = primary/on-primary fill. */
+/* Buttons — Rota pills. Primary: ink fill, bg-coloured text. Secondary:
+   transparent with a hairline. Pressed: scale .97, opacity .85. */
 .ghost-button,
 .preset-button,
 .sheet-practice-btn,
 .settings-button,
-.add-containment-btn {
-  min-height: 36px;
+.add-containment-btn,
+.tutorial-filter {
+  min-height: 34px;
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  font-weight: 500;
-  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), color 150ms var(--ease);
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), color 150ms var(--ease), transform 200ms var(--ease), opacity 200ms var(--ease);
 }
 .ghost-button:hover,
 .preset-button:hover,
 .sheet-practice-btn:hover,
-.settings-button:hover:not(:disabled) {
+.settings-button:hover:not(:disabled),
+.tutorial-filter:hover,
+.tutorial-filter:focus-visible,
+html[data-theme="light"] .ghost-button:hover,
+html[data-theme="light"] .preset-button:hover {
   border-color: var(--border-strong);
-  background: var(--surface-soft);
-  color: var(--text);
+  background: var(--surface);
+  color: var(--text-strong);
 }
 .exam-submit-btn,
 .ix-energize,
 .ix-welcome-go,
 .auth-submit,
-.guide-complete-button,
-.settings-button--primary {
-  border-color: var(--primary);
+.settings-button--primary,
+body[data-page="exams"] .exam-next-btn,
+body[data-page="exams"] .exam-submit-btn {
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
   background: var(--primary);
   color: var(--on-primary);
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0;
+  transition: transform 200ms var(--ease), opacity 200ms var(--ease), background-color 150ms var(--ease);
 }
 .exam-submit-btn:hover:not(:disabled),
 .ix-energize:hover,
 .ix-welcome-go:hover,
 .auth-submit:hover,
-.guide-complete-button:hover,
-.settings-button--primary:hover:not(:disabled) {
+.settings-button--primary:hover:not(:disabled),
+body[data-page="exams"] .exam-next-btn:hover:not(:disabled),
+body[data-page="exams"] .exam-submit-btn:hover:not(:disabled) {
   border-color: var(--primary);
   background: color-mix(in srgb, var(--primary) 88%, var(--bg));
   color: var(--on-primary);
 }
-.guide-complete-button[aria-pressed="true"] { border-color: var(--border); background: var(--surface); color: var(--muted-strong); }
+.auth-submit { min-height: 52px; border-radius: 14px; font-size: 1rem; }
+.ix-energize.is-on { border-color: var(--primary); background: var(--primary); color: var(--on-primary); }
+body[data-page="exams"] .exam-next-btn:disabled,
+body[data-page="exams"] .exam-submit-btn:disabled {
+  border-color: var(--surface-alt);
+  background: var(--surface-alt);
+  color: var(--muted);
+}
+.ghost-button:active:not(:disabled),
+.preset-button:active:not(:disabled),
+.sheet-practice-btn:active:not(:disabled),
+.settings-button:active:not(:disabled),
+.add-containment-btn:active:not(:disabled),
+.tutorial-filter:active:not(:disabled),
+.exam-submit-btn:active:not(:disabled),
+.ix-energize:active:not(:disabled),
+.ix-welcome-go:active:not(:disabled),
+.auth-submit:active:not(:disabled),
+body[data-page="exams"] .exam-next-btn:active:not(:disabled) {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+.auth-switch-btn,
+body[data-page="exams"] .exam-solution-table-source a { color: var(--text-strong); text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 3px; }
 
-/* Filter chips and tabs: pills, active = primary fill. */
+/* Chips, filters and segmented controls: active = ink fill. */
 .switch-chip,
-.exam-review-filter {
+.exam-review-filter,
+.tutorial-filter {
   border-radius: 999px;
   color: var(--muted-strong);
-  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), color 150ms var(--ease);
 }
 .switch-chip.is-active,
 .segment.active,
 .exam-review-filter.is-active,
+body[data-page="exams"] .exam-review-filter.is-active,
+.tutorial-filter.is-active,
+.notes-saved-toggle.is-active,
+.sheet-save-btn.is-active,
 .ix-tab.is-active {
   border-color: var(--primary);
   background: var(--primary);
@@ -6802,88 +6871,199 @@ html[data-theme="light"] .nav-menu-item:focus-visible { background: var(--surfac
 }
 .exam-review-filter.is-active:hover,
 .switch-chip.is-active:hover,
-.ix-tab.is-active:hover { background: var(--primary); color: var(--on-primary); }
+.tutorial-filter.is-active:hover,
+.notes-saved-toggle.is-active:hover,
+html[data-theme="light"] .notes-saved-toggle.is-active:hover,
+.ix-tab.is-active:hover { border-color: var(--primary); background: var(--primary); color: var(--on-primary); }
 body[data-page="exams"] .exam-review-filter.is-active strong { background: var(--on-primary); color: var(--primary); }
+body[data-page="exams"] .exam-view-switch button.is-active { background: var(--surface-alt); color: var(--text-strong); }
+body[data-page="exams"] .exam-flag-btn.is-active { border-color: var(--warning-text); background: var(--warning-soft); color: var(--warning-text); }
+
+/* Selected list rows: raised fill, ink text — no coloured outline. */
 .palette-result.is-active,
 .ix-palette-item.is-active,
 .exam-scoring-list li.is-active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--text);
+  border-color: var(--text-strong);
+  background: var(--surface-alt);
+  color: var(--text-strong);
+  box-shadow: none;
 }
 .palette-result.is-active .palette-result-subtitle,
 .ix-palette-item.is-active .ix-palette-icon,
-.ix-palette-item.is-active .ix-palette-label { color: var(--accent-strong); }
-.tool-library-item,
-.ix-tab { transition: background-color 150ms var(--ease), color 150ms var(--ease), border-color 150ms var(--ease); }
+.ix-palette-item.is-active .ix-palette-label { color: var(--text-strong); }
 
-/* Inputs: 36-40px, 8px radius, accent focus ring. */
+/* Inputs: bg fill, 11px radius, hairline, ink focus ring. */
 .field input:not([type="checkbox"]):not([type="radio"]),
 input:not([type="checkbox"]):not([type="radio"]),
 select,
-textarea { background: var(--bg); transition: border-color 150ms var(--ease), box-shadow 150ms var(--ease); }
+textarea { border-color: var(--line); background: var(--bg); transition: border-color 150ms var(--ease), box-shadow 150ms var(--ease); }
 textarea { border-radius: var(--radius-md); }
 .tool-panel .field input,
 .tool-panel .field select,
 .notes-search input,
-.library-search input[type="search"] { background: var(--bg); border-radius: var(--radius-md); }
+.settings-input[type="text"],
+.auth-field input,
+.ix-save-input,
+.ix-save-select,
+.ix-field input { border-color: var(--line); background: var(--bg); border-radius: var(--radius-md); }
+.notes-search input:not([type="checkbox"]):not([type="radio"]) { background: var(--surface); border-color: transparent; }
 .field input:not([type="checkbox"]):not([type="radio"]):hover,
 input:not([type="checkbox"]):not([type="radio"]):hover,
-select:hover { background: var(--bg); }
+select:hover { border-color: var(--border-strong); }
 .field input:not([type="checkbox"]):not([type="radio"]):focus,
 input:not([type="checkbox"]):not([type="radio"]):focus,
 select:focus,
-textarea:focus {
-  border-color: var(--accent);
-  background: var(--bg);
+textarea:focus,
+.notes-search input:focus-visible,
+.auth-field input:focus,
+.ix-field input:focus,
+body[data-page="exams"] .exam-test-select:focus-visible {
+  border-color: var(--text-strong);
   box-shadow: 0 0 0 3px var(--accent-focus);
   outline: none;
 }
 input[type="checkbox"],
 input[type="radio"],
-input[type="range"] { accent-color: var(--accent); }
+input[type="range"],
+.check-option input[type="checkbox"] { accent-color: var(--green); }
+:where(button, a, input, select, summary):focus-visible,
+.ix-component:focus-visible,
+.ix-terminal:focus-visible,
+.settings-theme-option input:focus-visible + span,
+.tutorial-load-btn:focus-visible,
+body[data-page="exams"] .exam-progress-segment:focus-visible,
+body[data-page="exams"] .exam-copy-btn:focus-visible,
+body[data-page="exams"] .exam-option-control:focus-visible,
+body[data-page="exams"] .exam-option-explanation-toggle:focus-visible { outline-color: var(--text-strong); }
+.ghost-button:focus-visible,
+.segment:focus-visible,
+.switch-chip:focus-visible,
+.palette-result:focus-visible { border-color: var(--text-strong); box-shadow: 0 0 0 3px var(--accent-focus); }
 
-/* Cards and panels: surface, hairline, 12px radius, hover border-strong. */
+/* Cards: flat card fill, no border, no shadow, 16px radius. A transparent
+   border keeps layout and lets state colours (correct / wrong) show. */
 .tool-panel,
-.learning-list,
 .sheet-card,
+.sheet-grid,
 .tutorial-card,
-.settings-section { border-radius: var(--radius-lg); }
-.tutorial-card,
-.sheet-card,
-.search-result { transition: border-color 150ms var(--ease); }
-.tutorial-card:hover,
-.sheet-card:hover { border-color: var(--border-strong); }
-body[data-page="exams"] .exam-question { border-radius: var(--radius-lg); }
-body[data-page="exams"] .exam-option-control { border-radius: var(--radius-md); }
-body[data-page="exams"] .exam-q-prompt { font-weight: 500; }
-.result-main,
-.learning-resume,
-.exam-explanation { border-left-color: var(--accent); }
-
-/* Menus, modals, tooltips */
-.modal-backdrop { background: var(--scrim); }
 .modal-shell,
-.auth-modal { border-radius: var(--radius-lg); }
-.tool-tooltip,
-body[data-page="exams"] .exam-tooltip { font-size: 0.8rem; line-height: 1.5; }
-
-/* Reference tables, badges, progress */
-.reference-table th { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-body[data-page="exams"] .exam-q-badge { letter-spacing: 0.06em; }
-body[data-page="exams"] .exam-option-letter { border-radius: var(--radius-sm); }
-.exam-section-breakdown-fill { background: var(--accent); }
-
-/* Tutorials and notes: quiet cards, mono meta. */
-.tutorial-card { overflow: hidden; }
-.sheet-card-head h3,
-.tutorial-card h3 { font-size: 1.02rem; }
-
-/* Light theme only gets the subtle card shadow. */
+.auth-modal,
+.ix-tabs,
+.ix-3d-wrap,
+.ix-palette,
+.ix-canvas,
+.ix-info-block,
+.ix-welcome,
+.settings-theme,
+body[data-page="exams"] .exam-hero-stats,
+body[data-page="exams"] .exam-question,
+body[data-page="exams"] .exam-results-banner,
+body[data-page="exams"] .exam-review-tools,
+body[data-page="exams"] .exam-view-switch {
+  border-color: transparent;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: none;
+}
+.sheet-grid { background: transparent; }
+.tutorial-card:hover,
+.sheet-card:hover { border-color: transparent; background: color-mix(in srgb, var(--surface) 55%, var(--surface-alt)); }
 html[data-theme="light"] .tool-panel,
 html[data-theme="light"] .sheet-card,
 html[data-theme="light"] .tutorial-card,
-html[data-theme="light"] .learning-list { box-shadow: var(--shadow-card); }
+html[data-theme="light"] .ghost-button,
+html[data-theme="light"] .switch-chip,
+html[data-theme="light"] .preset-button,
+html[data-theme="light"] .modal-shell,
+html[data-theme="light"] .auth-modal { box-shadow: none; }
+.modal-backdrop { background: var(--scrim); }
+
+/* Raised blocks nested in cards: raised fill, 12px radius, no border. */
+.result-main,
+.mini-metrics > div,
+.containment-card,
+.search-result,
+.palette-result,
+.help-row,
+.formula-content,
+.reference-table-scroll,
+.ix-palette-item,
+.ix-readout > div,
+.ix-tip-list kbd,
+.ix-welcome-close,
+body[data-page="exams"] .exam-explanation,
+body[data-page="exams"] .exam-option {
+  border-color: transparent;
+  border-radius: 12px;
+  background: var(--surface-alt);
+  box-shadow: none;
+}
+.result-main,
+.exam-explanation,
+body[data-page="exams"] .exam-explanation { border-left: 1px solid transparent; }
+.mini-metrics > div { padding: 10px 12px; }
+body[data-page="exams"] .exam-option:hover:not(.is-disabled) { border-color: var(--border-strong); }
+body[data-page="exams"] .exam-option-control,
+body[data-page="exams"] .exam-option-control:hover { border: 0; border-radius: inherit; background: transparent; }
+body[data-page="exams"] .exam-option-letter { border-radius: var(--radius-sm); background: var(--surface-soft); }
+html[data-theme="light"] body[data-page="exams"] .exam-option-letter { background: var(--surface); }
+body[data-page="exams"] .exam-option.is-selected:not(.is-answer):not(.is-wrong) { border-color: var(--text-strong); background: var(--surface-alt); }
+body[data-page="exams"] .exam-option.is-selected:not(.is-answer):not(.is-wrong) .exam-option-letter { background: var(--primary); color: var(--on-primary); }
+body[data-page="exams"] .exam-option.is-answer { border-color: color-mix(in srgb, var(--green) 60%, transparent); background: var(--success-soft); }
+body[data-page="exams"] .exam-option.is-wrong { border-color: color-mix(in srgb, var(--red) 60%, transparent); background: var(--danger-soft); }
+body[data-page="exams"] .exam-option-explanation-toggle:hover,
+body[data-page="exams"] .exam-option-details[open] > summary { background: var(--surface-soft); color: var(--text-strong); }
+body[data-page="exams"] .exam-question.is-correct { border-color: color-mix(in srgb, var(--green) 45%, transparent); }
+body[data-page="exams"] .exam-question.is-incorrect,
+body[data-page="exams"] .exam-question.is-unanswered { border-color: color-mix(in srgb, var(--red) 45%, transparent); }
+body[data-page="exams"] .exam-results-banner.is-pass { background: var(--success-soft); }
+body[data-page="exams"] .exam-results-banner.is-fail { background: var(--danger-soft); }
+body[data-page="exams"] .exam-stat { border-left-color: var(--line); }
+
+/* Chips and tags: raised neutral, muted text. */
+.tutorial-count,
+.tutorial-category {
+  border-color: transparent;
+  background: var(--surface-alt);
+  color: var(--muted-strong);
+}
+.tutorial-card-body .tutorial-steps-note { background: var(--surface-alt); }
+.tutorial-steps li::marker { color: var(--muted); }
+.tutorial-play-icon { background: #f0eeeb; color: #100e0c; border-radius: 999px; width: 56px; height: 56px; }
+.ix-tip-list li::before { background: var(--muted); }
+
+/* Progress: 4px capsule, track = fg at 10%, fill ink (green/red by meaning). */
+.exam-section-breakdown-fill { background: var(--text-strong); box-shadow: none; }
+body[data-page="exams"] .exam-progress-segment { border-radius: 999px; background: var(--track); }
+body[data-page="exams"] .exam-progress-segment:hover { background: color-mix(in srgb, var(--text) 22%, transparent); }
+body[data-page="exams"] .exam-progress-segment.is-answered { background: color-mix(in srgb, var(--text) 55%, transparent); }
+body[data-page="exams"] .exam-progress-segment.is-current { background: var(--text-strong); }
+body[data-page="exams"] .exam-progress-segment.is-correct { background: var(--green); }
+body[data-page="exams"] .exam-progress-segment.is-wrong { background: var(--red); }
+
+/* Switches: iOS-style, green when on (Rota's toggle tint). */
+.settings-switch.is-on::before { background: var(--green); }
+.settings-switch-knob { background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); }
+
+/* Status dot: 7px, green pulsing ring when live. */
+.pt-status-dot { width: 7px; height: 7px; }
+@keyframes rota-pulse {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 45%, transparent); }
+  to { box-shadow: 0 0 0 7px transparent; }
+}
+.ix-energize.is-on::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  vertical-align: 1px;
+  animation: rota-pulse 1.8s ease-out infinite;
+}
+html.reduce-motion .ix-energize.is-on::before { animation: none; }
+@media (prefers-reduced-motion: reduce) { .ix-energize.is-on::before { animation: none; } }
 
 @media (max-width: 720px) {
   .page-header h1,
@@ -6891,7 +7071,7 @@ html[data-theme="light"] .learning-list { box-shadow: var(--shadow-card); }
   .notes-header h1,
   .tool-library h1,
   .settings-header h1 { font-size: 1.75rem; overflow-wrap: anywhere; }
-  .brand strong { font-size: 1.15rem; }
+  .brand strong { font-size: 24px; }
   body[data-page="exams"] .exam-title-text { font-size: 1.5rem; }
 }
 
@@ -6904,24 +7084,56 @@ body[data-page="exams"] .exam-next-btn {
   gap: 8px;
 }
 
-/* Exam primary actions use the primary fill like every other primary button. */
-body[data-page="exams"] .exam-next-btn,
-body[data-page="exams"] .exam-submit-btn {
-  border-color: var(--primary);
-  border-radius: var(--radius-md);
-  background: var(--primary);
-  color: var(--on-primary);
-  font-weight: 500;
-  letter-spacing: 0;
-}
-body[data-page="exams"] .exam-next-btn:hover:not(:disabled),
-body[data-page="exams"] .exam-submit-btn:hover:not(:disabled) {
-  border-color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 88%, var(--bg));
-}
-body[data-page="exams"] .exam-next-btn:disabled,
-body[data-page="exams"] .exam-submit-btn:disabled {
-  border-color: var(--border);
-  background: var(--surface-soft);
-  color: var(--muted);
+/* ── Mobile tab bar: Rota's GlassTabBar ─────────────────────────────────
+   A full-width dark frosted band that fades in from the content above.
+   Always dark, even in the light theme. */
+@media (max-width: 720px) {
+  :root { --mobile-tabbar-h: calc(64px + env(safe-area-inset-bottom)); }
+  .mobile-tabbar {
+    height: var(--mobile-tabbar-h);
+    padding: 14px max(8px, env(safe-area-inset-right)) calc(2px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    border-top: 0;
+    background: transparent;
+    isolation: isolate;
+  }
+  .mobile-tabbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    /* Stops are px from the top, not %, so the home-indicator inset only
+       extends the opaque part and the fade never reaches the icon row. */
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0, rgba(0, 0, 0, 0.75) 29px, rgba(0, 0, 0, 0.92) 64px);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.85) 8px, #000 14px);
+    mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.85) 8px, #000 14px);
+  }
+  .mobile-tab,
+  .mobile-tab:hover {
+    gap: 5px;
+    min-height: 48px;
+    padding: 6px 4px;
+    border-radius: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 10.5px;
+    font-weight: 500;
+    transition: transform 200ms var(--ease), color 150ms var(--ease);
+  }
+  .mobile-tab-icon { width: 22px; height: 22px; }
+  .mobile-tab.is-active { color: #fff; background: transparent; font-weight: 600; }
+  .mobile-tab.is-active .mobile-tab-icon { stroke-width: 2.3; }
+  .mobile-tab:active:not(:disabled) { transform: scale(0.9); }
+  .mobile-tab:focus-visible { outline-color: #fff; outline-offset: -2px; }
+  /* The exam footer runs down behind the band so nothing peeks between them. */
+  body[data-page="exams"] .exam-footer {
+    bottom: 0;
+    padding-bottom: calc(var(--mobile-tabbar-h) + 8px);
+    border-top-color: var(--line);
+    background: var(--bg);
+  }
+  body[data-page="exams"] .exam-stat > span { font-size: 10px; letter-spacing: 0.03em; }
+  .sheet-grid { gap: 10px; }
+  .sheet-card + .sheet-card { border-top-color: transparent; }
 }

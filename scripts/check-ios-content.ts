@@ -168,7 +168,6 @@ async function verifyExamIndexParity(
   const expectedManifestPaths = new Set([
     "calculators.json",
     "cheat-sheet.json",
-    "course-guides.json",
     "exam-index.json",
     "tutorials.json",
     ...examIds.map((examId) => `exams/${examId}.json`),

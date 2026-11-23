@@ -37,7 +37,12 @@ struct ExamsView: View {
                 SparkyBackdrop()
 
                 ScrollView {
-                    LazyVStack(spacing: 16) {
+                    LazyVStack(spacing: 12) {
+                        SparkyPageHeader("Exams", subtitle: "Practice tests with worked answers") {
+                            SparkyAccountToolbarItem()
+                        }
+                        SparkySearchField(prompt: "Search exams", text: $searchText)
+                            .padding(.bottom, 6)
                         ForEach(filteredExams) { exam in
                             NavigationLink(value: exam.id) {
                                 ExamCatalogCard(
@@ -55,15 +60,8 @@ struct ExamsView: View {
                 .scrollIndicators(.hidden)
             }
             .navigationTitle("Exams")
-            .searchable(text: $searchText, prompt: "Search exams")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    SparkyBrandMark(size: 31)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    SparkyAccountToolbarItem()
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
+            .scrollDismissesKeyboard(.interactively)
             .navigationDestination(for: String.self) { examID in
                 ExamDetailView(
                     examID: examID,
@@ -144,8 +142,7 @@ private struct ExamCatalogCard: View {
 
             if completedTests > 0 || answeredQuestions > 0 {
                 HStack(spacing: 11) {
-                    ProgressView(value: progress)
-                        .tint(Color.sparkyAccent)
+                    SparkyProgressTrack(value: progress)
                     Text(completedTests == exam.testCount ? "Complete" : "\(completedTests)/\(exam.testCount) complete")
                         .font(.sparky(.caption, weight: .semibold))
                         .foregroundStyle(Color.sparkyMuted)
@@ -449,7 +446,7 @@ private struct ExamSessionView: View {
         }
         .navigationTitle(test.title)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
+        .sparkyTabBarHidden()
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
@@ -470,7 +467,7 @@ private struct ExamSessionView: View {
                     } label: {
                         Image(systemName: progress.flaggedQuestions.contains(question.number) ? "flag.fill" : "flag")
                     }
-                    .tint(progress.flaggedQuestions.contains(question.number) ? Color.sparkyAccent : nil)
+                    .tint(progress.flaggedQuestions.contains(question.number) ? Color.sparkyWarning : nil)
                     .accessibilityLabel(progress.flaggedQuestions.contains(question.number) ? "Remove flag" : "Flag question")
                 }
 
@@ -556,8 +553,7 @@ private struct ExamSessionView: View {
                     .font(.sparky(.caption, weight: .bold).monospacedDigit())
                     .foregroundStyle(Color.sparkyMuted)
             }
-            ProgressView(value: Double(currentIndex + 1), total: Double(max(questions.count, 1)))
-                .tint(Color.sparkyAccent)
+            SparkyProgressTrack(value: (Double(currentIndex + 1)) / (Double(max(questions.count, 1))))
             HStack {
                 Label("\(progress.answers.count) answered", systemImage: "checkmark.circle")
                 Spacer()
@@ -593,7 +589,7 @@ private struct ExamSessionView: View {
                         .foregroundStyle(Color.sparkyMuted)
                 }
                 Spacer()
-                ProgressRing(progress: score.percentage, size: 58)
+                ProgressRing(progress: score.percentage, size: 58, color: score.passed ? .sparkySuccess : .sparkyDanger)
             }
 
             HStack {
@@ -620,10 +616,13 @@ private struct ExamSessionView: View {
                 Haptics.selection()
             } label: {
                 Image(systemName: "chevron.left")
-                    .frame(width: 44, height: 44)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(currentIndex == 0 ? Color.sparkyFaint : Color.sparkyText)
+                    .frame(width: 52, height: 52)
+                    .background(Color.sparkySurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
-            .buttonStyle(.bordered)
-            .tint(Color.sparkyAccent)
+            .buttonStyle(SparkyPressStyle())
             .disabled(currentIndex == 0)
             .accessibilityLabel("Previous question")
 
@@ -681,9 +680,21 @@ private struct ExamSessionView: View {
             }
         }
         .padding(.horizontal, SparkyLayout.pageInset)
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial)
-        .overlay(alignment: .top) { Divider().overlay(Color.sparkyBorder) }
+        .padding(.top, 22)
+        .padding(.bottom, 8)
+        .background {
+            // Fades the content out under the controls instead of a hard bar edge (as in Rota).
+            LinearGradient(
+                stops: [
+                    .init(color: Color.sparkyBackground.opacity(0), location: 0),
+                    .init(color: Color.sparkyBackground, location: 0.3),
+                    .init(color: Color.sparkyBackground, location: 1),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea(edges: .bottom)
+        }
     }
 
     private func restorePosition() {
@@ -826,7 +837,7 @@ private struct QuestionCard: View {
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.circle)
                     .controlSize(.small)
-                    .tint(Color.sparkyAccent)
+                    .tint(Color.sparkyText)
                     .accessibilityIdentifier("exam.question.answer-toggle")
                     .accessibilityHint(
                         answerRevealed
@@ -910,15 +921,19 @@ private struct ExamOptionCard: View {
     private var accent: Color {
         if showsAnswer && correct { return .sparkySuccess }
         if submitted && selected { return .sparkyDanger }
-        if selected { return .sparkyAccent }
-        return .sparkyBorder
+        if selected { return .sparkyText }
+        return .clear
+    }
+
+    /// Tint for the explanation row; unselected wrong options have no accent of their own.
+    private var feedbackTint: Color {
+        accent == .clear ? .sparkyMuted : accent
     }
 
     private var fill: Color {
         if showsAnswer && correct { return .sparkySuccess.opacity(0.11) }
         if submitted && selected { return .sparkyDanger.opacity(0.10) }
-        if selected { return .sparkyAccentSoft }
-        return .sparkyBackground.opacity(submitted ? 0.45 : 0.58)
+        return .sparkySurfaceRaised.opacity(submitted && !selected ? 0.6 : 1)
     }
 
     var body: some View {
@@ -930,7 +945,7 @@ private struct ExamOptionCard: View {
                             ZStack {
                                 Circle()
                                     .fill(selected || (showsAnswer && correct) ? accent : Color.clear)
-                                Circle().stroke(accent, lineWidth: 1.5)
+                                Circle().stroke(accent == .clear ? Color.sparkyFaint : accent, lineWidth: 1.5)
                                 Text(choice.rawValue)
                                     .font(.sparkyMono(.caption, weight: .bold))
                                     .foregroundStyle(selected || (showsAnswer && correct) ? Color.sparkyBackground : Color.sparkyText)
@@ -990,10 +1005,10 @@ private struct ExamOptionCard: View {
             }
 
             if showsAnswer && (correct || explanationExpanded) {
-                Divider().overlay(accent.opacity(0.45))
+                Divider().overlay(feedbackTint.opacity(0.45))
                 HStack(alignment: .top, spacing: 9) {
                     Image(systemName: correct ? "checkmark.circle" : "info.circle")
-                        .foregroundStyle(accent)
+                        .foregroundStyle(feedbackTint)
                     Text(feedback.text)
                         .font(.sparky(.subheadline))
                         .foregroundStyle(Color.sparkyMuted)
@@ -1170,7 +1185,7 @@ private struct QuestionNavigatorSheet: View {
                                             if progress.flaggedQuestions.contains(question.number) {
                                                 Image(systemName: "flag.fill")
                                                     .font(.system(size: 8))
-                                                    .foregroundStyle(Color.sparkyAccentText)
+                                                    .foregroundStyle(Color.sparkyWarning)
                                                     .padding(5)
                                             }
                                         }
@@ -1199,7 +1214,7 @@ private struct QuestionNavigatorSheet: View {
         if progress.submitted {
             return progress.answers[question.number] == question.answer ? .sparkySuccess : .sparkyDanger
         }
-        if progress.answers[question.number] != nil { return .sparkyAccent }
+        if progress.answers[question.number] != nil { return .sparkyText }
         return .sparkyMuted
     }
 

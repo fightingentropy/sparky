@@ -43,8 +43,10 @@ struct AccountToolbarButton<SyncStatusContent: View>: View {
             AccountAvatarView(
                 avatarDataURL: authStore.user?.avatar,
                 displayName: authStore.user?.displayName,
-                size: 32
+                size: 36
             )
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(authStore.user == nil ? "Profile menu" : "Profile menu for \(authStore.user?.displayName ?? "your account")")
@@ -156,7 +158,7 @@ struct AccountAvatarView: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color.sparkyAccentSoft)
+                .fill(Color.sparkySurfaceRaised)
 
             if let avatarImage {
                 Image(uiImage: avatarImage)
@@ -165,19 +167,15 @@ struct AccountAvatarView: View {
             } else if let initial {
                 Text(initial)
                     .font(.sparkyFixed(size: size * 0.42, weight: .bold))
-                    .foregroundStyle(Color.sparkyAccentText)
+                    .foregroundStyle(Color.sparkyText)
             } else {
                 Image(systemName: "person.fill")
                     .font(.system(size: size * 0.42, weight: .semibold))
-                    .foregroundStyle(Color.sparkyAccentText)
+                    .foregroundStyle(Color.sparkyText)
             }
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
-        .overlay {
-            Circle()
-                .stroke(Color.sparkyBorder, lineWidth: 1)
-        }
         .contentShape(Circle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
@@ -602,7 +600,7 @@ private struct AccountRestoringView: View {
         VStack(spacing: 14) {
             ProgressView()
                 .controlSize(.large)
-                .tint(Color.sparkyAccent)
+                .tint(Color.sparkyText)
             Text("Restoring your account…")
                 .font(.sparky(.headline))
                 .foregroundStyle(Color.sparkyText)
@@ -638,12 +636,7 @@ private struct AccountInputModifier: ViewModifier {
             .foregroundStyle(Color.sparkyText)
             .padding(.horizontal, 14)
             .frame(minHeight: 50)
-            .background(Color.sparkyBackground.opacity(0.75))
-            .clipShape(RoundedRectangle(cornerRadius: SparkyLayout.controlRadius, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: SparkyLayout.controlRadius, style: .continuous)
-                    .stroke(Color.sparkyBorder, lineWidth: 1)
-            }
+            .background(Color.sparkySurfaceRaised, in: RoundedRectangle(cornerRadius: SparkyLayout.innerRadius, style: .continuous))
     }
 }
 

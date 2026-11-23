@@ -6,14 +6,31 @@ struct MoreView: View {
     let studyState: StudyStateStore
     let progressStore: ProgressStore
 
+    @Environment(InspectionTrainingStore.self) private var inspectionTrainingStore
+
     var body: some View {
         NavigationStack {
             ZStack {
                 SparkyBackdrop()
 
                 ScrollView {
-                    LazyVStack(spacing: 18) {
+                    LazyVStack(spacing: 12) {
+                        SparkyPageHeader("More", subtitle: "Account, labs, tutorials, history and settings")
                         SparkyAccountSummaryCard()
+
+                        NavigationLink {
+                            InspectionTrainingHomeView()
+                        } label: {
+                            MoreDestinationCard(
+                                eyebrow: "Hands-on practice",
+                                title: "Inspection & testing labs",
+                                detail: "\(InspectionTrainingCatalog.labs.count) interactive labs · \(inspectionTrainingStore.completedLabCount) complete",
+                                symbol: "waveform.path.ecg.rectangle"
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("more-inspection-labs")
+                        .accessibilityHint("Practise using a virtual tester and interpreting results")
 
                         NavigationLink {
                             TutorialsView(tutorials: tutorials)
@@ -65,14 +82,7 @@ struct MoreView: View {
                 .scrollIndicators(.hidden)
             }
             .navigationTitle("More")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    SparkyBrandMark(size: 31)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    SparkyAccountToolbarItem()
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 
@@ -256,7 +266,7 @@ private struct TutorialStepsDisclosure: View {
             .padding(.top, 10)
         }
         .font(.sparky(.subheadline, weight: .semibold))
-        .tint(Color.sparkyAccent)
+        .tint(Color.sparkyText)
     }
 }
 
@@ -324,6 +334,7 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Group {
             Section {
                 ForEach(AppTab.allCases) { tab in
                     Toggle(
@@ -333,7 +344,7 @@ struct SettingsView: View {
                     .disabled(isLastVisibleTab(tab))
                 }
             } header: {
-                Text("Navigation")
+                SparkyEyebrow(text: "Navigation")
             } footer: {
                 Text("Choose which pages appear in the bottom tab bar. Keep at least one page visible; Settings remains available from the profile menu.")
             }
@@ -347,56 +358,64 @@ struct SettingsView: View {
                     .disabled(isLastVisibleExam(exam.id))
                 }
             } header: {
-                Text("Exam library")
+                SparkyEyebrow(text: "Exam library")
             } footer: {
                 Text("Choose which qualifications appear in Exams. Hidden categories keep their saved progress and can be shown again here.")
             }
 
-            Section("Appearance") {
+            Section {
                 Picker("Theme", selection: $appearance) {
                     ForEach(AppAppearance.allCases) { option in
                         Text(option.title).tag(option.rawValue)
                     }
                 }
                 Toggle("Comfortable text spacing", isOn: $comfortableText)
+            } header: {
+                SparkyEyebrow(text: "Appearance")
             }
 
-            Section("Feedback") {
+            Section {
                 Toggle("Haptics", isOn: $hapticsEnabled)
+            } header: {
+                SparkyEyebrow(text: "Feedback")
             }
 
-            Section("Study data") {
-                LabeledContent("Saved notes", value: "\(studyState.savedNoteIDs.count)")
-                LabeledContent("Completed guides", value: "\(studyState.completedGuideIDs.count)")
-                LabeledContent("Training labs complete", value: "\(inspectionTrainingStore.completedLabCount)")
-                LabeledContent("Calculations", value: "\(studyState.recentCalculations.count)")
-                LabeledContent("Exam banks in progress", value: "\(progressStore.exams.count)")
+            Section {
                 Button("Reset study and training progress", role: .destructive) {
                     showingResetConfirmation = true
                 }
                 Button("Reset all exam attempts", role: .destructive) {
                     showingExamResetConfirmation = true
                 }
+            } header: {
+                SparkyEyebrow(text: "Study data")
             }
 
-            Section("Account and support") {
+            Section {
                 Link("Privacy policy", destination: URL(string: "https://electrics.pages.dev/privacy")!)
                 Link("Help and support", destination: URL(string: "https://electrics.pages.dev/support")!)
                 Link("Delete account", destination: URL(string: "https://electrics.pages.dev/delete-account")!)
                     .foregroundStyle(Color.sparkyDanger)
                     .accessibilityHint("Opens Sparky's secure account deletion page")
+            } header: {
+                SparkyEyebrow(text: "Account and support")
             }
 
-            Section("About") {
+            Section {
                 LabeledContent("Version", value: appVersion)
                 Link("Open Sparky on the web", destination: URL(string: "https://electrics.pages.dev")!)
                 Text("Made for UK electrical learning and site work.")
                     .font(.sparky(.caption))
                     .foregroundStyle(Color.sparkyMuted)
+            } header: {
+                SparkyEyebrow(text: "About")
             }
+            }
+            .listRowBackground(Color.sparkySurface)
         }
         .scrollContentBackground(.hidden)
         .background(SparkyBackdrop())
+        .tint(Color.sparkyText)
         .navigationTitle("Settings")
         .confirmationDialog(
             "Reset local study data?",
@@ -408,7 +427,7 @@ struct SettingsView: View {
                 inspectionTrainingStore.resetAll()
             }
         } message: {
-            Text("This removes saved notes, completed guides, calculation history and inspection-training progress from this device. Exam attempts are kept.")
+            Text("This removes saved notes, calculation history and inspection-training progress from this device. Exam attempts are kept.")
         }
         .confirmationDialog(
             "Reset every exam attempt?",
@@ -485,8 +504,6 @@ struct SettingsView: View {
     }
 
     private var appVersion: String {
-        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
-        return "\(version) (\(build))"
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
     }
 }

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import { AuthProvider } from "./AuthContext";
 import App from "./App";
+import { migrateRemovedNavigationPages } from "./navigationPreferences";
 import { claimPreloadRecovery, recoverFromPreloadError } from "./pwaRecovery";
 import "./styles.css";
 
@@ -52,6 +53,9 @@ window.addEventListener("vite:preloadError", (event) => {
     scheduleReload: (callback, delayMs) => window.setTimeout(callback, delayMs)
   });
 });
+
+// Runs before the first render so App reads the cleaned navigation preference.
+migrateRemovedNavigationPages();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

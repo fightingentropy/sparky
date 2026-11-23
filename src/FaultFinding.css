@@ -1,4 +1,4 @@
-/* FaultFinding — dark theme, orange accent. All classes prefixed with ff-. */
+/* FaultFinding — Rota palette: flat cards, ink selection, green accent. All classes prefixed with ff-. */
 
 .ff-shell {
   width: 100%;
@@ -6,8 +6,8 @@
   min-height: 600px;
   display: flex;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -43,8 +43,8 @@
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent-strong);
-  font-weight: 700;
+  color: var(--muted);
+  font-weight: 500;
 }
 
 .ff-scene-name {
@@ -65,20 +65,20 @@
 }
 
 .ff-d-easy {
-  color: var(--success);
-  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
+  color: var(--success-text);
+  border-color: color-mix(in srgb, var(--success-text) 45%, var(--border));
   background: var(--success-soft);
 }
 
 .ff-d-medium {
-  color: var(--accent-strong);
-  border-color: var(--accent-line);
-  background: var(--accent-soft);
+  color: var(--warning-text);
+  border-color: color-mix(in srgb, var(--warning-text) 45%, var(--border));
+  background: var(--warning-soft);
 }
 
 .ff-d-hard {
-  color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  color: var(--danger-text);
+  border-color: color-mix(in srgb, var(--danger-text) 45%, var(--border));
   background: var(--danger-soft);
 }
 
@@ -96,21 +96,21 @@
 
 .ff-tp-dot {
   fill: var(--surface);
-  stroke: var(--accent-strong);
+  stroke: var(--text-strong);
   stroke-width: 1.6;
   transition: fill 160ms var(--ease), stroke 160ms var(--ease);
 }
 
 .ff-tp:hover .ff-tp-dot {
   fill: var(--surface);
-  stroke: var(--accent-strong);
+  stroke: var(--text-strong);
   filter: none;
 }
 
 /* Keyboard focus: clear ring on the dot and reveal the description tooltip. */
 .ff-tp:focus-visible { outline: none; }
 .ff-tp:focus-visible .ff-tp-dot {
-  stroke: var(--accent-strong);
+  stroke: var(--text-strong);
   stroke-width: 2.4;
 }
 .ff-tp:focus-visible .ff-tp-tooltip { opacity: 1; }
@@ -190,7 +190,7 @@
 
 .ff-segmented {
   display: inline-flex;
-  background: var(--surface-soft);
+  background: var(--surface-alt);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -214,13 +214,15 @@
 .ff-segment:hover { color: var(--text); }
 
 .ff-segment-on {
-  background: var(--accent-muted);
-  color: var(--accent-strong);
+  background: var(--primary);
+  color: var(--on-primary);
 }
+
+.ff-segment-on:hover { color: var(--on-primary); }
 
 .ff-segment-red {
   background: var(--danger-soft);
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 .ff-segment-black {
@@ -259,8 +261,8 @@
 
 .ff-card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
   padding: 12px 14px;
   box-shadow: var(--shadow-card);
   display: flex;
@@ -281,8 +283,8 @@
   width: 22px;
   height: 22px;
   border-radius: var(--radius-sm);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
+  background: var(--surface-alt);
+  color: var(--muted-strong);
 }
 
 .ff-card-title {
@@ -310,8 +312,8 @@
 .ff-current-stats {
   min-width: 0;
   padding: 9px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  border-radius: 12px;
   background: var(--surface-alt);
 }
 
@@ -420,8 +422,9 @@
 
 .ff-streak-num {
   font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--accent-strong);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text-strong);
   line-height: 1;
 }
 
@@ -444,12 +447,12 @@
 }
 
 .ff-mastery {
-  border-color: color-mix(in srgb, var(--success) 45%, var(--border));
+  border-color: color-mix(in srgb, var(--success-text) 45%, var(--border));
   background: var(--success-soft);
 }
 
 .ff-mastery strong {
-  color: var(--success);
+  color: var(--success-text);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-size: 0.85rem;
@@ -620,10 +623,12 @@
 
 .ff-mode-btn:hover { color: rgba(255, 255, 255, 0.65); border-color: #3a3d40; }
 
-.ff-mode-active {
-  background: var(--accent);
-  color: #1a1c1f;
-  border-color: var(--accent);
+/* The meter is always dark: the selected mode is an ink (light) fill. */
+.ff-mode-active,
+.ff-mode-active:hover {
+  background: #f0eeeb;
+  color: #100e0c;
+  border-color: #f0eeeb;
   box-shadow: none;
 }
 
@@ -657,7 +662,7 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
-.ff-probe-status strong { color: var(--accent-strong); font-weight: 700; }
+.ff-probe-status strong { color: var(--green); font-weight: 700; }
 
 /* Hints / Diagnosis */
 .ff-hint-count {
@@ -669,9 +674,9 @@
 
 .ff-hint-btn {
   appearance: none;
-  border: 1px dashed var(--accent-muted);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
   border-radius: var(--radius-sm);
   font-weight: 700;
   font-size: 0.85rem;
@@ -681,7 +686,7 @@
   transition: background 140ms var(--ease), border-color 140ms var(--ease);
 }
 
-.ff-hint-btn:hover { background: transparent; border-color: var(--border); }
+.ff-hint-btn:hover { background: var(--surface-alt); border-color: var(--border-strong); }
 
 .ff-hint-list {
   list-style: none;
@@ -699,15 +704,15 @@
   line-height: 1.45;
   color: var(--muted-strong);
   padding: 8px 10px;
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  border-left: 2px solid var(--accent);
+  background: var(--surface-alt);
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
 }
 
 .ff-hint-num {
-  font-weight: 700;
-  color: var(--accent-strong);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--muted);
   flex-shrink: 0;
   font-size: 0.75rem;
 }
@@ -770,15 +775,15 @@
 .ff-choice-text { flex: 1; min-width: 0; }
 
 .ff-choice-selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  box-shadow: 0 0 0 1px var(--accent);
+  border-color: var(--text-strong);
+  background: var(--surface-alt);
+  box-shadow: none;
 }
 
 .ff-choice-selected .ff-choice-key {
-  background: var(--accent);
-  color: var(--on-accent);
-  border-color: var(--accent);
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
 }
 
 .ff-choice-correct {
@@ -787,10 +792,12 @@
   color: var(--text);
 }
 
+/* Filled keys and buttons carry on-accent text, so they use the darker
+   text-safe status shades (AA in the light theme). */
 .ff-choice-correct .ff-choice-key {
-  background: var(--success);
+  background: var(--success-text);
   color: var(--on-accent);
-  border-color: var(--success);
+  border-color: var(--success-text);
 }
 
 .ff-choice-wrong {
@@ -800,9 +807,9 @@
 }
 
 .ff-choice-wrong .ff-choice-key {
-  background: var(--danger);
+  background: var(--danger-text);
   color: var(--on-accent);
-  border-color: var(--danger);
+  border-color: var(--danger-text);
 }
 
 .ff-choice:disabled { cursor: default; }
@@ -811,7 +818,7 @@
   appearance: none;
   width: 100%;
   padding: 10px 14px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   border: 1px solid var(--primary);
   background: var(--primary);
   color: var(--on-primary);
@@ -831,14 +838,14 @@
 .ff-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .ff-submit-next {
-  background: var(--success);
-  border-color: var(--success);
+  background: var(--success-text);
+  border-color: var(--success-text);
   color: var(--on-accent);
 }
 
 .ff-submit-retry {
-  background: var(--danger);
-  border-color: var(--danger);
+  background: var(--danger-text);
+  border-color: var(--danger-text);
   color: var(--on-accent);
 }
 
@@ -867,7 +874,7 @@
   color: var(--text);
 }
 
-.ff-banner-good .ff-banner-head { color: var(--success); }
+.ff-banner-good .ff-banner-head { color: var(--success-text); }
 
 .ff-banner-bad {
   background: var(--danger-soft);
@@ -875,7 +882,7 @@
   color: var(--text);
 }
 
-.ff-banner-bad .ff-banner-head { color: var(--danger); }
+.ff-banner-bad .ff-banner-head { color: var(--danger-text); }
 .ff-banner p { margin: 0; }
 
 .ff-confirm { font-size: 0.82rem; color: var(--muted-strong); }

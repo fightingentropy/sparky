@@ -78,65 +78,6 @@ struct ContentManifest: Codable, Hashable, Sendable {
     let files: [ContentManifestFile]
 }
 
-enum GuideCategory: String, Codable, CaseIterable, Hashable, Sendable {
-    case route
-    case qualification
-    case assessment
-    case reference
-}
-
-struct GuideFact: Codable, Hashable, Sendable {
-    let label: String
-    let value: String
-}
-
-struct GuideNoteLink: Codable, Hashable, Identifiable, Sendable {
-    let noteID: String
-    let label: String
-
-    var id: String { noteID }
-
-    private enum CodingKeys: String, CodingKey {
-        case noteID = "noteId"
-        case label
-    }
-}
-
-struct GuideSection: Codable, Hashable, Sendable {
-    let title: String
-    let items: [String]
-}
-
-struct CourseGuide: Codable, Hashable, Identifiable, Sendable {
-    let id: String
-    let title: String
-    let kicker: String
-    let category: GuideCategory
-    let summary: String
-    let examID: String?
-    let examLabel: String?
-    let noteLinks: [GuideNoteLink]?
-    let facts: [GuideFact]
-    let sections: [GuideSection]
-    let pitfalls: [String]
-    let nextActions: [String]
-
-    private enum CodingKeys: String, CodingKey {
-        case id
-        case title
-        case kicker
-        case category
-        case summary
-        case examID = "examId"
-        case examLabel
-        case noteLinks
-        case facts
-        case sections
-        case pitfalls
-        case nextActions
-    }
-}
-
 struct Tutorial: Codable, Hashable, Identifiable, Sendable {
     let id: String
     let videoID: String
