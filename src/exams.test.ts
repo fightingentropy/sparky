@@ -230,6 +230,16 @@ describe("exam data", () => {
     );
   });
 
+  it("explains every Initial Verification and Fundamental homework answer specifically", () => {
+    for (const exam of [focusedInitialVerificationExam, fundamentalInspectionExam]) {
+      for (const question of getQuestionsForVariant(exam, 1)) {
+        expect(question.explanation, `${exam.id} homework Q${question.number}`).not.toMatch(
+          /applicable answer for the stated conditions/i
+        );
+      }
+    }
+  });
+
   it("adds the Fundamental homework paper alongside the focused single-phase mock", () => {
     expect(Object.values(FUNDAMENTAL_BLUEPRINT_COUNTS).reduce((sum, count) => sum + count, 0))
       .toBe(30);

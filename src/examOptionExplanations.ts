@@ -14,6 +14,7 @@ import { eighteenthEditionQ29703To29706 } from "./examRationales/eighteenthEditi
 import { eighteenthEditionQ29707To29710 } from "./examRationales/eighteenthEditionQ29707To29710";
 import { eighteenthEditionQ29711To29715 } from "./examRationales/eighteenthEditionQ29711To29715";
 import { initialVerificationAuditFixes } from "./examRationales/initialVerificationAuditFixes";
+import { initialVerificationHomework } from "./examRationales/initialVerificationHomework";
 import { initialVerificationMock2 } from "./examRationales/initialVerificationMock2";
 import { initialVerificationTest1 } from "./examRationales/initialVerificationTest1";
 import { initialVerificationTest2 } from "./examRationales/initialVerificationTest2";
@@ -294,6 +295,7 @@ export const CURATED_RATIONALE_SETS: readonly CuratedRationaleSet[] = [
   ...initialVerificationTest8,
   ...initialVerificationMock2,
   ...initialVerificationAuditFixes,
+  ...initialVerificationHomework,
   ...inspectionDesign2396Part1,
   ...inspectionDesign2396Part2,
   ...inspectionDesign2396Part3,

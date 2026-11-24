@@ -8,6 +8,7 @@ import { periodicInspectionPart2Corrections } from "./examCorrections/periodicIn
 import { periodicInspectionPart3Corrections } from "./examCorrections/periodicInspectionPart3";
 import { periodicInspectionPart4Corrections } from "./examCorrections/periodicInspectionPart4";
 import { initialVerificationAuditCorrections } from "./examCorrections/initialVerificationAudit";
+import { initialVerificationHomeworkCorrections } from "./examCorrections/initialVerificationHomework";
 import type { ExamQuestionCorrection } from "./examCorrections/types";
 import { wiringRegulationsHomeworkCorrections } from "./examCorrections/wiringRegulationsHomework";
 import type { Exam, ExamQuestion } from "./exams/types";
@@ -24,6 +25,7 @@ const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
   ...periodicInspectionPart3Corrections,
   ...periodicInspectionPart4Corrections,
   ...initialVerificationAuditCorrections,
+  ...initialVerificationHomeworkCorrections,
   {
     examId: "initial-verification",
     variantId: "quiz-29745",

@@ -60,7 +60,12 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertTrue(exam.format.contains("60 minutes"))
         XCTAssertTrue(exam.format.contains("Guidance Note 3"))
         XCTAssertEqual(exam.contentSources?.first?.classification, .examConvention)
-        XCTAssertEqual(test.questions.first?.sourceIDs, exam.contentSources?.map(\.id))
+        // Questions that cite a table also carry a focused source, so the exam
+        // can list more sources than any one question uses.
+        XCTAssertEqual(
+            test.questions.first?.sourceIDs,
+            exam.contentSources?.first.map { [$0.id] }
+        )
     }
 
     @MainActor
