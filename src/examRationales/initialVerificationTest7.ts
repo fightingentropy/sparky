@@ -157,7 +157,7 @@ export const initialVerificationTest7 = [
     options: [
       "The Zs is within the maximum allowed",
       "The insulation resistance is acceptable",
-      "The polarity of switches and fuses are correct",
+      "The RCD operating time is within the required limit",
       "There is adequate access to switchgear",
     ],
     answer: "There is adequate access to switchgear",
@@ -166,8 +166,8 @@ export const initialVerificationTest7 = [
         "Earth-fault loop impedance is established by measurement or an accepted calculation and then compared with the protective-device limit. It cannot be determined by visual inspection alone.",
       "The insulation resistance is acceptable":
         "Insulation may look intact while hidden leakage or damage remains. Acceptance requires the prescribed insulation-resistance test, with connected equipment handled appropriately.",
-      "The polarity of switches and fuses are correct":
-        "Visible terminations may offer supporting evidence, but polarity must be verified throughout the circuit by the appropriate dead tests and supply check. Appearance alone is not sufficient evidence.",
+      "The RCD operating time is within the required limit":
+        "RCD operating time can only be established by testing the device with an RCD test instrument and comparing the result with the required maximum; it cannot be judged by looking at the device.",
     },
     sourceUrls: [
       "https://electrical.theiet.org/media/2822/bs7671-all-forms-v31.pdf",
@@ -396,14 +396,14 @@ export const initialVerificationTest7 = [
   },
   {
     prompt:
-      "In a fall-of-potential electrode test with the current spike 30 m away, a 62% reading is checked by moving the potential spike by 10% of the electrode-to-current-spike distance each way. How far is each check movement?",
+      "In a fall-of-potential electrode test with the current spike 30 m away, the reading taken with the potential spike midway is checked by moving the potential spike by 10% of the electrode-to-current-spike distance each way. How far is each check movement?",
     options: ["1 metre", "15 metres", "3 metres", "6 metres"],
     answer: "3 metres",
     rationales: {
       "1 metre":
         "One metre is only about 3.3 percent of the stated 30 m separation. A 10 percent check movement is three times that distance.",
       "15 metres":
-        "Fifteen metres is half the entire test-spike separation, not 10 percent. Moving that far would not provide the requested checks close to the 62 percent position.",
+        "Fifteen metres is half the entire test-spike separation, not 10 percent. Moving that far would not provide the requested checks close to the midway position.",
       "6 metres":
         "Six metres is 20 percent of the separation and is twice the specified movement. Ten percent of 30 m is 3 m.",
     },

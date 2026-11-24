@@ -803,7 +803,7 @@ export const initialVerificationTest1 = [
   },
   {
     prompt:
-      "What value requires the application of a multiplier correction factor when confirming an earth fault loop impedance test result complies with the IET Wiring Regulations?",
+      "When the 0.8 rule of thumb is used to confirm that a measured earth fault loop impedance complies with BS 7671, which values is the 0.8 factor applied to?",
     options: [
       "The measured R1+R2 value",
       "The measured ZS values",
@@ -817,11 +817,11 @@ export const initialVerificationTest1 = [
       "The measured ZS values":
         "The measured value represents the installation at its test temperature. For the standard 80% method, the permissible tabulated limit is reduced before the reading is compared with it; the reading itself is not multiplied down.",
       "The values in Guidance Note 3":
-        "GN3 and the On-Site Guide already publish maximum measured values adjusted for field use. Applying the 0.8 factor again would double-correct the limit.",
+        "Guidance Note 3's Appendix A already gives maximum measured values at 10 °C, so the 0.8 factor is not applied to them; only its Table A7 ambient-temperature correction is used when testing at another temperature.",
     },
     sourceUrls: [
+      "https://electrical.theiet.org/media/qxhf2est/guidance-note-3-2022-ninth-edition-first-printing-errata-november-2024.pdf",
       "https://electrical.theiet.org/wiring-matters/years/2024/100-may-2024/why-are-the-values-of-maximum-earth-fault-loop-impedance-different/",
-      "https://electrical.theiet.org/bs-7671-18th-edition-wiring-regulations/faqs/inspection-and-testing-faqs/",
     ],
   },
   {

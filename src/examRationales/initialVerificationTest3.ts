@@ -109,7 +109,7 @@ export const initialVerificationTest3 = [
       "(r1 & rn) value & polarity":
         "Lower-case r1 and rn denote the end-to-end line and neutral conductor resistances measured during the ring test. Those values alone are not the final line-to-CPC R1+R2 result named by this answer set.",
       "(r1 + r2) value & polarity":
-        "Lower-case r1 and r2 are the separate end-to-end resistances used to predict the cross-connected readings. The value recorded at an outlet after cross-connection is conventionally written R1+R2; the question's ampersand notation is malformed and should be corrected.",
+        "Lower-case r1 and r2 are the separate end-to-end resistances used to predict the cross-connected readings. The value recorded at an outlet after cross-connection is conventionally written R1+R2.",
     },
     sourceUrls: [
       "https://electrical.theiet.org/wiring-matters/years/2022/89-march-2022/resistance-readings-for-step-3-of-the-ring-final-circuit-test/",
@@ -218,16 +218,21 @@ export const initialVerificationTest3 = [
   },
   {
     prompt:
-      "Which insulation-resistance value is commonly used as a good-practice investigation trigger even though it is above the 1 MΩ minimum?",
-    options: ["0.5MΩ", "2.0MΩ", "2.5MΩ", "5MΩ"],
-    answer: "2.0MΩ",
+      "For a new installation, Guidance Note 3 says an insulation resistance reading that passes the 1 MΩ minimum should still be investigated if it is below which value?",
+    options: [
+      "0.5MΩ",
+      "2.0MΩ",
+      "20MΩ",
+      "5MΩ",
+    ],
+    answer: "20MΩ",
     rationales: {
       "0.5MΩ":
-        "A 0.5 MΩ result is below the usual 1 MΩ minimum for a low-voltage circuit and therefore requires correction, not merely discretionary investigation. This makes the wording awkward because 0.5 MΩ plainly also has to be investigated.",
-      "2.5MΩ":
-        "A 2.5 MΩ result is above the commonly cited 2 MΩ good-practice investigation threshold. It may still be assessed in context, but this value is not the threshold the question is testing.",
+        "A 0.5 MΩ reading is below the 1 MΩ minimum, so it fails outright rather than being a compliant reading that merely needs looking into.",
+      "2.0MΩ":
+        "Guidance Note 3 gives no 2 MΩ trigger; a 2 MΩ reading on new work is still ten times below the level at which it asks for investigation.",
       "5MΩ":
-        "Five megohms is comfortably above both the usual 1 MΩ minimum and the 2 MΩ investigation trigger. Nothing in this value alone points to deteriorated insulation.",
+        "Five megohms passes the 1 MΩ minimum but is still under 20 MΩ, so on a new installation it is a reading to investigate, not the investigation level itself.",
     },
     sourceUrls: [
       "https://electrical.theiet.org/bs-7671-18th-edition-wiring-regulations/faqs/inspection-and-testing-faqs/",
@@ -389,16 +394,16 @@ export const initialVerificationTest3 = [
   },
   {
     prompt:
-      "A 230 V circuit is protected by a 16 A BS EN 60898 Type B device. If the applicable maximum earth fault loop impedance is 2.73 Ω, what minimum fault current corresponds to that limit?",
+      "A 230 V circuit is protected by a 16 A BS EN 60898 Type B device. If the earth fault loop impedance equals the BS 7671 maximum of 2.73 Ω, what fault current would flow at the nominal 230 V?",
     options: ["123 A", "164 A", "248 A", "84 A"],
     answer: "84 A",
     rationales: {
       "123 A":
         "This would correspond to a much lower loop impedance of about 1.87 Ω. Dividing 230 V by the stated 2.73 Ω limit gives approximately 84 A.",
       "164 A":
-        "A current of 164 A would correspond to an impedance near 1.40 Ω at 230 V. That is not the stated maximum Zs of 2.87 Ω.",
+        "A current of 164 A would correspond to an impedance near 1.40 Ω at 230 V. That is not the stated maximum Zs of 2.73 Ω.",
       "248 A":
-        "A current of 248 A would imply a loop impedance of only about 0.93 Ω. It is much greater than the current calculated from the supplied 2.87 Ω value.",
+        "A current of 248 A would imply a loop impedance of only about 0.93 Ω. It is much greater than the current calculated from the supplied 2.73 Ω value.",
     },
     sourceUrls: [
       "https://electrical.theiet.org/wiring-matters/years/2024/100-may-2024/why-are-the-values-of-maximum-earth-fault-loop-impedance-different/",

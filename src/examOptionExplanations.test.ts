@@ -565,7 +565,7 @@ describe("exam option explanations", () => {
         "sourceUrls" in entry && Array.isArray(entry.sourceUrls),
     );
 
-    expect(sourcedSets).toHaveLength(4915);
+    expect(sourcedSets).toHaveLength(4921);
     for (const entry of sourcedSets) {
       expect(entry.sourceUrls.length).toBeGreaterThan(0);
       for (const sourceUrl of entry.sourceUrls) {

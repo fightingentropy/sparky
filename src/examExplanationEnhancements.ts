@@ -7,6 +7,7 @@ import { periodicInspectionCorrections } from "./examCorrections/periodicInspect
 import { periodicInspectionPart2Corrections } from "./examCorrections/periodicInspectionPart2";
 import { periodicInspectionPart3Corrections } from "./examCorrections/periodicInspectionPart3";
 import { periodicInspectionPart4Corrections } from "./examCorrections/periodicInspectionPart4";
+import { initialVerificationAuditCorrections } from "./examCorrections/initialVerificationAudit";
 import type { ExamQuestionCorrection } from "./examCorrections/types";
 import { wiringRegulationsHomeworkCorrections } from "./examCorrections/wiringRegulationsHomework";
 import type { Exam, ExamQuestion } from "./exams/types";
@@ -22,6 +23,7 @@ const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
   ...periodicInspectionPart2Corrections,
   ...periodicInspectionPart3Corrections,
   ...periodicInspectionPart4Corrections,
+  ...initialVerificationAuditCorrections,
   {
     examId: "initial-verification",
     variantId: "quiz-29745",
@@ -657,9 +659,11 @@ const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
     promptSuffix:
       "As good practice, which insulation resistance value should be investigated:",
     correctedPromptSuffix:
-      "Which insulation-resistance value is commonly used as a good-practice investigation trigger even though it is above the 1 MΩ minimum?",
+      "For a new installation, Guidance Note 3 says an insulation resistance reading that passes the 1 MΩ minimum should still be investigated if it is below which value?",
+    options: { C: "20MΩ" },
+    answer: "C",
     explanation:
-      "A reading around 2 MΩ warrants investigation because sound disconnected wiring would normally be much higher, even though the formal minimum for the stated circuit is 1 MΩ. A 0.5 MΩ result is already below the minimum and therefore fails rather than merely triggering a good-practice review.",
+      "BS 7671 accepts 1 MΩ, but Guidance Note 3 points out that new wiring should read far higher than that, so on a new installation any value below 20 MΩ is investigated even though it complies. It gives no 2 MΩ trigger.",
   },
   {
     examId: "initial-verification",
@@ -678,10 +682,10 @@ const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
     promptSuffix:
       "A 230 V single-phase circuit is protected by a 16 A device to BS EN 60898 Type B. Which one of the following is the minimum value of current required to cause effective disconnection in the required time if the maximum permitted earth fault loop impedance is 2.87Ω:",
     correctedPromptSuffix:
-      "A 230 V circuit is protected by a 16 A BS EN 60898 Type B device. If the applicable maximum earth fault loop impedance is 2.73 Ω, what minimum fault current corresponds to that limit?",
+      "A 230 V circuit is protected by a 16 A BS EN 60898 Type B device. If the earth fault loop impedance equals the BS 7671 maximum of 2.73 Ω, what fault current would flow at the nominal 230 V?",
     options: { D: "84 A" },
     explanation:
-      "Using Ohm's law, fault current = U0 ÷ Zs = 230 V ÷ 2.73 Ω = 84.25 A, so the nearest listed value is 84 A. The 2.73 Ω limit incorporates the current BS 7671 minimum-voltage factor rather than the older 2.87 Ω figure.",
+      "Using Ohm's law at the nominal voltage, fault current = U0 ÷ Zs = 230 V ÷ 2.73 Ω = 84.25 A, so the nearest listed value is 84 A. The 2.73 Ω limit itself is worked out with the minimum voltage factor Cmin of 0.95 (0.95 × 230 V ÷ 80 A), where 80 A is 5 × In, the current that trips a 16 A Type B device instantaneously; the older 2.87 Ω figure (230 V ÷ 80 A) left Cmin out.",
   },
   {
     examId: "initial-verification",
@@ -2075,7 +2079,7 @@ const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
     promptSuffix:
       "During earth electrode resistance testing the current test spike is placed 30 metres from the earth electrode under test. The potential test spike is placed midway between the earth electrode and the current spike. The potential spike would then normally be moved a distance each way of approximately:",
     correctedPromptSuffix:
-      "In a fall-of-potential electrode test with the current spike 30 m away, a 62% reading is checked by moving the potential spike by 10% of the electrode-to-current-spike distance each way. How far is each check movement?",
+      "In a fall-of-potential electrode test with the current spike 30 m away, the reading taken with the potential spike midway is checked by moving the potential spike by 10% of the electrode-to-current-spike distance each way. How far is each check movement?",
     explanation:
       "Ten percent of the 30 m separation is 3 m, so the potential spike is moved 3 m nearer and 3 m farther away to check for a stable plateau. The exact field layout must still follow the instrument manufacturer's method and site conditions.",
   },

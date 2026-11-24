@@ -300,20 +300,25 @@ export const initialVerificationTest2 = [
   },
   {
     prompt:
-      "On a typical 230 V circuit (IR test at 500 V DC), which insulation resistance value should be investigated as good practice?",
-    options: ["0.5MΩ", "2.0MΩ", "2.5MΩ", "5MΩ"],
-    answer: "2.0MΩ",
+      "On a new installation, a 230 V circuit tested at 500 V DC gives an insulation resistance above the 1 MΩ minimum. Below what value does Guidance Note 3 say such a reading should still be investigated?",
+    options: [
+      "0.5MΩ",
+      "2.0MΩ",
+      "20MΩ",
+      "5MΩ",
+    ],
+    answer: "20MΩ",
     rationales: {
       "0.5MΩ":
-        "This is below the 1 MΩ minimum for the stated test conditions. It is a failed result requiring correction rather than merely a precautionary investigation of an otherwise compliant value.",
-      "2.5MΩ":
-        "This is above both the mandatory minimum and the commonly used low-reading investigation threshold. It may still be compared with design or historic results, but the number alone does not trigger that particular good-practice warning.",
+        "0.5 MΩ is below the 1 MΩ minimum for a 230 V circuit tested at 500 V DC, so it is a failed result rather than a compliant reading that needs looking into.",
+      "2.0MΩ":
+        "There is no 2 MΩ investigation level in Guidance Note 3; on a new installation a 2 MΩ reading sits well below its 20 MΩ threshold.",
       "5MΩ":
-        "This comfortably exceeds the minimum and is not close to the low-value threshold in the question. Investigation could be justified by an adverse trend, but no such history is supplied.",
+        "5 MΩ passes the 1 MΩ minimum but is still below 20 MΩ, so on new work it is one of the readings to investigate rather than the threshold itself.",
     },
     sourceUrls: [
-      "https://electrical.theiet.org/wiring-matters/years/2020/81-july-2020/history-of-insulation-resistance-testing/",
       "https://electrical.theiet.org/bs-7671-18th-edition-wiring-regulations/faqs/inspection-and-testing-faqs/",
+      "https://electrical.theiet.org/wiring-matters/years/2020/81-july-2020/history-of-insulation-resistance-testing/",
     ],
   },
   {
