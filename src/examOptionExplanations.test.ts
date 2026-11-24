@@ -62,11 +62,11 @@ function allQuestions(exams: Exam[] = EXAMS): ExamQuestion[] {
 }
 
 describe("exam option explanations", () => {
-  it("shows the full correct explanation and feedback for all 14,169 distractors", () => {
+  it("shows the full correct explanation and feedback for all 14,334 distractors", () => {
     const questions = allQuestions();
     let distractorCount = 0;
 
-    expect(questions).toHaveLength(4723);
+    expect(questions).toHaveLength(4778);
     for (const question of questions) {
       const feedback = buildOptionExplanations(question);
       expect(Object.keys(feedback)).toEqual(CHOICES);
@@ -88,7 +88,7 @@ describe("exam option explanations", () => {
       }
     }
 
-    expect(distractorCount).toBe(14_169);
+    expect(distractorCount).toBe(14_334);
   });
 
   it("keeps the complete authored rationale when no safe option-specific reason exists", () => {
@@ -565,7 +565,7 @@ describe("exam option explanations", () => {
         "sourceUrls" in entry && Array.isArray(entry.sourceUrls),
     );
 
-    expect(sourcedSets).toHaveLength(4867);
+    expect(sourcedSets).toHaveLength(4915);
     for (const entry of sourcedSets) {
       expect(entry.sourceUrls.length).toBeGreaterThan(0);
       for (const sourceUrl of entry.sourceUrls) {
@@ -641,8 +641,8 @@ describe("exam option explanations", () => {
       }
     }
 
-    expect(questionCount).toBe(4_723);
-    expect(distractorCount).toBe(14_169);
+    expect(questionCount).toBe(4_778);
+    expect(distractorCount).toBe(14_334);
   });
 
   it("describes single choices as incomplete when all listed choices are required", () => {

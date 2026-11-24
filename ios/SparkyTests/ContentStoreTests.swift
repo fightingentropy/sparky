@@ -13,8 +13,8 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertEqual(store.catalog.schemaVersion, 3)
         XCTAssertEqual(store.catalog.examCount, 12)
         XCTAssertEqual(store.catalog.exams.count, 12)
-        XCTAssertEqual(store.catalog.variantCount, 99)
-        XCTAssertEqual(store.catalog.questionCount, 3_983)
+        XCTAssertEqual(store.catalog.variantCount, 100)
+        XCTAssertEqual(store.catalog.questionCount, 4_038)
         XCTAssertEqual(store.notes.count, 43)
         XCTAssertEqual(store.calculators.count, 10)
 
@@ -117,9 +117,24 @@ final class ContentStoreTests: XCTestCase {
         let homework = try XCTUnwrap(
             exam.tests.first { $0.id == "initial-verification-homework" }
         )
+        let mockTwo = try XCTUnwrap(
+            exam.tests.first { $0.id == "initial-verification-mock-2" }
+        )
 
         XCTAssertEqual(exam.title, "Initial Verification")
-        XCTAssertEqual(exam.tests.count, 2)
+        XCTAssertEqual(exam.tests.count, 3)
+        XCTAssertEqual(
+            exam.tests.map(\.id),
+            [
+                "initial-verification-mock-1",
+                "initial-verification-homework",
+                "initial-verification-mock-2",
+            ]
+        )
+        // Progress syncs by position, so the new paper must stay last.
+        XCTAssertEqual(exam.tests.map(\.index), [0, 1, 2])
+        XCTAssertEqual(mockTwo.questionCount, 55)
+        XCTAssertEqual(mockTwo.questions.map(\.number), Array(1...55))
         XCTAssertEqual(test.questionCount, 55)
         XCTAssertEqual(test.questions.map(\.number), Array(1...55))
         XCTAssertEqual(homework.questionCount, 43)
@@ -127,7 +142,7 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertTrue(exam.format.contains("90 minutes"))
         XCTAssertTrue(exam.format.contains("Guidance Note 3"))
 
-        let questionText = test.questions
+        let questionText = (test.questions + mockTwo.questions)
             .map {
                 let options = $0.options.ordered.map { $0.text }.joined(separator: " ")
                 return "\($0.prompt) \(options) \($0.explanation)"

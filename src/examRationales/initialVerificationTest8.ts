@@ -218,18 +218,18 @@ export const initialVerificationTest8 = [
     prompt:
       "A low-resistance ohmmeter used for continuity verification should have what open-circuit voltage and test current?",
     options: [
-      "Voltage between 0V and 20V; short-circuit current of 1 mA",
-      "Voltage between 0V and 24V; short-circuit current of 100 mA",
-      "Voltage between 4V and 20V; short-circuit current of 1 mA",
+      "Voltage between 0 V and 20 V; test current of at least 1 mA",
+      "Voltage between 0 V and 24 V; test current of at least 100 mA",
+      "Voltage between 4 V and 20 V; test current of at least 1 mA",
       "Voltage between 4 V and 24 V; test current of at least 200 mA",
     ],
     answer: "Voltage between 4 V and 24 V; test current of at least 200 mA",
     rationales: {
-      "Voltage between 0V and 20V; short-circuit current of 1 mA":
+      "Voltage between 0 V and 20 V; test current of at least 1 mA":
         "The voltage range incorrectly permits no effective test voltage, while the stated current is far too small for protective-conductor continuity verification. A substantial test current is needed to expose resistive joints reliably.",
-      "Voltage between 0V and 24V; short-circuit current of 100 mA":
+      "Voltage between 0 V and 24 V; test current of at least 100 mA":
         "Although the upper voltage is plausible, the range still starts below the specified minimum and the current is only half the required level. Both instrument characteristics must meet the continuity-test recommendation.",
-      "Voltage between 4V and 20V; short-circuit current of 1 mA":
+      "Voltage between 4 V and 20 V; test current of at least 1 mA":
         "The lower voltage boundary is suitable, but the current corresponds to insulation-tester capability rather than low-resistance continuity testing. It may fail to reveal a poor connection that behaves differently under a meaningful test current.",
     },
     sourceUrls: [

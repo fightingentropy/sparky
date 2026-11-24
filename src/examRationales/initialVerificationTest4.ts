@@ -150,17 +150,17 @@ export const initialVerificationTest4 = [
     options: [
       "Attach a warning label at the isolator stating 'do not switch on'",
       "Confirm the operation of the approved voltage indicator",
-      "Lock the main switch on the open position",
+      "Lock the main switch in the open position",
       "Switch the main isolator on and off",
     ],
     answer: "Confirm the operation of the approved voltage indicator",
     rationales: {
       "Attach a warning label at the isolator stating 'do not switch on'":
         "A notice helps prevent interference but cannot show that the detector remained functional during the absence-of-voltage check. The indicator needs a known source before and after use.",
-      "Lock the main switch on the open position":
+      "Lock the main switch in the open position":
         "Locking off secures the disconnection and is an essential separate step. It does not prove the test instrument, so it cannot guard against a false dead indication caused by instrument failure.",
       "Switch the main isolator on and off":
-        "Operating the isolator neither proves every relevant conductor dead nor verifies the detector. Re-energizing during the process would also defeat the secured safe-isolation state.",
+        "Operating the isolator neither proves every relevant conductor dead nor verifies the detector. Re-energising during the process would also defeat the secured safe-isolation state.",
     },
     sourceUrls: [
       "https://www.hse.gov.uk/pubns/priced/gs38.pdf",

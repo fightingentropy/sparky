@@ -6,7 +6,7 @@ The iOS app includes:
 
 - two site calculators (containment bend cut and angle drop) with draggable, live diagrams
 - searchable, saveable technical notes
-- 12 exam subjects, 99 tests, and 3,983 deterministic served questions
+- 12 exam subjects, 100 tests, and 4,038 deterministic served questions
 - per-option answer feedback, question flags, scores, and offline progress
 - optional sign-in that syncs exam progress with the web app
 - native navigation, Dynamic Type, haptics, and light/dark appearances

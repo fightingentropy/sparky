@@ -2220,6 +2220,9 @@ const ALL_EXAM_QUESTION_CORRECTIONS: readonly ExamQuestionCorrection[] = [
     correctedPromptSuffix:
       "A low-resistance ohmmeter used for continuity verification should have what open-circuit voltage and test current?",
     options: {
+      A: "Voltage between 0 V and 20 V; test current of at least 1 mA",
+      B: "Voltage between 0 V and 24 V; test current of at least 100 mA",
+      C: "Voltage between 4 V and 20 V; test current of at least 1 mA",
       D: "Voltage between 4 V and 24 V; test current of at least 200 mA",
     },
     explanation:

@@ -188,7 +188,7 @@ export const initialVerificationTest6Q01To45 = [
     options: [
       "Safety Earth Connection - Do Not Remove",
       "Safety Earth Point - Do Not Remove",
-      "Safety Earthing Connection -Do Not Remove",
+      "Safety Earthing Connection - Do Not Remove",
       "Safety Electrical Connection - Do Not Remove",
     ],
     answer: "Safety Electrical Connection - Do Not Remove",
@@ -197,8 +197,8 @@ export const initialVerificationTest6Q01To45 = [
         "This conveys a similar warning but is not the prescribed BS 951 wording. The standard phrase uses 'Electrical', allowing the same label to identify both earthing and protective-bonding safety connections.",
       "Safety Earth Point - Do Not Remove":
         "The label protects a safety connection, not merely a physical point. It also needs to cover bonding terminations that may not be an earth-electrode point.",
-      "Safety Earthing Connection -Do Not Remove":
-        "Besides the missing space, 'Earthing' is not the specified word. The prescribed durable notice reads 'Safety Electrical Connection – Do Not Remove'.",
+      "Safety Earthing Connection - Do Not Remove":
+        "'Earthing' is not the specified word. The prescribed durable notice reads 'Safety Electrical Connection - Do Not Remove'.",
     },
     sourceUrls: [
       "https://electrical.theiet.org/media/2066/bs-7671-2018-corrigendum-dec-2018-v2.pdf",

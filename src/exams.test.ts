@@ -94,7 +94,7 @@ const expectedPerAttempt: Record<string, number[]> = {
   "fundamental-inspection-testing": [30, 40],
   "special-locations": [30],
   "pat-testing": [50, 50, 50, 30, 35],
-  "initial-verification": [55, 43],
+  "initial-verification": [55, 43, 55],
   // variant 3 dropped three duplicate questions (30 -> 27).
   "inspection-design-2396": [30, 30, 30, 27, 30, 30, 30, 30, 30, 30, 30, 30, 30, 18],
   "periodic-inspection": [40, 40, 40, 40, 40, 23],
@@ -255,7 +255,7 @@ describe("exam data", () => {
     expect(Object.values(INITIAL_VERIFICATION_BLUEPRINT_COUNTS)).toEqual([
       7, 3, 8, 7, 11, 13, 5, 1
     ]);
-    expect(getVariantCount(focusedInitialVerificationExam)).toBe(2);
+    expect(getVariantCount(focusedInitialVerificationExam)).toBe(3);
     const questions = getQuestionsForVariant(focusedInitialVerificationExam, 0);
     expect(questions).toHaveLength(55);
     expect(getQuestionsForVariant(focusedInitialVerificationExam, 1)).toHaveLength(43);
@@ -269,6 +269,52 @@ describe("exam data", () => {
       /Questions \d+ (?:to|and) \d+|Figure \d+/i
     );
     expect(JSON.stringify(questions)).toMatch(/\bthree[- ]phase\b/i);
+  });
+
+  it("appends a second Initial Verification mock after the first two papers without repeating their questions", () => {
+    const variants = focusedInitialVerificationExam.sections[0].variants;
+    expect(variants.map((variant) => variant.id)).toEqual([
+      "initial-verification-mock-1",
+      "initial-verification-homework",
+      "initial-verification-mock-2"
+    ]);
+
+    const mockTwo = getQuestionsForVariant(focusedInitialVerificationExam, 2);
+    expect(mockTwo).toHaveLength(55);
+    expect(JSON.stringify(mockTwo)).not.toMatch(
+      /\bperiodic\b|\bEICR\b|condition report|classification code|next inspection/i
+    );
+    expect(JSON.stringify(mockTwo)).not.toMatch(
+      /Questions \d+ (?:to|and) \d+|Figure \d+/i
+    );
+    expect(JSON.stringify(mockTwo)).toMatch(/\bthree[- ]phase\b/i);
+
+    // Mock 2 exists to cover what the other two papers miss, so it must not
+    // repeat any of their questions.
+    const earlierSignatures = new Set(
+      [0, 1].flatMap((variantIndex) =>
+        getQuestionsForVariant(focusedInitialVerificationExam, variantIndex).map(
+          normalizedQuestionSignature
+        )
+      )
+    );
+    const earlierPrompts = new Set(
+      [0, 1].flatMap((variantIndex) =>
+        getQuestionsForVariant(focusedInitialVerificationExam, variantIndex).map(
+          (question) => question.prompt.trim().toLowerCase()
+        )
+      )
+    );
+    for (const question of mockTwo) {
+      expect(
+        earlierSignatures.has(normalizedQuestionSignature(question)),
+        question.prompt
+      ).toBe(false);
+      expect(
+        earlierPrompts.has(question.prompt.trim().toLowerCase()),
+        question.prompt
+      ).toBe(false);
+    }
   });
 
   it("has valid variants, sections, questions, media and scoring bands", () => {
@@ -493,6 +539,12 @@ describe("exam data", () => {
           length: 55,
           firstPrompt:
             "How many voltage measurements are required to confirm that a three-phase four-wire installation is safely isolated?"
+        },
+        {
+          variant: 2,
+          length: 55,
+          firstPrompt:
+            "Under Regulation 14 of the Electricity at Work Regulations, which activity can be justified on or near live conductors, provided suitable precautions are taken?"
         }
       ],
       "inspection-design-2396": [

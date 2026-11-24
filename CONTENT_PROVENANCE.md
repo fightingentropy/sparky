@@ -8,10 +8,10 @@ Question ownership updated: 4 September 2026. Erlin Hoxha confirmed that the pra
 
 Every delivered exam question resolves at least one `ContentSource`, and every calculator definition has one or more source records. Each record carries classification, jurisdiction, document identifier, edition, amendment, effective date, section/table locator, provenance-profile version, content version, a scoped hash, and licensed/editorial confirmation flags.
 
-The current generated delivery contains 3,983 question instances:
+The current generated delivery contains 4,038 question instances:
 
-- 98 resolve an existing focused section/table citation in addition to their bank source.
-- 3,885 resolve only the question-bank source record.
+- 101 resolve an existing focused section/table citation in addition to their bank source.
+- 3,937 resolve only the question-bank source record.
 - The question-bank record is classified as `exam-convention` and marked as needing editorial confirmation only.
 - No source is classified as `law`, because the repository does not contain a verified question-to-legislation mapping. Wording that mentions legislation is not treated as proof of provenance.
 

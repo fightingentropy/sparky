@@ -102,6 +102,86 @@ const INITIAL_VERIFICATION_MOCK_1: InitialVerificationBlueprint = {
   practicalTestingKnowledge: [["quiz-29751", 15]]
 };
 
+/**
+ * Mock 2 follows the same blueprint but targets Guidance Note 3 material the
+ * first mock and the homework paper do not reach: RCD types and test limits,
+ * maximum Zs for RCDs, stakeless electrode testing, insulation resistance above
+ * 500 V, overvoltage categories, AFDDs, cable depth and certificate selection.
+ * Its new questions live in the "initial-verification-gn3-additions" source
+ * variant; the rest come from pool questions no other paper serves.
+ */
+const INITIAL_VERIFICATION_MOCK_2: InitialVerificationBlueprint = {
+  safeIsolation: [
+    ["initial-verification-gn3-additions", 1],
+    ["initial-verification-gn3-additions", 2],
+    ["initial-verification-gn3-additions", 3],
+    ["initial-verification-gn3-additions", 4],
+    ["quiz-29748", 8],
+    ["initial-verification-gn3-additions", 5],
+    ["initial-verification-gn3-additions", 6]
+  ],
+  initialVerificationRequirements: [
+    ["initial-verification-gn3-additions", 7],
+    ["initial-verification-gn3-additions", 8],
+    ["initial-verification-gn3-additions", 9]
+  ],
+  initialInspection: [
+    ["initial-verification-gn3-additions", 10],
+    ["initial-verification-gn3-additions", 11],
+    ["initial-verification-gn3-additions", 12],
+    ["initial-verification-gn3-additions", 13],
+    ["initial-verification-gn3-additions", 14],
+    ["initial-verification-gn3-additions", 15],
+    ["initial-verification-gn3-additions", 16],
+    ["quiz-29750", 9]
+  ],
+  safeTestingAndCommissioning: [
+    ["quiz-29752", 11],
+    ["initial-verification-gn3-additions", 17],
+    ["initial-verification-gn3-additions", 18],
+    ["initial-verification-gn3-additions", 19],
+    ["initial-verification-gn3-additions", 20],
+    ["initial-verification-gn3-additions", 21],
+    ["initial-verification-gn3-additions", 22]
+  ],
+  preEnergisedTests: [
+    ["initial-verification-gn3-additions", 23],
+    ["initial-verification-gn3-additions", 24],
+    ["initial-verification-gn3-additions", 25],
+    ["initial-verification-gn3-additions", 26],
+    ["initial-verification-gn3-additions", 27],
+    ["initial-verification-gn3-additions", 28],
+    ["quiz-29746", 28],
+    ["initial-verification-gn3-additions", 29],
+    ["initial-verification-gn3-additions", 30],
+    ["initial-verification-gn3-additions", 31],
+    ["quiz-29750", 80]
+  ],
+  energisedTests: [
+    ["initial-verification-gn3-additions", 32],
+    ["initial-verification-gn3-additions", 33],
+    ["initial-verification-gn3-additions", 34],
+    ["initial-verification-gn3-additions", 35],
+    ["quiz-29752", 25],
+    ["initial-verification-gn3-additions", 36],
+    ["initial-verification-gn3-additions", 37],
+    ["initial-verification-gn3-additions", 38],
+    ["initial-verification-gn3-additions", 39],
+    ["initial-verification-gn3-additions", 40],
+    ["initial-verification-gn3-additions", 41],
+    ["initial-verification-gn3-additions", 42],
+    ["initial-verification-gn3-additions", 43]
+  ],
+  certificationAndDocumentation: [
+    ["quiz-29746", 19],
+    ["initial-verification-gn3-additions", 44],
+    ["initial-verification-gn3-additions", 45],
+    ["initial-verification-gn3-additions", 46],
+    ["initial-verification-gn3-additions", 47]
+  ],
+  practicalTestingKnowledge: [["initial-verification-gn3-additions", 48]]
+};
+
 const INITIAL_VERIFICATION_HOMEWORK_VARIANT_ID =
   "initial-verification-homework";
 
@@ -153,6 +233,30 @@ function findSourceVariantQuestions(
   throw new Error(`Initial Verification source variant ${variantId} was not found`);
 }
 
+function buildMockQuestions(
+  sourceExam: Exam,
+  blueprint: InitialVerificationBlueprint,
+  label: string
+): ExamQuestion[] {
+  validateBlueprint(blueprint);
+  const sourceQuestions = Object.values(blueprint).flat();
+  const questions = sourceQuestions.map((reference, index) => ({
+    ...findQuestion(sourceExam, reference),
+    number: index + 1
+  }));
+
+  if (questions.length !== 55) {
+    throw new Error(
+      `Initial Verification ${label} expected 55 questions, found ${questions.length}`
+    );
+  }
+  if (new Set(questions.map((question) => question.prompt)).size !== questions.length) {
+    throw new Error(`Initial Verification ${label} contains duplicate questions`);
+  }
+
+  return questions;
+}
+
 export function buildInitialVerificationExam(sourceExam: Exam): Exam {
   if (sourceExam.id !== "initial-verification") {
     throw new Error(
@@ -160,19 +264,16 @@ export function buildInitialVerificationExam(sourceExam: Exam): Exam {
     );
   }
 
-  validateBlueprint(INITIAL_VERIFICATION_MOCK_1);
-  const sourceQuestions = Object.values(INITIAL_VERIFICATION_MOCK_1).flat();
-  const questions = sourceQuestions.map((reference, index) => ({
-    ...findQuestion(sourceExam, reference),
-    number: index + 1
-  }));
-
-  if (questions.length !== 55) {
-    throw new Error(`Initial Verification mock expected 55 questions, found ${questions.length}`);
-  }
-  if (new Set(questions.map((question) => question.prompt)).size !== questions.length) {
-    throw new Error("Initial Verification mock contains duplicate questions");
-  }
+  const questions = buildMockQuestions(
+    sourceExam,
+    INITIAL_VERIFICATION_MOCK_1,
+    "mock 1"
+  );
+  const mockTwoQuestions = buildMockQuestions(
+    sourceExam,
+    INITIAL_VERIFICATION_MOCK_2,
+    "mock 2"
+  );
 
   const homeworkQuestions = findSourceVariantQuestions(
     sourceExam,
@@ -182,11 +283,11 @@ export function buildInitialVerificationExam(sourceExam: Exam): Exam {
   return {
     id: "initial-verification",
     title: PRIMARY_EXAM_TITLES["initial-verification"],
-    subtitle: "Two Initial Verification practice papers",
+    subtitle: "Three Initial Verification practice papers",
     description:
-      "Two Initial Verification practice papers covering safe isolation, inspection, pre-energised and energised testing, commissioning and certification for single- and three-phase installations.",
+      "Three Initial Verification practice papers covering safe isolation, inspection, pre-energised and energised testing, commissioning and certification for single- and three-phase installations.",
     format:
-      "Two rotating papers: one 55-question focused mock and one 43-question homework paper • 90 minutes • Open book (IET Guidance Note 3) • Pass at 60%+.",
+      "Three rotating papers: two 55-question focused mocks and one 43-question homework paper • 90 minutes • Open book (IET Guidance Note 3) • Pass at 60%+.",
     passPercent: 0.6,
     sections: [
       {
@@ -200,6 +301,12 @@ export function buildInitialVerificationExam(sourceExam: Exam): Exam {
           {
             id: INITIAL_VERIFICATION_HOMEWORK_VARIANT_ID,
             questions: homeworkQuestions
+          },
+          // Appended last so the first two papers keep their positions:
+          // saved progress is stored by position on the web and on the server.
+          {
+            id: "initial-verification-mock-2",
+            questions: mockTwoQuestions
           }
         ]
       }

@@ -70,13 +70,13 @@ export const EXAM_CONTENT_PROFILES = {
   ),
   "fundamental-inspection-testing": examProfile(
     "initial-verification.json",
-    "3eebab2c8ce31eb3c42d640e8f270d257e580714b689a8a87df93358b74cfe87",
+    "3dd85a834dd78816833c878f26c3082495f3909b0dd36dde585c8f6d19227d04",
     "Derived Fundamental Inspection and Testing practice profile",
     `derived-profile/fundamental-inspection-testing/content-schema-${CONTENT_SCHEMA_VERSION}`,
   ),
   "initial-verification": examProfile(
     "initial-verification.json",
-    "3eebab2c8ce31eb3c42d640e8f270d257e580714b689a8a87df93358b74cfe87",
+    "3dd85a834dd78816833c878f26c3082495f3909b0dd36dde585c8f6d19227d04",
     "Derived Initial Verification practice profile",
     `derived-profile/initial-verification/content-schema-${CONTENT_SCHEMA_VERSION}`,
   ),
