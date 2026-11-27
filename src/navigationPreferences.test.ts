@@ -21,6 +21,7 @@ describe("navigation visibility preferences", () => {
   it("puts Exams first in the primary navigation", () => {
     expect(visibleNavigationItems([]).map((item) => item.id)).toEqual([
       "exams",
+      "learn",
       "cheatsheet",
       "home"
     ]);
@@ -28,48 +29,49 @@ describe("navigation visibility preferences", () => {
   });
 
   it("accepts unique known navigation page ids only", () => {
-    expect(isNavigationPageIdArray(["home", "cheatsheet"])).toBe(true);
+    expect(isNavigationPageIdArray(["home", "cheatsheet", "learn"])).toBe(true);
     expect(isNavigationPageIdArray(["home", "home"])).toBe(false);
     expect(isNavigationPageIdArray(["settings"])).toBe(false);
-    expect(isNavigationPageIdArray(["learn"])).toBe(false);
+    expect(isNavigationPageIdArray(["guides"])).toBe(false);
   });
 
   it("can reduce the navigation to Exams and use it as the landing page", () => {
-    const hidden = ["home", "cheatsheet"] as const;
+    const hidden = ["home", "cheatsheet", "learn"] as const;
 
     expect(visibleNavigationItems(hidden).map((item) => item.id)).toEqual(["exams"]);
     expect(preferredLandingPage(hidden)).toBe("exams");
   });
 
   it("keeps a safe destination if stored preferences are externally corrupted", () => {
-    const allHidden = ["home", "cheatsheet", "exams"] as const;
+    const allHidden = ["home", "cheatsheet", "learn", "exams"] as const;
 
     expect(visibleNavigationItems(allHidden).map((item) => item.id)).toEqual(["exams"]);
   });
 
-  it("drops the removed Learn page from saved preferences but keeps the other choices", () => {
+  it("keeps a saved hidden Learn tab and clears the old study-guide progress", () => {
     const storage = memoryStorage({
       [NAVIGATION_VISIBILITY_STORAGE_KEY]: JSON.stringify(["home", "learn"]),
       "learning-completed-guides": JSON.stringify(["pat-eet-equipment"]),
-      "learning-last-opened-guide": JSON.stringify("pat-eet-equipment")
+      "learning-last-opened-guide": JSON.stringify("pat-eet-equipment"),
+      "learn-roadmap-progress-v1": JSON.stringify({ route: "done" })
     });
 
     migrateRemovedNavigationPages(storage);
 
-    const migrated = JSON.parse(storage.values.get(NAVIGATION_VISIBILITY_STORAGE_KEY)!) as unknown;
-    expect(migrated).toEqual(["home"]);
-    expect(isNavigationPageIdArray(migrated)).toBe(true);
+    const kept = JSON.parse(storage.values.get(NAVIGATION_VISIBILITY_STORAGE_KEY)!) as unknown;
+    expect(kept).toEqual(["home", "learn"]);
+    expect(isNavigationPageIdArray(kept)).toBe(true);
     expect(storage.values.has("learning-completed-guides")).toBe(false);
     expect(storage.values.has("learning-last-opened-guide")).toBe(false);
+    expect(storage.values.get("learn-roadmap-progress-v1")).toBe(JSON.stringify({ route: "done" }));
   });
 
-  it("leaves current or unreadable preferences alone", () => {
-    const current = memoryStorage({ [NAVIGATION_VISIBILITY_STORAGE_KEY]: JSON.stringify(["cheatsheet"]) });
-    migrateRemovedNavigationPages(current);
-    expect(current.values.get(NAVIGATION_VISIBILITY_STORAGE_KEY)).toBe(JSON.stringify(["cheatsheet"]));
-
-    const corrupt = memoryStorage({ [NAVIGATION_VISIBILITY_STORAGE_KEY]: "{not json" });
-    expect(() => migrateRemovedNavigationPages(corrupt)).not.toThrow();
-    expect(corrupt.values.get(NAVIGATION_VISIBILITY_STORAGE_KEY)).toBe("{not json");
+  it("survives storage that refuses to change", () => {
+    const locked = {
+      removeItem: () => {
+        throw new Error("blocked");
+      }
+    };
+    expect(() => migrateRemovedNavigationPages(locked)).not.toThrow();
   });
 });

@@ -6,6 +6,7 @@ extension AppTab {
         switch self {
         case .tools: "wrench.adjustable" + (selected ? ".fill" : "")
         case .notes: selected ? "doc.text.fill" : "doc.text"
+        case .learn: selected ? "point.topleft.down.to.point.bottomright.curvepath.fill" : systemImage
         case .exams: selected ? "checklist.checked" : "checklist"
         case .more: selected ? "ellipsis.circle.fill" : "ellipsis.circle"
         }

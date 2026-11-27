@@ -185,3 +185,118 @@ struct ExamTestSectionSummary: Codable, Hashable, Identifiable, Sendable {
     let title: String
     let questionCount: Int
 }
+
+// MARK: - Learn roadmap
+
+enum LearnNodeKind: String, Codable, Hashable, Sendable {
+    case topic
+    case subtopic
+    case exam
+}
+
+enum LearnSide: String, Codable, Hashable, Sendable {
+    case left
+    case right
+}
+
+/// How far a learner has got with a topic or subtopic. "Not started" is the absence of a status.
+enum LearnStatus: String, Codable, CaseIterable, Hashable, Sendable {
+    case learning
+    case done
+}
+
+/// A subtopic (cream node) or practice-exam link (blue node) hanging off a core topic.
+struct LearnBranch: Codable, Hashable, Identifiable, Sendable {
+    let id: String
+    let kind: LearnNodeKind
+    let side: LearnSide
+    let title: String
+    let summary: String
+    let points: [String]
+    let watchFor: [String]
+    let noteIDs: [String]
+    let examIDs: [String]
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case kind
+        case side
+        case title
+        case summary
+        case points
+        case watchFor
+        case noteIDs = "noteIds"
+        case examIDs = "examIds"
+    }
+}
+
+/// A core topic (yellow node on the spine) and its branches.
+struct LearnTopic: Codable, Hashable, Identifiable, Sendable {
+    let id: String
+    let kind: LearnNodeKind
+    let title: String
+    let summary: String
+    let points: [String]
+    let watchFor: [String]
+    let noteIDs: [String]
+    let examIDs: [String]
+    let branches: [LearnBranch]
+
+    var leftBranches: [LearnBranch] { branches.filter { $0.side == .left } }
+    var rightBranches: [LearnBranch] { branches.filter { $0.side == .right } }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case kind
+        case title
+        case summary
+        case points
+        case watchFor
+        case noteIDs = "noteIds"
+        case examIDs = "examIds"
+        case branches
+    }
+}
+
+struct LearnStage: Codable, Hashable, Identifiable, Sendable {
+    let id: String
+    let title: String
+    let summary: String
+    let topics: [LearnTopic]
+
+    /// Topics and subtopics, in roadmap order. Exam nodes only open an exam, so they carry no progress.
+    var trackableNodeIDs: [String] {
+        topics.flatMap { topic in
+            [topic.id] + topic.branches.filter { $0.kind != .exam }.map(\.id)
+        }
+    }
+}
+
+struct LearnRoadmap: Codable, Hashable, Sendable {
+    let title: String
+    let summary: String
+    let stages: [LearnStage]
+
+    var trackableNodeIDs: [String] {
+        stages.flatMap(\.trackableNodeIDs)
+    }
+}
+
+/// One node of the roadmap with where it sits: its stage (1-based number) and topic.
+/// `branch` is nil when the node is the topic itself.
+struct LearnNodeLocation: Identifiable, Sendable {
+    let stageNumber: Int
+    let stage: LearnStage
+    let topic: LearnTopic
+    let branch: LearnBranch?
+
+    var id: String { branch?.id ?? topic.id }
+    var kind: LearnNodeKind { branch?.kind ?? topic.kind }
+    var title: String { branch?.title ?? topic.title }
+    var summary: String { branch?.summary ?? topic.summary }
+    var points: [String] { branch?.points ?? topic.points }
+    var watchFor: [String] { branch?.watchFor ?? topic.watchFor }
+    var noteIDs: [String] { branch?.noteIDs ?? topic.noteIDs }
+    var examIDs: [String] { branch?.examIDs ?? topic.examIDs }
+    var isTrackable: Bool { kind != .exam }
+}

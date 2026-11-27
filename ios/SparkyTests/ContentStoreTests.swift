@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 @testable import Sparky
 
@@ -9,7 +10,7 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertEqual(store.manifest.schemaVersion, 1)
         XCTAssertEqual(store.manifest.contentSchemaVersion, 3)
         XCTAssertEqual(store.manifest.contentHash.count, 64)
-        XCTAssertEqual(store.manifest.files.count, 15)
+        XCTAssertEqual(store.manifest.files.count, 16)
         XCTAssertEqual(store.catalog.schemaVersion, 3)
         XCTAssertEqual(store.catalog.examCount, 12)
         XCTAssertEqual(store.catalog.exams.count, 12)
@@ -271,7 +272,7 @@ final class ContentStoreTests: XCTestCase {
 
     func testNavigationPreferencesCanShowOnlyExamsAndLaunchThere() {
         let stored = NavigationPreferences.storageValue(
-            for: [.tools, .notes, .more]
+            for: [.tools, .notes, .learn, .more]
         )
 
         XCTAssertEqual(NavigationPreferences.visibleTabs(from: stored), [.exams])
@@ -289,17 +290,88 @@ final class ContentStoreTests: XCTestCase {
         XCTAssertFalse(NavigationPreferences.hiddenTabs(from: allHidden).contains(.tools))
     }
 
-    func testNavigationPreferencesFromBeforeLearnWasRemovedStillDecode() {
-        // Hiding Learn alongside other tabs leaves only the remaining preferences.
+    func testNavigationPreferencesIncludeLearnBetweenNotesAndExams() {
+        XCTAssertEqual(AppTab.allCases, [.tools, .notes, .learn, .exams, .more])
+        XCTAssertEqual(NavigationPreferences.visibleTabs(from: "[]"), [.tools, .notes, .learn, .exams, .more])
+        XCTAssertEqual(AppTab.learn.title, "Learn")
+
+        // A stored "learn" id hides the tab again rather than being dropped.
         XCTAssertEqual(
             NavigationPreferences.visibleTabs(from: #"["learn","notes"]"#),
             [.tools, .exams, .more]
         )
-        // A saved choice that showed only Learn must not leave Settings claiming every tab is off.
-        let onlyLearnVisible = #"["exams","more","notes","tools"]"#
-        XCTAssertEqual(NavigationPreferences.visibleTabs(from: onlyLearnVisible), [.tools])
-        XCTAssertEqual(NavigationPreferences.hiddenTabs(from: onlyLearnVisible), [.notes, .exams, .more])
-        XCTAssertEqual(NavigationPreferences.preferredTab(from: onlyLearnVisible), .tools)
+        // Choices saved while Learn was gone never mention it, so Learn shows up for them.
+        let savedWithoutLearn = #"["exams","more","notes","tools"]"#
+        XCTAssertEqual(NavigationPreferences.visibleTabs(from: savedWithoutLearn), [.learn])
+        XCTAssertEqual(NavigationPreferences.preferredTab(from: savedWithoutLearn), .learn)
+
+        let onlyLearn = NavigationPreferences.storageValue(for: [.tools, .notes, .exams, .more])
+        XCTAssertEqual(NavigationPreferences.visibleTabs(from: onlyLearn), [.learn])
+    }
+
+    func testTabSymbolsExist() {
+        for tab in AppTab.allCases {
+            XCTAssertNotNil(UIImage(systemName: tab.systemImage), "\(tab) symbol")
+            XCTAssertNotNil(UIImage(systemName: tab.icon(selected: false)), "\(tab) tab-bar symbol")
+            XCTAssertNotNil(UIImage(systemName: tab.icon(selected: true)), "\(tab) selected tab-bar symbol")
+        }
+    }
+
+    @MainActor
+    func testLoadsLearnRoadmapAndEveryLinkResolves() throws {
+        let store = try ContentStore(contentDirectory: contentDirectory)
+        let roadmap = store.learnRoadmap
+
+        XCTAssertEqual(roadmap.stages.count, 8)
+        XCTAssertEqual(roadmap.stages.flatMap(\.topics).count, 33)
+        XCTAssertEqual(roadmap.stages.first?.title, "Getting started")
+
+        var seen = Set<String>()
+        for (offset, stage) in roadmap.stages.enumerated() {
+            XCTAssertFalse(stage.topics.isEmpty, stage.id)
+            for topic in stage.topics {
+                XCTAssertEqual(topic.kind, .topic)
+                XCTAssertTrue(seen.insert(topic.id).inserted, "duplicate \(topic.id)")
+                for branch in topic.branches {
+                    XCTAssertTrue(seen.insert(branch.id).inserted, "duplicate \(branch.id)")
+                    XCTAssertNotEqual(branch.kind, .topic, branch.id)
+                    if branch.kind == .exam {
+                        XCTAssertEqual(branch.examIDs.count, 1, branch.id)
+                    }
+                }
+                for node in [topic.id] + topic.branches.map(\.id) {
+                    let location = try XCTUnwrap(store.learnNode(id: node), node)
+                    XCTAssertEqual(location.stageNumber, offset + 1)
+                    XCTAssertEqual(location.stage.id, stage.id)
+                    XCTAssertEqual(location.topic.id, topic.id)
+                    for noteID in location.noteIDs {
+                        XCTAssertNotNil(store.note(id: noteID), "\(node) links missing note \(noteID)")
+                    }
+                    for examID in location.examIDs {
+                        XCTAssertNotNil(store.examIndex(id: examID), "\(node) links missing exam \(examID)")
+                    }
+                }
+            }
+        }
+
+        let ohm = try XCTUnwrap(store.learnNode(id: "ohms-law"))
+        XCTAssertNil(ohm.branch)
+        XCTAssertEqual(ohm.kind, .topic)
+        XCTAssertEqual(ohm.stage.title, "Electrical science")
+        XCTAssertEqual(ohm.noteIDs, ["cheat-core-formulas", "cheat-site-math"])
+
+        let examNode = try XCTUnwrap(store.learnNode(id: "bs7671-exam"))
+        XCTAssertEqual(examNode.kind, .exam)
+        XCTAssertEqual(examNode.topic.id, "bs7671")
+        XCTAssertEqual(examNode.examIDs, ["18th-edition"])
+        XCTAssertFalse(examNode.isTrackable)
+
+        let trackable = roadmap.trackableNodeIDs
+        XCTAssertEqual(trackable.first, "route")
+        XCTAssertEqual(Set(trackable).count, trackable.count)
+        XCTAssertFalse(trackable.contains("bs7671-exam"))
+        XCTAssertTrue(trackable.allSatisfy { store.learnNode(id: $0)?.isTrackable == true })
+        XCTAssertNil(store.learnNode(id: "not-a-node"))
     }
 
     @MainActor

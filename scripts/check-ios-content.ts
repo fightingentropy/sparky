@@ -169,6 +169,7 @@ async function verifyExamIndexParity(
     "calculators.json",
     "cheat-sheet.json",
     "exam-index.json",
+    "learn-roadmap.json",
     ...examIds.map((examId) => `exams/${examId}.json`),
   ]);
   requireCondition(

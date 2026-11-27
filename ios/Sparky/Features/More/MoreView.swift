@@ -92,6 +92,8 @@ struct SettingsView: View {
     private var hiddenExamIDsStorage = ExamLibraryPreferences.defaultStorageValue
     @State private var showingResetConfirmation = false
     @State private var showingExamResetConfirmation = false
+    @State private var showingLearnResetConfirmation = false
+    @Environment(LearnProgressStore.self) private var learnProgress
 
     var body: some View {
         Form {
@@ -145,6 +147,10 @@ struct SettingsView: View {
                 Button("Clear saved notes", role: .destructive) {
                     showingResetConfirmation = true
                 }
+                Button("Reset Learn progress", role: .destructive) {
+                    showingLearnResetConfirmation = true
+                }
+                .disabled(learnProgress.statuses.isEmpty)
                 Button("Reset all exam attempts", role: .destructive) {
                     showingExamResetConfirmation = true
                 }
@@ -188,6 +194,17 @@ struct SettingsView: View {
             }
         } message: {
             Text("This removes every saved note from this device. Exam attempts are kept.")
+        }
+        .confirmationDialog(
+            "Reset your Learn progress?",
+            isPresented: $showingLearnResetConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Reset progress", role: .destructive) {
+                learnProgress.reset()
+            }
+        } message: {
+            Text("This clears every Learning and Done mark on the roadmap on this device. Notes and exam attempts are kept.")
         }
         .confirmationDialog(
             "Reset every exam attempt?",

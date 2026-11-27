@@ -4,6 +4,7 @@ import Observation
 enum AppTab: String, CaseIterable, Hashable, Identifiable {
     case tools
     case notes
+    case learn
     case exams
     case more
 
@@ -13,6 +14,7 @@ enum AppTab: String, CaseIterable, Hashable, Identifiable {
         switch self {
         case .tools: "Tools"
         case .notes: "Notes"
+        case .learn: "Learn"
         case .exams: "Exams"
         case .more: "More"
         }
@@ -22,6 +24,7 @@ enum AppTab: String, CaseIterable, Hashable, Identifiable {
         switch self {
         case .tools: "wrench.adjustable"
         case .notes: "doc.text"
+        case .learn: "point.topleft.down.to.point.bottomright.curvepath"
         case .exams: "checklist"
         case .more: "ellipsis.circle"
         }

@@ -73,6 +73,8 @@ struct RootView: View {
             ToolsView()
         case .notes:
             NotesView()
+        case .learn:
+            LearnView()
         case .exams:
             ExamsView(contentStore: contentStore, progressStore: progressStore)
         case .more:

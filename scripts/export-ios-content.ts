@@ -16,6 +16,7 @@ import { buildOptionFeedback } from "../src/examOptionExplanations";
 import { applyExamSolutionTables } from "../src/examSolutionTables";
 import { buildFundamentalInspectionExam } from "../src/fundamentalInspectionExam";
 import { buildInitialVerificationExam } from "../src/initialVerificationExam";
+import { LEARN_ROADMAP } from "../src/learnRoadmap";
 import {
   getSectionQuestionsForVariant,
   getVariantCount,
@@ -438,6 +439,44 @@ function sha256(value: string | Uint8Array): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
+/**
+ * The Learn roadmap links into the notes and the exam catalog by id, so every
+ * link must land somewhere the app can open.
+ */
+function validateLearnRoadmap(examIds: ReadonlySet<string>): void {
+  const noteIds = new Set(CHEAT_SHEET_SECTIONS.map((section) => section.id));
+  requireUniqueIds(LEARN_ROADMAP.stages, "learn roadmap stages");
+  const nodes = LEARN_ROADMAP.stages.flatMap((stage) => {
+    requireNonEmpty(stage.title, `learn stage ${stage.id} title`);
+    if (stage.topics.length === 0) fail(`learn stage ${stage.id} has no topics`);
+    return stage.topics.flatMap((topic) => {
+      if (topic.kind !== "topic") fail(`learn topic ${topic.id} has kind ${topic.kind}`);
+      for (const branch of topic.branches) {
+        if (branch.kind !== "subtopic" && branch.kind !== "exam") {
+          fail(`learn branch ${branch.id} has kind ${String(branch.kind)}`);
+        }
+        if (branch.side !== "left" && branch.side !== "right") {
+          fail(`learn branch ${branch.id} has side ${String(branch.side)}`);
+        }
+        if (branch.kind === "exam" && branch.examIds.length !== 1) {
+          fail(`learn exam node ${branch.id} must link exactly one exam`);
+        }
+      }
+      return [topic, ...topic.branches];
+    });
+  });
+  requireUniqueIds([...LEARN_ROADMAP.stages, ...nodes], "learn roadmap nodes");
+  for (const node of nodes) {
+    requireNonEmpty(node.title, `learn node ${node.id} title`);
+    for (const noteId of node.noteIds) {
+      if (!noteIds.has(noteId)) fail(`learn node ${node.id} links unknown note ${noteId}`);
+    }
+    for (const examId of node.examIds) {
+      if (!examIds.has(examId)) fail(`learn node ${node.id} links unknown exam ${examId}`);
+    }
+  }
+}
+
 async function writeContentManifest(relativePaths: readonly string[]): Promise<void> {
   const sortedPaths = [...relativePaths].sort((left, right) => left.localeCompare(right, "en-GB"));
   if (new Set(sortedPaths).size !== sortedPaths.length) {
@@ -565,7 +604,10 @@ async function main(): Promise<void> {
       return left.title.localeCompare(right.title, "en-GB");
     });
 
+  validateLearnRoadmap(new Set(indexEntries.map((entry) => entry.id)));
+
   await Promise.all([
+    writeCompactJson(join(CONTENT_OUTPUT_DIR, "learn-roadmap.json"), LEARN_ROADMAP),
     writeCompactJson(
       join(CONTENT_OUTPUT_DIR, "calculators.json"),
       CALCULATOR_DEFINITIONS,
@@ -593,6 +635,7 @@ async function main(): Promise<void> {
     "calculators.json",
     "cheat-sheet.json",
     "exam-index.json",
+    "learn-roadmap.json",
     ...[...examOutputs.keys()].map((fileName) => `exams/${fileName}`),
   ];
   await writeContentManifest(contentPaths);
@@ -605,7 +648,7 @@ async function main(): Promise<void> {
     0,
   );
   console.log(
-    `Exported ${cheatSheetSections.length} cheat sheets and ${questionCount} questions ` +
+    `Exported ${cheatSheetSections.length} cheat sheets, the learn roadmap and ${questionCount} questions ` +
       `across ${indexEntries.length} exams to ${CONTENT_OUTPUT_DIR}`,
   );
 }

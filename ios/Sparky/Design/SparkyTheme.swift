@@ -54,6 +54,32 @@ extension Color {
     static let sparkyCardShadow = Color.clear
 }
 
+// Learn roadmap (roadmap.sh-style map). Yellow topics keep near-black text in both
+// appearances for contrast; cream subtopics, blue exam links, a blue spine and green "done".
+extension Color {
+    static let learnTopicFill = Color(uiColor: sparkyHex(0xfde047))
+    static let learnTopicText = Color(uiColor: sparkyHex(0x171513))
+    static let learnTopicBorder = Color(uiColor: sparkyHex(0x171513))
+
+    static let learnSubtopicFill = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x3a3222), light: sparkyHex(0xfbe7a6)))
+    static let learnSubtopicText = Color(uiColor: sparkyDynamic(dark: sparkyHex(0xf6e9c2), light: sparkyHex(0x171513)))
+    static let learnSubtopicBorder = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x5e5235), light: sparkyHex(0x171513)))
+
+    static let learnExamFill = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x3b78e7), light: sparkyHex(0x2f6ad3)))
+    static let learnExamText = Color.white
+
+    static let learnSpine = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x5b93f0), light: sparkyHex(0x3d7be0)))
+
+    static let learnDoneFill = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x1f3a28), light: sparkyHex(0xcdefd8)))
+    static let learnDoneText = Color(uiColor: sparkyDynamic(dark: sparkyHex(0xd6f5e0), light: sparkyHex(0x10331e)))
+    static let learnDoneBorder = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x2f6b43), light: sparkyHex(0x1e9b52)))
+
+    static let learnDoneBadge = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x62d286), light: sparkyHex(0x1e9b52)))
+    static let learnLearningBadge = Color(uiColor: sparkyDynamic(dark: sparkyHex(0xf0b54c), light: sparkyHex(0xb86e0a)))
+    /// Glyph colour on the status badges: white on the light-mode greens/ambers, near-black on the dark-mode ones.
+    static let learnBadgeGlyph = Color(uiColor: sparkyDynamic(dark: sparkyHex(0x100e0c), light: sparkyHex(0xffffff)))
+}
+
 enum SparkyLayout {
     static let pageInset: CGFloat = 16
     static let cardRadius: CGFloat = 16

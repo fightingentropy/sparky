@@ -41,7 +41,9 @@ final class ContentStore {
     let catalog: ExamCatalog
     let notes: [CheatSheetSection]
     let calculators: [CalculatorDefinition]
+    let learnRoadmap: LearnRoadmap
 
+    @ObservationIgnored private let learnNodeIndex: [String: LearnNodeLocation]
     @ObservationIgnored private let loader: ContentResourceLoader
     @ObservationIgnored private var cachedExams: [String: Exam] = [:]
 
@@ -83,6 +85,12 @@ final class ContentStore {
             at: "calculators.json",
             manifest: manifest
         )
+        learnRoadmap = try loader.decodeVerified(
+            LearnRoadmap.self,
+            at: "learn-roadmap.json",
+            manifest: manifest
+        )
+        learnNodeIndex = try Self.indexLearnNodes(in: learnRoadmap)
 
         guard catalog.examCount == catalog.exams.count else {
             throw ContentStoreError.invalidCatalog(
@@ -99,7 +107,8 @@ final class ContentStore {
             [
                 "calculators.json",
                 "cheat-sheet.json",
-                "exam-index.json"
+                "exam-index.json",
+                "learn-roadmap.json"
             ] + examIDs.map { "exams/\($0).json" }
         )
         let manifestPaths = Set(manifest.files.map(\.path))
@@ -122,6 +131,30 @@ final class ContentStore {
 
     func calculator(id: String) -> CalculatorDefinition? {
         calculators.first { $0.id == id }
+    }
+
+    /// A Learn roadmap node (topic, subtopic or exam link) with its stage and topic.
+    func learnNode(id: String) -> LearnNodeLocation? {
+        learnNodeIndex[id]
+    }
+
+    private static func indexLearnNodes(in roadmap: LearnRoadmap) throws -> [String: LearnNodeLocation] {
+        var index: [String: LearnNodeLocation] = [:]
+        func insert(_ location: LearnNodeLocation) throws {
+            guard index[location.id] == nil else {
+                throw ContentStoreError.invalidManifest("learn roadmap has duplicate node id \(location.id)")
+            }
+            index[location.id] = location
+        }
+        for (offset, stage) in roadmap.stages.enumerated() {
+            for topic in stage.topics {
+                try insert(LearnNodeLocation(stageNumber: offset + 1, stage: stage, topic: topic, branch: nil))
+                for branch in topic.branches {
+                    try insert(LearnNodeLocation(stageNumber: offset + 1, stage: stage, topic: topic, branch: branch))
+                }
+            }
+        }
+        return index
     }
 
     func loadExam(id: String) throws -> Exam {

@@ -503,7 +503,7 @@ private struct NoteTableRow: View {
     }
 }
 
-private extension CheatSheetSection {
+extension CheatSheetSection {
     func matches(_ query: String) -> Bool {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return true }

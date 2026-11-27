@@ -7,6 +7,7 @@ struct SparkyApp: App {
     @State private var contentError: String?
     @State private var progressStore = ProgressStore()
     @State private var studyState = StudyStateStore()
+    @State private var learnProgress = LearnProgressStore()
     @State private var router = AppRouter(selectedTab: Self.initialTab)
     @State private var authStore = AuthStore()
     @State private var progressSyncController = ProgressSyncController()
@@ -36,6 +37,7 @@ struct SparkyApp: App {
                     .environment(contentStore)
                     .environment(progressStore)
                     .environment(studyState)
+                    .environment(learnProgress)
                     .environment(router)
                     .environment(authStore)
                     .environment(progressSyncController)
@@ -177,6 +179,7 @@ struct SparkyApp: App {
         if let previewTab = ProcessInfo.processInfo.environment["SPARKY_PREVIEW_TAB"] {
             switch previewTab.lowercased() {
             case "notes": return .notes
+            case "learn": return .learn
             case "exams": return .exams
             case "more": return .more
             default: return .tools
@@ -189,6 +192,7 @@ struct SparkyApp: App {
            arguments.indices.contains(marker + 1) {
             switch arguments[marker + 1].lowercased() {
             case "notes": return .notes
+            case "learn": return .learn
             case "exams": return .exams
             case "more": return .more
             default: return .tools

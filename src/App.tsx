@@ -33,6 +33,7 @@ import {
 // is a boolean; the navigation callbacks below are useCallback'd).
 const ExamPage = memo(lazy(() => import("./ExamPage").then((m) => ({ default: m.ExamPage }))));
 const InteractivePage = memo(lazy(() => import("./InteractivePage").then((m) => ({ default: m.InteractivePage }))));
+const LearnPage = memo(lazy(() => import("./LearnPage").then((m) => ({ default: m.LearnPage }))));
 import { useAuth } from "./AuthContext";
 import { AuthModal } from "./AuthModal";
 import { SettingsPage } from "./SettingsPage";
@@ -49,6 +50,7 @@ import {
   type CheatSheetSection,
   type ReferenceTable
 } from "./cheatSheetSections";
+import { LEARN_ROADMAP } from "./learnRoadmap";
 
 type PageId = NavigationPageId | "interactive" | "settings";
 
@@ -80,6 +82,8 @@ function isColorTheme(value: unknown): value is ColorTheme {
 }
 
 const DEFAULT_PAGE: NavigationPageId = "exams";
+// Learn topics shown at most in one palette search, so notes and tools still fit.
+const MAX_PALETTE_TOPICS = 4;
 
 const PAGE_NAV_ITEMS: { id: PageId; label: string }[] = [
   ...NAVIGATION_ITEMS,
@@ -101,6 +105,17 @@ const MOBILE_TAB_ITEMS: { id: NavigationPageId; label: string; icon: ReactNode }
         <rect width="8" height="4" x="8" y="2" rx="1" />
         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
         <path d="m9 14 2 2 4-4" />
+      </>
+    )
+  },
+  {
+    id: "learn",
+    label: "Learn",
+    icon: (
+      <>
+        <circle cx="6" cy="19" r="3" />
+        <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" />
+        <circle cx="18" cy="5" r="3" />
       </>
     )
   },
@@ -310,10 +325,11 @@ function PresetButtons({
   );
 }
 
-// The Learn page with its study guides, and the Workplace Tutorials page, were
-// removed. Old bookmarks and history entries land on the default page with the
-// address rewritten to match.
-const REMOVED_PAGE_PATHS = new Set(["/learn", "/guides", "/tutorials"]);
+// The Workplace Tutorials page was removed. Old bookmarks and history entries
+// land on the default page with the address rewritten to match.
+const REMOVED_PAGE_PATHS = new Set(["/tutorials"]);
+// The study-guide list used to live at /guides; the Learn roadmap replaces it.
+const LEGACY_PAGE_PATHS = new Set(["/guides"]);
 
 function currentPath(): string {
   return window.location.pathname.replace(/\/+$/, "") || "/";
@@ -324,6 +340,7 @@ function getPageFromLocation(): PageId {
   if (path === "/" || path === "/exams") return "exams";
   if (path === "/tools") return "home";
   if (path === "/notes" || path === "/cheatsheet") return "cheatsheet";
+  if (path === "/learn" || path === "/guides") return "learn";
   if (path === "/interactive") return "interactive";
   if (path === "/settings") return "settings";
   return DEFAULT_PAGE;
@@ -335,6 +352,8 @@ function getPageHref(page: PageId): string {
       return "/tools";
     case "cheatsheet":
       return "/notes";
+    case "learn":
+      return "/learn";
     case "exams":
       return "/";
     case "interactive":
@@ -415,6 +434,8 @@ export default function App() {
   const [showSavedNotes, setShowSavedNotes] = useState(false);
   const [expandedNoteIds, setExpandedNoteIds] = useState<Set<string>>(() => new Set());
   const [examPracticeTarget, setExamPracticeTarget] = useState<{ examId: ExamId; nonce: number } | null>(null);
+  const [learnTarget, setLearnTarget] = useState<{ nodeId: string; nonce: number } | null>(null);
+  const [highlightedNoteId, setHighlightedNoteId] = useState<string | null>(null);
 
   const paletteTrapRef = useFocusTrap<HTMLDivElement>(paletteOpen);
   const helpTrapRef = useFocusTrap<HTMLDivElement>(helpOpen);
@@ -473,10 +494,35 @@ export default function App() {
     }
   }, []);
 
+  // A link names a specific exam, so reveal it if the user (or the default list)
+  // hid it; otherwise the Exams page would silently fall back to another exam.
   const openPracticeExam = useCallback(
     (examId: ExamId) => {
+      setHiddenExamIds((current) => (current.includes(examId) ? current.filter((id) => id !== examId) : current));
       setExamPracticeTarget({ examId, nonce: Date.now() });
       navigateTo("exams");
+    },
+    [navigateTo, setHiddenExamIds]
+  );
+
+  // Opens a note from elsewhere (the Learn roadmap): clears filters that could
+  // hide it, expands it and briefly outlines it so the eye lands in the right place.
+  const handleOpenNote = useCallback(
+    (noteId: string) => {
+      setNoteQuery("");
+      setShowSavedNotes(false);
+      setExpandedNoteIds((current) => new Set(current).add(noteId));
+      setHighlightedNoteId(noteId);
+      navigateTo("cheatsheet", noteId);
+      window.setTimeout(() => setHighlightedNoteId((current) => (current === noteId ? null : current)), 2200);
+    },
+    [navigateTo]
+  );
+
+  const openLearnNode = useCallback(
+    (nodeId: string) => {
+      setLearnTarget({ nodeId, nonce: Date.now() });
+      navigateTo("learn");
     },
     [navigateTo]
   );
@@ -601,6 +647,13 @@ export default function App() {
         action: () => navigateTo("exams")
       },
       {
+        title: "Learn",
+        subtitle: "The UK electrician roadmap, one topic at a time.",
+        tag: "Page",
+        keywords: "learn roadmap map study plan topics stages course route progress qualify apprenticeship guides",
+        action: () => navigateTo("learn")
+      },
+      {
         title: "Notes",
         subtitle: "Open the cheat sheet.",
         tag: "Page",
@@ -635,6 +688,17 @@ export default function App() {
         keywords: "settings profile account avatar photo nickname display name preferences reduce motion log out",
         action: () => navigateTo("settings")
       },
+      ...LEARN_ROADMAP.stages.flatMap((stage, stageIndex) =>
+        stage.topics.map((topic) => ({
+          title: topic.title,
+          subtitle: `Learn · Stage ${stageIndex + 1}: ${stage.title}`,
+          tag: "Topic",
+          // Titles only: matching on the reading copy would let roadmap topics
+          // crowd notes and tools out of the 12 palette results.
+          keywords: ["learn roadmap", topic.title, ...topic.branches.map((branch) => branch.title)].join(" "),
+          action: () => openLearnNode(topic.id)
+        }))
+      ),
       ...applets.map((applet) => ({
         title: applet.title,
         subtitle: applet.subtitle,
@@ -659,12 +723,17 @@ export default function App() {
         }))
       ])
     ];
-  }, [navigateTo]);
+  }, [navigateTo, openLearnNode]);
 
   const paletteItems = useMemo(
     () =>
       paletteBaseItems
         .filter((item) => matchesQuery(`${item.title} ${item.subtitle} ${item.keywords}`, paletteQuery))
+        .filter(
+          (item, index, matches) =>
+            item.tag !== "Topic" ||
+            matches.slice(0, index).filter((earlier) => earlier.tag === "Topic").length < MAX_PALETTE_TOPICS
+        )
         .slice(0, 12),
     [paletteBaseItems, paletteQuery]
   );
@@ -672,7 +741,11 @@ export default function App() {
   useEffect(() => {
     const updatePage = () => {
       const nextPage = getPageFromLocation();
-      if (REMOVED_PAGE_PATHS.has(currentPath())) window.history.replaceState(null, "", getPageHref(nextPage));
+      const path = currentPath();
+      if (REMOVED_PAGE_PATHS.has(path)) window.history.replaceState(null, "", getPageHref(nextPage));
+      else if (LEGACY_PAGE_PATHS.has(path)) {
+        window.history.replaceState(null, "", `${getPageHref(nextPage)}${window.location.hash}`);
+      }
       setPage(nextPage);
     };
     updatePage();
@@ -685,6 +758,7 @@ export default function App() {
     const pageTitle: Record<PageId, string> = {
       home: "Tools",
       cheatsheet: "Notes",
+      learn: "Learn",
       exams: "Practice Exams",
       interactive: "Interactive Training",
       settings: "Profile & settings"
@@ -1422,7 +1496,7 @@ export default function App() {
               <article
                 key={section.id}
                 id={section.id}
-                className={`sheet-card${expanded ? " is-expanded" : ""}`}
+                className={`sheet-card${expanded ? " is-expanded" : ""}${highlightedNoteId === section.id ? " is-highlighted" : ""}`}
               >
                 <div className="sheet-card-head">
                   <h3>
@@ -1618,6 +1692,14 @@ export default function App() {
               hiddenExamIds={hiddenExamIds}
             />
           ) : null}
+          {visitedPages.has("learn") ? (
+            <LearnPage
+              isActive={page === "learn"}
+              target={learnTarget}
+              onOpenExam={openPracticeExam}
+              onOpenNote={handleOpenNote}
+            />
+          ) : null}
           {visitedPages.has("interactive") ? <InteractivePage isActive={page === "interactive"} /> : null}
         </Suspense>
 
@@ -1651,7 +1733,7 @@ export default function App() {
             <div className="modal-header">
               <div>
                 <h2>Command palette</h2>
-                <p className="page-copy">Search pages, tools and notes.</p>
+                <p className="page-copy">Search pages, topics, tools and notes.</p>
               </div>
               <button className="ghost-button" type="button" onClick={() => setPaletteOpen(false)}>
                 Close
@@ -1664,7 +1746,7 @@ export default function App() {
                 ref={paletteInputRef}
                 id="palette-input"
                 type="search"
-                placeholder="Go to tools and notes"
+                placeholder="Go to topics, tools and notes"
                 autoComplete="off"
                 value={paletteQuery}
                 onChange={(e) => setPaletteQuery(e.target.value)}
